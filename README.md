@@ -177,8 +177,8 @@ public class MyService : IMyService {
 - [Implicit Configurations](Readme_md/ConfigurationAndCustomization.md#implicit-configurations)
   - [Name, Namespace and Modifier](Readme_md/ConfigurationAndCustomization.md#name-namespace-and-modifier)
   - [Overwriting default services](Readme_md/ConfigurationAndCustomization.md#overwriting-default-services)
-  - [Constructor](Readme_md/ConfigurationAndCustomization.md#custom-constructor)
-  - [Dispose](Readme_md/ConfigurationAndCustomization.md#custom-dispose)
+  - [Custom Constructor](Readme_md/ConfigurationAndCustomization.md#custom-constructor)
+  - [Custom Dispose](Readme_md/ConfigurationAndCustomization.md#custom-dispose)
   - [Struct](Readme_md/ConfigurationAndCustomization.md#struct)
 - [Workarounds for not supported Features](Readme_md/ConfigurationAndCustomization.md#workarounds-for-not-supported-features)
   - [Async Constructor](Readme_md/ConfigurationAndCustomization.md#async-constructor)
@@ -284,7 +284,7 @@ CircleDI is heavily inspired by Jab and has many similarities, but there are a h
  - CircleDI allows also property dependency injection and based on that also [circular dependency injection](#resolves-circular-dependencies).
  - [Non-Generic](#non-generic): Instead of *GetService&lt;T&gt;()*, CicleDI generates dedicated getter-methods.
  - [Non-Lazy Instantiation](#non-lazy-instantiation): Jab only creates services lazy, CircleDI is configurable to create a service within the constructor or lazy.
- - CircleDI has [much less boilerplate](#optimal-performance) (unnecessary casts and if-checks) than Jab.
+ - CircleDI has [less boilerplate](#optimal-performance) (unnecessary classes/methods and if-checks) than Jab.
  - CircleDI is more [customizable](#customizable)
 
 However, the idea of circular dependency resolving was inspired by razor components.
