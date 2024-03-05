@@ -56,7 +56,6 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         return serviceType.FullName switch {
             "MyCode.ITestProvider" => Self,
             "MyCode.ITestProvider.IScope" => CreateScope(),
-            "MyCode.TestDelegate" => TestDelegate,
             _ => null
         };
     }
@@ -205,13 +204,6 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     global::MyCode.ITestProvider.IScope CreateScope();
-    /// <summary>
-    /// Lifetime: <see cref="global::CircleDIAttributes.DelegateAttribute{TService}">Delegate</see><br />
-    /// Service type: <see cref="global::MyCode.TestDelegate"/><br />
-    /// Implementation type:  <see cref="global::MyCode.TestDelegate"/>
-    /// </summary>
-    global::MyCode.TestDelegate TestDelegate { get; }
-
 
     /// <summary>
     /// <para>

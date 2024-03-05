@@ -332,6 +332,8 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         foreach (Service service in serviceProvider.ServiceList) {
             if (service.Lifetime.HasFlag(ServiceLifetime.Scoped))
                 continue;
+            if (service.Implementation.Type != MemberType.None && service.Implementation.IsScoped)
+                continue;
 
             if (ReferenceEquals(service, serviceProvider.CreateScope)) {
                 builderExtension.AppendCreateScopeSummary();
@@ -994,9 +996,16 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             private int index = -1;
 
             public Service? GetNextNotScoped() {
-                for (index++; index < serviceProvider.ServiceList.Count; index++)
-                    if (!serviceProvider.ServiceList[index].Lifetime.HasFlag(ServiceLifetime.Scoped))
-                        return serviceProvider.ServiceList[index];
+                for (index++; index < serviceProvider.ServiceList.Count; index++) {
+                    Service service = serviceProvider.ServiceList[index];
+
+                    if (service.Lifetime.HasFlag(ServiceLifetime.Scoped))
+                        continue;
+                    if (service.Implementation.Type != MemberType.None && service.Implementation.IsScoped)
+                        continue;
+
+                    return service;
+                }
 
                 return null;
             }
