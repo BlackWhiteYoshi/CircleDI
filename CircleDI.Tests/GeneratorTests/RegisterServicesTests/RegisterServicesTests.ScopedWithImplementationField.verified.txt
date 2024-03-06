@@ -106,7 +106,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// Service type: <see cref="global::MyCode.ITestService"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestService"/>
         /// </summary>
-        public global::MyCode.ITestService TestService => __serviceProvider.testField;
+        public global::MyCode.ITestService TestService => ((global::MyCode.TestProvider)__serviceProvider).testField;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />

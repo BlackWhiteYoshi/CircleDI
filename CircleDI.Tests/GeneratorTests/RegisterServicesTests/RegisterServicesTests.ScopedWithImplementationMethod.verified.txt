@@ -99,7 +99,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
         public Scope(ITestProvider serviceProvider) {
             __serviceProvider = serviceProvider;
-            _testService = __serviceProvider.TestMethod();
+            _testService = ((global::MyCode.TestProvider)__serviceProvider).TestMethod();
         }
 
         /// <summary>

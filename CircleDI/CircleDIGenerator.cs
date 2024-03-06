@@ -110,10 +110,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         if (!serviceProvider.HasConstructor) {
             builder.Append($"{Indent.SP4}/// <summary>\n");
             builder.Append($"{Indent.SP4}/// Creates an instance of <see cref=\"global::");
-            if (serviceProvider.NameSpace != string.Empty) {
-                builder.Append(serviceProvider.NameSpace);
-                builder.Append('.');
-            }
+            builder.AppendNameSpace(serviceProvider.NameSpace);
             builder.Append(serviceProvider.Name);
             builder.Append("\"/> together with all <see cref=\"global::CircleDIAttributes.CreationTiming.Constructor\">non-lazy</see> singleton services.\n");
             builder.Append($"{Indent.SP4}/// </summary>\n");
@@ -137,16 +134,10 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         if (serviceProvider.GenerateScope) {
             builderExtension.AppendCreateScopeSummary();
             builder.Append($"{Indent.SP4}public global::");
-            if (serviceProvider.NameSpace != string.Empty) {
-                builder.Append(serviceProvider.NameSpace);
-                builder.Append('.');
-            }
+            builder.AppendNameSpace(serviceProvider.NameSpace);
             builder.Append(serviceProvider.InterfaceName);
             builder.Append(".IScope CreateScope() => new global::");
-            if (serviceProvider.NameSpace != string.Empty) {
-                builder.Append(serviceProvider.NameSpace);
-                builder.Append('.');
-            }
+            builder.AppendNameSpace(serviceProvider.NameSpace);
             builder.Append(serviceProvider.Name);
             builder.Append(".Scope");
             builderExtension.AppendConstructorDependencyList(serviceProvider.CreateScope);
@@ -236,10 +227,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             // exposing CreateScope() method
             builderExtension.AppendCreateScopeSummary();
             builder.Append($"{Indent.SP8}public global::");
-            if (serviceProvider.NameSpace != string.Empty) {
-                builder.Append(serviceProvider.NameSpace);
-                builder.Append('.');
-            }
+            builder.AppendNameSpace(serviceProvider.NameSpace);
             builder.Append(serviceProvider.InterfaceName);
             builder.Append(".IScope CreateScope() => __serviceProvider.CreateScope();\n\n");
 
@@ -338,10 +326,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             if (ReferenceEquals(service, serviceProvider.CreateScope)) {
                 builderExtension.AppendCreateScopeSummary();
                 builder.Append($"{Indent.SP4}global::");
-                if (serviceProvider.NameSpace != string.Empty) {
-                    builder.Append(serviceProvider.NameSpace);
-                    builder.Append('.');
-                }
+                builder.AppendNameSpace(serviceProvider.NameSpace);
                 builder.Append(serviceProvider.InterfaceName);
                 builder.Append(".IScope CreateScope();\n");
                 continue;
@@ -388,10 +373,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                 if (ReferenceEquals(service, serviceProvider.CreateScope)) {
                     builderExtension.AppendCreateScopeSummary();
                     builder.Append($"{Indent.SP8}global::");
-                    if (serviceProvider.NameSpace != string.Empty) {
-                        builder.Append(serviceProvider.NameSpace);
-                        builder.Append('.');
-                    }
+                    builder.AppendNameSpace(serviceProvider.NameSpace);
                     builder.Append(serviceProvider.InterfaceName);
                     builder.Append(".IScope CreateScope();\n");
                     continue;
@@ -532,14 +514,22 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                     AppendPropertyDependencyList(service, circularDependencies, indent.Sp8);
                     break;
                 case MemberType.Method:
-                    if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                        builder.Append("__serviceProvider.");
+                    if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
+                        builder.Append("((global::");
+                        builder.AppendNameSpace(serviceProvider.NameSpace);
+                        builder.Append(serviceProvider.Name);
+                        builder.Append(")__serviceProvider).");
+                    }
                     builder.Append(service.Implementation.Name);
                     AppendConstructorDependencyList(service);
                     break;
                 case MemberType.Property:
-                    if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                        builder.Append("__serviceProvider.");
+                    if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
+                        builder.Append("((global::");
+                        builder.AppendNameSpace(serviceProvider.NameSpace);
+                        builder.Append(serviceProvider.Name);
+                        builder.Append(")__serviceProvider).");
+                    }
                     builder.Append(service.Implementation.Name);
                     break;
             }
@@ -583,8 +573,12 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
         private readonly void AppendServicesGetterField(Service service) {
             builder.Append(" => ");
-            if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                builder.Append("__serviceProvider.");
+            if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
+                builder.Append("((global::");
+                builder.AppendNameSpace(serviceProvider.NameSpace);
+                builder.Append(serviceProvider.Name);
+                builder.Append(")__serviceProvider).");
+            }
             builder.Append(service.Implementation.Name);
             builder.Append(';');
             builder.Append('\n');
@@ -654,15 +648,23 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                     AppendCircularDependencies(circularDependencies, indentCreation);
                     break;
                 case MemberType.Property:
-                    if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                        builder.Append("__serviceProvider.");
+                    if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
+                        builder.Append("((global::");
+                        builder.AppendNameSpace(serviceProvider.NameSpace);
+                        builder.Append(serviceProvider.Name);
+                        builder.Append(")__serviceProvider).");
+                    }
                     builder.Append(service.Implementation.Name);
                     builder.Append(';');
                     builder.Append('\n');
                     break;
                 case MemberType.Method:
-                    if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                        builder.Append("__serviceProvider.");
+                    if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
+                        builder.Append("((global::");
+                        builder.AppendNameSpace(serviceProvider.NameSpace);
+                        builder.Append(serviceProvider.Name);
+                        builder.Append(")__serviceProvider).");
+                    }
                     builder.Append(service.Implementation.Name);
                     AppendConstructorDependencyList(service);
                     builder.Append(';');
@@ -816,36 +818,33 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
 
         private readonly void AppendServiceCreationTransient(Service service, bool isScopeProvider, string indentation) {
-            switch (service.Implementation.Type) {
-                case MemberType.None:
-                    builder.Append("new global::");
-                    builder.Append(service.ImplementationType);
-                    AppendConstructorDependencyList(service);
-                    AppendPropertyDependencyList(service, null!, indentation); // Transient is not allowed to have circular dependencies, so circularList is not accessed
-                    builder.Append(';');
-                    break;
-                case MemberType.Field:
-                case MemberType.Property:
-                    if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-                        builder.Append("__serviceProvider.");
-                        builder.AppendServiceGetter(service);
-                    }
-                    else
-                        builder.Append(service.Implementation.Name);
-                    builder.Append(';');
-                    break;
-                case MemberType.Method:
-                    if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-                        builder.Append("__serviceProvider.");
-                        builder.AppendServiceGetter(service);
-                    }
-                    else {
-                        builder.Append(service.Implementation.Name);
-                        AppendConstructorDependencyList(service);
-                    }
-                    builder.Append(';');
-                    break;
+            if (service.Implementation.Type == MemberType.None) {
+                builder.Append("new global::");
+                builder.Append(service.ImplementationType);
+                AppendConstructorDependencyList(service);
+                AppendPropertyDependencyList(service, null!, indentation); // Transient is not allowed to have circular dependencies, so circularList is not accessed
+                builder.Append(';');
+                return;
             }
+
+            if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
+                if (service.Lifetime == ServiceLifetime.Transient) {
+                    builder.Append("__serviceProvider.");
+                    builder.AppendServiceGetter(service);
+                    builder.Append(';');
+                    return;
+                }
+                
+                builder.Append("((global::");
+                builder.AppendNameSpace(serviceProvider.NameSpace);
+                builder.Append(serviceProvider.Name);
+                builder.Append(")__serviceProvider).");
+            }
+
+            builder.Append(service.Implementation.Name);
+            if (service.Implementation.Type == MemberType.Method)
+                AppendConstructorDependencyList(service);
+            builder.Append(';');
         }
 
         #endregion
@@ -871,8 +870,12 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                 builder.Append(' ');
                 builder.AppendServiceGetter(service);
                 builder.Append(" => ");
-                if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                    builder.Append("__serviceProvider.");
+                if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
+                    builder.Append("((global::");
+                    builder.AppendNameSpace(serviceProvider.NameSpace);
+                    builder.Append(serviceProvider.Name);
+                    builder.Append(")__serviceProvider).");
+                }
                 builder.Append(service.Implementation.Name);
                 builder.Append(';');
                 builder.Append('\n');
@@ -1652,10 +1655,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
             builder.Append(indent.Sp4);
             builder.Append("/// Creates an instance of <see cref=\"global::");
-            if (serviceProvider.NameSpace != string.Empty) {
-                builder.Append(serviceProvider.NameSpace);
-                builder.Append('.');
-            }
+            builder.AppendNameSpace(serviceProvider.NameSpace);
             builder.Append(serviceProvider.Name);
             builder.Append(".Scope\"/> together with all <see cref=\"global::CircleDIAttributes.CreationTiming.Constructor\">non-lazy</see> scoped services.\n");
 

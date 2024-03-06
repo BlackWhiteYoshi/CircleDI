@@ -18,6 +18,19 @@ public static class StringBuilderExtensions {
     }
 
     /// <summary>
+    /// Appends $"{namspace}." when namspace is not empty, otherwise does nothing.
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="namspace"></param>
+    public static void AppendNameSpace(this StringBuilder builder, string namspace) {
+        if (namspace == string.Empty)
+            return;
+        
+        builder.Append(namspace);
+        builder.Append('.');
+    }
+
+    /// <summary>
     /// <para>If implementation is field, it appends <i><see cref="Service.Implementation.Name"/></i>.</para>
     /// <para>Otherwise it appends <i><see cref="Service.Name"/></i>.</para>
     /// </summary>

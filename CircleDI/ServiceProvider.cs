@@ -765,7 +765,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             }
                             break;
                         case ServiceLifetime.Transient:
-                            if (dependency.Service.Lifetime is ServiceLifetime.Scoped or ServiceLifetime.TransientScoped)
+                            if (dependency.Service.Lifetime.HasFlag(ServiceLifetime.Scoped))
                                 service.Lifetime = ServiceLifetime.TransientScoped;
                             break;
                     }

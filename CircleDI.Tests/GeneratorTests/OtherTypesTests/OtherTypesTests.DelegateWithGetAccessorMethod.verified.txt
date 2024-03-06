@@ -136,7 +136,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// Service type: <see cref="global::MyCode.TestDelegate"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestDelegate"/>
         /// </summary>
-        public global::MyCode.TestDelegate GetTestDelegate() => __serviceProvider.DelegateImpl;
+        public global::MyCode.TestDelegate GetTestDelegate() => ((global::MyCode.TestProvider)__serviceProvider).DelegateImpl;
 
 
         /// <summary>
