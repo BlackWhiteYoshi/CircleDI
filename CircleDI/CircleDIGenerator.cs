@@ -496,7 +496,9 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                 return;
             if (service.Implementation.Type == MemberType.Field)
                 return;
-            if (service.Lifetime == ServiceLifetime.Transient)
+            if (service.Lifetime.HasFlag(ServiceLifetime.Transient))
+                return;
+            if (service.Lifetime == ServiceLifetime.Delegate)
                 return;
 
 

@@ -27,7 +27,6 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// Creates an instance of <see cref="global::MyCode.TestProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public TestProvider() {
-        _testDelegate = DelegateImpl();
         _testService = new global::MyCode.TestService() {
             TestDelegate = TestDelegate
         };
