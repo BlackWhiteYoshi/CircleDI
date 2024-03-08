@@ -145,9 +145,9 @@ public sealed class Service : IEquatable<Service> {
         };
         
         Lifetime = lifetime;
-        ServiceType = serviceType.ToDisplayString();
+        ServiceType = serviceType.ToFullQualifiedName();
         ServiceTypeArity = serviceType.Arity;
-        ImplementationType = implementationType.ToDisplayString();
+        ImplementationType = implementationType.ToFullQualifiedName();
         Name = attributeData.NamedArguments.GetArgument<string>("Name") ?? implementationType.Name.Replace('.', '_');
         CreationTime = (CreationTiming?)attributeData.NamedArguments.GetArgument<int?>("CreationTime") ?? creationTimeProvider;
         GetAccessor = (GetAccess?)attributeData.NamedArguments.GetArgument<int?>("GetAccessor") ?? getAccessorProvider;
@@ -305,7 +305,7 @@ public sealed class Service : IEquatable<Service> {
         INamedTypeSymbol attribute = attributeData.AttributeClass!;
         INamedTypeSymbol serviceType = (INamedTypeSymbol)attribute.TypeArguments[0];
 
-        ServiceType = serviceType.ToDisplayString();
+        ServiceType = serviceType.ToFullQualifiedName();
         ImplementationType = ServiceType;
 
         Name = attributeData.NamedArguments.GetArgument<string>("Name") ?? serviceType.Name.Replace(".", "");
@@ -431,7 +431,7 @@ public sealed class Service : IEquatable<Service> {
                 }
                 else {
                     isNamed = false;
-                    serviceIdentifier = property.Type.ToDisplayString();
+                    serviceIdentifier = property.Type.ToFullQualifiedName();
                     isParameter = false;
                 }
             }
@@ -441,7 +441,7 @@ public sealed class Service : IEquatable<Service> {
                     continue;
 
                 isNamed = false;
-                serviceIdentifier = property.Type.ToDisplayString();
+                serviceIdentifier = property.Type.ToFullQualifiedName();
                 isParameter = true;
             }
             else

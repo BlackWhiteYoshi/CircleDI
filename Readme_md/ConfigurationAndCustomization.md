@@ -362,7 +362,7 @@ public partial interface IMyProvider;
 /**
  * generated CreateScope() method:
  *
- * public global::IMyProvider.IScope CreateScope(string dbConnectionScoped) => new global::MyProvider.Scope(Self, dbConnectionScoped);
+ * public global::IMyProvider.IScope CreateScope(global::System.String dbConnectionScoped) => new global::MyProvider.Scope(Self, dbConnectionScoped);
  **/
 ```
 
@@ -409,34 +409,18 @@ public sealed partial class MyProvider {
 
 
 <br></br>
-### Struct
+### Struct Types and Native/Built-in Types
 
-It is also possible to register struct types as service.
+It is also possible to register struct types or native/built-in types as service.
 However, structs are value types and therefore copied when retrieving the service.
 So make sure the registered struct is trivially copyable.
 
 Getting a value type service by reference is not supported yet.
 
-Registering a built-in type is not supported. However, you can just wrap those types in a struct:
-
-```csharp
-[ServiceProvider]
-[Singleton<Flag>]
-public sealed partial class BooleanProvider;
-
-public struct Flag {
-    public Flag() { }
-
-    public bool Value { get; } = true;
-
-    public static implicit operator bool(Flag flag) => flag.Value;
-}
-```
-
 
 <br></br>
-### Workarounds for not supported Features
- 
+## Workarounds for not supported Features
+
 
 <br></br>
 ### Async Constructor
@@ -601,8 +585,8 @@ public class MyService {
 
 
 <br></br>
-### Remarks
- 
+## Remarks
+
 
 <br></br>
 ### IServiceProvider Interface

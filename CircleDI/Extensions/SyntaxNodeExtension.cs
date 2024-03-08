@@ -77,17 +77,54 @@ internal static class SyntaxNodeExtension {
                     result[i] = new ConstructorDependency() {
                         Name = constructor.Parameters[i].Name,
                         IsNamed = false,
-                        ServiceIdentifier = constructor.Parameters[i].Type.ToDisplayString(),
+                        ServiceIdentifier = constructor.Parameters[i].Type.ToFullQualifiedName(),
                         HasAttribute = false
                     };
             else
                 result[i] = new ConstructorDependency() {
                     Name = constructor.Parameters[i].Name,
                     IsNamed = false,
-                    ServiceIdentifier = constructor.Parameters[i].Type.ToDisplayString(),
+                    ServiceIdentifier = constructor.Parameters[i].Type.ToFullQualifiedName(),
                     HasAttribute = true
                 };
 
         return result;
+    }
+
+    /// <summary>
+    /// <para>
+    /// It executes <see cref="ISymbol.ToDisplayString(SymbolDisplayFormat?)"/> and then maps built-in types from '<i>C# type keyword</i>' to '<i>.NET type</i>'<br />
+    /// e.g. string -> System.String
+    /// </para>
+    /// <para>If it is not a '<i>C# type keyword</i>', it just returns the output of <see cref="ISymbol.ToDisplayString(SymbolDisplayFormat?)"/>.</para>
+    /// </summary>
+    /// <param name="typeSymbol"
+    /// <returns></returns>
+    internal static string ToFullQualifiedName(this ITypeSymbol typeSymbol) {
+        string type = typeSymbol.ToDisplayString();
+
+        return type switch {
+            "bool" => "System.Boolean",
+            "byte" => "System.Byte",
+            "sbyte" => "System.SByte",
+            "char" => "System.Char",
+            "decimal" => "System.Decimal",
+            "double" => "System.Double",
+            "float" => "System.Single",
+            "int" => "System.Int32",
+            "uint" => "System.UInt32",
+            "nint" => "System.IntPtr",
+            "nuint" => "System.UIntPtr",
+            "long" => "System.Int64",
+            "ulong" => "System.UInt64",
+            "short" => "System.Int16",
+            "ushort" => "System.UInt16",
+
+            "object" => "System.Object",
+            "string" => "System.String",
+            "dynamic" => "System.Object",
+
+            _ => type
+        };
     }
 }

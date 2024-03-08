@@ -50,6 +50,42 @@ public static class OtherTypesTests {
             """);
     }
 
+    [Fact]
+    public static Task NativeType() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestClass>]
+            [Singleton<TestStruct>]
+            [Singleton<int>]
+            public sealed partial class TestProvider;
+            
+
+            public class TestClass(int number);
+
+            [method: Constructor]
+            public struct TestStruct(int number);
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
     
     [Fact]
     public static Task Delegate() {
