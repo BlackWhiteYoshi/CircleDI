@@ -2,7 +2,7 @@
 
 /// <summary>
 /// Lifetime type of the service:<br />
-/// Singleton, Scoped, Transient or TransientSingleton, TransientScoped.
+/// Singleton, Scoped, Transient or TransientSingleton, TransientScoped or Delegate.
 /// </summary>
 [Flags]
 public enum ServiceLifetime : byte {

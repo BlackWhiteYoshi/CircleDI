@@ -49,7 +49,8 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                 errorReported = true;
             }
 
-            foreach (Service service in serviceProvider.ServiceList)
+            // serviceProvider.SortedServiceList is still empty at this point
+            foreach (Service service in serviceProvider.SingletonList.Concat(serviceProvider.ScopedList).Concat(serviceProvider.TransientList).Concat(serviceProvider.DelegateList))
                 if (service.ErrorList != null) {
                     foreach (Diagnostic error in service.ErrorList)
                         context.ReportDiagnostic(error);
@@ -130,18 +131,65 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         }
         builderExtension.AppendConstructorServices(serviceProvider.SingletonList);
 
-        // CreateScope() method
+        // "special" method CreateScope()
         if (serviceProvider.GenerateScope) {
             builderExtension.AppendCreateScopeSummary();
             builder.Append($"{Indent.SP4}public global::");
             builder.AppendNameSpace(serviceProvider.NameSpace);
             builder.Append(serviceProvider.InterfaceName);
-            builder.Append(".IScope CreateScope() => new global::");
+            builder.Append(".IScope CreateScope(");
+            foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
+                if (dependency.HasAttribute) {
+                    builder.Append("global::");
+                    builder.Append(dependency.ServiceIdentifier);
+                    builder.Append(' ');
+                    builder.Append(dependency.Name);
+                    builder.Append(',');
+                    builder.Append(' ');
+                }
+            if (builder[^1] == ' ')
+                builder.Length -= 2;
+            builder.Append(") => new global::");
             builder.AppendNameSpace(serviceProvider.NameSpace);
             builder.Append(serviceProvider.Name);
             builder.Append(".Scope");
-            builderExtension.AppendConstructorDependencyList(serviceProvider.CreateScope);
-            builderExtension.AppendPropertyDependencyList(serviceProvider.CreateScope, null!, Indent.SP4); // Transient is not allowed to have circular dependencies, so circularList is not accessed
+            // AppendConstructorDependencyList of serviceProvider.CreateScope
+            {
+                builder.Append('(');
+                if (serviceProvider.CreateScope.ConstructorDependencyList.Length > 0) {
+                    foreach (ConstructorDependency dependency in serviceProvider.CreateScope.ConstructorDependencyList) {
+                        if (dependency.HasAttribute)
+                            builder.Append(dependency.Name);
+                        else
+                            builder.AppendServiceGetter(dependency.Service!);
+                        builder.Append(',');
+                        builder.Append(' ');
+                    }
+                    builder.Length -= 2;
+                }
+                builder.Append(')');
+            }
+            // AppendPropertyDependencyList of serviceProvider.CreateScope
+            {
+                if (serviceProvider.CreateScope.PropertyDependencyList.Count > 0) {
+                    builder.Append(' ');
+                    builder.Append('{');
+                    foreach (PropertyDependency dependency in serviceProvider.CreateScope.PropertyDependencyList) {
+                        builder.Append($"\n{Indent.SP8}");
+                        builder.Append(dependency.Name);
+                        builder.Append(' ');
+                        builder.Append('=');
+                        builder.Append(' ');
+                        if (dependency.HasAttribute)
+                            builder.Append(dependency.Name);
+                        else
+                            builder.AppendServiceGetter(dependency.Service!);
+                        builder.Append(',');
+                    }
+                    builder.Length--;
+                    builder.Append($"\n{Indent.SP4}}}");
+                }
+            }
             builder.Append(';');
             builder.Append('\n');
             builder.Append('\n');
@@ -223,13 +271,6 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
             // scoped getter/getMethods
             builderExtension.AppendServicesGetter(serviceProvider.ScopedList, serviceProvider.ThreadSafeScope);
-
-            // exposing CreateScope() method
-            builderExtension.AppendCreateScopeSummary();
-            builder.Append($"{Indent.SP8}public global::");
-            builder.AppendNameSpace(serviceProvider.NameSpace);
-            builder.Append(serviceProvider.InterfaceName);
-            builder.Append(".IScope CreateScope() => __serviceProvider.CreateScope();\n\n");
 
             // singleton exposing
             foreach (Service service in serviceProvider.SingletonList) {
@@ -316,21 +357,33 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         builder.Append('{');
         builder.Append('\n');
 
+        // "special" method CreateScope()
+        if (serviceProvider.GenerateScope) {
+            builderExtension.AppendCreateScopeSummary();
+            builder.Append($"{Indent.SP4}global::");
+            builder.AppendNameSpace(serviceProvider.NameSpace);
+            builder.Append(serviceProvider.InterfaceName);
+            builder.Append(".IScope CreateScope(");
+            foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
+                if (dependency.HasAttribute) {
+                    builder.Append("global::");
+                    builder.Append(dependency.ServiceIdentifier);
+                    builder.Append(' ');
+                    builder.Append(dependency.Name);
+                    builder.Append(',');
+                    builder.Append(' ');
+                }
+            if (builder[^1] == ' ')
+                builder.Length -= 2;
+            builder.Append(");\n\n");
+        }
+
         // service getter
-        foreach (Service service in serviceProvider.ServiceList) {
+        foreach (Service service in serviceProvider.SortedServiceList) {
             if (service.Lifetime.HasFlag(ServiceLifetime.Scoped))
                 continue;
             if (service.Implementation.Type != MemberType.None && service.Implementation.IsScoped)
                 continue;
-
-            if (ReferenceEquals(service, serviceProvider.CreateScope)) {
-                builderExtension.AppendCreateScopeSummary();
-                builder.Append($"{Indent.SP4}global::");
-                builder.AppendNameSpace(serviceProvider.NameSpace);
-                builder.Append(serviceProvider.InterfaceName);
-                builder.Append(".IScope CreateScope();\n");
-                continue;
-            }
 
             builderExtension.AppendServiceSummary(service);
             builder.Append($"{Indent.SP4}global::");
@@ -369,7 +422,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             builder.Append('\n');
 
             // service getter
-            foreach (Service service in serviceProvider.ServiceList) {
+            foreach (Service service in serviceProvider.SortedServiceList) {
                 if (ReferenceEquals(service, serviceProvider.CreateScope)) {
                     builderExtension.AppendCreateScopeSummary();
                     builder.Append($"{Indent.SP8}global::");
@@ -1001,8 +1054,8 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             private int index = -1;
 
             public Service? GetNextNotScoped() {
-                for (index++; index < serviceProvider.ServiceList.Count; index++) {
-                    Service service = serviceProvider.ServiceList[index];
+                for (index++; index < serviceProvider.SortedServiceList.Count; index++) {
+                    Service service = serviceProvider.SortedServiceList[index];
 
                     if (service.Lifetime.HasFlag(ServiceLifetime.Scoped))
                         continue;
@@ -1017,8 +1070,8 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
             public Service? GetNextService() {
                 index++;
-                if (index < serviceProvider.ServiceList.Count)
-                    return serviceProvider.ServiceList[index];
+                if (index < serviceProvider.SortedServiceList.Count)
+                    return serviceProvider.SortedServiceList[index];
                 else
                     return null;
             }
@@ -1445,7 +1498,8 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         /// <param name="indentation"></param>
         public readonly void AppendPropertyDependencyList(Service service, List<(Service, PropertyDependency)> circularDependencies, string indentation) {
             if (service.PropertyDependencyList.Count > 0) {
-                builder.Append(" {");
+                builder.Append(' ');
+                builder.Append('{');
                 foreach (PropertyDependency dependency in service.PropertyDependencyList) {
                     if (dependency.IsCircular) {
                         if (dependency.IsRequired) {
@@ -1462,7 +1516,9 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                         builder.Append(indentation);
                         builder.Append(Indent.SP4);
                         builder.Append(dependency.Name);
-                        builder.Append(" = ");
+                        builder.Append(' ');
+                        builder.Append('=');
+                        builder.Append(' ');
                         builder.AppendServiceGetter(dependency.Service!);
                     }
                     builder.Append(',');
@@ -1545,7 +1601,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
             builder.Append(indent.Sp0);
             builder.Append("/// Number of services registered: ");
-            builder.Append(serviceProvider.ServiceList.Count - (serviceProvider.GenerateScope ? 1 : 0));
+            builder.Append(serviceProvider.SortedServiceList.Count);
             builder.Append("<br />\n");
 
             builder.Append(indent.Sp0);

@@ -82,7 +82,6 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         return serviceType.FullName switch {
             "MyCode.ISingleton" => Singleton,
             "MyCode.ITestProvider" => Self,
-            "MyCode.ITestProvider.IScope" => CreateScope(),
             "MyCode.ITransient" => Transient,
             _ => null
         };
@@ -156,11 +155,6 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
 
 
         /// <summary>
-        /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
-        /// </summary>
-        public global::MyCode.ITestProvider.IScope CreateScope() => __serviceProvider.CreateScope();
-
-        /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ISingleton"/><br />
         /// Implementation type:  <see cref="global::MyCode.Singleton"/>
@@ -197,7 +191,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
                 "MyCode.IScoped" => Scoped,
                 "MyCode.ISingleton" => Singleton,
                 "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => (global::MyCode.ITestProvider.IScope[])[SelfScope, CreateScope()],
+                "MyCode.ITestProvider.IScope" => SelfScope,
                 "MyCode.ITransient" => Transient,
                 _ => null
             };

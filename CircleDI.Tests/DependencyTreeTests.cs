@@ -7,18 +7,42 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests the function <see cref="DependencyTreeExtension.CreateDependencyTree(ServiceProvider)"/>.
 /// </summary>
-public sealed class DependencyTreeTests {
-    private static ServiceProvider CreateProvider(List<Service> serviceList)
-        => new(null!) {
+public static class DependencyTreeTests {
+    private static ServiceProvider CreateProvider(List<Service> serviceList) {
+        ServiceProvider serviceProvider = new(null!) {
             Name = "TestProvider",
             InterfaceName = $"ITestProvider",
-            NameSpace = string.Empty,
-            ServiceList = serviceList
+            NameSpace = string.Empty
         };
+
+        foreach (Service service in serviceList)
+            if (service.Lifetime == ServiceLifetime.Singleton)
+                serviceProvider.SingletonList.Add(service);
+        foreach (Service service in serviceList)
+            if (service.Lifetime == ServiceLifetime.Scoped)
+                serviceProvider.SingletonList.Add(service);
+        foreach (Service service in serviceList)
+            if (service.Lifetime == ServiceLifetime.Transient)
+                serviceProvider.SingletonList.Add(service);
+        foreach (Service service in serviceList)
+            if (service.Lifetime == ServiceLifetime.Delegate)
+                serviceProvider.SingletonList.Add(service);
+
+        return serviceProvider;
+    }
+
+    private static void SetDefaultDependenciesIterator(Service service) => SetDependencies(service, GetDependenciesDefaultIterator(service));
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "get_DependenciesDefaultIterator")]
+    private extern static IEnumerable<Dependency> GetDependenciesDefaultIterator(Service instance);
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Dependencies")]
+    private extern static void SetDependencies(Service instance, IEnumerable<Dependency> value);
+
 
 
     [Fact]
-    public void EmptyDoesNothing() {
+    public static void EmptyDoesNothing() {
         ServiceProvider serviceProvider = CreateProvider([]);
 
         serviceProvider.CreateDependencyTree();
@@ -29,7 +53,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void MultipleServicesWithSameTypeWithoutNamingFails() {
+    public static void MultipleServicesWithSameTypeWithoutNamingFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -57,7 +81,7 @@ public sealed class DependencyTreeTests {
     #region Tree
 
     [Fact]
-    public void Tree_SimplePath_Constructor() {
+    public static void Tree_SimplePath_Constructor() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -66,12 +90,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -81,12 +109,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service3",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         Service service3 = new() {
             Name = "service3",
@@ -95,8 +127,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service3",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service3);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2, service3]);
 
@@ -109,7 +143,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Tree_SimplePath_Property() {
+    public static void Tree_SimplePath_Property() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -123,10 +157,13 @@ public sealed class DependencyTreeTests {
                     ServiceIdentifier = "Service2",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
-            ]
+            ],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -141,10 +178,13 @@ public sealed class DependencyTreeTests {
                     ServiceIdentifier = "Service3",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
-            ]
+            ],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         Service service3 = new() {
             Name = "service3",
@@ -153,8 +193,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service3",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service3);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2, service3]);
 
@@ -169,7 +211,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Tree_NormalTreePath() {
+    public static void Tree_NormalTreePath() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -183,17 +225,21 @@ public sealed class DependencyTreeTests {
                     ServiceIdentifier = "Service2",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 },
                 new PropertyDependency() {
                     Name = "Service3",
                     ServiceIdentifier = "Service3",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
-            ]
+            ],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -203,16 +249,22 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service4",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 },
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service5",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         Service service3 = new() {
             Name = "service3",
@@ -227,17 +279,21 @@ public sealed class DependencyTreeTests {
                     ServiceIdentifier = "Service6",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 },
                 new PropertyDependency() {
                     Name = "Service7",
                     ServiceIdentifier = "Service7",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
-            ]
+            ],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service3);
 
         Service service4 = new() {
             Name = "service4",
@@ -246,8 +302,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service4",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service4);
 
         Service service5 = new() {
             Name = "service5",
@@ -256,8 +314,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service5",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service5);
 
         Service service6 = new() {
             Name = "service6",
@@ -266,8 +326,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service6",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service6);
 
         Service service7 = new() {
             Name = "service7",
@@ -276,8 +338,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service7",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service7);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2, service3, service4, service5, service6, service7]);
 
@@ -296,7 +360,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Tree_DoublePath() {
+    public static void Tree_DoublePath() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -305,16 +369,22 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 },
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -323,8 +393,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service2",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -337,7 +409,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Tree_MergingPath() {
+    public static void Tree_MergingPath() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -346,16 +418,22 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 },
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service3",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -365,12 +443,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service3",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         Service service3 = new() {
             Name = "service3",
@@ -379,8 +461,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service3",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service3);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2, service3]);
 
@@ -394,7 +478,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Tree_DiamondMerging() {
+    public static void Tree_DiamondMerging() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -403,16 +487,22 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 },
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service3",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -422,12 +512,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service4",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         Service service3 = new() {
             Name = "service3",
@@ -437,12 +531,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service4",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service3);
 
         Service service4 = new() {
             Name = "service4",
@@ -451,8 +549,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service4",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service4);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2, service3, service4]);
 
@@ -467,7 +567,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Tree_MissingDependencyFails() {
+    public static void Tree_MissingDependencyFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -491,7 +591,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Tree_NotDeclaredInterfaceDependencyFails() {
+    public static void Tree_NotDeclaredInterfaceDependencyFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -500,7 +600,7 @@ public sealed class DependencyTreeTests {
             [ServiceProvider]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
-                    public Scope(ITestProvider serviceProvider) {
+                    public Scope([Dependency] ITestProvider serviceProvider) {
                         InitServices(serviceProvider);
                     }
                 }
@@ -517,7 +617,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Tree_MissingNamedDependencyFails() {
+    public static void Tree_MissingNamedDependencyFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -544,7 +644,7 @@ public sealed class DependencyTreeTests {
     #region MultipleRoots
 
     [Fact]
-    public void MultipleRoots_MergingRoots() {
+    public static void MultipleRoots_MergingRoots() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -553,12 +653,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service3",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -568,12 +672,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service3",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         Service service3 = new() {
             Name = "service3",
@@ -582,8 +690,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service3",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service3);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2, service3]);
 
@@ -596,7 +706,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void MultipleRoots_MergingPath() {
+    public static void MultipleRoots_MergingPath() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -605,12 +715,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service4",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -620,12 +734,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service3",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         Service service3 = new() {
             Name = "service3",
@@ -635,12 +753,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service4",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service3);
 
         Service service4 = new() {
             Name = "service4",
@@ -649,8 +771,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service4",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service4);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2, service3, service4]);
 
@@ -669,7 +793,7 @@ public sealed class DependencyTreeTests {
     #region MultipleTrees
 
     [Fact]
-    public void MultipleTrees_IndependServices() {
+    public static void MultipleTrees_IndependServices() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -677,8 +801,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service1",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -687,8 +813,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service2",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -700,7 +828,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void MultipleTrees_IndependentPath() {
+    public static void MultipleTrees_IndependentPath() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -709,12 +837,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service4",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -724,12 +856,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service3",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         Service service3 = new() {
             Name = "service3",
@@ -739,12 +875,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service4",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service3);
 
         Service service4 = new() {
             Name = "service4",
@@ -753,8 +893,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service4",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service4);
 
         Service service5 = new() {
             Name = "service5",
@@ -769,10 +911,13 @@ public sealed class DependencyTreeTests {
                     ServiceIdentifier = "Service6",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
-            ]
+            ],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service5);
 
         Service service6 = new() {
             Name = "service6",
@@ -781,8 +926,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service6",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service6);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2, service3, service4, service5, service6]);
 
@@ -802,7 +949,7 @@ public sealed class DependencyTreeTests {
     #region Circles
 
     [Fact]
-    public void Circles_SimpleCircle() {
+    public static void Circles_SimpleCircle() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -816,10 +963,13 @@ public sealed class DependencyTreeTests {
                     ServiceIdentifier = "Service2",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
-            ]
+            ],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -834,10 +984,13 @@ public sealed class DependencyTreeTests {
                     ServiceIdentifier = "Service1",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -851,7 +1004,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Circles_SelfCircle() {
+    public static void Circles_SelfCircle() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -865,10 +1018,13 @@ public sealed class DependencyTreeTests {
                     ServiceIdentifier = "Service1",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
-            ]
+            ],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         ServiceProvider serviceProvider = CreateProvider([service1]);
 
@@ -881,7 +1037,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Circles_ConstructorPropertyCircle() {
+    public static void Circles_ConstructorPropertyCircle() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -890,12 +1046,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
+                    HasAttribute = false,
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -910,10 +1070,13 @@ public sealed class DependencyTreeTests {
                     ServiceIdentifier = "Service1",
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -927,7 +1090,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Circles_InvalidCircle() {
+    public static void Circles_InvalidCircle() {
         const string input = """
             using CircleDIAttributes;
             
@@ -954,7 +1117,7 @@ public sealed class DependencyTreeTests {
     #region Lifetime
 
     [Fact]
-    public void Lifetime_SingletonToTransient() {
+    public static void Lifetime_SingletonToTransient() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -963,12 +1126,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -977,8 +1144,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service2",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -991,7 +1160,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Lifetime_ScopedToSingleton() {
+    public static void Lifetime_ScopedToSingleton() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Scoped,
@@ -1000,12 +1169,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -1014,8 +1187,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service2",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -1027,7 +1202,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Lifetime_ScopedToTransient() {
+    public static void Lifetime_ScopedToTransient() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Scoped,
@@ -1036,12 +1211,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -1050,8 +1229,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service2",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -1064,7 +1245,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Lifetime_TransientToSingleton() {
+    public static void Lifetime_TransientToSingleton() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Transient,
@@ -1073,12 +1254,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -1087,8 +1272,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service2",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -1101,7 +1288,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Lifetime_TransientToScoped() {
+    public static void Lifetime_TransientToScoped() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Transient,
@@ -1110,12 +1297,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -1124,8 +1315,10 @@ public sealed class DependencyTreeTests {
             ServiceType = "Service2",
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -1138,7 +1331,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Lifetime_SingletonToScoped() {
+    public static void Lifetime_SingletonToScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1162,7 +1355,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Lifetime_SingletonToTransientScoped() {
+    public static void Lifetime_SingletonToTransientScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1188,7 +1381,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void Lifetime_SingletonToMutlipleScoped() {
+    public static void Lifetime_SingletonToMutlipleScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1221,7 +1414,7 @@ public sealed class DependencyTreeTests {
     #region CreationTiming
 
     [Fact]
-    public void CreationTiming_ConstructorToConstructor() {
+    public static void CreationTiming_ConstructorToConstructor() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1232,12 +1425,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -1248,8 +1445,10 @@ public sealed class DependencyTreeTests {
             CreationTime = CreationTiming.Constructor,
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -1261,7 +1460,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void CreationTiming_ConstructorToLazy() {
+    public static void CreationTiming_ConstructorToLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1285,7 +1484,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void CreationTiming_LazyToConstructor() {
+    public static void CreationTiming_LazyToConstructor() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1296,12 +1495,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -1312,8 +1515,10 @@ public sealed class DependencyTreeTests {
             CreationTime = CreationTiming.Constructor,
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
@@ -1325,7 +1530,7 @@ public sealed class DependencyTreeTests {
     }
 
     [Fact]
-    public void CreationTiming_LazyToLazy() {
+    public static void CreationTiming_LazyToLazy() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1336,12 +1541,16 @@ public sealed class DependencyTreeTests {
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
+                    Name = string.Empty,
                     ServiceIdentifier = "Service2",
-                    IsNamed = false
+                    IsNamed = false,
+                    HasAttribute = false
                 }
             ],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service1);
 
         Service service2 = new() {
             Name = "service2",
@@ -1352,8 +1561,10 @@ public sealed class DependencyTreeTests {
             CreationTime = CreationTiming.Lazy,
 
             ConstructorDependencyList = [],
-            PropertyDependencyList = []
+            PropertyDependencyList = [],
+            Dependencies = null!
         };
+        SetDefaultDependenciesIterator(service2);
 
         ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 

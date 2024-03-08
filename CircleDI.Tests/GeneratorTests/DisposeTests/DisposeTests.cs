@@ -11,9 +11,9 @@ namespace CircleDI.Tests;
 /// - AsyncDispose function
 /// </para>
 /// </summary>
-public sealed class DisposeTests {
+public static class DisposeTests {
     [Fact]
-    public Task Singleton() {
+    public static Task Singleton() {
         const string input = """
             using CircleDIAttributes;
             
@@ -35,7 +35,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task Scope() {
+    public static Task Scope() {
         const string input = """
             using CircleDIAttributes;
             
@@ -57,7 +57,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task Transient() {
+    public static Task Transient() {
         const string input = """
             using CircleDIAttributes;
             
@@ -80,7 +80,7 @@ public sealed class DisposeTests {
 
 
     [Fact]
-    public Task AsyncSingleton() {
+    public static Task AsyncSingleton() {
         const string input = """
             using CircleDIAttributes;
             
@@ -102,7 +102,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task AsyncScope() {
+    public static Task AsyncScope() {
         const string input = """
             using CircleDIAttributes;
             
@@ -124,7 +124,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task AsyncTransient() {
+    public static Task AsyncTransient() {
         const string input = """
             using CircleDIAttributes;
             
@@ -147,7 +147,7 @@ public sealed class DisposeTests {
 
 
     [Fact]
-    public Task SyncAndAsyncSingleton() {
+    public static Task SyncAndAsyncSingleton() {
         const string input = """
             using CircleDIAttributes;
             
@@ -169,7 +169,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task SyncAndAsyncScope() {
+    public static Task SyncAndAsyncScope() {
         const string input = """
             using CircleDIAttributes;
             
@@ -191,7 +191,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task SyncAndAsyncTransient() {
+    public static Task SyncAndAsyncTransient() {
         const string input = """
             using CircleDIAttributes;
             
@@ -214,7 +214,7 @@ public sealed class DisposeTests {
 
 
     [Fact]
-    public Task CustomDisposeMethod() {
+    public static Task CustomDisposeMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -236,7 +236,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task CustomDisposeAsyncMethod() {
+    public static Task CustomDisposeAsyncMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -258,7 +258,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task CustomDisposeMethodScope() {
+    public static Task CustomDisposeMethodScope() {
         const string input = """
             using CircleDIAttributes;
             
@@ -282,7 +282,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task CustomDisposeAsyncMethodScope() {
+    public static Task CustomDisposeAsyncMethodScope() {
         const string input = """
             using CircleDIAttributes;
             
@@ -307,7 +307,7 @@ public sealed class DisposeTests {
 
 
     [Fact]
-    public Task NoDisposableServices() {
+    public static Task NoDisposableServices() {
         const string input = """
             using CircleDIAttributes;
             
@@ -329,7 +329,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task MultipleSingletons() {
+    public static Task MultipleSingletons() {
         const string input = """
             using CircleDIAttributes;
             
@@ -355,7 +355,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task SingletonAndTransinent() {
+    public static Task SingletonAndTransinent() {
         const string input = """
             using CircleDIAttributes;
             
@@ -382,7 +382,7 @@ public sealed class DisposeTests {
 
 
     [Fact]
-    public Task LazySingleton() {
+    public static Task LazySingleton() {
         const string input = """
             using CircleDIAttributes;
             
@@ -404,7 +404,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task LazyMultipleSingleton() {
+    public static Task LazyMultipleSingleton() {
         const string input = """
             using CircleDIAttributes;
             
@@ -431,7 +431,7 @@ public sealed class DisposeTests {
 
 
     [Fact]
-    public Task TransientWithPropertyDependency() {
+    public static Task TransientWithPropertyDependency() {
         const string input = """
             using CircleDIAttributes;
             
@@ -459,7 +459,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task TransientWithPropertyDependencyAndGetAccessorMethod() {
+    public static Task TransientWithPropertyDependencyAndGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -488,7 +488,7 @@ public sealed class DisposeTests {
 
 
     [Fact]
-    public Task SyncAndAsyncNotTreadSafeHasList() {
+    public static Task SyncAndAsyncNotTreadSafeHasList() {
         const string input = """
             using CircleDIAttributes;
             
@@ -514,7 +514,7 @@ public sealed class DisposeTests {
     }
 
     [Fact]
-    public Task TransientScopeGenerateListOnlyInScopedProvider() {
+    public static Task TransientScopeGenerateListOnlyInScopedProvider() {
         const string input = """
             using CircleDIAttributes;
             
@@ -541,7 +541,7 @@ public sealed class DisposeTests {
 
 
     [Fact]
-    public Task ManyServices() {
+    public static Task ManyServices() {
         const string input = """
             using CircleDIAttributes;
             

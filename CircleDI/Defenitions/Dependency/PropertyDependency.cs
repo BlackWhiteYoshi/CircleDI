@@ -5,11 +5,6 @@
 /// </summary>
 public sealed class PropertyDependency : Dependency, IEquatable<PropertyDependency> {
     /// <summary>
-    /// Name of the Property
-    /// </summary>
-    public required string Name { get; init; }
-
-    /// <summary>
     /// <para>Has Property a readonly setter or a normal setter.</para>
     /// <para>
     /// True -> init<br />
@@ -46,8 +41,6 @@ public sealed class PropertyDependency : Dependency, IEquatable<PropertyDependen
         if (ReferenceEquals(this, other))
             return true;
 
-        if (Name != other.Name)
-            return false;
         if (IsInit != other.IsInit)
             return false;
         if (IsRequired != other.IsRequired)
@@ -57,10 +50,7 @@ public sealed class PropertyDependency : Dependency, IEquatable<PropertyDependen
     }
 
     public override int GetHashCode() {
-        int hashCode = Name.GetHashCode();
-        hashCode = Combine(hashCode, IsInit.GetHashCode());
-        hashCode = Combine(hashCode, IsRequired.GetHashCode());
-
+        int hashCode = Combine(IsInit.GetHashCode(), IsRequired.GetHashCode());
         return Combine(hashCode, base.GetHashCode());
 
 

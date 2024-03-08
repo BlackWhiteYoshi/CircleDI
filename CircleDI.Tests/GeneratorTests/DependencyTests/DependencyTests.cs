@@ -7,9 +7,9 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests for dependency injection and corresponding attributes (DependencyAttribute, Constructorttribute).
 /// </summary>
-public sealed class DependencyTests {
+public static class DependencyTests {
     [Fact]
-    public Task SingleSingleton() {
+    public static Task SingleSingleton() {
         const string input = """
             using CircleDIAttributes;
             
@@ -35,7 +35,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task SingleScoped() {
+    public static Task SingleScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -61,7 +61,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task SingleTransient() {
+    public static Task SingleTransient() {
         const string input = """
             using CircleDIAttributes;
             
@@ -87,7 +87,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task SingleTransientScoped() {
+    public static Task SingleTransientScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -116,61 +116,9 @@ public sealed class DependencyTests {
         return Verify(sourceTextClass);
     }
 
-    [Fact]
-    public Task SingletonHasTransientSingleton() {
-        const string input = """
-            using CircleDIAttributes;
-            
-            namespace MyCode;
-
-            [ServiceProvider]
-            [Singleton<ITestService, TestService>]
-            public sealed partial class TestProvider;
-
-            public partial interface ITestProvider {
-                public partial interface IScope;
-            }
-            
-            public interface ITestService;
-            public sealed class TestService(ITestProvider.IScope scopeProvider) : ITestService;
-
-            """;
-
-        string[] sourceTexts = input.GenerateSourceText(out _, out _);
-        string sourceTextClass = sourceTexts[^2];
-
-        return Verify(sourceTextClass);
-    }
 
     [Fact]
-    public Task ScopedHasTransientSingleton() {
-        const string input = """
-            using CircleDIAttributes;
-            
-            namespace MyCode;
-
-            [ServiceProvider]
-            [Scoped<ITestService, TestService>]
-            public sealed partial class TestProvider;
-
-            public partial interface ITestProvider {
-                public partial interface IScope;
-            }
-            
-            public interface ITestService;
-            public sealed class TestService(ITestProvider.IScope scopeProvider) : ITestService;
-
-            """;
-
-        string[] sourceTexts = input.GenerateSourceText(out _, out _);
-        string sourceTextClass = sourceTexts[^2];
-
-        return Verify(sourceTextClass);
-    }
-
-
-    [Fact]
-    public Task MultipleSingleton() {
+    public static Task MultipleSingleton() {
         const string input = """
             using CircleDIAttributes;
             
@@ -204,7 +152,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task MultipleScoped() {
+    public static Task MultipleScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -238,7 +186,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task MultipleTransient() {
+    public static Task MultipleTransient() {
         const string input = """
             using CircleDIAttributes;
             
@@ -272,7 +220,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task NamedDependency() {
+    public static Task NamedDependency() {
         const string input = """
             using CircleDIAttributes;
             
@@ -298,7 +246,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task SingleProperty() {
+    public static Task SingleProperty() {
         const string input = """
             using CircleDIAttributes;
             
@@ -326,7 +274,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task TransientProperty() {
+    public static Task TransientProperty() {
         const string input = """
             using CircleDIAttributes;
             
@@ -354,7 +302,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task MultipleProperties() {
+    public static Task MultipleProperties() {
         const string input = """
             using CircleDIAttributes;
             
@@ -392,7 +340,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task PropertyWithAttribute() {
+    public static Task PropertyWithAttribute() {
         const string input = """
             using CircleDIAttributes;
             
@@ -421,7 +369,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task PropertyAsNamedDependency() {
+    public static Task PropertyAsNamedDependency() {
         const string input = """
             using CircleDIAttributes;
             
@@ -450,7 +398,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task NormalPropertyIsIgnored() {
+    public static Task NormalPropertyIsIgnored() {
         const string input = """
             using CircleDIAttributes;
             
@@ -479,7 +427,7 @@ public sealed class DependencyTests {
 
 
     [Fact]
-    public Task MultipleConstructorWithConstructorAttribute() {
+    public static Task MultipleConstructorWithConstructorAttribute() {
         const string input = """
             using CircleDIAttributes;
             
@@ -510,7 +458,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task MultipleConstructorWithConstructorAttributeOnPrimary() {
+    public static Task MultipleConstructorWithConstructorAttributeOnPrimary() {
         const string input = """
             using CircleDIAttributes;
             
@@ -540,7 +488,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public void MultipleConstructorWithoutAttributeFails() {
+    public static void MultipleConstructorWithoutAttributeFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -570,7 +518,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public void MultipleConstructorWithMultipleAttributesFails() {
+    public static void MultipleConstructorWithMultipleAttributesFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -602,7 +550,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task CircularSelfSetAccessor() {
+    public static Task CircularSelfSetAccessor() {
         const string input = """
             using CircleDIAttributes;
             
@@ -626,7 +574,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task CircularSelfInitAccessor() {
+    public static Task CircularSelfInitAccessor() {
         const string input = """
             using CircleDIAttributes;
             
@@ -650,7 +598,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public void CircularSelfNoAccessorFails() {
+    public static void CircularSelfNoAccessorFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -676,7 +624,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task CircularServices() {
+    public static Task CircularServices() {
         const string input = """
             using CircleDIAttributes;
             
@@ -706,7 +654,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task CircularManyServices() {
+    public static Task CircularManyServices() {
         const string input = """
             using CircleDIAttributes;
             
@@ -746,7 +694,7 @@ public sealed class DependencyTests {
     }
 
     [Fact]
-    public Task CircularLazyServices() {
+    public static Task CircularLazyServices() {
         const string input = """
             using CircleDIAttributes;
             

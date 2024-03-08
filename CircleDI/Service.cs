@@ -105,9 +105,12 @@ public sealed class Service : IEquatable<Service> {
 
 
     /// <summary>
-    /// <see cref="ConstructorDependencyList"/> concatenated with <see cref="PropertyDependencyList"/>.
+    /// <para>Iterator for all dependencies of this service.</para>
+    /// <para>Normally it is just <see cref="ConstructorDependencyList"/> concatenated with <see cref="PropertyDependencyList"/>.</para>
+    /// <para>The exception is the "special" service <see cref="ServiceProvider.CreateScope"/>, it needs an iterator with filter.</para>
     /// </summary>
-    public IEnumerable<Dependency> Dependencies => ConstructorDependencyList.Concat<Dependency>(PropertyDependencyList);
+    public required IEnumerable<Dependency> Dependencies { get; init; }
+    private IEnumerable<Dependency> DependenciesDefaultIterator => ConstructorDependencyList.Concat<Dependency>(PropertyDependencyList);
 
 
     /// <summary>
@@ -153,10 +156,13 @@ public sealed class Service : IEquatable<Service> {
         if (attributeData.NamedArguments.GetArgument<string>("Implementation") is not string implementationName) {
             Implementation = default;
             
-            (ConstructorDependencyList, Diagnostic? constructorListError) = CreateConstructorDependencyList(implementationType, attributeData);
-            if (constructorListError != null) {
+            (IMethodSymbol? constructor, Diagnostic? constructorListError) = FindConstructor(implementationType, attributeData);
+            if (constructor != null)
+                ConstructorDependencyList = constructor!.CreateConstructorDependencyList();
+            else {
+                ConstructorDependencyList = [];
                 ErrorList ??= [];
-                ErrorList.Add(constructorListError);
+                ErrorList.Add(constructorListError!);
             }
 
             (PropertyDependencyList, Diagnostic? propertyListError) = CreatePropertyDependencyList(implementationType, attributeData);
@@ -279,6 +285,7 @@ public sealed class Service : IEquatable<Service> {
 
             PropertyDependencyList = [];
         }
+        Dependencies = DependenciesDefaultIterator;
 
         IsDisposable = implementationType.HasInterface("IDisposable");
         IsAsyncDisposable = implementationType.HasInterface("IAsyncDisposable");
@@ -308,6 +315,7 @@ public sealed class Service : IEquatable<Service> {
 
         ConstructorDependencyList = [];
         PropertyDependencyList = [];
+        Dependencies = DependenciesDefaultIterator;
         // Has no dependencies, so it is already dependency tree initialized
         TreeState = DependencyTreeFlags.Traversed;
 
@@ -360,7 +368,7 @@ public sealed class Service : IEquatable<Service> {
         }
     }
 
-    
+
     /// <summary>
     /// Creates the ConstructorDependencyList by analyzing the available constructors at the given class/implementation.<br />
     /// When an applicable constructor is found, the list will be created based on that constructor, otherwise an error will be created and the list will be empty.
@@ -368,12 +376,12 @@ public sealed class Service : IEquatable<Service> {
     /// <param name="implementation"></param>
     /// <param name="attributeData"></param>
     /// <returns></returns>
-    public static (ConstructorDependency[] constructorDependencyList, Diagnostic? error) CreateConstructorDependencyList(INamedTypeSymbol implementation, AttributeData attributeData) {
+    public static (IMethodSymbol? constructor, Diagnostic? error) FindConstructor(INamedTypeSymbol implementation, AttributeData attributeData) {
         switch (implementation.InstanceConstructors.Length) {
             case 0:
-                return ([], attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
+                return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
             case 1:
-                return (implementation.InstanceConstructors[0].CreateConstructorDependencyList(), null);
+                return (implementation.InstanceConstructors[0], null);
             default:
                 IMethodSymbol? constructor = null;
                 foreach (IMethodSymbol ctor in implementation.InstanceConstructors)
@@ -383,17 +391,17 @@ public sealed class Service : IEquatable<Service> {
                         else {
                             AttributeData firstAttribute = constructor.GetAttribute("ConstructorAttribute")!;
                             AttributeData secondAttribute = ctor.GetAttribute("ConstructorAttribute")!;
-                            return ([], firstAttribute.CreateMultipleConstructorAttributesError(secondAttribute, implementation, implementation.ToDisplayString()));
+                            return (null, firstAttribute.CreateMultipleConstructorAttributesError(secondAttribute, implementation, implementation.ToDisplayString()));
                         }
 
                 if (constructor != null)
-                    return (constructor.CreateConstructorDependencyList(), null);
+                    return (constructor, null);
                 else
-                    return ([], attributeData.CreateMissingConstructorAttributesError(implementation, implementation.ToDisplayString()));
+                    return (null, attributeData.CreateMissingConstructorAttributesError(implementation, implementation.ToDisplayString()));
         }
     }
 
-    
+
     /// <summary>
     /// Creates the PropertyDependencyList based on the given class/implementation.<br />
     /// Each property marked with 'required' or '[Dependency]' will be added to the list.
@@ -411,6 +419,7 @@ public sealed class Service : IEquatable<Service> {
 
             bool isNamed;
             string serviceIdentifier;
+            bool isParameter;
             if (property.GetAttribute("DependencyAttribute") is AttributeData propertyAttribute) {
                 if (property.SetMethod == null)
                     return ([], attributeData.CreateMissingSetAccessorError(property, implementation, property.ToDisplayString()));
@@ -418,10 +427,12 @@ public sealed class Service : IEquatable<Service> {
                 if (propertyAttribute.NamedArguments.GetArgument<string>("Name") is string dependencyName) {
                     isNamed = true;
                     serviceIdentifier = dependencyName;
+                    isParameter = false;
                 }
                 else {
                     isNamed = false;
                     serviceIdentifier = property.Type.ToDisplayString();
+                    isParameter = false;
                 }
             }
             else if (property.IsRequired) {
@@ -431,14 +442,16 @@ public sealed class Service : IEquatable<Service> {
 
                 isNamed = false;
                 serviceIdentifier = property.Type.ToDisplayString();
+                isParameter = true;
             }
             else
                 continue;
 
             propertyDependencyList.Add(new PropertyDependency() {
+                Name = property.Name,
                 IsNamed = isNamed,
                 ServiceIdentifier = serviceIdentifier,
-                Name = property.Name,
+                HasAttribute = isParameter,
                 IsInit = property.SetMethod.IsInitOnly,
                 IsRequired = property.IsRequired,
             });

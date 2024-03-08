@@ -59,24 +59,34 @@ internal static class SyntaxNodeExtension {
     /// Otherwise <see cref="IsNamed"/> is set to false, and <see cref="ServiceIdentifier"/> is set to parameter type.
     /// </para>
     /// </summary>
-    /// <param name="methodSymbol"></param>
+    /// <param name="constructor"></param>
     /// <returns></returns>
-    internal static ConstructorDependency[] CreateConstructorDependencyList(this IMethodSymbol methodSymbol) {
-        ConstructorDependency[] result = new ConstructorDependency[methodSymbol.Parameters.Length];
+    internal static ConstructorDependency[] CreateConstructorDependencyList(this IMethodSymbol constructor) {
+        ConstructorDependency[] result = new ConstructorDependency[constructor.Parameters.Length];
 
-        for (int i = 0; i < methodSymbol.Parameters.Length; i++)
-            if (methodSymbol.Parameters[i].GetAttribute("DependencyAttribute") is AttributeData attributeData && attributeData.NamedArguments.GetArgument<string>("Name") is string dependencyName) {
+        for (int i = 0; i < constructor.Parameters.Length; i++)
+            if (constructor.Parameters[i].GetAttribute("DependencyAttribute") is AttributeData attributeData)
+                if (attributeData.NamedArguments.GetArgument<string>("Name") is string dependencyName)
+                    result[i] = new ConstructorDependency() {
+                        Name = constructor.Parameters[i].Name,
+                        IsNamed = true,
+                        ServiceIdentifier = dependencyName,
+                        HasAttribute = false
+                    };
+                else
+                    result[i] = new ConstructorDependency() {
+                        Name = constructor.Parameters[i].Name,
+                        IsNamed = false,
+                        ServiceIdentifier = constructor.Parameters[i].Type.ToDisplayString(),
+                        HasAttribute = false
+                    };
+            else
                 result[i] = new ConstructorDependency() {
-                    IsNamed = true,
-                    ServiceIdentifier = dependencyName
-                };
-            }
-            else {
-                result[i] = new ConstructorDependency() {
+                    Name = constructor.Parameters[i].Name,
                     IsNamed = false,
-                    ServiceIdentifier = methodSymbol.Parameters[i].Type.ToDisplayString()
+                    ServiceIdentifier = constructor.Parameters[i].Type.ToDisplayString(),
+                    HasAttribute = true
                 };
-            }
 
         return result;
     }

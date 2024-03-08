@@ -9,6 +9,12 @@ public abstract class Dependency {
     /// </summary>
     public Service? Service { get; set; }
 
+
+    /// <summary>
+    /// Name of the Parameter/Property
+    /// </summary>
+    public required string Name { get; init; }
+
     /// <summary>
     /// <para>Whether the service is mapped by name or by type.</para>
     /// <para>
@@ -24,21 +30,33 @@ public abstract class Dependency {
     /// </summary>
     public required string ServiceIdentifier { get; init; }
 
+    /// <summary>
+    /// Indicates if a [Dependency]-attribute is present.
+    /// </summary>
+    public required bool HasAttribute { get; init; } = false;
+
 
     #region Equals
 
     protected bool Equals(Dependency other) {
+        if (Name != other.Name)
+            return false;
         if (IsNamed != other.IsNamed)
             return false;
-        
         if (ServiceIdentifier != other.ServiceIdentifier)
+            return false;
+        if (HasAttribute != other.HasAttribute)
             return false;
 
         return true;
     }
 
     public override int GetHashCode() {
-        return Combine(IsNamed.GetHashCode(), ServiceIdentifier.GetHashCode());
+        int hashCode = Name.GetHashCode();
+        hashCode = Combine(hashCode, IsNamed.GetHashCode());
+        hashCode = Combine(hashCode, ServiceIdentifier.GetHashCode());
+        hashCode = Combine(hashCode, HasAttribute.GetHashCode());
+        return hashCode;
 
 
         static int Combine(int h1, int h2) {

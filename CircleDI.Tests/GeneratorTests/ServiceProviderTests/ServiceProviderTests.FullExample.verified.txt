@@ -153,7 +153,6 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
             "MyCode.ISingletonDependency2" => SingletonDependency2,
             "MyCode.ISingletonDisposable" => SingletonDisposable,
             "MyCode.ITestProvider" => Self,
-            "MyCode.ITestProvider.IScope" => CreateScope(),
             "MyCode.ITransient" => Transient,
             "MyCode.ITransientAsyncDisposable" => TransientAsyncDisposable,
             "MyCode.ITransientDisposable" => TransientDisposable,
@@ -297,11 +296,6 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
 
 
         /// <summary>
-        /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
-        /// </summary>
-        public global::MyCode.ITestProvider.IScope CreateScope() => __serviceProvider.CreateScope();
-
-        /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ISingleton"/><br />
         /// Implementation type:  <see cref="global::MyCode.Singleton"/>
@@ -410,7 +404,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
                 "MyCode.ISingletonDependency2" => SingletonDependency2,
                 "MyCode.ISingletonDisposable" => SingletonDisposable,
                 "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => (global::MyCode.ITestProvider.IScope[])[SelfScope, CreateScope()],
+                "MyCode.ITestProvider.IScope" => SelfScope,
                 "MyCode.ITransient" => Transient,
                 "MyCode.ITransientAsyncDisposable" => TransientAsyncDisposable,
                 "MyCode.ITransientDisposable" => TransientDisposable,
@@ -501,6 +495,11 @@ namespace MyCode;
 /// </summary>
 public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     /// <summary>
+    /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// </summary>
+    global::MyCode.ITestProvider.IScope CreateScope();
+
+    /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::MyCode.ISingleton"/><br />
     /// Implementation type:  <see cref="global::MyCode.Singleton"/>
@@ -542,10 +541,6 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     /// </summary>
     global::MyCode.ITestProvider Self { get; }
 
-    /// <summary>
-    /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
-    /// </summary>
-    global::MyCode.ITestProvider.IScope CreateScope();
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITransient"/><br />
@@ -674,10 +669,6 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
         /// </summary>
         global::MyCode.ITestProvider.IScope SelfScope { get; }
 
-        /// <summary>
-        /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
-        /// </summary>
-        global::MyCode.ITestProvider.IScope CreateScope();
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITransient"/><br />

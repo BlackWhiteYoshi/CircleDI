@@ -12,9 +12,9 @@ namespace CircleDI.Tests;
 /// Transient
 /// </para>
 /// </summary>
-public sealed class RegisterServicesTests {
+public static class RegisterServicesTests {
     [Fact]
-    public Task Singleton() {
+    public static Task Singleton() {
         const string input = """
             using CircleDIAttributes;
             
@@ -45,7 +45,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task SingletonWithImplementationTypeOnly() {
+    public static Task SingletonWithImplementationTypeOnly() {
         const string input = """
             using CircleDIAttributes;
             
@@ -75,7 +75,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task SingletonWithName() {
+    public static Task SingletonWithName() {
         const string input = """
             using CircleDIAttributes;
             
@@ -106,7 +106,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task SingletonWithCreationTimeLazy() {
+    public static Task SingletonWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -137,7 +137,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task SingletonWithGetAccessorMethod() {
+    public static Task SingletonWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -169,7 +169,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task SingletonWithImplementationThis() {
+    public static Task SingletonWithImplementationThis() {
         const string input = """
             using CircleDIAttributes;
             
@@ -197,7 +197,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task SingletonWithImplementationField() {
+    public static Task SingletonWithImplementationField() {
         const string input = """
             using CircleDIAttributes;
             
@@ -230,7 +230,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void SingletonWithImplementationFieldScoped() {
+    public static void SingletonWithImplementationFieldScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -257,7 +257,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task SingletonWithImplementationFieldStatic() {
+    public static Task SingletonWithImplementationFieldStatic() {
         const string input = """
             using CircleDIAttributes;
             
@@ -290,7 +290,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void SingletonWithImplementationFieldStaticScoped() {
+    public static void SingletonWithImplementationFieldStaticScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -318,7 +318,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task SingletonWithImplementationProperty() {
+    public static Task SingletonWithImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
             
@@ -351,7 +351,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void SingletonWithImplementationPropertyScoped() {
+    public static void SingletonWithImplementationPropertyScoped() {
         const string input = """
             using CircleDIAttributes;
             F
@@ -378,7 +378,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task SingletonWithImplementationPropertyStatic() {
+    public static Task SingletonWithImplementationPropertyStatic() {
         const string input = """
             using CircleDIAttributes;
             
@@ -411,7 +411,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void SingletonWithImplementationPropertyStaticScoped() {
+    public static void SingletonWithImplementationPropertyStaticScoped() {
         const string input = """
             using CircleDIAttributes;
             F
@@ -439,7 +439,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task SingletonWithImplementationMethod() {
+    public static Task SingletonWithImplementationMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -472,7 +472,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void SingletonWithImplementationMethodScoped() {
+    public static void SingletonWithImplementationMethodScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -499,7 +499,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task SingletonWithImplementationMethodStatic() {
+    public static Task SingletonWithImplementationMethodStatic() {
         const string input = """
             using CircleDIAttributes;
             
@@ -532,7 +532,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void SingletonWithImplementationMethodStaticScoped() {
+    public static void SingletonWithImplementationMethodStaticScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -560,7 +560,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task MultipleSingletons() {
+    public static Task MultipleSingletons() {
         const string input = """
             using CircleDIAttributes;
             
@@ -598,7 +598,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task Scoped() {
+    public static Task Scoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -629,7 +629,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationTypeOnly() {
+    public static Task ScopedWithImplementationTypeOnly() {
         const string input = """
             using CircleDIAttributes;
             
@@ -659,7 +659,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithName() {
+    public static Task ScopedWithName() {
         const string input = """
             using CircleDIAttributes;
             
@@ -690,7 +690,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithCreationTimeLazy() {
+    public static Task ScopedWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -721,7 +721,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithGetAccessorMethod() {
+    public static Task ScopedWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -753,7 +753,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task ScopedWithImplementationThis() {
+    public static Task ScopedWithImplementationThis() {
         const string input = """
             using CircleDIAttributes;
             
@@ -781,7 +781,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationField() {
+    public static Task ScopedWithImplementationField() {
         const string input = """
             using CircleDIAttributes;
             
@@ -814,7 +814,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationFieldScoped() {
+    public static Task ScopedWithImplementationFieldScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -849,7 +849,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationFieldStatic() {
+    public static Task ScopedWithImplementationFieldStatic() {
         const string input = """
             using CircleDIAttributes;
             
@@ -882,7 +882,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationFieldStaticScoped() {
+    public static Task ScopedWithImplementationFieldStaticScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -918,7 +918,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task ScopedWithImplementationProperty() {
+    public static Task ScopedWithImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
             
@@ -951,7 +951,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationPropertyScoped() {
+    public static Task ScopedWithImplementationPropertyScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -986,7 +986,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationPropertyStatic() {
+    public static Task ScopedWithImplementationPropertyStatic() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1019,7 +1019,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationPropertyStaticScoped() {
+    public static Task ScopedWithImplementationPropertyStaticScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1055,7 +1055,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task ScopedWithImplementationMethod() {
+    public static Task ScopedWithImplementationMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1088,7 +1088,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationMethodScoped() {
+    public static Task ScopedWithImplementationMethodScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1123,7 +1123,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationMethodStatic() {
+    public static Task ScopedWithImplementationMethodStatic() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1156,7 +1156,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task ScopedWithImplementationMethodStaticScoped() {
+    public static Task ScopedWithImplementationMethodStaticScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1192,7 +1192,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task MultipleScopedServices() {
+    public static Task MultipleScopedServices() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1230,7 +1230,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task Transient() {
+    public static Task Transient() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1261,7 +1261,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task TransientWithImplementationTypeOnly() {
+    public static Task TransientWithImplementationTypeOnly() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1291,7 +1291,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task TransientWithName() {
+    public static Task TransientWithName() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1322,7 +1322,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task TransientWithGetAccessorMethod() {
+    public static Task TransientWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1354,7 +1354,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public void TransientWithImplementationThis() {
+    public static void TransientWithImplementationThis() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1374,7 +1374,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void TransientWithImplementationField() {
+    public static void TransientWithImplementationField() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1399,7 +1399,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void TransientWithImplementationFieldScoped() {
+    public static void TransientWithImplementationFieldScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1426,7 +1426,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void TransientWithImplementationFieldStatic() {
+    public static void TransientWithImplementationFieldStatic() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1451,7 +1451,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void TransientWithImplementationFieldStaticScoped() {
+    public static void TransientWithImplementationFieldStaticScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1479,7 +1479,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task TransientWithImplementationProperty() {
+    public static Task TransientWithImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1512,7 +1512,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task TransientWithImplementationPropertyScoped() {
+    public static Task TransientWithImplementationPropertyScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1547,7 +1547,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task TransientWithImplementationPropertyStatic() {
+    public static Task TransientWithImplementationPropertyStatic() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1580,7 +1580,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task TransientWithImplementationPropertyStaticScoped() {
+    public static Task TransientWithImplementationPropertyStaticScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1616,7 +1616,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task TransientWithImplementationMethod() {
+    public static Task TransientWithImplementationMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1649,7 +1649,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task TransientWithImplementationMethodScoped() {
+    public static Task TransientWithImplementationMethodScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1684,7 +1684,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task TransientWithImplementationMethodStatic() {
+    public static Task TransientWithImplementationMethodStatic() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1717,7 +1717,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task TransientWithImplementationMethodStaticScoped() {
+    public static Task TransientWithImplementationMethodStaticScoped() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1753,7 +1753,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task MultipleTransientServices() {
+    public static Task MultipleTransientServices() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1791,7 +1791,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public void RegisterServiceThatDoesNotExistsFails() {
+    public static void RegisterServiceThatDoesNotExistsFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1812,7 +1812,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public Task OverwriteDefaultServiceSelf() {
+    public static Task OverwriteDefaultServiceSelf() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1842,7 +1842,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void OverwriteDefaultServiceSelfAsConstuctorCallFails() {
+    public static void OverwriteDefaultServiceSelfAsConstuctorCallFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1864,7 +1864,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public Task OverwriteDefaultServiceSelfScope() {
+    public static Task OverwriteDefaultServiceSelfScope() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1896,7 +1896,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void OverwriteDefaultServiceSelfScopeAsConstuctorCallFails() {
+    public static void OverwriteDefaultServiceSelfScopeAsConstuctorCallFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1921,7 +1921,7 @@ public sealed class RegisterServicesTests {
 
 
     [Fact]
-    public void RegisterServiceWithFieldImplementationOfWrongType() {
+    public static void RegisterServiceWithFieldImplementationOfWrongType() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1943,7 +1943,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void RegisterServiceWithPropertyImplementationOfWrongType() {
+    public static void RegisterServiceWithPropertyImplementationOfWrongType() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1965,7 +1965,7 @@ public sealed class RegisterServicesTests {
     }
 
     [Fact]
-    public void RegisterServiceWithMethodImplementationOfWrongType() {
+    public static void RegisterServiceWithMethodImplementationOfWrongType() {
         const string input = """
             using CircleDIAttributes;
             

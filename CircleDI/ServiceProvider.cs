@@ -155,45 +155,20 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// The list is sorted by <see cref="Service.ServiceType"/>.</para>
     /// <para>When setter is used, the given list will be modified/sorted.</para>
     /// </summary>
-    public List<Service> ServiceList {
-        get => sortedServiceList;
-        init {
-            value.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
-            sortedServiceList = value;
-
-            SingletonList.Clear();
-            ScopedList.Clear();
-            TransientList.Clear();
-            foreach (Service service in value)
-                switch (service.Lifetime) {
-                    case ServiceLifetime.Singleton:
-                        SingletonList.Add(service);
-                        break;
-                    case ServiceLifetime.Scoped:
-                        ScopedList.Add(service);
-                        break;
-                    case ServiceLifetime.Transient:
-                        TransientList.Add(service);
-                        break;
-                    default:
-                        throw new Exception("Only Singleton, Scoped and Transient are allowed");
-                }
-        }
-    }
-    private readonly List<Service> sortedServiceList = [];
+    public List<Service> SortedServiceList { get; private set; } = [];
 
     /// <summary>
-    /// Binary search the sorted <see cref="ServiceList"/>.
+    /// Binary search the sorted <see cref="SortedServiceList"/>.
     /// </summary>
     /// <param name="serviceType"></param>
     /// <returns>The index of the first occurrence and the number of matched services.</returns>
     public (int index, int count) FindService(string serviceType) {
         int lowerBound = 0;
-        int upperBound = sortedServiceList.Count;
+        int upperBound = SortedServiceList.Count;
         while (lowerBound < upperBound) {
             int index = (lowerBound + upperBound) / 2;
             
-            switch (sortedServiceList[index].ServiceType.CompareTo(serviceType)) {
+            switch (SortedServiceList[index].ServiceType.CompareTo(serviceType)) {
                 case -1:
                     lowerBound = index + 1;
                     break;
@@ -202,11 +177,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     break;
                 case 0:
                     int start = index;
-                    while (start > 0 && sortedServiceList[start - 1].ServiceType == serviceType)
+                    while (start > 0 && SortedServiceList[start - 1].ServiceType == serviceType)
                         start--;
                     
                     int end = index + 1;
-                    while (end < sortedServiceList.Count && sortedServiceList[end].ServiceType == serviceType)
+                    while (end < SortedServiceList.Count && SortedServiceList[end].ServiceType == serviceType)
                         end++;
 
                     return (start, end - start);
@@ -486,6 +461,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                     ConstructorDependencyList = [],
                     PropertyDependencyList = [],
+                    Dependencies = [],
                     Name = "Self",
                     CreationTime = creationTimeMainProvider,
                     GetAccessor = getAccessorMainProvider,
@@ -504,6 +480,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                         ConstructorDependencyList = [],
                         PropertyDependencyList = [],
+                        Dependencies = [],
                         Name = "SelfScope",
                         CreationTime = creationTimeScopeProvider,
                         GetAccessor = getAccessorScopeProvider,
@@ -511,23 +488,28 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         IsAsyncDisposable = false
                     });
 
-                
-                // Default Service CreateScope()
+
+                // "special" method CreateScope()
                 ConstructorDependency[] constructorDependencyList;
                 List<PropertyDependency> propertyDependencyList;
                 if (serviceProviderScope != null) {
                     if (HasConstructorScope) {
-                        (constructorDependencyList, Diagnostic? constructorListError) = Service.CreateConstructorDependencyList(serviceProviderScope!, serviceProviderAttribute);
-                        if (constructorListError != null) {
+                        (IMethodSymbol? constructor, Diagnostic? constructorListError) = Service.FindConstructor(serviceProviderScope!, serviceProviderAttribute);
+                        if (constructor != null)
+                            constructorDependencyList = constructor.CreateConstructorDependencyList();
+                        else {
+                            constructorDependencyList = [];
                             ErrorList ??= [];
-                            ErrorList.Add(constructorListError);
+                            ErrorList.Add(constructorListError!);
                         }
                     }
                     else
                         // default constructorDependency
                         constructorDependencyList = [new ConstructorDependency() {
+                            Name = InterfaceName,
                             IsNamed = false,
-                            ServiceIdentifier = serviceType
+                            ServiceIdentifier = serviceType,
+                            HasAttribute = false
                         }];
 
                     (propertyDependencyList, Diagnostic? propertyListError) = Service.CreatePropertyDependencyList(serviceProviderScope!, serviceProviderAttribute);
@@ -537,10 +519,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     }
                 }
                 else {
-                    // default constructorDependency and propertyDependencyList
+                    // default constructorDependency and no propertyDependencyList
                     constructorDependencyList = [new ConstructorDependency() {
+                        Name = InterfaceName,
                         IsNamed = false,
-                        ServiceIdentifier = serviceType
+                        ServiceIdentifier = serviceType,
+                        HasAttribute = false
                     }];
                     propertyDependencyList = [];
                 }
@@ -553,18 +537,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     CreationTime = CreationTiming.Lazy,
                     GetAccessor = GetAccess.Property,
                     ConstructorDependencyList = constructorDependencyList,
-                    PropertyDependencyList = propertyDependencyList
+                    PropertyDependencyList = propertyDependencyList,
+                    Dependencies = constructorDependencyList.Concat<Dependency>(propertyDependencyList).Where((Dependency dependency) => !dependency.HasAttribute)
                 };
             }
-
-            sortedServiceList = new List<Service>(SingletonList.Count + ScopedList.Count + TransientList.Count + DelegateList.Count + 1);
-            sortedServiceList.AddRange(SingletonList);
-            sortedServiceList.AddRange(ScopedList);
-            sortedServiceList.AddRange(TransientList);
-            sortedServiceList.AddRange(DelegateList);
-            if (CreateScope is not null)
-                sortedServiceList.Add(CreateScope);
-            sortedServiceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
         }
     }
 
@@ -572,6 +548,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     #region Dependency Tree
 
     /// <summary>
+    /// <para>Creates <see cref="SortedServiceList"/>.</para>
     /// <para>Creates and validates the dependency tree.</para>
     /// <para>
     /// The tree itself are <see cref="Service"/> nodes and the edges are <see cref="Dependency">Dependencies</see>.<br />
@@ -589,9 +566,15 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// </summary>
     /// <remarks>In some circumstances circle dependencies are also allowed, so strictly spoken it's not a tree. Furthermore there is no one root node, there can be many root nodes and independent trees.</remarks>
     public void CreateDependencyTree() {
+        SortedServiceList = [.. SingletonList, .. ScopedList, .. TransientList, .. DelegateList];
+        SortedServiceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
+
         CreateDependencyTreeCore core = new(this);
 
-        foreach (Service service in ServiceList)
+        if (CreateScope is not null)
+            core.InitNode(CreateScope);
+
+        foreach (Service service in SortedServiceList)
             core.InitNode(service);
     }
 
@@ -609,7 +592,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 try {
                     Service? dependencyService;
                     if (dependency.IsNamed) {
-                        foreach (Service providerService in serviceProvider.ServiceList)
+                        foreach (Service providerService in serviceProvider.SortedServiceList)
                             if (providerService.Name == dependency.ServiceIdentifier) {
                                 dependencyService = providerService;
                                 goto dependencyServiceInitialized;
@@ -646,7 +629,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 return;
                             }
                             case 1: {
-                                dependencyService = serviceProvider.ServiceList[index];
+                                dependencyService = serviceProvider.SortedServiceList[index];
                                 break;
                             }
                             default: {
@@ -654,14 +637,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 if (service.Lifetime.HasFlag(ServiceLifetime.Singleton)) {
                                     int serviceIndex = -1;
                                     for (int i = index; i < index + count; i++)
-                                        if (!serviceProvider.ServiceList[i].Lifetime.HasFlag(ServiceLifetime.Scoped))
+                                        if (!serviceProvider.SortedServiceList[i].Lifetime.HasFlag(ServiceLifetime.Scoped))
                                             if (serviceIndex == -1)
                                                 serviceIndex = i;
                                             else
                                                 goto error;
 
                                     if (serviceIndex == -1) {
-                                        IEnumerable<string> servicesWithSameType = serviceProvider.ServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
+                                        IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
 
                                         Diagnostic error = serviceProvider.serviceProviderAttribute.CreateDependencyLifetimeAllServicesError(service.Name, dependency.ServiceIdentifier, servicesWithSameType);
                                         serviceProvider.ErrorList ??= [];
@@ -669,23 +652,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                         return;
                                     }
                                     
-                                    dependencyService = serviceProvider.ServiceList[serviceIndex];
+                                    dependencyService = serviceProvider.SortedServiceList[serviceIndex];
                                     break;    
                                 }
-                                // in case of 2 services 'SelfScope' and 'CreateService()', automatically choose 'SelfScope'
-                                else if (service.Lifetime.HasFlag(ServiceLifetime.Scoped))
-                                    if (count == 2)
-                                        if (ReferenceEquals(serviceProvider.ServiceList[index], serviceProvider.CreateScope)) {
-                                            dependencyService = serviceProvider.ServiceList[index + 1];
-                                            break;
-                                        }
-                                        else if (ReferenceEquals(serviceProvider.ServiceList[index + 1], serviceProvider.CreateScope)) {
-                                            dependencyService = serviceProvider.ServiceList[index];
-                                            break;
-                                        }
                                 error:
                                 {
-                                    IEnumerable<string> servicesWithSameType = serviceProvider.ServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
+                                    IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
                                     bool isParameter = dependency is ConstructorDependency;
 
                                     Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {

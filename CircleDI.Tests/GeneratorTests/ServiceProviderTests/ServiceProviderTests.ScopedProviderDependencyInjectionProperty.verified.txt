@@ -33,7 +33,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// <summary>
     /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self) {
+    public global::MyCode.ITestProvider.IScope CreateScope(global::MyCode.ITestProvider testProvider, global::MyCode.ITestService1 TestService1, global::MyCode.ITestService2 TestService2) => new global::MyCode.TestProvider.Scope(testProvider) {
         TestService1 = TestService1,
         TestService2 = TestService2
     };
@@ -75,7 +75,6 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     object? IServiceProvider.GetService(Type serviceType) {
         return serviceType.FullName switch {
             "MyCode.ITestProvider" => Self,
-            "MyCode.ITestProvider.IScope" => CreateScope(),
             "MyCode.ITestService1" => TestService1,
             "MyCode.ITestService2" => TestService2,
             _ => null
@@ -136,11 +135,6 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
 
 
         /// <summary>
-        /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
-        /// </summary>
-        public global::MyCode.ITestProvider.IScope CreateScope() => __serviceProvider.CreateScope();
-
-        /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ITestService1"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestService1"/>
@@ -175,7 +169,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         object? IServiceProvider.GetService(Type serviceType) {
             return serviceType.FullName switch {
                 "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => (global::MyCode.ITestProvider.IScope[])[SelfScope, CreateScope()],
+                "MyCode.ITestProvider.IScope" => SelfScope,
                 "MyCode.ITestService1" => TestService1,
                 "MyCode.ITestService2" => TestService2,
                 _ => null

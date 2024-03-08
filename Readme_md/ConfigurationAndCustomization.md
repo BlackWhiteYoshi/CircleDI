@@ -317,35 +317,6 @@ public sealed partial class MyProvider;
 public partial interface IMyProvider;
 ```
 
-<br></br>
-There is also another "special" service that has always the name "CreateScope()" and cannot be overwritten.
-It creates a new Scope by using the constructor.
-
-Normally, when requesting a type and multiple services are matching, a compile time error occurs.
-However, if you have a scoped (or transient-scoped) service and requesting a ScopedProvider,
-you do not get a compile error, even there are 2 services available (the default service returning itself and "CreateScope()" creating a new one).
-In this special case the default service (reference to existing scope) is taken.
-
-```csharp
-namespace MySpace;
-
-[ServiceProvider]
-[Scoped<MyService>]
-public sealed partial class MyProvider;
-
-// declaring the interface type in the same namespace
-public partial interface IMyProvider;
-
-
-// Actually there are 2 services available for IMyProvider:
-// - "SelfScope": returns a reference to itself
-// - "CreateScope": creates a new one
-// Normally this would be a compile error, but in this special case "SelfScope" is taken
-public sealed class MyService(IMyProvider myProvider);
-```
-
-The service "CreateScope()" does not exist when generating Scope is disabled.
-
 
 <br></br>
 ### Custom Constructor
@@ -353,9 +324,11 @@ The service "CreateScope()" does not exist when generating Scope is disabled.
 The generator implements a constructor to initialize Singleton/Scoped services.
 When you declare a constructor in the ServiceProvider/ScopedProvider, the generator will generate a private *InitServices()* method instead.
 This method should be called at the end of your constructor to initialize the services.
-
 In the ScopeProvider the generated constructor takes as parameter a reference of the ServiceProvider, so the *InitServices()* method will also take this parameter.
-Parameters of the constructor can be supplied via dependency injection and to provide that parameter for *InitServices()*, you usually get this object via Dependency Injection and pass it to *InitServices()*.
+
+For constructing the Scope you can make use of the *CreateScope()* method.
+Every dependency of the ScopeProvider will be a parameter in *CreateScope()*
+or if the dependency has a [Dependency]-attribute, the dependency will be injected from the ServiceProvider instead
 
 Note:  
 The service types of the ServiceProvider and ScopedProvider are the auto-generated interfaces.
@@ -366,14 +339,18 @@ To solve this issue, you can correct the namespace by just declaring the interfa
 ```csharp
 [ServiceProvider]
 public sealed partial class MyProvider {
-    // Does the same as not declaring this constructor
-    public MyProvider() {
+    private readonly string _dbConnection;
+
+    public MyProvider(string dbConnection) {
+        _dbConnection = dbConnection;
         InitServices();
     }
 
     public sealed partial class Scope {
-        // Does the same as not declaring this constructor
-        public Scope(IMyProvider myProvider) {
+        private readonly string _dbConnectionScoped;
+
+        public Scope([Dependency] IMyProvider myProvider, string dbConnectionScoped) {
+            _dbConnectionScoped = dbConnectionScoped;
             InitServices(myProvider);
         }
     }
@@ -381,6 +358,12 @@ public sealed partial class MyProvider {
 
 // declaring the interface type in the same namespace
 public partial interface IMyProvider;
+
+/**
+ * generated CreateScope() method:
+ *
+ * public global::IMyProvider.IScope CreateScope(string dbConnectionScoped) => new global::MyProvider.Scope(Self, dbConnectionScoped);
+ **/
 ```
 
 If you have nullable reference types enabled and forgot to call *InitServices()*, you get "Non-nullable field '\{name\}' must contain a non-null value when exiting constructor" warning for each reference type service.

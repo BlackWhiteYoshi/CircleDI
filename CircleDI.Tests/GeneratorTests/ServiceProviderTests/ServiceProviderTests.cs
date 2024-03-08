@@ -7,9 +7,9 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests the ServiceProviderAttribute and ScopedProviderAttribute.
 /// </summary>
-public sealed class ServiceProviderTests {
+public static class ServiceProviderTests {
     [Fact]
-    public void NoServiceProviderAttributeGeneratesNoProvider() {
+    public static void NoServiceProviderAttributeGeneratesNoProvider() {
         const string input = """
             using CircleDIAttributes;
             
@@ -32,7 +32,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task EmptyServiceProviderAttributeGeneratesDefaultProvider() {
+    public static Task EmptyServiceProviderAttributeGeneratesDefaultProvider() {
         const string input = """
             using CircleDIAttributes;
             
@@ -60,7 +60,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public void MissingPartialOnServiceProviderReportsError() {
+    public static void MissingPartialOnServiceProviderReportsError() {
         const string input = """
             using CircleDIAttributes;
             
@@ -79,7 +79,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public void MissingPartialOnScopeProviderReportsError() {
+    public static void MissingPartialOnScopeProviderReportsError() {
         const string input = """
             using CircleDIAttributes;
             
@@ -100,7 +100,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public void ServiceProviderGlobalNamespace() {
+    public static void ServiceProviderGlobalNamespace() {
         const string input = """
             using CircleDIAttributes;
             
@@ -120,7 +120,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public void ServiceProviderNestedNamespace() {
+    public static void ServiceProviderNestedNamespace() {
         const string input = """
             using CircleDIAttributes;
             
@@ -143,7 +143,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public Task ServiceProviderInitServicesMethod() {
+    public static Task ServiceProviderInitServicesMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -172,7 +172,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task ServiceProviderInitServicesMethodLazy() {
+    public static Task ServiceProviderInitServicesMethodLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -201,7 +201,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task ScopedProviderInitServicesMethod() {
+    public static Task ScopedProviderInitServicesMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -233,7 +233,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task ScopedProviderInitServicesMethodLazy() {
+    public static Task ScopedProviderInitServicesMethodLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -264,8 +264,63 @@ public sealed class ServiceProviderTests {
         return Verify(sourceTextClass);
     }
 
+
     [Fact]
-    public Task ScopedProviderRequiredPropertiesWithoutCustomConstructor() {
+    public static Task ScopedProviderParameterDependency() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            
+            [ServiceProvider]
+            [Transient<IScoped, Scoped>]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope {
+                    public Scope(IScoped scoped) { }
+                }
+            }
+            public partial interface ITestProvider;
+            
+            public interface IScoped;
+            public sealed class Scoped : IScoped;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+    [Fact]
+    public static Task ScopedProviderParameterProviderDependency() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            
+            [ServiceProvider]
+            [Transient<IScoped, Scoped>]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope {
+                    public Scope([Dependency] IScoped scoped) { }
+                }
+            }
+            public partial interface ITestProvider;
+            
+            public interface IScoped;
+            public sealed class Scoped : IScoped;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+    [Fact]
+    public static Task ScopedProviderPropertyDependency() {
         const string input = """
             using CircleDIAttributes;
             
@@ -291,9 +346,79 @@ public sealed class ServiceProviderTests {
         return Verify(sourceTextClass);
     }
 
+    [Fact]
+    public static Task ScopedProviderPropertyProviderDependency() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            
+            [ServiceProvider]
+            [Transient<IScoped, Scoped>]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope {
+                    [Dependency]
+                    public required IScoped Scoped { private get; init; }
+                }
+            }
+            public partial interface ITestProvider;
+            
+            public interface IScoped;
+            public sealed class Scoped : IScoped;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
 
     [Fact]
-    public Task ScopedProviderDependencyInjectionParameter() {
+    public static Task ScopedProviderParameterPropertyAndProviderDependency() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            
+            [ServiceProvider]
+            [Transient<IService1, Service1>]
+            [Transient<IService2, Service2>]
+            [Transient<IService3, Service3>]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope {
+                    [Dependency]
+                    public required IService2 Service2 { private get; init; }
+                    
+                    public required IService3 Service3 { private get; init; }
+
+                    public Scope([Dependency] ITestProvider serviceProvider, IService1 service1) {
+                        InitServices(serviceProvider);
+                    }
+                }
+            }
+            public partial interface ITestProvider;
+            
+            public interface IService1;
+            public sealed class Service1 : IService1;
+
+            public interface IService2;
+            public sealed class Service2 : IService2;
+            
+            public interface IService3;
+            public sealed class Service3 : IService3;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+
+    [Fact]
+    public static Task ScopedProviderDependencyInjectionParameter() {
         const string input = """
             using CircleDIAttributes;
             
@@ -326,7 +451,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task ScopedProviderDependencyInjectionProperty() {
+    public static Task ScopedProviderDependencyInjectionProperty() {
         const string input = """
             using CircleDIAttributes;
             
@@ -362,7 +487,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task ScopedProviderDependencyInjectionParameterProperty() {
+    public static Task ScopedProviderDependencyInjectionParameterProperty() {
         const string input = """
             using CircleDIAttributes;
             
@@ -399,7 +524,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public void ScopedProviderDependencyInjectionNotRegisteredFails() {
+    public static void ScopedProviderDependencyInjectionNotRegisteredFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -408,7 +533,7 @@ public sealed class ServiceProviderTests {
             [ServiceProvider]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
-                    public Scope(ITestService testService) {
+                    public Scope([Dependency] ITestService testService) {
                         InitServices();
                     }
                 }
@@ -427,7 +552,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public void ScopedProviderDependencyInjectionAmbiguousFails() {
+    public static void ScopedProviderDependencyInjectionAmbiguousFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -438,7 +563,7 @@ public sealed class ServiceProviderTests {
             [Transient<ITestService, TestService>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
-                    public Scope(ITestService testService) {
+                    public Scope([Dependency] ITestService testService) {
                         InitServices();
                     }
                 }
@@ -457,7 +582,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public void ScopedProviderDependencyInjectionNotNamedRegisteredFails() {
+    public static void ScopedProviderDependencyInjectionNotNamedRegisteredFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -486,7 +611,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public void ScopedProviderDependencyInjectionScopedFails() {
+    public static void ScopedProviderDependencyInjectionScopedFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -496,8 +621,8 @@ public sealed class ServiceProviderTests {
             [Scoped<ITestService, TestService>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
-                    public Scope(ITestService testService) {
-                        InitServices();
+                    public Scope([Dependency] ITestService testService) {
+                        InitServices(testService);
                     }
                 }
             }
@@ -515,7 +640,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public void ScopedProviderDependencyInjectionTransientScopedFails() {
+    public static void ScopedProviderDependencyInjectionTransientScopedFails() {
         const string input = """
             using CircleDIAttributes;
             
@@ -526,14 +651,7 @@ public sealed class ServiceProviderTests {
             [Scoped<ITestService2, TestService2>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
-                    public required TestProvider Asdf { private get; init; }
-
-                    public required ITestService1 TestService1 { private get; init; }
-                    public required ITestService2 TestService2 { private get; init; }
-
-                    public Scope(ITestService1 testService1, ITestService2 testService2) {
-                        InitServices();
-                    }
+                    public Scope([Dependency] ITestService1 testService1) { }
                 }
             }
             
@@ -554,7 +672,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public Task AttributeServiceProviderWithDifferentInterfaceName() {
+    public static Task AttributeServiceProviderWithDifferentInterfaceName() {
         const string input = """
             using CircleDIAttributes;
             
@@ -581,7 +699,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeServiceProviderWithCreationTimeLazy() {
+    public static Task AttributeServiceProviderWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -611,7 +729,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeServiceProviderWithGetAccessorMethod() {
+    public static Task AttributeServiceProviderWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -641,7 +759,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeServiceProviderWithGetAccessorMethodAndLazy() {
+    public static Task AttributeServiceProviderWithGetAccessorMethodAndLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -672,7 +790,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public Task AttributeServiceProviderWithThreadSafeFalse() {
+    public static Task AttributeServiceProviderWithThreadSafeFalse() {
         const string input = """
             using CircleDIAttributes;
             
@@ -702,7 +820,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeServiceProviderWithThreadSafeFalseAndCreationTimeLazy() {
+    public static Task AttributeServiceProviderWithThreadSafeFalseAndCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -732,7 +850,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeServiceProviderWithThreadSafeFalseAndGetAccessorMethod() {
+    public static Task AttributeServiceProviderWithThreadSafeFalseAndGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -762,7 +880,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeServiceProviderWithThreadSafeFalseAndGetAccessorMethodAndLazy() {
+    public static Task AttributeServiceProviderWithThreadSafeFalseAndGetAccessorMethodAndLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -793,7 +911,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public Task AttributeScopeProviderNotGenerated() {
+    public static Task AttributeScopeProviderNotGenerated() {
         const string input = """
             using CircleDIAttributes;
             
@@ -833,7 +951,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeScopeProviderWithCreationTimeLazy() {
+    public static Task AttributeScopeProviderWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -864,7 +982,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeScopeProviderWithGetAccessorMethod() {
+    public static Task AttributeScopeProviderWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -895,7 +1013,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeScopeProviderWithGetAccessorMethodAndLazy() {
+    public static Task AttributeScopeProviderWithGetAccessorMethodAndLazy() {
         const string input = """
             using CircleDIAttributes;
     
@@ -927,7 +1045,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public Task AttributeScopeProviderWithThreadSafeFalse() {
+    public static Task AttributeScopeProviderWithThreadSafeFalse() {
         const string input = """
             using CircleDIAttributes;
             
@@ -958,7 +1076,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeScopeProviderWithThreadSafeFalseAndCreationTimeLazy() {
+    public static Task AttributeScopeProviderWithThreadSafeFalseAndCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -989,7 +1107,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeScopeProviderWithThreadSafeFalseAndGetAccessorMethod() {
+    public static Task AttributeScopeProviderWithThreadSafeFalseAndGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1020,7 +1138,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeScopeProviderWithThreadSafeFalseAndGetAccessorMethodAndLazy() {
+    public static Task AttributeScopeProviderWithThreadSafeFalseAndGetAccessorMethodAndLazy() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1052,7 +1170,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public Task AttributeServiceProviderWithNoDiposeGeneration() {
+    public static Task AttributeServiceProviderWithNoDiposeGeneration() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1087,7 +1205,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeServiceProviderWithDiposeOnlyGeneration() {
+    public static Task AttributeServiceProviderWithDiposeOnlyGeneration() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1122,7 +1240,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeServiceProviderWithDiposeAsyncOnlyGeneration() {
+    public static Task AttributeServiceProviderWithDiposeAsyncOnlyGeneration() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1157,7 +1275,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeServiceProviderWithDiposeBothGeneration() {
+    public static Task AttributeServiceProviderWithDiposeBothGeneration() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1193,7 +1311,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public Task AttributeScopeProviderWithNoDiposeGeneration() {
+    public static Task AttributeScopeProviderWithNoDiposeGeneration() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1229,7 +1347,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeScopeProviderWithDiposeOnlyGeneration() {
+    public static Task AttributeScopeProviderWithDiposeOnlyGeneration() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1265,7 +1383,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeScopeProviderWithDiposeAsyncOnlyGeneration() {
+    public static Task AttributeScopeProviderWithDiposeAsyncOnlyGeneration() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1301,7 +1419,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public Task AttributeScopeProviderWithDiposeBothGeneration() {
+    public static Task AttributeScopeProviderWithDiposeBothGeneration() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1338,7 +1456,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public void AttributeScopeProviderAlsoWorkingOnScopeClass() {
+    public static void AttributeScopeProviderAlsoWorkingOnScopeClass() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1371,7 +1489,7 @@ public sealed class ServiceProviderTests {
     }
 
     [Fact]
-    public void AttributeScopeProviderReportsErrorWhenUsedTwice() {
+    public static void AttributeScopeProviderReportsErrorWhenUsedTwice() {
         const string input = """
             using CircleDIAttributes;
             
@@ -1399,7 +1517,7 @@ public sealed class ServiceProviderTests {
 
 
     [Fact]
-    public Task FullExample() {
+    public static Task FullExample() {
         const string input = """
             using CircleDIAttributes;
             

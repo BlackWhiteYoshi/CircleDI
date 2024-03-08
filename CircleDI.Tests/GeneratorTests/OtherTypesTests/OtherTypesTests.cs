@@ -13,9 +13,9 @@ namespace CircleDI.Tests;
 /// - native types
 /// </para>
 /// </summary>
-public sealed class OtherTypesTests {
+public static class OtherTypesTests {
     [Fact]
-    public Task Struct() {
+    public static Task Struct() {
         const string input = """
             using CircleDIAttributes;
             
@@ -52,7 +52,7 @@ public sealed class OtherTypesTests {
 
     
     [Fact]
-    public Task Delegate() {
+    public static Task Delegate() {
         const string input = """
             using CircleDIAttributes;
 
@@ -84,7 +84,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public Task DelegateStatic() {
+    public static Task DelegateStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -116,7 +116,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public Task DelegateNamed() {
+    public static Task DelegateNamed() {
         const string input = """
             using CircleDIAttributes;
 
@@ -148,7 +148,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public Task DelegateWithGetAccessorMethod() {
+    public static Task DelegateWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -180,7 +180,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public Task DelegateScoped() {
+    public static Task DelegateScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -214,7 +214,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public Task DelegateStaticScoped() {
+    public static Task DelegateStaticScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -248,7 +248,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public Task DelegateInjectionConstructor() {
+    public static Task DelegateInjectionConstructor() {
         const string input = """
             using CircleDIAttributes;
 
@@ -284,7 +284,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public Task DelegateInjectionProperty() {
+    public static Task DelegateInjectionProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -323,7 +323,7 @@ public sealed class OtherTypesTests {
 
 
     [Fact]
-    public void DelegateWrongTypeFails() {
+    public static void DelegateWrongTypeFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -347,7 +347,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public void DelegateNoImplementationFails() {
+    public static void DelegateNoImplementationFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -369,7 +369,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public void DelegateWrongNumberOfParametersFails() {
+    public static void DelegateWrongNumberOfParametersFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -393,7 +393,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public void DelegateWrongParameterTypeFails() {
+    public static void DelegateWrongParameterTypeFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -417,7 +417,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public void DelegateManyWrongParameterTypesFailingWithMultipleErrors() {
+    public static void DelegateManyWrongParameterTypesFailingWithMultipleErrors() {
         const string input = """
             using CircleDIAttributes;
 
@@ -443,7 +443,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public void DelegateWrongReturnTypeFails() {
+    public static void DelegateWrongReturnTypeFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -467,7 +467,7 @@ public sealed class OtherTypesTests {
     }
 
     [Fact]
-    public void DelegateAllTypesWrongFailingWithMultipleErrors() {
+    public static void DelegateAllTypesWrongFailingWithMultipleErrors() {
         const string input = """
             using CircleDIAttributes;
 
@@ -496,7 +496,7 @@ public sealed class OtherTypesTests {
 
 
     [Fact]
-    public Task GenericClass() {
+    public static Task GenericClass() {
         const string input = """
             using CircleDIAttributes;
             
@@ -529,7 +529,7 @@ public sealed class OtherTypesTests {
     
     
     [Fact]
-    public void InterfaceFails() {
+    public static void InterfaceFails() {
         const string input = """
             using CircleDIAttributes;
             

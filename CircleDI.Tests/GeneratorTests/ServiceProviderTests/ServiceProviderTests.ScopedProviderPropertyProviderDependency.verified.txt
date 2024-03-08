@@ -10,9 +10,9 @@ namespace MyCode;
 
 /// <summary>
 /// <para>
-/// Number of services registered: 5<br />
-/// - Singleton: 2<br />
-/// - Scoped: 2<br />
+/// Number of services registered: 3<br />
+/// - Singleton: 1<br />
+/// - Scoped: 1<br />
 /// - Transient: 1<br />
 /// - Delegate: 0
 /// </para>
@@ -27,22 +27,15 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// Creates an instance of <see cref="global::MyCode.TestProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public TestProvider() {
-        _singleton = new global::MyCode.Singleton();
     }
 
     /// <summary>
     /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
+    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self) {
+        Scoped = Scoped
+    };
 
-
-    /// <summary>
-    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::MyCode.ISingleton"/><br />
-    /// Implementation type:  <see cref="global::MyCode.Singleton"/>
-    /// </summary>
-    public global::MyCode.ISingleton Singleton => _singleton;
-    private global::MyCode.Singleton _singleton;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -54,10 +47,10 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-    /// Service type: <see cref="global::MyCode.ITransient"/><br />
-    /// Implementation type:  <see cref="global::MyCode.Transient"/>
+    /// Service type: <see cref="global::MyCode.IScoped"/><br />
+    /// Implementation type:  <see cref="global::MyCode.Scoped"/>
     /// </summary>
-    public global::MyCode.ITransient Transient => new global::MyCode.Transient();
+    public global::MyCode.IScoped Scoped => new global::MyCode.Scoped();
 
 
     /// <summary>
@@ -71,9 +64,8 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
         return serviceType.FullName switch {
-            "MyCode.ISingleton" => Singleton,
+            "MyCode.IScoped" => Scoped,
             "MyCode.ITestProvider" => Self,
-            "MyCode.ITransient" => Transient,
             _ => null
         };
     }
@@ -96,16 +88,16 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
 
     /// <summary>
     /// <para>
-    /// Number of services registered: 5<br />
-    /// - Singleton: 2<br />
-    /// - Scoped: 2<br />
+    /// Number of services registered: 3<br />
+    /// - Singleton: 1<br />
+    /// - Scoped: 1<br />
     /// - Transient: 1<br />
     /// - Delegate: 0
     /// </para>
     /// <para>
     /// This provider can create a scope,<br />
     /// implements both Dispose() and DisposeAsync() methods<br />
-    /// and is not thread safe.
+    /// and is thread safe.
     /// </para>
     /// </summary>
     public sealed partial class Scope : ITestProvider.IScope, IServiceProvider {
@@ -117,31 +109,15 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
         public Scope(ITestProvider serviceProvider) {
             __serviceProvider = serviceProvider;
-            _scoped = new global::MyCode.Scoped();
         }
-
-        /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::MyCode.IScoped"/><br />
-        /// Implementation type:  <see cref="global::MyCode.Scoped"/>
-        /// </summary>
-        public global::MyCode.IScoped GetScoped() => _scoped;
-        private global::MyCode.Scoped _scoped;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestProvider.Scope"/>
         /// </summary>
-        public global::MyCode.ITestProvider.IScope GetSelfScope() => this;
+        public global::MyCode.ITestProvider.IScope SelfScope => this;
 
-
-        /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-        /// Service type: <see cref="global::MyCode.ISingleton"/><br />
-        /// Implementation type:  <see cref="global::MyCode.Singleton"/>
-        /// </summary>
-        public global::MyCode.ISingleton Singleton => __serviceProvider.Singleton;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -153,10 +129,10 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-        /// Service type: <see cref="global::MyCode.ITransient"/><br />
-        /// Implementation type:  <see cref="global::MyCode.Transient"/>
+        /// Service type: <see cref="global::MyCode.IScoped"/><br />
+        /// Implementation type:  <see cref="global::MyCode.Scoped"/>
         /// </summary>
-        public global::MyCode.ITransient Transient => new global::MyCode.Transient();
+        public global::MyCode.IScoped Scoped => new global::MyCode.Scoped();
 
 
         /// <summary>
@@ -170,11 +146,9 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
             return serviceType.FullName switch {
-                "MyCode.IScoped" => GetScoped(),
-                "MyCode.ISingleton" => Singleton,
+                "MyCode.IScoped" => Scoped,
                 "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => GetSelfScope(),
-                "MyCode.ITransient" => Transient,
+                "MyCode.ITestProvider.IScope" => SelfScope,
                 _ => null
             };
         }

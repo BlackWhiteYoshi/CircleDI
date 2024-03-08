@@ -3,24 +3,34 @@
 /// <summary>
 /// Tests the function <see cref="ServiceProvider.FindService(string)"/>.
 /// </summary>
-public sealed class FindServiceTests {
-    private static ServiceProvider CreateProvider(string[] serviceTypeList)
-        => new(null!) {
+public static class FindServiceTests {
+    private static ServiceProvider CreateProvider(string[] serviceTypeList) {
+        List<Service> serviceList = serviceTypeList.Select((string serviceType) => new Service() {
+            ServiceType = serviceType,
+            Name = string.Empty,
+            ImplementationType = string.Empty,
+            Lifetime = ServiceLifetime.Singleton,
+            ConstructorDependencyList = [],
+            PropertyDependencyList = [],
+            Dependencies = []
+        }).ToList();
+        serviceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
+
+        ServiceProvider serviceProvider = new(null!) {
             Name = "TestProvider",
             InterfaceName = "ITestProvider",
-            NameSpace = string.Empty,
-            ServiceList = serviceTypeList.Select((string serviceType) => new Service() {
-                ServiceType = serviceType,
-                Name = string.Empty,
-                ImplementationType = string.Empty,
-                Lifetime = ServiceLifetime.Singleton,
-                ConstructorDependencyList = [],
-                PropertyDependencyList = [],
-            }).ToList()
+            NameSpace = string.Empty
         };
+        SetSortedServiceList(serviceProvider, serviceList);
+        return serviceProvider;
+    }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_SortedServiceList")]
+    private extern static void SetSortedServiceList(ServiceProvider instance, List<Service> value);
+
 
     [Fact]
-    public void NotFound() {
+    public static void NotFound() {
         ServiceProvider serviceProvider = CreateProvider(["test1, test2, test3"]);
 
         (int index, int count) = serviceProvider.FindService("notPresent");
@@ -30,7 +40,7 @@ public sealed class FindServiceTests {
     }
 
     [Fact]
-    public void Empty() {
+    public static void Empty() {
         ServiceProvider serviceProvider = CreateProvider([]);
 
         (int index, int count) = serviceProvider.FindService("notPresent");
@@ -40,7 +50,7 @@ public sealed class FindServiceTests {
     }
 
     [Fact]
-    public void OneElement() {
+    public static void OneElement() {
         ServiceProvider serviceProvider = CreateProvider(["test1"]);
 
         (int index, int count) = serviceProvider.FindService("test1");
@@ -51,7 +61,7 @@ public sealed class FindServiceTests {
 
 
     [Fact]
-    public void TwoElements_FindFirst() {
+    public static void TwoElements_FindFirst() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2"]);
 
         (int index, int count) = serviceProvider.FindService("test1");
@@ -61,7 +71,7 @@ public sealed class FindServiceTests {
     }
 
     [Fact]
-    public void TwoElements_FindSecond() {
+    public static void TwoElements_FindSecond() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2"]);
 
         (int index, int count) = serviceProvider.FindService("test2");
@@ -71,7 +81,7 @@ public sealed class FindServiceTests {
     }
 
     [Fact]
-    public void TwoElements_BothEqual() {
+    public static void TwoElements_BothEqual() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test1"]);
 
         (int index, int count) = serviceProvider.FindService("test1");
@@ -82,7 +92,7 @@ public sealed class FindServiceTests {
 
 
     [Fact]
-    public void ThreeElements_FindFirst() {
+    public static void ThreeElements_FindFirst() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
         (int index, int count) = serviceProvider.FindService("test1");
@@ -92,7 +102,7 @@ public sealed class FindServiceTests {
     }
 
     [Fact]
-    public void ThreeElements_FindSecond() {
+    public static void ThreeElements_FindSecond() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
         (int index, int count) = serviceProvider.FindService("test2");
@@ -102,7 +112,7 @@ public sealed class FindServiceTests {
     }
 
     [Fact]
-    public void ThreeElements_FindThird() {
+    public static void ThreeElements_FindThird() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
         (int index, int count) = serviceProvider.FindService("test3");
@@ -112,7 +122,7 @@ public sealed class FindServiceTests {
     }
 
     [Fact]
-    public void ThreeElements_FindFirst2() {
+    public static void ThreeElements_FindFirst2() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test1", "test3"]);
 
         (int index, int count) = serviceProvider.FindService("test1");
@@ -122,7 +132,7 @@ public sealed class FindServiceTests {
     }
 
     [Fact]
-    public void ThreeElements_FindLast2() {
+    public static void ThreeElements_FindLast2() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test2"]);
 
         (int index, int count) = serviceProvider.FindService("test2");
@@ -132,7 +142,7 @@ public sealed class FindServiceTests {
     }
 
     [Fact]
-    public void ThreeElements_FindAll3() {
+    public static void ThreeElements_FindAll3() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test1", "test1"]);
 
         (int index, int count) = serviceProvider.FindService("test1");
@@ -143,7 +153,7 @@ public sealed class FindServiceTests {
 
 
     [Fact]
-    public void Twentylements_Find04To07() {
+    public static void Twentylements_Find04To07() {
         ServiceProvider serviceProvider = CreateProvider([
             "test01",
             "test02",
