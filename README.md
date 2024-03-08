@@ -332,3 +332,6 @@ And code conventions, structure, and quality is important to me. So there is a g
 
 - 0.1.0
   First version. Includes all basic functionalities for generating a Service Provider.
+- 0.2.0
+  Breaking Change: *CreateScope()* lists dependencies without [Dependency]-attribute as parameters and dependencies with [Dependency]-attribute are supplied by the ServiceProvider.  
+  Native/Built-in types are supported.
