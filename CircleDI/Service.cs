@@ -413,49 +413,50 @@ public sealed class Service : IEquatable<Service> {
     public static (List<PropertyDependency> propertyDependencyList, Diagnostic? error) CreatePropertyDependencyList(INamedTypeSymbol implementation, AttributeData attributeData) {
         List<PropertyDependency> propertyDependencyList = [];
 
-        foreach (ISymbol member in implementation.GetMembers()) {
-            if (member is not IPropertySymbol { Name.Length: > 0 } property)
-                continue;
-
-            bool isNamed;
-            string serviceIdentifier;
-            bool isParameter;
-            if (property.GetAttribute("DependencyAttribute") is AttributeData propertyAttribute) {
-                if (property.SetMethod == null)
-                    return ([], attributeData.CreateMissingSetAccessorError(property, implementation, property.ToDisplayString()));
-
-                if (propertyAttribute.NamedArguments.GetArgument<string>("Name") is string dependencyName) {
-                    isNamed = true;
-                    serviceIdentifier = dependencyName;
-                    isParameter = false;
-                }
-                else {
-                    isNamed = false;
-                    serviceIdentifier = property.Type.ToFullQualifiedName();
-                    isParameter = false;
-                }
-            }
-            else if (property.IsRequired) {
-                if (property.SetMethod == null)
-                    // natuaral syntax error when required and no setMethod
+        for (INamedTypeSymbol? baseType = implementation; baseType is not null; baseType = baseType.BaseType)
+            foreach (ISymbol member in baseType.GetMembers()) {
+                if (member is not IPropertySymbol { Name.Length: > 0 } property)
                     continue;
 
-                isNamed = false;
-                serviceIdentifier = property.Type.ToFullQualifiedName();
-                isParameter = true;
-            }
-            else
-                continue;
+                bool isNamed;
+                string serviceIdentifier;
+                bool isParameter;
+                if (property.GetAttribute("DependencyAttribute") is AttributeData propertyAttribute) {
+                    if (property.SetMethod == null)
+                        return ([], attributeData.CreateMissingSetAccessorError(property, baseType, property.ToDisplayString()));
 
-            propertyDependencyList.Add(new PropertyDependency() {
-                Name = property.Name,
-                IsNamed = isNamed,
-                ServiceIdentifier = serviceIdentifier,
-                HasAttribute = isParameter,
-                IsInit = property.SetMethod.IsInitOnly,
-                IsRequired = property.IsRequired,
-            });
-        }
+                    if (propertyAttribute.NamedArguments.GetArgument<string>("Name") is string dependencyName) {
+                        isNamed = true;
+                        serviceIdentifier = dependencyName;
+                        isParameter = false;
+                    }
+                    else {
+                        isNamed = false;
+                        serviceIdentifier = property.Type.ToFullQualifiedName();
+                        isParameter = false;
+                    }
+                }
+                else if (property.IsRequired) {
+                    if (property.SetMethod == null)
+                        // natuaral syntax error when required and no setMethod
+                        continue;
+
+                    isNamed = false;
+                    serviceIdentifier = property.Type.ToFullQualifiedName();
+                    isParameter = true;
+                }
+                else
+                    continue;
+
+                propertyDependencyList.Add(new PropertyDependency() {
+                    Name = property.Name,
+                    IsNamed = isNamed,
+                    ServiceIdentifier = serviceIdentifier,
+                    HasAttribute = isParameter,
+                    IsInit = property.SetMethod.IsInitOnly,
+                    IsRequired = property.IsRequired,
+                });
+            }
 
         return (propertyDependencyList, null);
     }

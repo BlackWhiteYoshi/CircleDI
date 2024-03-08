@@ -1810,6 +1810,47 @@ public static class RegisterServicesTests {
         Assert.Equal("ServiceImplementation 'TestService' does not exist or has no accessible constructor", diagnostics[0].GetMessage());
     }
 
+    [Fact]
+    public static Task RegisterServiceThatDerivesFromBaseClass() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<DerivedClass>]
+            public sealed partial class TestProvider;
+
+
+            public abstract class BaseBaseClass {
+                public required DerivedClass DerivedBaseBase { get; init; }
+            }
+
+            public abstract class BaseClass : BaseBaseClass {
+                public required DerivedClass DerivedBase { get; init; }
+            }
+
+            public sealed class DerivedClass : BaseClass {
+                public required DerivedClass Derived { get; init; }
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
 
     [Fact]
     public static Task OverwriteDefaultServiceSelf() {
