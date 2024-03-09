@@ -28,6 +28,17 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
 
     /// <summary>
+    /// The type of the ServiceProvider: class, struct, record
+    /// </summary>
+    public ClassStructKeyword Keyword { get; init; } = ClassStructKeyword.Class;
+
+    /// <summary>
+    /// The type of the ScopeProvider: class, struct, record
+    /// </summary>
+    public ClassStructKeyword KeywordScope { get; init; } = ClassStructKeyword.Class;
+
+
+    /// <summary>
     /// <para>The list of modifiers of this ServiceProvider without the last modifier "partial"</para>
     /// <para>Since the modifier "partial" is required and "partial" must be the last modifier, it can be omitted.</para>
     /// <para>e.g. ["public", "sealed"]</para>
@@ -214,11 +225,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// <param name="syntaxContext"></param>
     [SetsRequiredMembers]
     public ServiceProvider(GeneratorAttributeSyntaxContext syntaxContext) {
-        ClassDeclarationSyntax serviceProviderSyntax = (ClassDeclarationSyntax)syntaxContext.TargetNode;
-        
-        ClassDeclarationSyntax? serviceProviderScopeSyntax = null;
+        TypeDeclarationSyntax serviceProviderSyntax = (TypeDeclarationSyntax)syntaxContext.TargetNode;
+
+        TypeDeclarationSyntax? serviceProviderScopeSyntax = null;
         foreach (MemberDeclarationSyntax memberSyntax in serviceProviderSyntax.Members)
-            if (memberSyntax is ClassDeclarationSyntax { Identifier.ValueText: "Scope" } scopedProviderSyntax) {
+            if (memberSyntax is TypeDeclarationSyntax { Identifier.ValueText: "Scope" } scopedProviderSyntax) {
                 serviceProviderScopeSyntax = scopedProviderSyntax;
                 break;
             }
@@ -254,6 +265,26 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             NameSpace = string.Empty;
 
 
+        Keyword = serviceProviderSyntax switch {
+            ClassDeclarationSyntax => ClassStructKeyword.Class,
+            StructDeclarationSyntax => ClassStructKeyword.Struct,
+            RecordDeclarationSyntax { ClassOrStructKeyword.ValueText: "" } => ClassStructKeyword.Record,
+            RecordDeclarationSyntax { ClassOrStructKeyword.ValueText: "class" } => ClassStructKeyword.RecordClass,
+            RecordDeclarationSyntax { ClassOrStructKeyword.ValueText: "struct" } => ClassStructKeyword.RecordStruct,
+            _ => ClassStructKeyword.Class
+        };
+
+        KeywordScope = serviceProviderScopeSyntax switch {
+            null => ClassStructKeyword.Class,
+            ClassDeclarationSyntax => ClassStructKeyword.Class,
+            StructDeclarationSyntax => ClassStructKeyword.Struct,
+            RecordDeclarationSyntax { ClassOrStructKeyword.ValueText: "" } => ClassStructKeyword.Record,
+            RecordDeclarationSyntax { ClassOrStructKeyword.ValueText: "class" } => ClassStructKeyword.RecordClass,
+            RecordDeclarationSyntax { ClassOrStructKeyword.ValueText: "struct" } => ClassStructKeyword.RecordStruct,
+            _ => ClassStructKeyword.Class
+        };
+
+
         Modifiers = new string[serviceProviderSyntax.Modifiers.Count - 1];
         for (int i = 0; i < Modifiers.Length; i++)
             Modifiers[i] = serviceProviderSyntax.Modifiers[i].ValueText;
@@ -285,13 +316,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             getAccessorMainProvider = GetAccess.Property;
         }
 
-        // parameters on ScopedProviderAttribute
-        bool generateScope = true;
-        GenerateDisposeMethodsScope = GenerateDisposeMethods;
-        ThreadSafeScope = ThreadSafe;
-        CreationTiming creationTimeScopeProvider = creationTimeMainProvider;
-        GetAccess getAccessorScopeProvider = getAccessorMainProvider;
 
+        // parameters on ScopedProviderAttribute
         AttributeData? scopedProviderAttribute = serviceProvider.GetAttribute("ScopedProviderAttribute");
         if (serviceProviderScope != null) {
             AttributeData? scopedProviderAttributeNested = serviceProviderScope.GetAttribute("ScopedProviderAttribute");
@@ -307,17 +333,22 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             }
         }
 
+        bool generateScope;
+        CreationTiming creationTimeScopeProvider;
+        GetAccess getAccessorScopeProvider;
         if (scopedProviderAttribute != null) {
-            if (scopedProviderAttribute.NamedArguments.GetArgument<bool?>("Generate") is bool generate)
-                generateScope = generate;
-            if ((DisposeGeneration?)scopedProviderAttribute.NamedArguments.GetArgument<int?>("GenerateDisposeMethods") is DisposeGeneration disposeGeneration)
-                GenerateDisposeMethodsScope = disposeGeneration;
-            if (scopedProviderAttribute.NamedArguments.GetArgument<bool?>("ThreadSafe") is bool threadSafe)
-                ThreadSafeScope = threadSafe;
-            if ((CreationTiming?)scopedProviderAttribute.NamedArguments.GetArgument<int?>("CreationTime") is CreationTiming creationTiming)
-                creationTimeScopeProvider = creationTiming;
-            if ((GetAccess?)scopedProviderAttribute.NamedArguments.GetArgument<int?>("GetAccessor") is GetAccess getAccess)
-                getAccessorScopeProvider = getAccess;
+            generateScope = scopedProviderAttribute.NamedArguments.GetArgument<bool?>("Generate") ?? true;
+            GenerateDisposeMethodsScope = (DisposeGeneration?)scopedProviderAttribute.NamedArguments.GetArgument<int?>("GenerateDisposeMethods") ?? GenerateDisposeMethods;
+            ThreadSafeScope = scopedProviderAttribute.NamedArguments.GetArgument<bool?>("ThreadSafe") ?? ThreadSafe;
+            creationTimeScopeProvider = (CreationTiming?)scopedProviderAttribute.NamedArguments.GetArgument<int?>("CreationTime") ?? creationTimeMainProvider;
+            getAccessorScopeProvider = (GetAccess?)scopedProviderAttribute.NamedArguments.GetArgument<int?>("GetAccessor") ?? getAccessorMainProvider;
+        }
+        else {
+            generateScope = true;
+            GenerateDisposeMethodsScope = GenerateDisposeMethods;
+            ThreadSafeScope = ThreadSafe;
+            creationTimeScopeProvider = creationTimeMainProvider;
+            getAccessorScopeProvider = getAccessorMainProvider;
         }
 
 
@@ -776,6 +807,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         if (NameSpace != other.NameSpace)
             return false;
 
+        if (Keyword != other.Keyword)
+            return false;
+        if (KeywordScope != other.KeywordScope)
+            return false;
+
         if (!Modifiers.SequenceEqual(other.Modifiers))
             return false;
         if (!ModifiersScope.SequenceEqual(other.ModifiersScope))
@@ -846,6 +882,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         int hashCode = Name.GetHashCode();
         hashCode = Combine(hashCode, InterfaceName.GetHashCode());
         hashCode = Combine(hashCode, NameSpace.GetHashCode());
+
+        hashCode = Combine(hashCode, Keyword.GetHashCode());
+        hashCode = Combine(hashCode, KeywordScope.GetHashCode());
 
         foreach (string modifier in Modifiers)
             hashCode = Combine(hashCode, modifier.GetHashCode());

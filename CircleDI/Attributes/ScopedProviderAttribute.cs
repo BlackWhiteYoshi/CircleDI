@@ -21,7 +21,7 @@ public static partial class Attributes {
         /// </para>
         /// <para>This attribute itself does nothing, but it provides additional configurations for the ScopedProvider.</para>
         /// </summary>
-        [AttributeUsage(AttributeTargets.Class)]
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ScopedProviderAttribute : Attribute {
             /// <summary>

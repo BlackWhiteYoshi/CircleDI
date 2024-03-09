@@ -273,17 +273,18 @@ public sealed class MyService([Dependency(Name = "Service")] IService firstServi
 <br></br>
 ### Name, Namespace and Modifier
 
-The class name and the namespace are given with partial class under the [ServiceProviderAttribute](Readme_md/TypeTables.md#serviceproviderattribute).
+The class name, type and the namespace are given with partial class under the [ServiceProviderAttribute](Readme_md/TypeTables.md#serviceproviderattribute).
 The modifiers are also inferred from the class definition.
 
 ```csharp
 namespace MySpace;
 
 [ServiceProvider]
-internal sealed partial class MyProvider;
+internal sealed partial record class MyProvider;
 
 // generated ServiceProvider will have:
 //   name: "MyProvider"
+//   type: "record class"
 //   namespace: "MySpace"
 //   modifier: "internal", "sealed", "partial"
 ```

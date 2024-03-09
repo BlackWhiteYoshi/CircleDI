@@ -21,7 +21,7 @@ public static partial class Attributes {
         /// </para>
         /// <para>The source generator will generate a complete service provider, but you can add additional custom implementation to it.</para>
         /// </summary>
-        [AttributeUsage(AttributeTargets.Class)]
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ServiceProviderAttribute : Attribute {
             /// <summary>

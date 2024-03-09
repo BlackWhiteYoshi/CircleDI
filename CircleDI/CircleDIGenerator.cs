@@ -31,7 +31,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         // all classes with ServiceProviderAttribute
         IncrementalValuesProvider<ServiceProvider> serviceProviderList = context.SyntaxProvider.ForAttributeWithMetadataName(
             "CircleDIAttributes.ServiceProviderAttribute",
-            static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax,
+            static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
             static (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new ServiceProvider(generatorAttributeSyntaxContext));
 
         context.RegisterSourceOutput(serviceProviderList, GenerateClass);
@@ -100,9 +100,13 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             builder.Append(modifier);
             builder.Append(' ');
         }
-        builder.Append("partial class ");
+        builder.Append("partial ");
+        builder.Append(serviceProvider.Keyword.AsString());
+        builder.Append(' ');
         builder.Append(serviceProvider.Name);
-        builder.Append(" : ");
+        builder.Append(' ');
+        builder.Append(':');
+        builder.Append(' ');
         builder.Append(serviceProvider.InterfaceName);
         builder.Append(", IServiceProvider {\n");
 
@@ -227,7 +231,9 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                 builder.Append(modifier);
                 builder.Append(' ');
             }
-            builder.Append("partial class Scope : ");
+            builder.Append("partial ");
+            builder.Append(serviceProvider.KeywordScope.AsString());
+            builder.Append(" Scope : ");
             builder.Append(serviceProvider.InterfaceName);
             builder.Append(".IScope, IServiceProvider {\n");
 

@@ -7,13 +7,131 @@ using System.Reflection.Metadata;
 namespace CircleDI.Tests;
 
 /// <summary>
-/// <para>Tests for Services that are ValueTypes:</para>
+/// <para>Tests for other Types:</para>
 /// <para>
 /// - struct<br />
+/// - record<br />
 /// - native types
 /// </para>
 /// </summary>
 public static class OtherTypesTests {
+    [Fact]
+    public static Task ServiceProviderStruct() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            public sealed partial struct TestProvider {
+                public sealed partial struct Scope;
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ServiceProviderRecord() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            public sealed partial record TestProvider {
+                public sealed partial record Scope;
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ServiceProviderRecordClass() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            public sealed partial record class TestProvider {
+                public sealed partial record class Scope;
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ServiceProviderRecordStruct() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            public sealed partial record struct TestProvider {
+                public sealed partial record struct Scope;
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+
     [Fact]
     public static Task Struct() {
         const string input = """
@@ -32,6 +150,77 @@ public static class OtherTypesTests {
 
             public interface ITestDependency;
             public struct TestDependency : ITestDependency;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task RecordClass() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<ITestService, TestService>]
+            [Singleton<ITestDependency, TestDependency>]
+            public sealed partial class TestProvider;
+            
+            public interface ITestService;
+            public record class TestService(ITestDependency testDependency) : ITestService;
+
+            public interface ITestDependency;
+            public record class TestDependency() : ITestDependency;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task RecordStruct() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<ITestService, TestService>]
+            [Singleton<ITestDependency, TestDependency>]
+            public sealed partial class TestProvider;
+            
+            public interface ITestService;
+            [method: Constructor]
+            public record struct TestService(ITestDependency testDependency) : ITestService;
+
+            public interface ITestDependency;
+            public record struct TestDependency : ITestDependency;
 
             """;
 

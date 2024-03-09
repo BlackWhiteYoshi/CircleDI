@@ -19,7 +19,7 @@ public static partial class Attributes {
         /// </summary>
         /// <typeparam name="TService">Type of the service and implementation.</typeparam>
         /// <param name="methodName">Methodname that will be the implementation for the given service.</param>
-        [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class DelegateAttribute<TService>(string methodName) : Attribute {
             {{SERVICE_NAME_PROPERTY}}
