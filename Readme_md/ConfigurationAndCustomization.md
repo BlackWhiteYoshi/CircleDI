@@ -109,7 +109,7 @@ For in depth explanation see [Named Services](#named-services).
 <br></br>
 ### ConstructorAttribute
 
-This attribute is only needed if a service implementation has 2 or more constructors and the service is not constructed via [Implementation](#implementation-property).
+This attribute is only needed if a service implementation has 2 or more constructors and the service is not constructed via [Implementation](#implementation-property) (Only constructors with accessibility public or internal are considered, others are ignored).
 In this case you have to specify one constructor which should be used to create the service.
 This is done by marking the constructor with this attribute.
 

@@ -381,10 +381,18 @@ public sealed class Service : IEquatable<Service> {
             case 0:
                 return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
             case 1:
+                if (implementation.InstanceConstructors[0].DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
+                    return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
                 return (implementation.InstanceConstructors[0], null);
             default:
                 IMethodSymbol? constructor = null;
-                foreach (IMethodSymbol ctor in implementation.InstanceConstructors)
+                int availableConstructors = 0;
+                foreach (IMethodSymbol ctor in implementation.InstanceConstructors) {
+                    if (ctor.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
+                        continue;
+
+                    availableConstructors++;
+
                     if (ctor.GetAttribute("ConstructorAttribute") != null)
                         if (constructor == null)
                             constructor = ctor;
@@ -393,11 +401,19 @@ public sealed class Service : IEquatable<Service> {
                             AttributeData secondAttribute = ctor.GetAttribute("ConstructorAttribute")!;
                             return (null, firstAttribute.CreateMultipleConstructorAttributesError(secondAttribute, implementation, implementation.ToDisplayString()));
                         }
+                }
 
-                if (constructor != null)
-                    return (constructor, null);
-                else
-                    return (null, attributeData.CreateMissingConstructorAttributesError(implementation, implementation.ToDisplayString()));
+                switch (availableConstructors) {
+                    case 0:
+                        return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
+                    case 1:
+                        return (implementation.InstanceConstructors[0], null);
+                    default:
+                        if (constructor == null)
+                            return (null, attributeData.CreateMissingConstructorAttributesError(implementation, implementation.ToDisplayString()));
+                        else
+                            return (constructor, null);
+                }
         }
     }
 

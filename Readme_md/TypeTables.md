@@ -164,7 +164,8 @@ It is also used to specify specific/named services, see *Name* property.
 
 Explicitly specifies the constructor that is used to create the service.
 
-If multiple constructors are available, you must use this attribute on exactly one constructor, otherwise a compile error occurs.
+If multiple constructors are available, you must use this attribute on exactly one constructor, otherwise a compile error occurs.  
+Only constructors with accessibility public or internal are considered, others are ignored.
 
 A struct has always the parameterless constructor, so by specifying one non-parameterless constructor you have actually two and therefore have to use this attribute.
 

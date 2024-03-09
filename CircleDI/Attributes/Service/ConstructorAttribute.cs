@@ -15,7 +15,10 @@ public static partial class Attributes {
 
         /// <summary>
         /// <para>Explicitly specifies the constructor that is used to create the service.</para>
-        /// <para>If multiple constructors are available, you must use this attribute on exactly one constructor, otherwise a compile error occurs.</para>
+        /// <para>
+        /// If multiple constructors are available, you must use this attribute on exactly one constructor, otherwise a compile error occurs.<br />
+        /// Only constructors with accessibility public or internal are considered, others are ignored.
+        /// </para>
         /// </summary>
         /// <remarks>A struct has always the parameterless constructor, so by specifying one non-parameterless constructor you have actually two and therfore have to use this attribute.</remarks>
         [AttributeUsage(AttributeTargets.Constructor)]
