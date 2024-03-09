@@ -30,12 +30,11 @@ public sealed class PropertyDependency : Dependency, IEquatable<PropertyDependen
 
     public static bool operator !=(PropertyDependency left, PropertyDependency right) => !(left == right); 
     
-    public override bool Equals(object? obj) {
-        if (obj is not PropertyDependency propertyDependency)
-            return false;
-
-        return Equals(propertyDependency);
-    }
+    public override bool Equals(object? obj)
+        => obj switch {
+            PropertyDependency propertyDependency => Equals(propertyDependency),
+            _ => false
+        };
 
     public bool Equals(PropertyDependency other) {
         if (ReferenceEquals(this, other))

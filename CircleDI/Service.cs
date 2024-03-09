@@ -484,12 +484,11 @@ public sealed class Service : IEquatable<Service> {
 
     public static bool operator !=(Service left, Service right) => !(left == right);
 
-    public override bool Equals(object? obj) {
-        if (obj is not Service service)
-            return false;
-
-        return Equals(service);
-    }
+    public override bool Equals(object? obj)
+        => obj switch {
+            Service service => Equals(service),
+            _ => false
+        };
 
     public bool Equals(Service other) {
         if (ReferenceEquals(this, other))

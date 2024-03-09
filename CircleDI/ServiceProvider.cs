@@ -789,12 +789,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
     public static bool operator !=(ServiceProvider left, ServiceProvider right) => !(left == right);
 
-    public override bool Equals(object? obj) {
-        if (obj is not ServiceProvider serviceProvider)
-            return false;
-
-        return Equals(serviceProvider);
-    }
+    public override bool Equals(object? obj)
+        => obj switch {
+            ServiceProvider serviceProvider => Equals(serviceProvider),
+            _ => false
+        };
 
     public bool Equals(ServiceProvider other) {
         if (ReferenceEquals(this, other))

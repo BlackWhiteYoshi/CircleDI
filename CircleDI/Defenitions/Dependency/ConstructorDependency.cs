@@ -10,12 +10,11 @@ public sealed class ConstructorDependency : Dependency, IEquatable<ConstructorDe
 
     public static bool operator !=(ConstructorDependency left, ConstructorDependency right) => !(left == right);
 
-    public override bool Equals(object? obj) {
-        if (obj is not ConstructorDependency constructorDependency)
-            return false;
-
-        return Equals(constructorDependency);
-    }
+    public override bool Equals(object? obj)
+        => obj switch {
+            ConstructorDependency constructorDependency => Equals(constructorDependency),
+            _ => false
+        };
 
     public bool Equals(ConstructorDependency other) {
         if (ReferenceEquals(this, other))
