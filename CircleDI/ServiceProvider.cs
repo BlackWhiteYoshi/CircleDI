@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -22,7 +23,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public required string InterfaceName { get; init; }
 
     /// <summary>
-    /// The containing namespace the class
+    /// The containing namespace of the ServiceProvider with trailing '.'
     /// </summary>
     public required string NameSpace { get; init; }
 
@@ -260,7 +261,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         Name = serviceProviderSyntax.Identifier.ValueText;
         string fullName = serviceProvider.ToDisplayString();
         if (fullName.Length > Name.Length)
-            NameSpace = fullName[..^(Name.Length + 1)];
+            NameSpace = fullName[..^Name.Length];
         else
             NameSpace = string.Empty;
 
@@ -401,29 +402,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         // adding services and default services
         {
             // Default service ServiceProvider itself
-            string serviceType;
-            string implementationType;
-            if (NameSpace != string.Empty) {
-                serviceType = $"{NameSpace}.{InterfaceName}";
-                implementationType = $"{NameSpace}.{Name}";
-            }
-            else {
-                serviceType = InterfaceName;
-                implementationType = Name;
-            }
+            string serviceType = $"{NameSpace}{InterfaceName}";
+            string implementationType = $"{NameSpace}{Name}";
             bool hasServiceSelf = false;
 
             // Default Service ServiceProvider.Scope self
-            string serviceTypeScope;
-            string implementationTypeScope;
-            if (NameSpace != string.Empty) {
-                serviceTypeScope = $"{NameSpace}.{InterfaceName}.IScope";
-                implementationTypeScope = $"{NameSpace}.{Name}.Scope";
-            }
-            else {
-                serviceTypeScope = $"{InterfaceName}.IScope";
-                implementationTypeScope = $"{Name}.Scope";
-            }
+            string serviceTypeScope = $"{NameSpace}{InterfaceName}.IScope";
+            string implementationTypeScope = $"{NameSpace}{Name}.Scope";
             bool hasServiceSelfScope = false;
 
             // register services [Singleton<>, Scoped<>, Transient<>, Delegate<> attributes]
@@ -633,7 +618,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         // else
                         {
                             Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                true => serviceProvider.serviceProviderAttribute.CreateScopedProviderNamedUnregisteredError(serviceProvider.NameSpace != string.Empty ? $"{serviceProvider.NameSpace}.{serviceProvider.Name}" : serviceProvider.Name, dependency.ServiceIdentifier),
+                                true => serviceProvider.serviceProviderAttribute.CreateScopedProviderNamedUnregisteredError($"{serviceProvider.NameSpace}{serviceProvider.Name}", dependency.ServiceIdentifier),
                                 false => serviceProvider.serviceProviderAttribute.CreateDependencyNamedUnregisteredError(service.Name, dependency.ServiceIdentifier)
                             };
                             serviceProvider.ErrorList ??= [];
@@ -649,13 +634,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 serviceProvider.ErrorList ??= [];
 
                                 Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                    true => serviceProvider.serviceProviderAttribute.CreateScopedProviderUnregisteredError(serviceProvider.NameSpace != string.Empty ? $"{serviceProvider.NameSpace}.{serviceProvider.Name}" : serviceProvider.Name, dependency.ServiceIdentifier),
+                                    true => serviceProvider.serviceProviderAttribute.CreateScopedProviderUnregisteredError($"{serviceProvider.NameSpace}{serviceProvider.Name}", dependency.ServiceIdentifier),
                                     false => serviceProvider.serviceProviderAttribute.CreateDependencyUnregisteredError(service.Name, dependency.ServiceIdentifier)
                                 };
                                 serviceProvider.ErrorList.Add(error);
 
                                 if (dependency.ServiceIdentifier == serviceProvider.InterfaceName || dependency.ServiceIdentifier == $"{serviceProvider.InterfaceName}.IScope") {
-                                    Diagnostic hintError = serviceProvider.serviceProviderAttribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceIdentifier, serviceProvider.NameSpace, serviceProvider.InterfaceName);
+                                    Diagnostic hintError = serviceProvider.serviceProviderAttribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceIdentifier, serviceProvider.NameSpace[..^1], serviceProvider.InterfaceName);
                                     serviceProvider.ErrorList.Add(hintError);
                                 }
 
@@ -694,7 +679,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                     bool isParameter = dependency is ConstructorDependency;
 
                                     Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                        true => serviceProvider.serviceProviderAttribute.CreateScopedProviderAmbiguousError(serviceProvider.NameSpace != string.Empty ? $"{serviceProvider.NameSpace}.{serviceProvider.Name}" : serviceProvider.Name, dependency.ServiceIdentifier, servicesWithSameType, isParameter),
+                                        true => serviceProvider.serviceProviderAttribute.CreateScopedProviderAmbiguousError($"{serviceProvider.NameSpace}{serviceProvider.Name}", dependency.ServiceIdentifier, servicesWithSameType, isParameter),
                                         false => serviceProvider.serviceProviderAttribute.CreateDependencyAmbiguousError(service.Name, dependency.ServiceIdentifier, servicesWithSameType, isParameter)
                                     };
                                     serviceProvider.ErrorList ??= [];
@@ -757,13 +742,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             break;
                         case ServiceLifetime.TransientSingleton:
                             if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeScopeError(serviceProvider.NameSpace != string.Empty ? $"{serviceProvider.NameSpace}.{serviceProvider.Name}" : serviceProvider.Name, dependency.ServiceIdentifier);
+                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeScopeError($"{serviceProvider.NameSpace}{serviceProvider.Name}", dependency.ServiceIdentifier);
                                 serviceProvider.ErrorList ??= [];
                                 serviceProvider.ErrorList.Add(error);
                                 return;
                             }
                             if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeTransientError(serviceProvider.NameSpace != string.Empty ? $"{serviceProvider.NameSpace}.{serviceProvider.Name}" : serviceProvider.Name, dependency.ServiceIdentifier);
+                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeTransientError($"{serviceProvider.NameSpace}{serviceProvider.Name}", dependency.ServiceIdentifier);
                                 serviceProvider.ErrorList ??= [];
                                 serviceProvider.ErrorList.Add(error);
                                 return;
