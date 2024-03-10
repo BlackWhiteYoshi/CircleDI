@@ -303,18 +303,24 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         CreationTiming creationTimeMainProvider;
         GetAccess getAccessorMainProvider;
         if (serviceProviderAttribute.NamedArguments.Length > 0) {
-            InterfaceName = serviceProviderAttribute.NamedArguments.GetArgument<string>("InterfaceName") ?? $"I{Name}";
+            InterfaceName = serviceProviderAttribute.NamedArguments.GetArgument<string?>("InterfaceName") ?? (Name != "ServiceProvider" ? $"I{Name}" : "IServiceprovider");
             GenerateDisposeMethods = (DisposeGeneration?)serviceProviderAttribute.NamedArguments.GetArgument<int?>("GenerateDisposeMethods") ?? DisposeGeneration.GenerateBoth;
             ThreadSafe = serviceProviderAttribute.NamedArguments.GetArgument<bool?>("ThreadSafe") ?? true;
             creationTimeMainProvider = (CreationTiming?)serviceProviderAttribute.NamedArguments.GetArgument<int?>("CreationTime") ?? CreationTiming.Constructor;
             getAccessorMainProvider = (GetAccess?)serviceProviderAttribute.NamedArguments.GetArgument<int?>("GetAccessor") ?? GetAccess.Property;
         }
         else {
-            InterfaceName = $"I{Name}";
+            InterfaceName = Name != "ServiceProvider" ? $"I{Name}" : "IServiceprovider";
             GenerateDisposeMethods = DisposeGeneration.GenerateBoth;
             ThreadSafe = true;
             creationTimeMainProvider = CreationTiming.Constructor;
             getAccessorMainProvider = GetAccess.Property;
+        }
+
+        if (InterfaceName == "IServiceProvider") {
+            Diagnostic error = serviceProviderAttribute.CreateInterfaceNameIServiceProviderError();
+            ErrorList ??= [];
+            ErrorList.Add(error);
         }
 
 

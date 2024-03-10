@@ -48,8 +48,10 @@ The other 4 attributes are for registering services.
 There are several properties that can be configured to change the generated code:
 
 - *InterfaceName*:
-Together with the ServiceProvider an interface based on the provider will be generated and the ServiceProvider implements it.
-This sets the name/identifier of the generated interface explicitly. The default name is "I{classname}".
+Together with the class an interface will be generated based on the class and the class implements it.
+This sets the name/identifier of the generated interface explicitly. The default name is "I\{classname\}".  
+An Exception is when the class name is "ServiceProvider", then the default interface name will be "IServiceprovider"
+and explicitly setting the interface name to "IServiceProvider" is not allowed, otherwise it will collide with [System.IServiceProvider](https://learn.microsoft.com/en-us//dotnet/api/system.iserviceprovider).
 
 - *CreationTime*:
 Sets when the instantiation of a service happens: at ServiceProvider instantiation (inside the constructor) or lazy (first time used).
@@ -608,7 +610,7 @@ public class MyService {
 <br></br>
 ### IServiceProvider Interface
 
-The generated ServiceProvider also implements [System.IServiceProvider](https://learn.microsoft.com/en-us/dotnet/api/system.iserviceprovider?view=net-8.0), but it is not recommended to use it.
+The generated ServiceProvider also implements [System.IServiceProvider](https://learn.microsoft.com/en-us/dotnet/api/system.iserviceprovider), but it is not recommended to use it.
 The interface is implemented explicitly, so you need a *IServiceProvider* reference to call the *GetService(Type)* method.
 The method can return *null*, an *object* of the given type or an *Array* of the given type, depending if the given type is registered zero, one or many times.
 

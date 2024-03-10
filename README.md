@@ -232,7 +232,7 @@ Only the generated code gets in your binary and that is not much.
 
 It has [no runtime dependencies](#no-runtime-dependencies) and the generated code uses no reflection or other AOT-critical statements.
 Actually the generated code is quite simple.
-However, to resolve circular init-only dependency injection, [UnsafeAccessor](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.unsafeaccessorattribute?view=net-8.0) are used.
+However, to resolve circular init-only dependency injection, [UnsafeAccessor](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.unsafeaccessorattribute) are used.
 
 ### Beautiful Code Generation
 

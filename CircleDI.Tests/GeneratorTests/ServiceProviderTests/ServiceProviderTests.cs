@@ -93,9 +93,47 @@ public static class ServiceProviderTests {
             """;
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
         Assert.Single(diagnostics);
         Assert.Equal("CDI002", diagnostics[0].Id);
         Assert.Equal("Missing partial keyword", diagnostics[0].GetMessage());
+    }
+
+    [Fact]
+    public static void InterfaceNameIServiceProviderError() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider(InterfaceName = "IServiceProvider")]
+            public sealed partial class TestProvider;
+            
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI035", diagnostics[0].Id);
+        Assert.Equal("InterfaceName 'IServiceProvider' is not allowed, it collides with 'System.IServiceProvider'", diagnostics[0].GetMessage());
+    }
+
+    [Fact]
+    public static void NameServiceProviderHasInterfaceNameIServiceprovider() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            public sealed partial class ServiceProvider;
+            
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextInterface = sourceTexts[^1];
+
+        Assert.Contains("public partial interface IServiceprovider", sourceTextInterface);
     }
 
 

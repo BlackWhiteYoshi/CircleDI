@@ -29,6 +29,18 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
+    public static Diagnostic CreateInterfaceNameIServiceProviderError(this AttributeData serviceProvider)
+        => Diagnostic.Create(InterfaceNameIServiceProvider, serviceProvider.ToLocation());
+
+    private static DiagnosticDescriptor InterfaceNameIServiceProvider { get; } = new(
+        id: "CDI035",
+        title: "InterfaceName is IServiceProvider",
+        messageFormat: "InterfaceName 'IServiceProvider' is not allowed, it collides with 'System.IServiceProvider'",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
     public static Diagnostic CreateScopeProviderAttributeTwiceError(this AttributeData scopedProviderAttributeNested, AttributeData scopedProviderAttribute)
         => Diagnostic.Create(ScopeProviderAttributeTwice, scopedProviderAttributeNested.ToLocation(), additionalLocations: scopedProviderAttribute.ToLocationList());
 
