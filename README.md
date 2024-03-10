@@ -335,3 +335,6 @@ And code conventions, structure, and quality is important to me. So there is a g
 - 0.2.0
   Breaking Change: *CreateScope()* lists dependencies without [Dependency]-attribute as parameters and dependencies with [Dependency]-attribute are supplied by the ServiceProvider.  
   Native/Built-in types are supported.
+- 0.3.0
+  Added support for passing value type services by reference.
+  ServiceProvider can now also be struct, record or record struct.
