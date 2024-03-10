@@ -89,14 +89,17 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "MyCode.ITestDependency1" => TestDependency1,
-            "MyCode.ITestDependency2" => TestDependency2,
-            "MyCode.ITestDependency3" => TestDependency3,
-            "MyCode.ITestProvider" => Self,
-            "MyCode.ITestService" => TestService,
-            _ => null
-        };
+        if (serviceType == typeof(global::MyCode.ITestDependency1))
+            return TestDependency1;
+        if (serviceType == typeof(global::MyCode.ITestDependency2))
+            return TestDependency2;
+        if (serviceType == typeof(global::MyCode.ITestDependency3))
+            return TestDependency3;
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
+        if (serviceType == typeof(global::MyCode.ITestService))
+            return TestService;
+        return null;
     }
 
 
@@ -194,15 +197,19 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "MyCode.ITestDependency1" => TestDependency1,
-                "MyCode.ITestDependency2" => TestDependency2,
-                "MyCode.ITestDependency3" => TestDependency3,
-                "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => SelfScope,
-                "MyCode.ITestService" => TestService,
-                _ => null
-            };
+            if (serviceType == typeof(global::MyCode.ITestDependency1))
+                return TestDependency1;
+            if (serviceType == typeof(global::MyCode.ITestDependency2))
+                return TestDependency2;
+            if (serviceType == typeof(global::MyCode.ITestDependency3))
+                return TestDependency3;
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::MyCode.ITestService))
+                return TestService;
+            return null;
         }
 
 

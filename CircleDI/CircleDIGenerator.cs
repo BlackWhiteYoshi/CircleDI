@@ -1030,32 +1030,28 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             builder.Append("/// </summary>\n");
             builder.Append(indent.Sp4);
             builder.Append("object? IServiceProvider.GetService(Type serviceType) {\n");
-            builder.Append(indent.Sp8);
-            // TODO better mapping for genericTypes
-            builder.Append("return serviceType.FullName switch {\n");
 
             Service? service = GetNextService();
             while (service is not null) {
-                string? serviceMetaName = GetMetaName(service);
+                builder.Append(indent.Sp8);
+                builder.Append("if (serviceType == typeof(global::");
+                builder.Append(service.ServiceType);
+                builder.Append(')');
+                builder.Append(')');
+                builder.Append('\n');
 
                 builder.Append(indent.Sp12);
-                builder.Append('"');
-                builder.Append(serviceMetaName);
-                builder.Append('"');
-                builder.Append(" => ");
+                builder.Append("return ");
 
                 Service? nextService = GetNextService();
-                if (serviceMetaName != GetMetaName(nextService)) {
+                if (service.ServiceType != nextService?.ServiceType) {
                     builder.AppendServiceGetter(service);
-                    builder.Append(',');
+                    builder.Append(';');
                     builder.Append('\n');
                 }
                 else {
-                    // TODO when better mapping -> do service.ServiceType[] again
-                    //builder.Append("(global::");
-                    //builder.Append(service.ServiceType);
-                    builder.Append('(');
-                    builder.Append("object");
+                    builder.Append("(global::");
+                    builder.Append(service.ServiceType);
                     builder.Append('[');
                     builder.Append(']');
                     builder.Append(')');
@@ -1068,20 +1064,19 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                         builder.AppendServiceGetter(nextService!);
                         nextService = GetNextService();
                     }
-                    while (serviceMetaName == GetMetaName(nextService));
+                    while (service.ServiceType == nextService?.ServiceType);
 
                     builder.Append(']');
-                    builder.Append(',');
+                    builder.Append(';');
                     builder.Append('\n');
                 }
 
                 service = nextService;
             }
 
-            builder.Append(indent.Sp12);
-            builder.Append("_ => null\n");
             builder.Append(indent.Sp8);
-            builder.Append("};\n");
+            builder.Append("return null;\n");
+
             builder.Append(indent.Sp4);
             builder.Append('}');
             builder.Append('\n');

@@ -64,12 +64,13 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "MyCode.ISingleton" => Singleton,
-            "MyCode.ITestProvider" => Self,
-            "MyCode.ITransient" => Transient,
-            _ => null
-        };
+        if (serviceType == typeof(global::MyCode.ISingleton))
+            return Singleton;
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
+        if (serviceType == typeof(global::MyCode.ITransient))
+            return Transient;
+        return null;
     }
 
 

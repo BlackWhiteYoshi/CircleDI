@@ -82,12 +82,13 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "MyCode.IServiceDispose" => ServiceDispose,
-            "MyCode.IServiceDisposeAsync" => ServiceDisposeAsync,
-            "MyCode.ITestProvider" => Self,
-            _ => null
-        };
+        if (serviceType == typeof(global::MyCode.IServiceDispose))
+            return ServiceDispose;
+        if (serviceType == typeof(global::MyCode.IServiceDisposeAsync))
+            return ServiceDisposeAsync;
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
+        return null;
     }
 
 
@@ -211,13 +212,15 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "MyCode.IServiceDispose" => ServiceDispose,
-                "MyCode.IServiceDisposeAsync" => ServiceDisposeAsync,
-                "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => SelfScope,
-                _ => null
-            };
+            if (serviceType == typeof(global::MyCode.IServiceDispose))
+                return ServiceDispose;
+            if (serviceType == typeof(global::MyCode.IServiceDisposeAsync))
+                return ServiceDisposeAsync;
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return SelfScope;
+            return null;
         }
 
 

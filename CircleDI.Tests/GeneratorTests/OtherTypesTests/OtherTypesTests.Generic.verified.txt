@@ -89,12 +89,17 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "MyCode.ITestProvider" => Self,
-            "MyCode.TestService`1" => (object[])[TestServiceInt, TestService, TestServiceString],
-            "System.IComparable" => Int32,
-            _ => null
-        };
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
+        if (serviceType == typeof(global::MyCode.TestService<int>))
+            return TestServiceInt;
+        if (serviceType == typeof(global::MyCode.TestService<MyCode.TestParameter>))
+            return TestService;
+        if (serviceType == typeof(global::MyCode.TestService<string>))
+            return TestServiceString;
+        if (serviceType == typeof(global::System.IComparable))
+            return Int32;
+        return null;
     }
 
 
@@ -192,13 +197,19 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => SelfScope,
-                "MyCode.TestService`1" => (object[])[TestServiceInt, TestService, TestServiceString],
-                "System.IComparable" => Int32,
-                _ => null
-            };
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::MyCode.TestService<int>))
+                return TestServiceInt;
+            if (serviceType == typeof(global::MyCode.TestService<MyCode.TestParameter>))
+                return TestService;
+            if (serviceType == typeof(global::MyCode.TestService<string>))
+                return TestServiceString;
+            if (serviceType == typeof(global::System.IComparable))
+                return Int32;
+            return null;
         }
 
 

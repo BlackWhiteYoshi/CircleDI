@@ -75,12 +75,13 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "MyCode.ITestProvider" => Self,
-            "MyCode.ITestService" => (object[])[TestService, TestService2],
-            "MyCode.ITestServiceM" => TestServiceM,
-            _ => null
-        };
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
+        if (serviceType == typeof(global::MyCode.ITestService))
+            return (global::MyCode.ITestService[])[TestService, TestService2];
+        if (serviceType == typeof(global::MyCode.ITestServiceM))
+            return TestServiceM;
+        return null;
     }
 
 
@@ -172,13 +173,15 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => SelfScope,
-                "MyCode.ITestService" => (object[])[TestService, TestService2],
-                "MyCode.ITestServiceM" => TestServiceM,
-                _ => null
-            };
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::MyCode.ITestService))
+                return (global::MyCode.ITestService[])[TestService, TestService2];
+            if (serviceType == typeof(global::MyCode.ITestServiceM))
+                return TestServiceM;
+            return null;
         }
 
 

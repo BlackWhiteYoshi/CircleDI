@@ -77,12 +77,13 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "MyCode.ISingleton" => GetSingleton(),
-            "MyCode.ITestProvider" => GetSelf(),
-            "MyCode.ITransient" => GetTransient(),
-            _ => null
-        };
+        if (serviceType == typeof(global::MyCode.ISingleton))
+            return GetSingleton();
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return GetSelf();
+        if (serviceType == typeof(global::MyCode.ITransient))
+            return GetTransient();
+        return null;
     }
 
 
@@ -183,14 +184,17 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "MyCode.IScoped" => GetScoped(),
-                "MyCode.ISingleton" => GetSingleton(),
-                "MyCode.ITestProvider" => GetSelf(),
-                "MyCode.ITestProvider.IScope" => GetSelfScope(),
-                "MyCode.ITransient" => GetTransient(),
-                _ => null
-            };
+            if (serviceType == typeof(global::MyCode.IScoped))
+                return GetScoped();
+            if (serviceType == typeof(global::MyCode.ISingleton))
+                return GetSingleton();
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return GetSelf();
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return GetSelfScope();
+            if (serviceType == typeof(global::MyCode.ITransient))
+                return GetTransient();
+            return null;
         }
 
 

@@ -102,15 +102,19 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "MyCode.ITestProvider" => Self,
-            "MyCode.ITestService1" => TestService1,
-            "MyCode.ITestService2" => TestService2,
-            "MyCode.ITestService3" => TestService3,
-            "MyCode.ITestService4" => TestService4,
-            "MyCode.ITestService5" => TestService5,
-            _ => null
-        };
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
+        if (serviceType == typeof(global::MyCode.ITestService1))
+            return TestService1;
+        if (serviceType == typeof(global::MyCode.ITestService2))
+            return TestService2;
+        if (serviceType == typeof(global::MyCode.ITestService3))
+            return TestService3;
+        if (serviceType == typeof(global::MyCode.ITestService4))
+            return TestService4;
+        if (serviceType == typeof(global::MyCode.ITestService5))
+            return TestService5;
+        return null;
     }
 
 
@@ -219,16 +223,21 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => SelfScope,
-                "MyCode.ITestService1" => TestService1,
-                "MyCode.ITestService2" => TestService2,
-                "MyCode.ITestService3" => TestService3,
-                "MyCode.ITestService4" => TestService4,
-                "MyCode.ITestService5" => TestService5,
-                _ => null
-            };
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::MyCode.ITestService1))
+                return TestService1;
+            if (serviceType == typeof(global::MyCode.ITestService2))
+                return TestService2;
+            if (serviceType == typeof(global::MyCode.ITestService3))
+                return TestService3;
+            if (serviceType == typeof(global::MyCode.ITestService4))
+                return TestService4;
+            if (serviceType == typeof(global::MyCode.ITestService5))
+                return TestService5;
+            return null;
         }
 
 

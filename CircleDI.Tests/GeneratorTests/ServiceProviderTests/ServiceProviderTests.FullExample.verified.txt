@@ -146,19 +146,27 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "MyCode.ISingleton" => Singleton,
-            "MyCode.ISingletonAsyncDisposable" => SingletonAsyncDisposable,
-            "MyCode.ISingletonDependency1" => SingletonDependency1,
-            "MyCode.ISingletonDependency2" => SingletonDependency2,
-            "MyCode.ISingletonDisposable" => SingletonDisposable,
-            "MyCode.ITestProvider" => Self,
-            "MyCode.ITransient" => Transient,
-            "MyCode.ITransientAsyncDisposable" => TransientAsyncDisposable,
-            "MyCode.ITransientDisposable" => TransientDisposable,
-            "MyCode.MyDelegate" => MyDelegate,
-            _ => null
-        };
+        if (serviceType == typeof(global::MyCode.ISingleton))
+            return Singleton;
+        if (serviceType == typeof(global::MyCode.ISingletonAsyncDisposable))
+            return SingletonAsyncDisposable;
+        if (serviceType == typeof(global::MyCode.ISingletonDependency1))
+            return SingletonDependency1;
+        if (serviceType == typeof(global::MyCode.ISingletonDependency2))
+            return SingletonDependency2;
+        if (serviceType == typeof(global::MyCode.ISingletonDisposable))
+            return SingletonDisposable;
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
+        if (serviceType == typeof(global::MyCode.ITransient))
+            return Transient;
+        if (serviceType == typeof(global::MyCode.ITransientAsyncDisposable))
+            return TransientAsyncDisposable;
+        if (serviceType == typeof(global::MyCode.ITransientDisposable))
+            return TransientDisposable;
+        if (serviceType == typeof(global::MyCode.MyDelegate))
+            return MyDelegate;
+        return null;
     }
 
 
@@ -392,25 +400,39 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "MyCode.IScoped" => Scoped,
-                "MyCode.IScopedAsyncDisposable" => ScopedAsyncDisposable,
-                "MyCode.IScopedDependency1" => ScopedDependency1,
-                "MyCode.IScopedDependency2" => ScopedDependency2,
-                "MyCode.IScopedDisposable" => ScopedDisposable,
-                "MyCode.ISingleton" => Singleton,
-                "MyCode.ISingletonAsyncDisposable" => SingletonAsyncDisposable,
-                "MyCode.ISingletonDependency1" => SingletonDependency1,
-                "MyCode.ISingletonDependency2" => SingletonDependency2,
-                "MyCode.ISingletonDisposable" => SingletonDisposable,
-                "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => SelfScope,
-                "MyCode.ITransient" => Transient,
-                "MyCode.ITransientAsyncDisposable" => TransientAsyncDisposable,
-                "MyCode.ITransientDisposable" => TransientDisposable,
-                "MyCode.MyDelegate" => MyDelegate,
-                _ => null
-            };
+            if (serviceType == typeof(global::MyCode.IScoped))
+                return Scoped;
+            if (serviceType == typeof(global::MyCode.IScopedAsyncDisposable))
+                return ScopedAsyncDisposable;
+            if (serviceType == typeof(global::MyCode.IScopedDependency1))
+                return ScopedDependency1;
+            if (serviceType == typeof(global::MyCode.IScopedDependency2))
+                return ScopedDependency2;
+            if (serviceType == typeof(global::MyCode.IScopedDisposable))
+                return ScopedDisposable;
+            if (serviceType == typeof(global::MyCode.ISingleton))
+                return Singleton;
+            if (serviceType == typeof(global::MyCode.ISingletonAsyncDisposable))
+                return SingletonAsyncDisposable;
+            if (serviceType == typeof(global::MyCode.ISingletonDependency1))
+                return SingletonDependency1;
+            if (serviceType == typeof(global::MyCode.ISingletonDependency2))
+                return SingletonDependency2;
+            if (serviceType == typeof(global::MyCode.ISingletonDisposable))
+                return SingletonDisposable;
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::MyCode.ITransient))
+                return Transient;
+            if (serviceType == typeof(global::MyCode.ITransientAsyncDisposable))
+                return TransientAsyncDisposable;
+            if (serviceType == typeof(global::MyCode.ITransientDisposable))
+                return TransientDisposable;
+            if (serviceType == typeof(global::MyCode.MyDelegate))
+                return MyDelegate;
+            return null;
         }
 
 

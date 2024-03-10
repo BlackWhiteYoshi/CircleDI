@@ -98,15 +98,19 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "MyCode.InInject" => InInject,
-            "MyCode.ITestProvider" => Self,
-            "MyCode.OutInject" => OutInject,
-            "MyCode.RefInject" => RefInject,
-            "MyCode.RefReadonlyInject" => RefReadonlyInject,
-            "MyCode.TestStruct" => TestStruct,
-            _ => null
-        };
+        if (serviceType == typeof(global::MyCode.InInject))
+            return InInject;
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
+        if (serviceType == typeof(global::MyCode.OutInject))
+            return OutInject;
+        if (serviceType == typeof(global::MyCode.RefInject))
+            return RefInject;
+        if (serviceType == typeof(global::MyCode.RefReadonlyInject))
+            return RefReadonlyInject;
+        if (serviceType == typeof(global::MyCode.TestStruct))
+            return TestStruct;
+        return null;
     }
 
 
@@ -211,16 +215,21 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "MyCode.InInject" => InInject,
-                "MyCode.ITestProvider" => Self,
-                "MyCode.ITestProvider.IScope" => SelfScope,
-                "MyCode.OutInject" => OutInject,
-                "MyCode.RefInject" => RefInject,
-                "MyCode.RefReadonlyInject" => RefReadonlyInject,
-                "MyCode.TestStruct" => TestStruct,
-                _ => null
-            };
+            if (serviceType == typeof(global::MyCode.InInject))
+                return InInject;
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::MyCode.OutInject))
+                return OutInject;
+            if (serviceType == typeof(global::MyCode.RefInject))
+                return RefInject;
+            if (serviceType == typeof(global::MyCode.RefReadonlyInject))
+                return RefReadonlyInject;
+            if (serviceType == typeof(global::MyCode.TestStruct))
+                return TestStruct;
+            return null;
         }
 
 
