@@ -179,7 +179,7 @@ public class MyService : IMyService {
   - [Overwriting default services](Readme_md/ConfigurationAndCustomization.md#overwriting-default-services)
   - [Custom Constructor](Readme_md/ConfigurationAndCustomization.md#custom-constructor)
   - [Custom Dispose](Readme_md/ConfigurationAndCustomization.md#custom-dispose)
-  - [Struct](Readme_md/ConfigurationAndCustomization.md#struct)
+  - [Struct Types and Native/Built-in Types](Readme_md/ConfigurationAndCustomization.md#struct-types-and-nativebuilt-in-types)
 - [Workarounds for not supported Features](Readme_md/ConfigurationAndCustomization.md#workarounds-for-not-supported-features)
   - [Async Constructor](Readme_md/ConfigurationAndCustomization.md#async-constructor)
   - [Decoration](Readme_md/ConfigurationAndCustomization.md#decoration)

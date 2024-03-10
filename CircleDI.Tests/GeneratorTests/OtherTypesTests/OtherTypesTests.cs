@@ -1,8 +1,6 @@
 ﻿using CircleDI.Tests.GenerateSourceText;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Data.Common;
-using System.Reflection.Metadata;
 
 namespace CircleDI.Tests;
 
@@ -133,6 +131,43 @@ public static class OtherTypesTests {
 
 
     [Fact]
+    public static Task Generic() {
+        const string input = """
+            using CircleDIAttributes;
+            using System;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService<TestParameter>>]
+            [Singleton<TestService<int>>(Name = $"{nameof(TestService<int>)}Int")]
+            [Singleton<TestService<string>>(Name = $"{nameof(TestService<string>)}String")]
+            [Singleton<IComparable, int>]
+            public sealed partial class TestProvider;
+
+
+            public sealed class TestService<T>;
+            public sealed class TestParameter;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+
+    [Fact]
     public static Task Struct() {
         const string input = """
             using CircleDIAttributes;
@@ -184,7 +219,7 @@ public static class OtherTypesTests {
             public record class TestService(ITestDependency testDependency) : ITestService;
 
             public interface ITestDependency;
-            public record class TestDependency() : ITestDependency;
+            public record class TestDependency : ITestDependency;
 
             """;
 
@@ -248,13 +283,14 @@ public static class OtherTypesTests {
 
             [ServiceProvider]
             [Singleton<TestClass>]
-            [Singleton<TestStruct>]
+            [Singleton<ITestStruct, TestStruct>]
             [Singleton<int>]
             public sealed partial class TestProvider;
             
 
             public class TestClass(int number);
 
+            public interface ITestStruct;
             [method: Constructor]
             public struct TestStruct(int number);
 
@@ -275,7 +311,78 @@ public static class OtherTypesTests {
             """);
     }
 
-    
+
+    [Fact]
+    public static Task RefInClassProviderAndNoRefInStructProvider() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestStruct>]
+            [Scoped<TestStruct>(Name = $"{nameof(TestStruct)}Scoped")]
+            public partial struct TestProvider;
+            
+            public struct TestStruct;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task RefInOutInjection() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestStruct>]
+            [Singleton<RefInject>]
+            [Singleton<InInject>]
+            [Singleton<OutInject>]
+            [Singleton<RefReadonlyInject>]
+            public sealed partial class TestProvider;
+            
+            public struct TestStruct;
+
+            public sealed class RefInject(ref TestStruct testStruct);
+            public sealed class InInject(in TestStruct testStruct);
+            public sealed class OutInject(out TestStruct testStruct);
+            public sealed class RefReadonlyInject(ref readonly TestStruct testStruct);
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+
     [Fact]
     public static Task Delegate() {
         const string input = """

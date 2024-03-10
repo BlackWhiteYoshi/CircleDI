@@ -93,7 +93,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -112,7 +113,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service3",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -252,13 +254,15 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service4",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 },
                 new ConstructorDependency() {
                     Name = string.Empty,
                     ServiceIdentifier = "Service5",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -372,13 +376,15 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 },
                 new ConstructorDependency() {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -421,13 +427,15 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 },
                 new ConstructorDependency() {
                     Name = string.Empty,
                     ServiceIdentifier = "Service3",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -446,7 +454,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service3",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -490,13 +499,15 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 },
                 new ConstructorDependency() {
                     Name = string.Empty,
                     ServiceIdentifier = "Service3",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -515,7 +526,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service4",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -534,7 +546,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service4",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -656,7 +669,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service3",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -675,7 +689,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service3",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -718,7 +733,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service4",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -737,7 +753,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service3",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -756,7 +773,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service4",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -840,7 +858,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service4",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -859,7 +878,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service3",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -878,7 +898,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service4",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -1050,6 +1071,7 @@ public static class DependencyTreeTests {
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
                     HasAttribute = false,
+                    ByRef = RefKind.None,
                 }
             ],
             PropertyDependencyList = [],
@@ -1129,7 +1151,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -1172,7 +1195,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -1214,7 +1238,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -1257,7 +1282,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -1300,7 +1326,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -1428,7 +1455,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -1498,7 +1526,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],
@@ -1544,7 +1573,8 @@ public static class DependencyTreeTests {
                     Name = string.Empty,
                     ServiceIdentifier = "Service2",
                     IsNamed = false,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ByRef = RefKind.None
                 }
             ],
             PropertyDependencyList = [],

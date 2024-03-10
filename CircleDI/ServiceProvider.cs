@@ -540,7 +540,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             Name = InterfaceName,
                             IsNamed = false,
                             ServiceIdentifier = serviceType,
-                            HasAttribute = false
+                            HasAttribute = true,
+                            ByRef = RefKind.None
                         }];
 
                     (propertyDependencyList, Diagnostic? propertyListError) = Service.CreatePropertyDependencyList(serviceProviderScope!, serviceProviderAttribute);
@@ -555,7 +556,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         Name = InterfaceName,
                         IsNamed = false,
                         ServiceIdentifier = serviceType,
-                        HasAttribute = false
+                        HasAttribute = true,
+                        ByRef = RefKind.None
                     }];
                     propertyDependencyList = [];
                 }
@@ -569,7 +571,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     GetAccessor = GetAccess.Property,
                     ConstructorDependencyList = constructorDependencyList,
                     PropertyDependencyList = propertyDependencyList,
-                    Dependencies = constructorDependencyList.Concat<Dependency>(propertyDependencyList).Where((Dependency dependency) => !dependency.HasAttribute)
+                    Dependencies = constructorDependencyList.Concat<Dependency>(propertyDependencyList).Where((Dependency dependency) => dependency.HasAttribute)
                 };
             }
         }

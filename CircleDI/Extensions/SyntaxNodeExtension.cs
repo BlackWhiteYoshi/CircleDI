@@ -71,21 +71,24 @@ internal static class SyntaxNodeExtension {
                         Name = constructor.Parameters[i].Name,
                         IsNamed = true,
                         ServiceIdentifier = dependencyName,
-                        HasAttribute = false
+                        HasAttribute = true,
+                        ByRef = constructor.Parameters[i].RefKind
                     };
                 else
                     result[i] = new ConstructorDependency() {
                         Name = constructor.Parameters[i].Name,
                         IsNamed = false,
                         ServiceIdentifier = constructor.Parameters[i].Type.ToFullQualifiedName(),
-                        HasAttribute = false
+                        HasAttribute = true,
+                        ByRef = constructor.Parameters[i].RefKind
                     };
             else
                 result[i] = new ConstructorDependency() {
                     Name = constructor.Parameters[i].Name,
                     IsNamed = false,
                     ServiceIdentifier = constructor.Parameters[i].Type.ToFullQualifiedName(),
-                    HasAttribute = true
+                    HasAttribute = false,
+                    ByRef = constructor.Parameters[i].RefKind
                 };
 
         return result;

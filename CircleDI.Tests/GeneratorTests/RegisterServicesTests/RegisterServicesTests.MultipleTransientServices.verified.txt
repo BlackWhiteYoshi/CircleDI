@@ -77,7 +77,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     object? IServiceProvider.GetService(Type serviceType) {
         return serviceType.FullName switch {
             "MyCode.ITestProvider" => Self,
-            "MyCode.ITestService" => (global::MyCode.ITestService[])[TestService, TestService2],
+            "MyCode.ITestService" => (object[])[TestService, TestService2],
             "MyCode.ITestServiceM" => TestServiceM,
             _ => null
         };
@@ -175,7 +175,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
             return serviceType.FullName switch {
                 "MyCode.ITestProvider" => Self,
                 "MyCode.ITestProvider.IScope" => SelfScope,
-                "MyCode.ITestService" => (global::MyCode.ITestService[])[TestService, TestService2],
+                "MyCode.ITestService" => (object[])[TestService, TestService2],
                 "MyCode.ITestServiceM" => TestServiceM,
                 _ => null
             };

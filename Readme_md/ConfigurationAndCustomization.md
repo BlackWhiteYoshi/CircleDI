@@ -13,7 +13,7 @@
   - [Overwriting default services](#overwriting-default-services)
   - [Custom Constructor](#custom-constructor)
   - [Custom Dispose](#custom-dispose)
-  - [Struct](#struct)
+  - [Struct Types and Native/Built-in Types](#struct-types-and-nativebuilt-in-types)
 - [Workarounds for not supported Features](#workarounds-for-not-supported-features)
   - [Async Constructor](#async-constructor)
   - [Decoration](#decoration)
@@ -413,10 +413,26 @@ public sealed partial class MyProvider {
 ### Struct Types and Native/Built-in Types
 
 It is also possible to register struct types or native/built-in types as service.
-However, structs are value types and therefore copied when retrieving the service.
-So make sure the registered struct is trivially copyable.
+If structs are passed by value, they get copied when retrieving the service.
+So, make sure the registered struct is trivially copyable.
 
-Getting a value type service by reference is not supported yet.
+Passing a struct by reference is only possible in certain conditions.
+First of all, only singleton and scoped services can be passed by reference, transient services have no field where the reference could point to.
+Additionally service type and implementation type must be the same and the ServiceProvider must be a class.  
+To pass by reference just use *ref*, *ref readonly*, *in* or *out* on a dependency parameter.
+
+```csharp
+[ServiceProvider]
+[Singleton<IService, Service>]
+[Singleton<StructService>]
+public sealed partial class MyProvider;
+
+
+public interface IService;
+public sealed class Service(ref StructService structService) : IService;
+
+public struct StructService;
+```
 
 
 <br></br>

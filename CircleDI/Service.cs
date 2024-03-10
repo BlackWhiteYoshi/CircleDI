@@ -31,6 +31,12 @@ public sealed class Service : IEquatable<Service> {
     public int ServiceTypeArity { get; init; } = 0;
 
     /// <summary>
+    /// Is true, when service is singleton/scoped and service and implementation are the same and they are a struct, record struct or native/built-in type.<br />
+    /// Is false, when Class or record class.
+    /// </summary>
+    public bool IsRefable { get; init; } = false;
+
+    /// <summary>
     /// <para>The type of the actual object that will be instatiated.</para>
     /// <para>If only 1 TypeArgument in the register attribute is present, then ServiceType and ImplementationType is the same.</para>
     /// </summary>
@@ -147,6 +153,7 @@ public sealed class Service : IEquatable<Service> {
         Lifetime = lifetime;
         ServiceType = serviceType.ToFullQualifiedName();
         ServiceTypeArity = serviceType.Arity;
+        IsRefable = lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped && serviceType.IsValueType && SymbolEqualityComparer.Default.Equals(serviceType, implementationType);
         ImplementationType = implementationType.ToFullQualifiedName();
         Name = attributeData.NamedArguments.GetArgument<string>("Name") ?? implementationType.Name.Replace('.', '_');
         CreationTime = (CreationTiming?)attributeData.NamedArguments.GetArgument<int?>("CreationTime") ?? creationTimeProvider;
@@ -385,19 +392,21 @@ public sealed class Service : IEquatable<Service> {
                     return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
                 return (implementation.InstanceConstructors[0], null);
             default:
-                IMethodSymbol? constructor = null;
+                IMethodSymbol? attributeConstructor = null;
+                IMethodSymbol? lastAvailableConstructor = null;
                 int availableConstructors = 0;
                 foreach (IMethodSymbol ctor in implementation.InstanceConstructors) {
                     if (ctor.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
                         continue;
 
                     availableConstructors++;
+                    lastAvailableConstructor = ctor;
 
                     if (ctor.GetAttribute("ConstructorAttribute") != null)
-                        if (constructor == null)
-                            constructor = ctor;
+                        if (attributeConstructor == null)
+                            attributeConstructor = ctor;
                         else {
-                            AttributeData firstAttribute = constructor.GetAttribute("ConstructorAttribute")!;
+                            AttributeData firstAttribute = attributeConstructor.GetAttribute("ConstructorAttribute")!;
                             AttributeData secondAttribute = ctor.GetAttribute("ConstructorAttribute")!;
                             return (null, firstAttribute.CreateMultipleConstructorAttributesError(secondAttribute, implementation, implementation.ToDisplayString()));
                         }
@@ -407,12 +416,12 @@ public sealed class Service : IEquatable<Service> {
                     case 0:
                         return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
                     case 1:
-                        return (implementation.InstanceConstructors[0], null);
+                        return (lastAvailableConstructor, null);
                     default:
-                        if (constructor == null)
+                        if (attributeConstructor == null)
                             return (null, attributeData.CreateMissingConstructorAttributesError(implementation, implementation.ToDisplayString()));
                         else
-                            return (constructor, null);
+                            return (attributeConstructor, null);
                 }
         }
     }
@@ -436,7 +445,7 @@ public sealed class Service : IEquatable<Service> {
 
                 bool isNamed;
                 string serviceIdentifier;
-                bool isParameter;
+                bool hasAttribute;
                 if (property.GetAttribute("DependencyAttribute") is AttributeData propertyAttribute) {
                     if (property.SetMethod == null)
                         return ([], attributeData.CreateMissingSetAccessorError(property, baseType, property.ToDisplayString()));
@@ -444,12 +453,12 @@ public sealed class Service : IEquatable<Service> {
                     if (propertyAttribute.NamedArguments.GetArgument<string>("Name") is string dependencyName) {
                         isNamed = true;
                         serviceIdentifier = dependencyName;
-                        isParameter = false;
+                        hasAttribute = true;
                     }
                     else {
                         isNamed = false;
                         serviceIdentifier = property.Type.ToFullQualifiedName();
-                        isParameter = false;
+                        hasAttribute = true;
                     }
                 }
                 else if (property.IsRequired) {
@@ -459,7 +468,7 @@ public sealed class Service : IEquatable<Service> {
 
                     isNamed = false;
                     serviceIdentifier = property.Type.ToFullQualifiedName();
-                    isParameter = true;
+                    hasAttribute = false;
                 }
                 else
                     continue;
@@ -468,7 +477,7 @@ public sealed class Service : IEquatable<Service> {
                     Name = property.Name,
                     IsNamed = isNamed,
                     ServiceIdentifier = serviceIdentifier,
-                    HasAttribute = isParameter,
+                    HasAttribute = hasAttribute,
                     IsInit = property.SetMethod.IsInitOnly,
                     IsRequired = property.IsRequired,
                 });
@@ -502,6 +511,8 @@ public sealed class Service : IEquatable<Service> {
         if (ServiceType != other.ServiceType)
             return false;
         if (ServiceTypeArity != other.ServiceTypeArity)
+            return false;
+        if (IsRefable != other.IsRefable)
             return false;
         if (ImplementationType != other.ImplementationType)
             return false;
@@ -545,6 +556,7 @@ public sealed class Service : IEquatable<Service> {
         int hashCode = Lifetime.GetHashCode();
         hashCode = Combine(hashCode, ServiceType.GetHashCode());
         hashCode = Combine(hashCode, ServiceTypeArity.GetHashCode());
+        hashCode = Combine(hashCode, IsRefable.GetHashCode());
         hashCode = Combine(hashCode, ImplementationType.GetHashCode());
         hashCode = Combine(hashCode, Implementation.GetHashCode());
 
