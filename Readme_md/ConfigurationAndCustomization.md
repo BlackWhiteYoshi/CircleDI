@@ -76,6 +76,10 @@ For in depth explanation see [Named Services](#named-services).
 If nothing is specified both Dispose() and DisposeAsync() methods are generated to implement IDisposable and IAsyncDisposable.
 You can configure this property to only generate one method or omit both.
 
+- *NoDispose*
+Skips the generation for disposing a specific service, regardless the service implements [IDisposable](https://learn.microsoft.com/en-us/dotnet/api/system.idisposable) or [IAsyncDisposable](https://learn.microsoft.com/en-us/dotnet/api/system.iasyncdisposable).
+If the service does not implement [IDisposable](https://learn.microsoft.com/en-us/dotnet/api/system.idisposable)/[IAsyncDisposable](https://learn.microsoft.com/en-us/dotnet/api/system.iasyncdisposable), this will have no effect.
+
 - *Generate* (ScopeProvider):
 Toggles the generation off the Scope Class inside the ServiceProvider.
 If turned off, no Scope is generated and therefore <see cref="ScopedAttribute"/> has no effect.

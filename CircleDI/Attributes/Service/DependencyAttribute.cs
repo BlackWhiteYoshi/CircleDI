@@ -20,7 +20,13 @@ public static partial class Attributes {
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class DependencyAttribute : Attribute {
-            {{DEPENDENCY_NAME_PROPERTY}}
+            /// <summary>
+            /// <para>The name this dependency gets the service injected from.</para>
+            /// <para>If omitted, it will match based on the type.</para>
+            /// <para>If multiple services for this type exists, this property must be set, otherwise compile error.</para>
+            /// <para>When the Name property of a service not set, the name defaults to the name of TImplementation.</para>
+            /// </summary>
+            public string Name { get; init; }
         }
 
         #endif

@@ -159,6 +159,10 @@ public sealed class Service : IEquatable<Service> {
         CreationTime = (CreationTiming?)attributeData.NamedArguments.GetArgument<int?>("CreationTime") ?? creationTimeProvider;
         GetAccessor = (GetAccess?)attributeData.NamedArguments.GetArgument<int?>("GetAccessor") ?? getAccessorProvider;
 
+        bool noDispose = attributeData.NamedArguments.GetArgument<bool>("NoDispose");
+        IsDisposable = !noDispose && implementationType.HasInterface("IDisposable");
+        IsAsyncDisposable = !noDispose && implementationType.HasInterface("IAsyncDisposable");
+
         // Implementation, ConstructorDependencyList, PropertyDependencyList
         if (attributeData.NamedArguments.GetArgument<string>("Implementation") is not string implementationName) {
             Implementation = default;
@@ -293,9 +297,6 @@ public sealed class Service : IEquatable<Service> {
             PropertyDependencyList = [];
         }
         Dependencies = DependenciesDefaultIterator;
-
-        IsDisposable = implementationType.HasInterface("IDisposable");
-        IsAsyncDisposable = implementationType.HasInterface("IAsyncDisposable");
     }
 
     /// <summary>

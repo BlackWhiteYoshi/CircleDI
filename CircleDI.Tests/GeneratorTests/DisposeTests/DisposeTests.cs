@@ -329,6 +329,32 @@ public static class DisposeTests {
     }
 
     [Fact]
+    public static Task NoDisposeProperty() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Transient<ITestService, TestService>(NoDispose = true)]
+            [Transient<ITestDisposable, TestDisposable>(NoDispose = true)]
+            public sealed partial class TestProvider;
+
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
+            public interface ITestDisposable;
+            public sealed class TestDisposable : ITestDisposable, IDisposable;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+    [Fact]
     public static Task MultipleSingletons() {
         const string input = """
             using CircleDIAttributes;

@@ -29,13 +29,13 @@ public static partial class Attributes {
             public string Name { get; init; }
         """;
 
-    private const string DEPENDENCY_NAME_PROPERTY = """
+    private const string SERVICE_NO_DISPOSE_PROPERTY = """
         /// <summary>
-            /// <para>The name this dependency gets the service injected from.</para>
-            /// <para>If omitted, it will match based on the type.</para>
-            /// <para>If multiple services for this type exists, this property must be set, otherwise compile error.</para>
-            /// <para>When the Name property of a service not set, the name defaults to the name of TImplementation.</para>
+            /// <para>When true, the ServiceProvider does not dispose this service on <see cref="System.IDisposable.Dispose">Dispose()</see> or <see cref="System.IAsyncDisposable.DisposeAsync">DisposeAsync()</see>,
+            /// regardless the service implements <see cref="System.IDisposable">IDisposable</see> or <see cref="System.IAsyncDisposable">IAsyncDisposable</see>.</para>
+            /// <para>If the service does not implement <see cref="System.IDisposable">IDisposable</see>/<see cref="System.IAsyncDisposable">IAsyncDisposable</see>, this will have no effect.</para>
+            /// <para>Default is false.</para>
             /// </summary>
-            public string Name { get; init; }
+            public bool NoDispose { get; init; }
         """;
 }

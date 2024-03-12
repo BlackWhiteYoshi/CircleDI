@@ -31,6 +31,8 @@ public static partial class Attributes {
             {{SERVICE_NAME_PROPERTY}}
 
             {{GET_ACCESSOR_PROPERTY}}
+
+            {{SERVICE_NO_DISPOSE_PROPERTY}}
         }
 
         /// <summary>
