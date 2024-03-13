@@ -26,17 +26,20 @@ public sealed class PropertyDependency : Dependency, IEquatable<PropertyDependen
 
     #region Equals
 
-    public static bool operator ==(PropertyDependency left, PropertyDependency right) => left.Equals(right);
-
-    public static bool operator !=(PropertyDependency left, PropertyDependency right) => !(left == right); 
-    
-    public override bool Equals(object? obj)
-        => obj switch {
-            PropertyDependency propertyDependency => Equals(propertyDependency),
-            _ => false
+    public static bool operator ==(PropertyDependency? left, PropertyDependency? right)
+        => (left, right) switch {
+            (null, null) => true,
+            (null, not null) => false,
+            (not null, _) => left.Equals(right)
         };
 
-    public bool Equals(PropertyDependency other) {
+    public static bool operator !=(PropertyDependency? left, PropertyDependency? right) => !(left == right);
+
+    public override bool Equals(object? obj) => Equals(obj as PropertyDependency);
+
+    public bool Equals(PropertyDependency? other) {
+        if (other is null)
+            return false;
         if (ReferenceEquals(this, other))
             return true;
 

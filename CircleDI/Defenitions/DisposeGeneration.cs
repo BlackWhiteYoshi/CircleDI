@@ -9,7 +9,7 @@
 /// <para>It can be toggled that both are generated, only one of them or the generation is skipped entirely.</para>
 /// </summary>
 [Flags]
-public enum DisposeGeneration : byte {
+public enum DisposeGeneration {
     /// <summary>
     /// The generation of both dispose methods will be skipped.
     /// </summary>

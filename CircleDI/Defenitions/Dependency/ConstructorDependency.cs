@@ -13,17 +13,20 @@ public sealed class ConstructorDependency : Dependency, IEquatable<ConstructorDe
 
     #region Equals
 
-    public static bool operator ==(ConstructorDependency left, ConstructorDependency right) => left.Equals(right);
-
-    public static bool operator !=(ConstructorDependency left, ConstructorDependency right) => !(left == right);
-
-    public override bool Equals(object? obj)
-        => obj switch {
-            ConstructorDependency constructorDependency => Equals(constructorDependency),
-            _ => false
+    public static bool operator ==(ConstructorDependency? left, ConstructorDependency? right)
+        => (left, right) switch {
+            (null, null) => true,
+            (null, not null) => false,
+            (not null, _) => left.Equals(right)
         };
 
-    public bool Equals(ConstructorDependency other) {
+    public static bool operator !=(ConstructorDependency? left, ConstructorDependency? right) => !(left == right);
+
+    public override bool Equals(object? obj) => Equals(obj as ConstructorDependency);
+
+    public bool Equals(ConstructorDependency? other) {
+        if (other is null)
+            return false;
         if (ReferenceEquals(this, other))
             return true;
 
@@ -44,21 +47,4 @@ public sealed class ConstructorDependency : Dependency, IEquatable<ConstructorDe
     }
 
     #endregion
-}
-
-public static class RefKindExtension {
-    /// <summary>
-    /// <para>Maps <see cref="RefKind"/> to <see cref="string"/>.</para>
-    /// <para>Actually <see cref="RefKind"/> should be a enum of string in the first place, but C# does not support that.</para>
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    public static string AsString(this RefKind value)
-        => value switch {
-            RefKind.None => string.Empty,
-            RefKind.Ref or RefKind.RefReadOnlyParameter => "ref ",
-            RefKind.Out => "out ",
-            RefKind.In => "in ",
-            RefKind.RefReadOnly or _ => throw new Exception($"Invalid enum Type '{nameof(RefKind)}': {value}")
-        };
 }

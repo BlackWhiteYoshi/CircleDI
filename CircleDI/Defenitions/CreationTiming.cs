@@ -6,7 +6,7 @@
 /// At ServiceProvider instantiation (inside the constructor) or lazy (first time used).
 /// </para>
 /// </summary>
-public enum CreationTiming : byte {
+public enum CreationTiming {
     /// <summary>
     /// The instantiation of the service happens inside the constructor of the ServiceProvider.
     /// </summary>

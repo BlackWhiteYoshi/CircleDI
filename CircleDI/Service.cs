@@ -490,17 +490,20 @@ public sealed class Service : IEquatable<Service> {
 
     #region Equals
 
-    public static bool operator ==(Service left, Service right) => left.Equals(right);
-
-    public static bool operator !=(Service left, Service right) => !(left == right);
-
-    public override bool Equals(object? obj)
-        => obj switch {
-            Service service => Equals(service),
-            _ => false
+    public static bool operator ==(Service? left, Service? right)
+        => (left, right) switch {
+            (null, null) => true,
+            (null, not null) => false,
+            (not null, _) => left.Equals(right)
         };
 
-    public bool Equals(Service other) {
+    public static bool operator !=(Service? left, Service? right) => !(left == right);
+
+    public override bool Equals(object? obj) => Equals(obj as Service);
+
+    public bool Equals(Service? other) {
+        if (other is null)
+            return false;
         if (ReferenceEquals(this, other))
             return true;
 
@@ -537,18 +540,8 @@ public sealed class Service : IEquatable<Service> {
         if (IsAsyncDisposable != other.IsAsyncDisposable)
             return false;
 
-        switch ((ErrorList, other.ErrorList)) {
-            case (null, null):
-                break;
-            case (not null, null):
-                return false;
-            case (null, not null):
-                return false;
-            default:
-                if (!ErrorList.SequenceEqual(other.ErrorList))
-                    return false;
-                break;
-        }
+        if (!ErrorList.SequenceNullEqual(other.ErrorList))
+            return false;
 
         return true;
     }

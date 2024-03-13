@@ -4,7 +4,7 @@
 /// The type of the member to access the service.<br />
 /// It can be either property or method.
 /// </summary>
-public enum GetAccess : byte {
+public enum GetAccess {
     /// <summary>
     /// <para>The member will be a property with a get-accessor.</para>
     /// <para> The name of the Property will be the same as the service name.</para>

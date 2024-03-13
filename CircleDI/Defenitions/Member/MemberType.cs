@@ -3,7 +3,7 @@
 /// <summary>
 /// The type of the implementation, it can be a field, property, method or none (null).
 /// </summary>
-public enum MemberType : byte {
+public enum MemberType {
     /// <summary>
     /// Indicates that no implementation exists.<br />
     /// It means the same as 'null'.

@@ -792,17 +792,20 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
     #region Equals
 
-    public static bool operator ==(ServiceProvider left, ServiceProvider right) => left.Equals(right);
-
-    public static bool operator !=(ServiceProvider left, ServiceProvider right) => !(left == right);
-
-    public override bool Equals(object? obj)
-        => obj switch {
-            ServiceProvider serviceProvider => Equals(serviceProvider),
-            _ => false
+    public static bool operator ==(ServiceProvider? left, ServiceProvider? right)
+        => (left, right) switch {
+            (null, null) => true,
+            (null, not null) => false,
+            (not null, _) => left.Equals(right)
         };
 
-    public bool Equals(ServiceProvider other) {
+    public static bool operator !=(ServiceProvider? left, ServiceProvider? right) => !(left == right);
+
+    public override bool Equals(object? obj) => Equals(obj as ServiceProvider);
+
+    public bool Equals(ServiceProvider? other) {
+        if (other is null)
+            return false;
         if (ReferenceEquals(this, other))
             return true;
 
@@ -846,18 +849,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         if (ThreadSafeScope != other.ThreadSafeScope)
             return false;
 
-        switch ((CreateScope, other.CreateScope)) {
-            case (null, null):
-                break;
-            case (not null, null):
-                return false;
-            case (null, not null):
-                return false;
-            default:
-                if (CreateScope != other.CreateScope)
-                    return false;
-                break;
-        }
+        if (CreateScope != other.CreateScope)
+            return false;
 
         if (!SingletonList.SequenceEqual(other.SingletonList))
             return false;
@@ -868,18 +861,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         if (!DelegateList.SequenceEqual(other.DelegateList))
             return false;
 
-        switch ((ErrorList, other.ErrorList)) {
-            case (null, null):
-                break;
-            case (not null, null):
-                return false;
-            case (null, not null):
-                return false;
-            default:
-                if (!ErrorList.SequenceEqual(other.ErrorList))
-                    return false;
-                break;
-        }
+        if (!ErrorList.SequenceNullEqual(other.ErrorList))
+            return false;
 
         return true;
     }

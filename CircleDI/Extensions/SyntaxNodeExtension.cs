@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 
 namespace CircleDI;
 
-internal static class SyntaxNodeExtension {
+public static class SyntaxNodeExtension {
     /// <summary>
     /// <para>Finds the attribute with the given name.</para>
     /// <para>If the given attribute is not present, it returns null.</para>
@@ -11,7 +11,7 @@ internal static class SyntaxNodeExtension {
     /// <param name="symbol"></param>
     /// <param name="name"></param>
     /// <returns></returns>
-    internal static AttributeData? GetAttribute(this ISymbol symbol, string name) {
+    public static AttributeData? GetAttribute(this ISymbol symbol, string name) {
         foreach (AttributeData attributeData in symbol.GetAttributes())
             if (attributeData.AttributeClass?.Name == name)
                 return attributeData;
@@ -26,7 +26,7 @@ internal static class SyntaxNodeExtension {
     /// <param name="arguments"></param>
     /// <param name="name"></param>
     /// <returns></returns>
-    internal static T? GetArgument<T>(this ImmutableArray<KeyValuePair<string, TypedConstant>> arguments, string name) {
+    public static T? GetArgument<T>(this ImmutableArray<KeyValuePair<string, TypedConstant>> arguments, string name) {
         for (int i = 0; i < arguments.Length; i++)
             if (arguments[i].Key == name)
                 return arguments[i].Value switch {
@@ -43,7 +43,7 @@ internal static class SyntaxNodeExtension {
     /// <param name="symbol"></param>
     /// <param name="name"></param>
     /// <returns></returns>
-    internal static bool HasInterface(this ITypeSymbol symbol, string name) {
+    public static bool HasInterface(this ITypeSymbol symbol, string name) {
         foreach (INamedTypeSymbol interfaceSymbol in symbol.AllInterfaces)
             if (interfaceSymbol.Name == name)
                 return true;
@@ -61,7 +61,7 @@ internal static class SyntaxNodeExtension {
     /// </summary>
     /// <param name="constructor"></param>
     /// <returns></returns>
-    internal static ConstructorDependency[] CreateConstructorDependencyList(this IMethodSymbol constructor) {
+    public static ConstructorDependency[] CreateConstructorDependencyList(this IMethodSymbol constructor) {
         ConstructorDependency[] result = new ConstructorDependency[constructor.Parameters.Length];
 
         for (int i = 0; i < constructor.Parameters.Length; i++)
@@ -103,7 +103,7 @@ internal static class SyntaxNodeExtension {
     /// </summary>
     /// <param name="typeSymbol"
     /// <returns></returns>
-    internal static string ToFullQualifiedName(this ITypeSymbol typeSymbol) {
+    public static string ToFullQualifiedName(this ITypeSymbol typeSymbol) {
         string type = typeSymbol.ToDisplayString();
 
         return type switch {
@@ -130,4 +130,22 @@ internal static class SyntaxNodeExtension {
             _ => type
         };
     }
+
+
+    /// <summary>
+    /// Determines whether two sequences are equal by comparing the elements by using the default equality comparer for their type.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements of the input sequences.</typeparam>
+    /// <param name="first"></param>
+    /// <param name="second"></param>
+    /// <returns>
+    /// true if both are null or the two source sequences are of equal length and their corresponding elements are equal according to the default equality comparer for their type<br />
+    /// false if one source sequence is null or the item length or an item in the sequence differs.
+    /// </returns>
+    public static bool SequenceNullEqual<T>(this IEnumerable<T>? first, IEnumerable<T>? second)
+        => (first, second) switch {
+            (null, null) => true,
+            (not null, null) or (null, not null) => false,
+            (not null, not null) => first.SequenceEqual(second)
+        };
 }

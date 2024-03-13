@@ -4,7 +4,7 @@
 /// Some Flags for creating, processing or consuming the dependency tree.
 /// </summary>
 [Flags]
-public enum DependencyTreeFlags : byte {
+public enum DependencyTreeFlags {
     /// <summary>
     /// The initial value, no flags are set.
     /// </summary>

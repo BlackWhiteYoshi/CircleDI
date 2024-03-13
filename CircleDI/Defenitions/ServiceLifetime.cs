@@ -5,7 +5,7 @@
 /// Singleton, Scoped, Transient or TransientSingleton, TransientScoped or Delegate.
 /// </summary>
 [Flags]
-public enum ServiceLifetime : byte {
+public enum ServiceLifetime {
     /// <summary>
     /// Service living in ServiceProvider and is getting constructed once.
     /// </summary>
@@ -36,15 +36,4 @@ public enum ServiceLifetime : byte {
     /// Service without lifetime, methods are constant executable data and therefore created at compile time.
     /// </summary>
     Delegate = 0b000
-}
-
-public static class ServiceLifeTimeToStringExtension {
-    public static string AsString(this ServiceLifetime serviceLifetime)
-        => serviceLifetime switch {
-            ServiceLifetime.Singleton => nameof(ServiceLifetime.Singleton),
-            ServiceLifetime.Scoped => nameof(ServiceLifetime.Scoped),
-            ServiceLifetime.Transient or ServiceLifetime.TransientSingleton or ServiceLifetime.TransientScoped => nameof(ServiceLifetime.Transient),
-            ServiceLifetime.Delegate => nameof(ServiceLifetime.Delegate),
-            _ => ((int)serviceLifetime).ToString()
-        };
 }
