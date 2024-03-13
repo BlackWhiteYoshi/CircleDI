@@ -120,7 +120,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </summary>
         /// <param name="serviceProvider">
         /// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />
-        /// public Scope(ITestProvider serviceProvider) { ...
+        /// public Scope([Dependency] ITestProvider serviceProvider) { ...
         /// </param>
         [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(__serviceProvider))]
         private void InitServices(ITestProvider serviceProvider) {

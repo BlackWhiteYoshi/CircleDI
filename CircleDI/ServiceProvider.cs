@@ -18,14 +18,27 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public required string Name { get; init; }
 
     /// <summary>
-    /// Name of the interface that the generated Service Provider implements.
-    /// </summary>
-    public required string InterfaceName { get; init; }
-
-    /// <summary>
     /// The containing namespace of the ServiceProvider with trailing '.'
     /// </summary>
     public required string NameSpace { get; init; }
+
+    /// <summary>
+    /// Name of the interface that the generated Service Provider implements.
+    /// </summary>
+    public required string InterfaceName {
+        get => _interfaceName;
+        init {
+            _interfaceName = value;
+            HasInterface = value.Length > 0;
+        }
+    }
+    private readonly string _interfaceName = string.Empty;
+
+    /// <summary>
+    /// Is true when <see cref="InterfaceName"/> is not empty.<br />
+    /// If empty, no interface will be generated.
+    /// </summary>
+    public bool HasInterface { get; private set; }
 
 
     /// <summary>
@@ -408,13 +421,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         // adding services and default services
         {
             // Default service ServiceProvider itself
-            string serviceType = $"{NameSpace}{InterfaceName}";
             string implementationType = $"{NameSpace}{Name}";
+            string serviceType = HasInterface ? $"{NameSpace}{InterfaceName}" : implementationType;
             bool hasServiceSelf = false;
 
             // Default Service ServiceProvider.Scope self
-            string serviceTypeScope = $"{NameSpace}{InterfaceName}.IScope";
             string implementationTypeScope = $"{NameSpace}{Name}.Scope";
+            string serviceTypeScope = HasInterface ? $"{NameSpace}{InterfaceName}.IScope" : implementationTypeScope;
             bool hasServiceSelfScope = false;
 
             // register services [Singleton<>, Scoped<>, Transient<>, Delegate<> attributes]
@@ -528,7 +541,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     else
                         // default constructorDependency
                         constructorDependencyList = [new ConstructorDependency() {
-                            Name = InterfaceName,
+                            Name = HasInterface ? InterfaceName : Name,
                             IsNamed = false,
                             ServiceIdentifier = serviceType,
                             HasAttribute = true,
@@ -544,7 +557,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 else {
                     // default constructorDependency and no propertyDependencyList
                     constructorDependencyList = [new ConstructorDependency() {
-                        Name = InterfaceName,
+                        Name = HasInterface ? InterfaceName : Name,
                         IsNamed = false,
                         ServiceIdentifier = serviceType,
                         HasAttribute = true,
@@ -645,10 +658,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 };
                                 serviceProvider.ErrorList.Add(error);
 
-                                if (dependency.ServiceIdentifier == serviceProvider.InterfaceName || dependency.ServiceIdentifier == $"{serviceProvider.InterfaceName}.IScope") {
-                                    Diagnostic hintError = serviceProvider.serviceProviderAttribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceIdentifier, serviceProvider.NameSpace[..^1], serviceProvider.InterfaceName);
-                                    serviceProvider.ErrorList.Add(hintError);
-                                }
+                                if (serviceProvider.HasInterface)
+                                    if (dependency.ServiceIdentifier == serviceProvider.InterfaceName || dependency.ServiceIdentifier == $"{serviceProvider.InterfaceName}.IScope") {
+                                        Diagnostic hintError = serviceProvider.serviceProviderAttribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceIdentifier, serviceProvider.NameSpace[..^1], serviceProvider.InterfaceName);
+                                        serviceProvider.ErrorList.Add(hintError);
+                                    }
 
                                 return;
                             }
@@ -794,9 +808,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         if (Name != other.Name)
             return false;
-        if (InterfaceName != other.InterfaceName)
-            return false;
         if (NameSpace != other.NameSpace)
+            return false;
+        if (InterfaceName != other.InterfaceName)
             return false;
 
         if (Keyword != other.Keyword)
@@ -872,8 +886,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
     public override int GetHashCode() {
         int hashCode = Name.GetHashCode();
-        hashCode = Combine(hashCode, InterfaceName.GetHashCode());
         hashCode = Combine(hashCode, NameSpace.GetHashCode());
+        hashCode = Combine(hashCode, InterfaceName.GetHashCode());
 
         hashCode = Combine(hashCode, Keyword.GetHashCode());
         hashCode = Combine(hashCode, KeywordScope.GetHashCode());

@@ -107,8 +107,12 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         builder.Append(' ');
         builder.Append(':');
         builder.Append(' ');
-        builder.Append(serviceProvider.InterfaceName);
-        builder.Append(", IServiceProvider {\n");
+        if (serviceProvider.HasInterface) {
+            builder.Append(serviceProvider.InterfaceName);
+            builder.Append(',');
+            builder.Append(' ');
+        }
+        builder.Append("IServiceProvider {\n");
 
 
         // constructor or InitServices()
@@ -140,8 +144,15 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             builderExtension.AppendCreateScopeSummary();
             builder.Append($"{Indent.SP4}public global::");
             builder.Append(serviceProvider.NameSpace);
-            builder.Append(serviceProvider.InterfaceName);
-            builder.Append(".IScope CreateScope(");
+            if (serviceProvider.HasInterface) {
+                builder.Append(serviceProvider.InterfaceName);
+                builder.Append(".IScope");
+            }
+            else {
+                builder.Append(serviceProvider.Name);
+                builder.Append(".Scope");
+            }
+            builder.Append(" CreateScope(");
             foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
                 if (!dependency.HasAttribute) {
                     builder.Append("global::");
@@ -237,13 +248,16 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             builder.Append("partial ");
             builder.Append(serviceProvider.KeywordScope.AsString());
             builder.Append(" Scope : ");
-            builder.Append(serviceProvider.InterfaceName);
-            builder.Append(".IScope, IServiceProvider {\n");
+            if (serviceProvider.HasInterface) {
+                builder.Append(serviceProvider.InterfaceName);
+                builder.Append(".IScope, ");
+            }
+            builder.Append("IServiceProvider {\n");
 
             // ServiceProviderField
             {
                 builder.Append($"{Indent.SP8}private ");
-                builder.Append(serviceProvider.InterfaceName);
+                builder.Append(serviceProvider.HasInterface ? serviceProvider.InterfaceName : serviceProvider.Name);
                 builder.Append(" __serviceProvider;");
                 builder.Append('\n');
                 builder.Append('\n');
@@ -262,9 +276,9 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                     {Indent.SP8}/// </summary>
                     {Indent.SP8}/// <param name="serviceProvider">
                     {Indent.SP8}/// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />
-                    {Indent.SP8}/// public Scope(
+                    {Indent.SP8}/// public Scope([Dependency] 
                     """);
-                builder.Append(serviceProvider.InterfaceName);
+                builder.Append(serviceProvider.HasInterface ? serviceProvider.InterfaceName : serviceProvider.Name);
                 builder.Append($$"""
                      serviceProvider) { ...
                     {{Indent.SP8}}/// </param>
@@ -273,7 +287,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                 builderExtension.AppendInitServicesMemberNotNull();
                 builder.Append($"{Indent.SP8}private void InitServices(");
             }
-            builder.Append(serviceProvider.InterfaceName);
+            builder.Append(serviceProvider.HasInterface ? serviceProvider.InterfaceName : serviceProvider.Name);
             builder.Append(" serviceProvider) {\n");
             builder.Append($"{Indent.SP12}__serviceProvider = serviceProvider;\n");
             builderExtension.AppendConstructorServices();
@@ -337,6 +351,9 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
     }
 
     private void GenerateInterface(SourceProductionContext context, ServiceProvider serviceProvider) {
+        if (!serviceProvider.HasInterface)
+            return;
+
         StringBuilder builder = stringBuilderPool.Get();
         StringBuilderExtension builderExtension = new(builder, serviceProvider);
 

@@ -737,6 +737,33 @@ public static class ServiceProviderTests {
     }
 
     [Fact]
+    public static Task AttributeServiceProviderWithEmptyInterfaceName() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider(InterfaceName = "")]
+            [Singleton<TestProvider>(Name = "Me", Implementation = "this")]
+            [Scoped<TestProvider.Scope>(Name = "MeScope", Implementation = "this")]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope {
+                    public Scope([Dependency] TestProvider testProvider) {
+                        InitServices(testProvider);
+                    }
+                }
+            }
+            
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^1];
+
+        return Verify(sourceTextClass);
+    }
+
+
+    [Fact]
     public static Task AttributeServiceProviderWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;

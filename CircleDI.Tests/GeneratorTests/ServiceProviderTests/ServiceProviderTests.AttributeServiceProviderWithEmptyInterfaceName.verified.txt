@@ -10,10 +10,10 @@ namespace MyCode;
 
 /// <summary>
 /// <para>
-/// Number of services registered: 4<br />
-/// - Singleton: 2<br />
+/// Number of services registered: 2<br />
+/// - Singleton: 1<br />
 /// - Scoped: 1<br />
-/// - Transient: 1<br />
+/// - Transient: 0<br />
 /// - Delegate: 0
 /// </para>
 /// <para>
@@ -22,45 +22,25 @@ namespace MyCode;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public sealed partial class TestProvider : ITestProvider, IServiceProvider {
+public sealed partial class TestProvider : IServiceProvider {
     /// <summary>
     /// Creates an instance of <see cref="global::MyCode.TestProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public TestProvider() {
-        _testService1 = new global::MyCode.TestService1();
     }
 
     /// <summary>
     /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope(global::MyCode.ITestProvider testProvider, global::MyCode.ITestService1 testService1, global::MyCode.ITestService2 testService2, global::MyCode.ITestService1 TestService1, global::MyCode.ITestService2 TestService2) => new global::MyCode.TestProvider.Scope(testProvider, testService1, testService2) {
-        TestService1 = TestService1,
-        TestService2 = TestService2
-    };
+    public global::MyCode.TestProvider.Scope CreateScope() => new global::MyCode.TestProvider.Scope(Me);
 
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::MyCode.ITestService1"/><br />
-    /// Implementation type:  <see cref="global::MyCode.TestService1"/>
-    /// </summary>
-    public global::MyCode.ITestService1 TestService1 => _testService1;
-    private global::MyCode.TestService1 _testService1;
-
-    /// <summary>
-    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
+    /// Service type: <see cref="global::MyCode.TestProvider"/><br />
     /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
     /// </summary>
-    public global::MyCode.ITestProvider Self => this;
-
-
-    /// <summary>
-    /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-    /// Service type: <see cref="global::MyCode.ITestService2"/><br />
-    /// Implementation type:  <see cref="global::MyCode.TestService2"/>
-    /// </summary>
-    public global::MyCode.ITestService2 TestService2 => new global::MyCode.TestService2();
+    public global::MyCode.TestProvider Me => this;
 
 
     /// <summary>
@@ -73,12 +53,8 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
-        if (serviceType == typeof(global::MyCode.ITestService1))
-            return TestService1;
-        if (serviceType == typeof(global::MyCode.ITestService2))
-            return TestService2;
+        if (serviceType == typeof(global::MyCode.TestProvider))
+            return Me;
         return null;
     }
 
@@ -100,10 +76,10 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
 
     /// <summary>
     /// <para>
-    /// Number of services registered: 4<br />
-    /// - Singleton: 2<br />
+    /// Number of services registered: 2<br />
+    /// - Singleton: 1<br />
     /// - Scoped: 1<br />
-    /// - Transient: 1<br />
+    /// - Transient: 0<br />
     /// - Delegate: 0
     /// </para>
     /// <para>
@@ -112,50 +88,35 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : ITestProvider.IScope, IServiceProvider {
-        private ITestProvider __serviceProvider;
+    public sealed partial class Scope : IServiceProvider {
+        private TestProvider __serviceProvider;
 
         /// <summary>
         /// Constructs non-lazy scoped services. Should be called inside the constructor at the end.
         /// </summary>
         /// <param name="serviceProvider">
         /// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />
-        /// public Scope([Dependency] ITestProvider serviceProvider) { ...
+        /// public Scope([Dependency] TestProvider serviceProvider) { ...
         /// </param>
         [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(__serviceProvider))]
-        private void InitServices(ITestProvider serviceProvider) {
+        private void InitServices(TestProvider serviceProvider) {
             __serviceProvider = serviceProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
+        /// Service type: <see cref="global::MyCode.TestProvider.Scope"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestProvider.Scope"/>
         /// </summary>
-        public global::MyCode.ITestProvider.IScope SelfScope => this;
+        public global::MyCode.TestProvider.Scope MeScope => this;
 
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-        /// Service type: <see cref="global::MyCode.ITestService1"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestService1"/>
-        /// </summary>
-        public global::MyCode.ITestService1 TestService1 => __serviceProvider.TestService1;
-
-        /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-        /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
+        /// Service type: <see cref="global::MyCode.TestProvider"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
         /// </summary>
-        public global::MyCode.ITestProvider Self => __serviceProvider.Self;
-
-
-        /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-        /// Service type: <see cref="global::MyCode.ITestService2"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestService2"/>
-        /// </summary>
-        public global::MyCode.ITestService2 TestService2 => new global::MyCode.TestService2();
+        public global::MyCode.TestProvider Me => __serviceProvider.Me;
 
 
         /// <summary>
@@ -168,14 +129,10 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
-            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::MyCode.ITestService1))
-                return TestService1;
-            if (serviceType == typeof(global::MyCode.ITestService2))
-                return TestService2;
+            if (serviceType == typeof(global::MyCode.TestProvider))
+                return Me;
+            if (serviceType == typeof(global::MyCode.TestProvider.Scope))
+                return MeScope;
             return null;
         }
 

@@ -49,7 +49,9 @@ There are several properties that can be configured to change the generated code
 
 - *InterfaceName*:
 Together with the class an interface will be generated based on the class and the class implements it.
-This sets the name/identifier of the generated interface explicitly. The default name is "I\{classname\}".  
+This sets the name/identifier of the generated interface explicitly.
+When *InterfaceName* is explicitly set to an empty string, no interface will be generated.
+The default name is "I\{classname\}".  
 An Exception is when the class name is "ServiceProvider", then the default interface name will be "IServiceprovider"
 and explicitly setting the interface name to "IServiceProvider" is not allowed, otherwise it will collide with [System.IServiceProvider](https://learn.microsoft.com/en-us//dotnet/api/system.iserviceprovider).
 
@@ -308,7 +310,8 @@ Note:
 The service types of the ServiceProvider and ScopedProvider are the auto-generated interfaces.
 You can use them without getting a syntax error, however, at the point of generation the interfaces do not exist yet
 and therefore the generator will accept these types, but puts them in the global namespace.
-To solve this issue, you can correct the namespace by just declaring the interface type in the same namespace.
+To solve this issue, you can correct the namespace by just declaring the interface type in the same namespace.  
+If no interfaces are generated, then the service types are the ServiceProvider and ScopedProvider classes itself.
 
 ```csharp
 namespace MySpace;
@@ -335,13 +338,14 @@ In the ScopeProvider the generated constructor takes as parameter a reference of
 
 For constructing the Scope you can make use of the *CreateScope()* method.
 Every dependency of the ScopeProvider will be a parameter in *CreateScope()*
-or if the dependency has a [Dependency]-attribute, the dependency will be injected from the ServiceProvider instead
+or if the dependency has a [Dependency]-attribute, the dependency will be injected from the ServiceProvider instead.
 
 Note:  
 The service types of the ServiceProvider and ScopedProvider are the auto-generated interfaces.
 You can use them without getting a syntax error, however, at the point of generation the interfaces do not exist yet
 and therefore the generator will accept these types, but puts them in the global namespace.
-To solve this issue, you can correct the namespace by just declaring the interface type in the same namespace.
+To solve this issue, you can correct the namespace by just declaring the interface type in the same namespace.  
+If no interfaces are generated, then the service types are the ServiceProvider and ScopedProvider classes itself.
 
 ```csharp
 [ServiceProvider]
