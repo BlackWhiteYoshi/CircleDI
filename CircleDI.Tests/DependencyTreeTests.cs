@@ -12,7 +12,7 @@ public static class DependencyTreeTests {
         ServiceProvider serviceProvider = new(null!) {
             Name = "TestProvider",
             InterfaceName = $"ITestProvider",
-            NameSpace = string.Empty
+            NameSpaceList = []
         };
 
         foreach (Service service in serviceList)

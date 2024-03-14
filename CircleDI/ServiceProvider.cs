@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -18,9 +17,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public required string Name { get; init; }
 
     /// <summary>
-    /// The containing namespace of the ServiceProvider with trailing '.'
+    /// The namespace names the ServiceProvider is located.
     /// </summary>
-    public required string NameSpace { get; init; }
+    public required List<string> NameSpaceList { get; init; }
 
     /// <summary>
     /// Name of the interface that the generated Service Provider implements.
@@ -258,6 +257,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         serviceProviderAttribute = syntaxContext.Attributes[0];
 
 
+        if (serviceProvider.ContainingType != null) {
+            // TODO error
+            //Diagnostic error = null!;
+            //ErrorList ??= [];
+            //ErrorList.Add(error);
+        }
+        
         if (serviceProviderSyntax.Modifiers[^1].ValueText != "partial") {
             Diagnostic error = serviceProviderAttribute.CreatePartialKeywordServiceProviderError();
             ErrorList ??= [];
@@ -272,12 +278,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         
 
         Name = serviceProviderSyntax.Identifier.ValueText;
-        string fullName = serviceProvider.ToDisplayString();
-        if (fullName.Length > Name.Length)
-            NameSpace = fullName[..^Name.Length];
-        else
-            NameSpace = string.Empty;
-
+        NameSpaceList = serviceProvider.GetNamespaceList();
 
         Keyword = serviceProviderSyntax switch {
             ClassDeclarationSyntax => ClassStructKeyword.Class,
@@ -421,13 +422,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         // adding services and default services
         {
             // Default service ServiceProvider itself
-            string implementationType = $"{NameSpace}{Name}";
-            string serviceType = HasInterface ? $"{NameSpace}{InterfaceName}" : implementationType;
+            string implementationType = NameSpaceList.GetFullyQualifiedName(Name);
+            string serviceType = HasInterface ? NameSpaceList.GetFullyQualifiedName(InterfaceName) : implementationType;
             bool hasServiceSelf = false;
 
             // Default Service ServiceProvider.Scope self
-            string implementationTypeScope = $"{NameSpace}{Name}.Scope";
-            string serviceTypeScope = HasInterface ? $"{NameSpace}{InterfaceName}.IScope" : implementationTypeScope;
+            string implementationTypeScope = NameSpaceList.GetFullyQualifiedName(Name, "Scope");
+            string serviceTypeScope = HasInterface ? NameSpaceList.GetFullyQualifiedName(InterfaceName, "IScope") : implementationTypeScope;
             bool hasServiceSelfScope = false;
 
             // register services [Singleton<>, Scoped<>, Transient<>, Delegate<> attributes]
@@ -637,7 +638,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         // else
                         {
                             Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                true => serviceProvider.serviceProviderAttribute.CreateScopedProviderNamedUnregisteredError($"{serviceProvider.NameSpace}{serviceProvider.Name}", dependency.ServiceIdentifier),
+                                true => serviceProvider.serviceProviderAttribute.CreateScopedProviderNamedUnregisteredError(serviceProvider.NameSpaceList.GetFullyQualifiedName(serviceProvider.Name), dependency.ServiceIdentifier),
                                 false => serviceProvider.serviceProviderAttribute.CreateDependencyNamedUnregisteredError(service.Name, dependency.ServiceIdentifier)
                             };
                             serviceProvider.ErrorList ??= [];
@@ -653,14 +654,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 serviceProvider.ErrorList ??= [];
 
                                 Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                    true => serviceProvider.serviceProviderAttribute.CreateScopedProviderUnregisteredError($"{serviceProvider.NameSpace}{serviceProvider.Name}", dependency.ServiceIdentifier),
+                                    true => serviceProvider.serviceProviderAttribute.CreateScopedProviderUnregisteredError(serviceProvider.NameSpaceList.GetFullyQualifiedName(serviceProvider.Name), dependency.ServiceIdentifier),
                                     false => serviceProvider.serviceProviderAttribute.CreateDependencyUnregisteredError(service.Name, dependency.ServiceIdentifier)
                                 };
                                 serviceProvider.ErrorList.Add(error);
 
                                 if (serviceProvider.HasInterface)
                                     if (dependency.ServiceIdentifier == serviceProvider.InterfaceName || dependency.ServiceIdentifier == $"{serviceProvider.InterfaceName}.IScope") {
-                                        Diagnostic hintError = serviceProvider.serviceProviderAttribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceIdentifier, serviceProvider.NameSpace[..^1], serviceProvider.InterfaceName);
+                                        Diagnostic hintError = serviceProvider.serviceProviderAttribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceIdentifier, string.Join(".", serviceProvider.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceName);
                                         serviceProvider.ErrorList.Add(hintError);
                                     }
 
@@ -699,7 +700,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                     bool isParameter = dependency is ConstructorDependency;
 
                                     Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                        true => serviceProvider.serviceProviderAttribute.CreateScopedProviderAmbiguousError($"{serviceProvider.NameSpace}{serviceProvider.Name}", dependency.ServiceIdentifier, servicesWithSameType, isParameter),
+                                        true => serviceProvider.serviceProviderAttribute.CreateScopedProviderAmbiguousError(serviceProvider.NameSpaceList.GetFullyQualifiedName(serviceProvider.Name), dependency.ServiceIdentifier, servicesWithSameType, isParameter),
                                         false => serviceProvider.serviceProviderAttribute.CreateDependencyAmbiguousError(service.Name, dependency.ServiceIdentifier, servicesWithSameType, isParameter)
                                     };
                                     serviceProvider.ErrorList ??= [];
@@ -762,13 +763,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             break;
                         case ServiceLifetime.TransientSingleton:
                             if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeScopeError($"{serviceProvider.NameSpace}{serviceProvider.Name}", dependency.ServiceIdentifier);
+                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeScopeError(serviceProvider.NameSpaceList.GetFullyQualifiedName(serviceProvider.Name), dependency.ServiceIdentifier);
                                 serviceProvider.ErrorList ??= [];
                                 serviceProvider.ErrorList.Add(error);
                                 return;
                             }
                             if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeTransientError($"{serviceProvider.NameSpace}{serviceProvider.Name}", dependency.ServiceIdentifier);
+                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeTransientError(serviceProvider.NameSpaceList.GetFullyQualifiedName(serviceProvider.Name), dependency.ServiceIdentifier);
                                 serviceProvider.ErrorList ??= [];
                                 serviceProvider.ErrorList.Add(error);
                                 return;
@@ -811,7 +812,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         if (Name != other.Name)
             return false;
-        if (NameSpace != other.NameSpace)
+        if (!NameSpaceList.SequenceEqual(other.NameSpaceList))
             return false;
         if (InterfaceName != other.InterfaceName)
             return false;
@@ -869,7 +870,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
     public override int GetHashCode() {
         int hashCode = Name.GetHashCode();
-        hashCode = Combine(hashCode, NameSpace.GetHashCode());
+        foreach (string namspace in NameSpaceList)
+            hashCode = Combine(hashCode, namspace.GetHashCode());
         hashCode = Combine(hashCode, InterfaceName.GetHashCode());
 
         hashCode = Combine(hashCode, Keyword.GetHashCode());

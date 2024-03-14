@@ -19,7 +19,7 @@ public static class FindServiceTests {
         ServiceProvider serviceProvider = new(null!) {
             Name = "TestProvider",
             InterfaceName = "ITestProvider",
-            NameSpace = string.Empty
+            NameSpaceList = []
         };
         SetSortedServiceList(serviceProvider, serviceList);
         return serviceProvider;

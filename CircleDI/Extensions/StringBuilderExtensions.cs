@@ -2,6 +2,9 @@
 
 namespace CircleDI;
 
+/// <summary>
+/// Extension methods on <see cref="StringBuilder"/>.
+/// </summary>
 public static class StringBuilderExtensions {
     /// <summary>
     /// Appends the given string whereat the first character will be appended as lowercase.
@@ -44,6 +47,19 @@ public static class StringBuilderExtensions {
             builder.Append("Get");
             builder.Append(service.Name);
             builder.Append("()");
+        }
+    }
+
+
+    /// <summary>
+    /// Appends the complete namespace with trailing '.'
+    /// </summary>
+    /// <param name="namespaceList"></param>
+    /// <returns></returns>
+    public static void AppendNamespaceList(this StringBuilder builder, List<string> namespaceList) {
+        for (int i = namespaceList.Count - 1; i >= 0; i--) {
+            builder.Append(namespaceList[i]);
+            builder.Append(".");
         }
     }
 }

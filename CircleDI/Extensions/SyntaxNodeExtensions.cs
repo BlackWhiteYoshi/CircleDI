@@ -3,7 +3,11 @@ using System.Collections.Immutable;
 
 namespace CircleDI;
 
-public static class SyntaxNodeExtension {
+/// <summary>
+/// Extension methods on source generator types (namespace 'Microsoft.CodeAnalysis').<br />
+/// e.g. <see cref="SyntaxNode"/>, <see cref="ISymbol"/>, <see cref="AttributeData"/>, <see cref="TypedConstant"/>
+/// </summary>
+public static class SyntaxNodeExtensions {
     /// <summary>
     /// <para>Finds the attribute with the given name.</para>
     /// <para>If the given attribute is not present, it returns null.</para>
@@ -50,6 +54,50 @@ public static class SyntaxNodeExtension {
 
         return false;
     }
+
+
+    /// <summary>
+    /// <para>A list of namespace names the given type is located.</para>
+    /// <para>
+    /// The first item is the most inner namespace and the last item is the most outer namespace.<br />
+    /// So, to construct a fully-qualified name this list should be iterated backwards.
+    /// </para>
+    /// </summary>
+    /// <param name="typeSymbol"></param>
+    /// <returns></returns>
+    public static List<string> GetNamespaceList(this INamedTypeSymbol typeSymbol) {
+        List<string> namcespaceList = [];
+
+        INamespaceSymbol namespaceSymbol = typeSymbol.ContainingNamespace;
+        while (namespaceSymbol.Name != string.Empty) {
+            namcespaceList.Add(namespaceSymbol.Name);
+            namespaceSymbol = namespaceSymbol.ContainingNamespace;
+        }
+
+        return namcespaceList;
+    }
+
+    /// <summary>
+    /// <para>A list of all types (name and type) the given type is contained in.</para>
+    /// <para>
+    /// The first item is the most inner type and the last item is the most outer type.<br />
+    /// So, to construct a fully-qualified name this list should be iterated backwards.
+    /// </para>
+    /// </summary>
+    /// <param name="typeSymbol"></param>
+    /// <returns></returns>
+    public static List<(string name, TypeKind type)> GetContainingTypeList(this INamedTypeSymbol typeSymbol) {
+        List<(string name, TypeKind type)> typeList = [];
+
+        INamedTypeSymbol containingtypeSymbol = typeSymbol.ContainingType;
+        while (containingtypeSymbol != null) {
+            typeList.Add((containingtypeSymbol.Name, containingtypeSymbol.TypeKind));
+            containingtypeSymbol = typeSymbol.ContainingType;
+        }
+
+        return typeList;
+    }
+
 
     /// <summary>
     /// <para>Creates an array by mapping <see cref="IMethodSymbol.Parameters"/> to <see cref="ConstructorDependency"/>.</para>
@@ -130,22 +178,4 @@ public static class SyntaxNodeExtension {
             _ => type
         };
     }
-
-
-    /// <summary>
-    /// Determines whether two sequences are equal by comparing the elements by using the default equality comparer for their type.
-    /// </summary>
-    /// <typeparam name="T">The type of the elements of the input sequences.</typeparam>
-    /// <param name="first"></param>
-    /// <param name="second"></param>
-    /// <returns>
-    /// true if both are null or the two source sequences are of equal length and their corresponding elements are equal according to the default equality comparer for their type<br />
-    /// false if one source sequence is null or the item length or an item in the sequence differs.
-    /// </returns>
-    public static bool SequenceNullEqual<T>(this IEnumerable<T>? first, IEnumerable<T>? second)
-        => (first, second) switch {
-            (null, null) => true,
-            (not null, null) or (null, not null) => false,
-            (not null, not null) => first.SequenceEqual(second)
-        };
 }

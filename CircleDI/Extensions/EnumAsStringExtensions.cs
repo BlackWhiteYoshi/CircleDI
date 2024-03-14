@@ -2,6 +2,9 @@
 
 namespace CircleDI;
 
+/// <summary>
+/// Extension methods for mapping enum types to string.
+/// </summary>
 public static class EnumAsStringExtension {
     /// <summary>
     /// Maps <see cref="ServiceLifetime"/> to <see cref="string"/>.
@@ -45,6 +48,26 @@ public static class EnumAsStringExtension {
             RefKind.Out => "out ",
             RefKind.In => "in ",
             RefKind.RefReadOnly or _ => throw new Exception($"Invalid enum Type '{nameof(RefKind)}': {value}")
+        };
+
+    /// <summary>
+    /// <para>Maps <see cref="TypeKind"/> to <see cref="string"/>.</para>
+    /// <para>
+    /// But only the top level types are mapped:<br />
+    /// class, struct, interface, enum, delegate
+    /// </para>
+    /// <para>All other types are mapped to "unknownType".</para>
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static string AsString(this TypeKind value)
+        => value switch {
+            TypeKind.Class => "class",
+            TypeKind.Struct => "strcut",
+            TypeKind.Interface => "interface",
+            TypeKind.Enum => "enum",
+            TypeKind.Delegate => "delegate",
+            _ => "unknownType"
         };
 
     /// <summary>
