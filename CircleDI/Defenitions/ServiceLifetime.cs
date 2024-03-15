@@ -1,4 +1,4 @@
-﻿namespace CircleDI;
+﻿namespace CircleDI.Defenitions;
 
 /// <summary>
 /// Lifetime type of the service:<br />

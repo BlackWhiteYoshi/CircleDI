@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace CircleDI;
+namespace CircleDI.Defenitions;
 
 public static class DiagnosticErrors {
     #region ServiceProvider Errors

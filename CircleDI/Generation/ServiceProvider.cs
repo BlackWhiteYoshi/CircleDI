@@ -1,9 +1,11 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CircleDI.Defenitions;
+using CircleDI.Extensions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace CircleDI;
+namespace CircleDI.Generation;
 
 /// <summary>
 /// <para>Holds all relevant information to source generate the ServiceProvider class and interface.</para>

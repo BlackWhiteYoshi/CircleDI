@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CircleDI.Generation;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 using System.Reflection;

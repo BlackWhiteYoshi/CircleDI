@@ -1,4 +1,6 @@
-﻿namespace CircleDI;
+﻿using CircleDI.Generation;
+
+namespace CircleDI.Defenitions;
 
 /// <summary>
 /// Base type for <see cref="ConstructorDependency"/> and <see cref="PropertyDependency"/>.

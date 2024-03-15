@@ -1,7 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CircleDI.Defenitions;
+using CircleDI.Generation;
+using Microsoft.CodeAnalysis;
 using System.Text;
 
-namespace CircleDI;
+namespace CircleDI.Extensions;
 
 /// <summary>
 /// Extension methods on <see cref="StringBuilder"/>.

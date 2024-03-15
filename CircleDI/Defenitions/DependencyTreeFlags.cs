@@ -1,4 +1,4 @@
-﻿namespace CircleDI;
+﻿namespace CircleDI.Defenitions;
 
 /// <summary>
 /// Some Flags for creating, processing or consuming the dependency tree.

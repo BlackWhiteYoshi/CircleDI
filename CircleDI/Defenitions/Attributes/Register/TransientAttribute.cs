@@ -1,4 +1,4 @@
-﻿namespace CircleDI;
+﻿namespace CircleDI.Defenitions;
 
 public static partial class Attributes {
     public const string TransientAttribute = $$"""

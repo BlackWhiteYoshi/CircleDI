@@ -1,4 +1,4 @@
-﻿namespace CircleDI;
+﻿namespace CircleDI.Defenitions;
 
 /// <summary>
 /// The type of the ServiceProvider/ScopeProvider.

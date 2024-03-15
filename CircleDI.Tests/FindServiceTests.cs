@@ -1,4 +1,7 @@
-﻿namespace CircleDI.Tests;
+﻿using CircleDI.Defenitions;
+using CircleDI.Generation;
+
+namespace CircleDI.Tests;
 
 /// <summary>
 /// Tests the function <see cref="ServiceProvider.FindService(string)"/>.

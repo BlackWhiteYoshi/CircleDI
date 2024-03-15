@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using CircleDI.Defenitions;
+using CircleDI.Generation;
+using System.Reflection;
 
 namespace CircleDI.Tests;
 

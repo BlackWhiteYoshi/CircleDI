@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace CircleDI;
+namespace CircleDI.Extensions;
 
 /// <summary>
 /// Extension methods on types that implement <see cref="IEnumerable{T}"/>.
