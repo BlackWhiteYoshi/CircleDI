@@ -25,7 +25,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// So, to construct a fully-qualified name this list should be iterated backwards.
     /// </para>
     /// </summary>
-    public required List<string> NameSpaceList { get; init; }
+    public List<string> NameSpaceList { get; init; }
 
     /// <summary>
     /// The type of the ServiceProvider: class, struct, record
@@ -52,13 +52,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public string[] ModifiersScope { get; init; } = [];
 
     /// <summary>
-    /// <para>A list of all types (name and type) the given type is nested in.</para>
+    /// <para>A list of all types (name and type) the ServiceProvider is nested in.</para>
     /// <para>
     /// The first item is the most inner type and the last item is the most outer type.<br />
     /// So, to construct a fully-qualified name this list should be iterated backwards.
     /// </para>
     /// </summary>
-    public List<(string name, TypeKind type)> ContainingTypeList { get; init; } = [];
+    public List<(string name, TypeKind type)> ContainingTypeList { get; init; }
 
 
     /// <summary>
@@ -78,6 +78,33 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// If empty, no interface will be generated.
     /// </summary>
     public bool HasInterface { get; private set; }
+
+    /// <summary>
+    /// The modifier that is relevant for the interface. The other modifier 'partial' is always applied.
+    /// </summary>
+    public Accessibility InterfaceAccessibility { get; init; } = Accessibility.Public;
+
+    /// <summary>
+    /// he modifier that is relevant for the interface scope. The other modifier 'partial' is always applied.
+    /// </summary>
+    public Accessibility InterfaceAccessibilityScope { get; init; } = Accessibility.Public;
+
+    /// <summary>
+    /// <para>The namespace names the interface is located.</para>
+    /// <para>
+    /// The first item is the most inner namespace and the last item is the most outer namespace.<br />
+    /// So, to construct a fully-qualified name this list should be iterated backwards.
+    /// </para>
+    /// </summary>
+    public List<string> InterfaceNameSpaceList { get; init; }
+
+    /// <summary>
+    /// <para>A list of all types (name and type) the interface is nested in.</para>
+    /// <para>
+    /// The first item is the most inner type and the last item is the most outer type.<br />
+    /// So, to construct a fully-qualified name this list should be iterated backwards.
+    /// </summary>
+    public List<(string name, TypeKind type)> InterfaceContainingTypeList { get; init; }
 
 
     /// <summary>
@@ -244,7 +271,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// Creates a data-object representing a ServiceProviderAttribute.
     /// </summary>
     /// <param name="serviceProviderAttribute"></param>
-    public ServiceProvider(AttributeData serviceProviderAttribute) => this.serviceProviderAttribute = serviceProviderAttribute;
+    public ServiceProvider(AttributeData serviceProviderAttribute) {
+        this.serviceProviderAttribute = serviceProviderAttribute;
+        NameSpaceList = [];
+        InterfaceNameSpaceList = [];
+        ContainingTypeList = [];
+        InterfaceContainingTypeList = [];
+    } 
 
     /// <summary>
     /// Creates a data-object based on a ServiceProviderAttribute.
@@ -347,6 +380,23 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             ErrorList.Add(error);
         }
 
+        // interface type
+        InterfaceAccessibility = Accessibility.Public;
+        InterfaceAccessibilityScope = Accessibility.Public;
+        InterfaceNameSpaceList = NameSpaceList;
+        InterfaceContainingTypeList = ContainingTypeList;
+        INamedTypeSymbol? interfaceSymbol = syntaxContext.SemanticModel.Compilation.GetTypeByMetadataName(InterfaceName);
+        if (interfaceSymbol != null && interfaceSymbol.TypeKind == TypeKind.Interface) {
+            InterfaceName = interfaceSymbol.Name;
+
+            InterfaceAccessibility = interfaceSymbol.DeclaredAccessibility;
+            if (interfaceSymbol.GetMembers("IScope") is [INamedTypeSymbol interfaceScopeSymbol] && interfaceScopeSymbol.TypeKind == TypeKind.Interface)
+                InterfaceAccessibilityScope = interfaceScopeSymbol.DeclaredAccessibility;
+
+            InterfaceNameSpaceList = interfaceSymbol.GetNamespaceList();
+            InterfaceContainingTypeList = interfaceSymbol.GetContainingTypeList();
+        }
+
 
         // parameters on ScopedProviderAttribute
         AttributeData? scopedProviderAttribute = serviceProvider.GetAttribute("ScopedProviderAttribute");
@@ -433,12 +483,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         {
             // Default service ServiceProvider itself
             string implementationType = Name.GetFullyQualifiedName(NameSpaceList, ContainingTypeList);
-            string serviceType = HasInterface ? InterfaceName.GetFullyQualifiedName(NameSpaceList, ContainingTypeList) : implementationType;
+            string serviceType = HasInterface ? InterfaceName.GetFullyQualifiedName(InterfaceNameSpaceList, InterfaceContainingTypeList) : implementationType;
             bool hasServiceSelf = false;
 
             // Default Service ServiceProvider.Scope self
             string implementationTypeScope = Name.GetFullyQualifiedName("Scope", NameSpaceList, ContainingTypeList);
-            string serviceTypeScope = HasInterface ? InterfaceName.GetFullyQualifiedName("IScope", NameSpaceList, ContainingTypeList) : implementationTypeScope;
+            string serviceTypeScope = HasInterface ? InterfaceName.GetFullyQualifiedName("IScope", InterfaceNameSpaceList, InterfaceContainingTypeList) : implementationTypeScope;
             bool hasServiceSelfScope = false;
 
             // register services [Singleton<>, Scoped<>, Transient<>, Delegate<> attributes]
@@ -841,6 +891,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         if (InterfaceName != other.InterfaceName)
             return false;
+        if (InterfaceAccessibility != other.InterfaceAccessibility)
+            return false;
+        if (InterfaceAccessibilityScope != other.InterfaceAccessibilityScope)
+            return false;
+        if (!InterfaceNameSpaceList.SequenceEqual(other.InterfaceNameSpaceList))
+            return false;
+        if (!InterfaceContainingTypeList.SequenceEqual(other.InterfaceContainingTypeList))
+            return false;
 
         if (HasConstructor != other.HasConstructor)
             return false;
@@ -893,6 +951,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         hashCode = CombineList(hashCode, ContainingTypeList);
 
         hashCode = Combine(hashCode, InterfaceName.GetHashCode());
+        hashCode = Combine(hashCode, InterfaceAccessibility.GetHashCode());
+        hashCode = Combine(hashCode, InterfaceAccessibilityScope.GetHashCode());
+        hashCode = CombineList(hashCode, InterfaceNameSpaceList);
+        hashCode = CombineList(hashCode, InterfaceContainingTypeList);
 
         hashCode = Combine(hashCode, HasConstructor.GetHashCode());
         hashCode = Combine(hashCode, HasConstructorScope.GetHashCode());

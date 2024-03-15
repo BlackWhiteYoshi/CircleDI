@@ -13,8 +13,7 @@ public static class DependencyTreeTests {
     private static ServiceProvider CreateProvider(List<Service> serviceList) {
         ServiceProvider serviceProvider = new(null!) {
             Name = "TestProvider",
-            InterfaceName = $"ITestProvider",
-            NameSpaceList = []
+            InterfaceName = $"ITestProvider"
         };
 
         foreach (Service service in serviceList)

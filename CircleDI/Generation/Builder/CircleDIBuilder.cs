@@ -97,6 +97,9 @@ public readonly struct CircleDIBuilder {
         builder.Append(':');
         builder.Append(' ');
         if (serviceProvider.HasInterface) {
+            builder.Append("global::");
+            builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
+            builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
             builder.Append(serviceProvider.InterfaceName);
             builder.Append(',');
             builder.Append(' ');
@@ -139,8 +142,8 @@ public readonly struct CircleDIBuilder {
             builderExtension.AppendCreateScopeSummary();
             builder.Append(builderExtension.indent.Sp4);
             builder.Append("public global::");
-            builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-            builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
+            builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
+            builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
             if (serviceProvider.HasInterface) {
                 builder.Append(serviceProvider.InterfaceName);
                 builder.Append(".IScope");
@@ -250,6 +253,9 @@ public readonly struct CircleDIBuilder {
             builder.Append(serviceProvider.KeywordScope.AsString());
             builder.Append(" Scope : ");
             if (serviceProvider.HasInterface) {
+                builder.Append("global::");
+                builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
+                builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
                 builder.Append(serviceProvider.InterfaceName);
                 builder.Append(".IScope, ");
             }
@@ -259,7 +265,15 @@ public readonly struct CircleDIBuilder {
             {
                 builder.Append(builderExtension.indent.Sp4);
                 builder.Append("private ");
-                builder.Append(serviceProvider.HasInterface ? serviceProvider.InterfaceName : serviceProvider.Name);
+                if (serviceProvider.HasInterface) {
+                    builder.Append("global::");
+                    builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
+                    builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
+                    builder.Append(serviceProvider.InterfaceName);
+                }
+                else {
+                    builder.Append(serviceProvider.Name);
+                }
                 builder.Append(" __serviceProvider;");
                 builder.Append('\n');
                 builder.Append('\n');
@@ -286,7 +300,13 @@ public readonly struct CircleDIBuilder {
                 builder.Append("/// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />\n");
                 builder.Append(builderExtension.indent.Sp4);
                 builder.Append("/// public Scope([Dependency] ");
-                builder.Append(serviceProvider.HasInterface ? serviceProvider.InterfaceName : serviceProvider.Name);
+                if (serviceProvider.HasInterface) {
+                    builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
+                    builder.Append(serviceProvider.InterfaceName);
+                }
+                else {
+                    builder.Append(serviceProvider.Name);
+                }
                 builder.Append(" serviceProvider) { ...\n");
                 builder.Append(builderExtension.indent.Sp4);
                 builder.Append("/// </param>\n");
@@ -294,7 +314,15 @@ public readonly struct CircleDIBuilder {
                 builder.Append(builderExtension.indent.Sp4);
                 builder.Append("private void InitServices(");
             }
-            builder.Append(serviceProvider.HasInterface ? serviceProvider.InterfaceName : serviceProvider.Name);
+            if (serviceProvider.HasInterface) {
+                builder.Append("global::");
+                builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
+                builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
+                builder.Append(serviceProvider.InterfaceName);
+            }
+            else {
+                builder.Append(serviceProvider.Name);
+            }
             builder.Append(" serviceProvider) {\n");
             builder.Append(builderExtension.indent.Sp8);
             builder.Append("__serviceProvider = serviceProvider;\n");
@@ -389,9 +417,9 @@ public readonly struct CircleDIBuilder {
     
             
             """);
-        if (serviceProvider.NameSpaceList.Count > 0) {
+        if (serviceProvider.InterfaceNameSpaceList.Count > 0) {
             builder.Append("namespace ");
-            builder.AppendNamespaceList(serviceProvider.NameSpaceList);
+            builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
             builder.Length--;
             builder.Append(';');
             builder.Append('\n');
@@ -399,12 +427,12 @@ public readonly struct CircleDIBuilder {
         }
 
         // containing types
-        for (int i = serviceProvider.ContainingTypeList.Count - 1; i >= 0; i--) {
+        for (int i = serviceProvider.InterfaceContainingTypeList.Count - 1; i >= 0; i--) {
             builder.Append(builderExtension.indent.Sp0);
             builder.Append("partial ");
-            builder.Append(serviceProvider.ContainingTypeList[i].type.AsString());
+            builder.Append(serviceProvider.InterfaceContainingTypeList[i].type.AsString());
             builder.Append(' ');
-            builder.Append(serviceProvider.ContainingTypeList[i].name);
+            builder.Append(serviceProvider.InterfaceContainingTypeList[i].name);
             builder.Append(' ');
             builder.Append('{');
             builder.Append('\n');
@@ -414,7 +442,8 @@ public readonly struct CircleDIBuilder {
         // interface head
         builderExtension.AppendClassSummary();
         builder.Append(builderExtension.indent.Sp0);
-        builder.Append("public partial interface ");
+        builder.Append(serviceProvider.InterfaceAccessibility.AsString());
+        builder.Append("partial interface ");
         builder.Append(serviceProvider.InterfaceName);
         builder.Append(serviceProvider.GenerateDisposeMethods switch {
             DisposeGeneration.NoDisposing => " ",
@@ -431,8 +460,8 @@ public readonly struct CircleDIBuilder {
             builderExtension.AppendCreateScopeSummary();
             builder.Append(builderExtension.indent.Sp4);
             builder.Append("global::");
-            builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-            builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
+            builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
+            builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
             builder.Append(serviceProvider.InterfaceName);
             builder.Append(".IScope CreateScope(");
             foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
@@ -487,7 +516,8 @@ public readonly struct CircleDIBuilder {
             // class head
             builderExtension.AppendClassSummary();
             builder.Append(builderExtension.indent.Sp0);
-            builder.Append("public partial interface IScope");
+            builder.Append(serviceProvider.InterfaceAccessibilityScope.AsString());
+            builder.Append("partial interface IScope");
             builder.Append(serviceProvider.GenerateDisposeMethodsScope switch {
                 DisposeGeneration.NoDisposing => " ",
                 DisposeGeneration.Dispose => " : IDisposable ",
@@ -539,7 +569,7 @@ public readonly struct CircleDIBuilder {
         builder.Append('\n');
 
         // containing types closing
-        for (int i = 0; i < serviceProvider.ContainingTypeList.Count; i++) {
+        for (int i = 0; i < serviceProvider.InterfaceContainingTypeList.Count; i++) {
             builderExtension.indent.DecreaseLevel();
             builder.Append(builderExtension.indent.Sp0);
             builder.Append('}');

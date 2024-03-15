@@ -22,7 +22,7 @@ namespace MyCode;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public sealed partial class TestProvider : ITestProvider, IServiceProvider {
+public sealed partial class TestProvider : global::MyCode.ITestProvider, IServiceProvider {
     /// <summary>
     /// Creates an instance of <see cref="global::MyCode.TestProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
@@ -98,8 +98,8 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : ITestProvider.IScope, IServiceProvider {
-        private ITestProvider __serviceProvider;
+    public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
+        private global::MyCode.ITestProvider __serviceProvider;
 
         /// <summary>
         /// Constructs non-lazy scoped services. Should be called inside the constructor at the end.
@@ -109,7 +109,7 @@ public sealed partial class TestProvider : ITestProvider, IServiceProvider {
         /// public Scope([Dependency] ITestProvider serviceProvider) { ...
         /// </param>
         [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(__serviceProvider))]
-        private void InitServices(ITestProvider serviceProvider) {
+        private void InitServices(global::MyCode.ITestProvider serviceProvider) {
             __serviceProvider = serviceProvider;
         }
 

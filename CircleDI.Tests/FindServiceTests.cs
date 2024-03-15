@@ -21,8 +21,7 @@ public static class FindServiceTests {
 
         ServiceProvider serviceProvider = new(null!) {
             Name = "TestProvider",
-            InterfaceName = "ITestProvider",
-            NameSpaceList = []
+            InterfaceName = "ITestProvider"
         };
         SetSortedServiceList(serviceProvider, serviceList);
         return serviceProvider;
