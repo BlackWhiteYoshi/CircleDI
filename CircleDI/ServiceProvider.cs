@@ -17,9 +17,47 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public required string Name { get; init; }
 
     /// <summary>
-    /// The namespace names the ServiceProvider is located.
+    /// <para>The namespace names the ServiceProvider is located.</para>
+    /// <para>
+    /// The first item is the most inner namespace and the last item is the most outer namespace.<br />
+    /// So, to construct a fully-qualified name this list should be iterated backwards.
+    /// </para>
     /// </summary>
     public required List<string> NameSpaceList { get; init; }
+
+    /// <summary>
+    /// The type of the ServiceProvider: class, struct, record
+    /// </summary>
+    public ClassStructKeyword Keyword { get; init; } = ClassStructKeyword.Class;
+
+    /// <summary>
+    /// The type of the ScopeProvider: class, struct, record
+    /// </summary>
+    public ClassStructKeyword KeywordScope { get; init; } = ClassStructKeyword.Class;
+
+    /// <summary>
+    /// <para>The list of modifiers of this ServiceProvider without the last modifier "partial"</para>
+    /// <para>Since the modifier "partial" is required and "partial" must be the last modifier, it can be omitted.</para>
+    /// <para>e.g. ["public", "sealed"]</para>
+    /// </summary>
+    public string[] Modifiers { get; init; } = [];
+
+    /// <summary>
+    /// <para>The list of modifiers of the scoped ServiceProvider without the last modifier "partial"</para>
+    /// <para>Since the modifier "partial" is required and "partial" must be the last modifier, it can be omitted.</para>
+    /// <para>e.g. ["public", "sealed"]</para>
+    /// </summary>
+    public string[] ModifiersScope { get; init; } = [];
+
+    /// <summary>
+    /// <para>A list of all types (name and type) the given type is nested in.</para>
+    /// <para>
+    /// The first item is the most inner type and the last item is the most outer type.<br />
+    /// So, to construct a fully-qualified name this list should be iterated backwards.
+    /// </para>
+    /// </summary>
+    public List<(string name, TypeKind type)> ContainingTypeList { get; init; } = [];
+
 
     /// <summary>
     /// Name of the interface that the generated Service Provider implements.
@@ -38,32 +76,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// If empty, no interface will be generated.
     /// </summary>
     public bool HasInterface { get; private set; }
-
-
-    /// <summary>
-    /// The type of the ServiceProvider: class, struct, record
-    /// </summary>
-    public ClassStructKeyword Keyword { get; init; } = ClassStructKeyword.Class;
-
-    /// <summary>
-    /// The type of the ScopeProvider: class, struct, record
-    /// </summary>
-    public ClassStructKeyword KeywordScope { get; init; } = ClassStructKeyword.Class;
-
-
-    /// <summary>
-    /// <para>The list of modifiers of this ServiceProvider without the last modifier "partial"</para>
-    /// <para>Since the modifier "partial" is required and "partial" must be the last modifier, it can be omitted.</para>
-    /// <para>e.g. ["public", "sealed"]</para>
-    /// </summary>
-    public string[] Modifiers { get; init; } = [];
-
-    /// <summary>
-    /// <para>The list of modifiers of the scoped ServiceProvider without the last modifier "partial"</para>
-    /// <para>Since the modifier "partial" is required and "partial" must be the last modifier, it can be omitted.</para>
-    /// <para>e.g. ["public", "sealed"]</para>
-    /// </summary>
-    public string[] ModifiersScope { get; init; } = [];
 
 
     /// <summary>
@@ -257,13 +269,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         serviceProviderAttribute = syntaxContext.Attributes[0];
 
 
-        if (serviceProvider.ContainingType != null) {
-            // TODO error
-            //Diagnostic error = null!;
-            //ErrorList ??= [];
-            //ErrorList.Add(error);
-        }
-        
         if (serviceProviderSyntax.Modifiers[^1].ValueText != "partial") {
             Diagnostic error = serviceProviderAttribute.CreatePartialKeywordServiceProviderError();
             ErrorList ??= [];
@@ -279,6 +284,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         Name = serviceProviderSyntax.Identifier.ValueText;
         NameSpaceList = serviceProvider.GetNamespaceList();
+        ContainingTypeList = serviceProvider.GetContainingTypeList();
 
         Keyword = serviceProviderSyntax switch {
             ClassDeclarationSyntax => ClassStructKeyword.Class,
@@ -299,7 +305,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             _ => ClassStructKeyword.Class
         };
 
-
         Modifiers = new string[serviceProviderSyntax.Modifiers.Count - 1];
         for (int i = 0; i < Modifiers.Length; i++)
             Modifiers[i] = serviceProviderSyntax.Modifiers[i].ValueText;
@@ -311,6 +316,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         }
         else
             ModifiersScope = ["public", "sealed"];
+
+
+        // TODO interface handling here
 
 
         // parameters on ServiceProviderAttribute
@@ -422,13 +430,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         // adding services and default services
         {
             // Default service ServiceProvider itself
-            string implementationType = NameSpaceList.GetFullyQualifiedName(Name);
-            string serviceType = HasInterface ? NameSpaceList.GetFullyQualifiedName(InterfaceName) : implementationType;
+            string implementationType = Name.GetFullyQualifiedName(NameSpaceList, ContainingTypeList);
+            string serviceType = HasInterface ? InterfaceName.GetFullyQualifiedName(NameSpaceList, ContainingTypeList) : implementationType;
             bool hasServiceSelf = false;
 
             // Default Service ServiceProvider.Scope self
-            string implementationTypeScope = NameSpaceList.GetFullyQualifiedName(Name, "Scope");
-            string serviceTypeScope = HasInterface ? NameSpaceList.GetFullyQualifiedName(InterfaceName, "IScope") : implementationTypeScope;
+            string implementationTypeScope = Name.GetFullyQualifiedName("Scope", NameSpaceList, ContainingTypeList);
+            string serviceTypeScope = HasInterface ? InterfaceName.GetFullyQualifiedName("IScope", NameSpaceList, ContainingTypeList) : implementationTypeScope;
             bool hasServiceSelfScope = false;
 
             // register services [Singleton<>, Scoped<>, Transient<>, Delegate<> attributes]
@@ -638,7 +646,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         // else
                         {
                             Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                true => serviceProvider.serviceProviderAttribute.CreateScopedProviderNamedUnregisteredError(serviceProvider.NameSpaceList.GetFullyQualifiedName(serviceProvider.Name), dependency.ServiceIdentifier),
+                                true => serviceProvider.serviceProviderAttribute.CreateScopedProviderNamedUnregisteredError(GetFullyQualifiedName(serviceProvider), dependency.ServiceIdentifier),
                                 false => serviceProvider.serviceProviderAttribute.CreateDependencyNamedUnregisteredError(service.Name, dependency.ServiceIdentifier)
                             };
                             serviceProvider.ErrorList ??= [];
@@ -654,13 +662,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 serviceProvider.ErrorList ??= [];
 
                                 Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                    true => serviceProvider.serviceProviderAttribute.CreateScopedProviderUnregisteredError(serviceProvider.NameSpaceList.GetFullyQualifiedName(serviceProvider.Name), dependency.ServiceIdentifier),
+                                    true => serviceProvider.serviceProviderAttribute.CreateScopedProviderUnregisteredError(GetFullyQualifiedName(serviceProvider), dependency.ServiceIdentifier),
                                     false => serviceProvider.serviceProviderAttribute.CreateDependencyUnregisteredError(service.Name, dependency.ServiceIdentifier)
                                 };
                                 serviceProvider.ErrorList.Add(error);
 
                                 if (serviceProvider.HasInterface)
                                     if (dependency.ServiceIdentifier == serviceProvider.InterfaceName || dependency.ServiceIdentifier == $"{serviceProvider.InterfaceName}.IScope") {
+                                        // TODO
                                         Diagnostic hintError = serviceProvider.serviceProviderAttribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceIdentifier, string.Join(".", serviceProvider.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceName);
                                         serviceProvider.ErrorList.Add(hintError);
                                     }
@@ -700,7 +709,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                     bool isParameter = dependency is ConstructorDependency;
 
                                     Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                        true => serviceProvider.serviceProviderAttribute.CreateScopedProviderAmbiguousError(serviceProvider.NameSpaceList.GetFullyQualifiedName(serviceProvider.Name), dependency.ServiceIdentifier, servicesWithSameType, isParameter),
+                                        true => serviceProvider.serviceProviderAttribute.CreateScopedProviderAmbiguousError(GetFullyQualifiedName(serviceProvider), dependency.ServiceIdentifier, servicesWithSameType, isParameter),
                                         false => serviceProvider.serviceProviderAttribute.CreateDependencyAmbiguousError(service.Name, dependency.ServiceIdentifier, servicesWithSameType, isParameter)
                                     };
                                     serviceProvider.ErrorList ??= [];
@@ -763,13 +772,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             break;
                         case ServiceLifetime.TransientSingleton:
                             if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeScopeError(serviceProvider.NameSpaceList.GetFullyQualifiedName(serviceProvider.Name), dependency.ServiceIdentifier);
+                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeScopeError(GetFullyQualifiedName(serviceProvider), dependency.ServiceIdentifier);
                                 serviceProvider.ErrorList ??= [];
                                 serviceProvider.ErrorList.Add(error);
                                 return;
                             }
                             if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeTransientError(serviceProvider.NameSpaceList.GetFullyQualifiedName(serviceProvider.Name), dependency.ServiceIdentifier);
+                                Diagnostic error = serviceProvider.serviceProviderAttribute.CreateScopedProviderLifetimeTransientError(GetFullyQualifiedName(serviceProvider), dependency.ServiceIdentifier);
                                 serviceProvider.ErrorList ??= [];
                                 serviceProvider.ErrorList.Add(error);
                                 return;
@@ -785,6 +794,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     path.RemoveAt(path.Count - 1);
                 }
             }
+
+
+            static string GetFullyQualifiedName(ServiceProvider serviceProvider) => serviceProvider.Name.GetFullyQualifiedName(serviceProvider.NameSpaceList, serviceProvider.ContainingTypeList);
         }
     }
 
@@ -814,17 +826,18 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             return false;
         if (!NameSpaceList.SequenceEqual(other.NameSpaceList))
             return false;
-        if (InterfaceName != other.InterfaceName)
-            return false;
-
         if (Keyword != other.Keyword)
             return false;
         if (KeywordScope != other.KeywordScope)
             return false;
-
         if (!Modifiers.SequenceEqual(other.Modifiers))
             return false;
         if (!ModifiersScope.SequenceEqual(other.ModifiersScope))
+            return false;
+        if (!ContainingTypeList.SequenceEqual(other.ContainingTypeList))
+            return false;
+
+        if (InterfaceName != other.InterfaceName)
             return false;
 
         if (HasConstructor != other.HasConstructor)
@@ -870,17 +883,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
     public override int GetHashCode() {
         int hashCode = Name.GetHashCode();
-        foreach (string namspace in NameSpaceList)
-            hashCode = Combine(hashCode, namspace.GetHashCode());
-        hashCode = Combine(hashCode, InterfaceName.GetHashCode());
-
+        hashCode = CombineList(hashCode, NameSpaceList);
         hashCode = Combine(hashCode, Keyword.GetHashCode());
         hashCode = Combine(hashCode, KeywordScope.GetHashCode());
+        hashCode = CombineList(hashCode, Modifiers);
+        hashCode = CombineList(hashCode, ModifiersScope);
+        hashCode = CombineList(hashCode, ContainingTypeList);
 
-        foreach (string modifier in Modifiers)
-            hashCode = Combine(hashCode, modifier.GetHashCode());
-        foreach (string modifierScope in ModifiersScope)
-            hashCode = Combine(hashCode, modifierScope.GetHashCode());
+        hashCode = Combine(hashCode, InterfaceName.GetHashCode());
 
         hashCode = Combine(hashCode, HasConstructor.GetHashCode());
         hashCode = Combine(hashCode, HasConstructorScope.GetHashCode());
@@ -898,22 +908,23 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         if (CreateScope is not null)
             hashCode = Combine(hashCode, CreateScope.GetHashCode());
 
-        foreach (Service service in SingletonList)
-            hashCode = Combine(hashCode, service.GetHashCode());
-        foreach (Service service in ScopedList)
-            hashCode = Combine(hashCode, service.GetHashCode());
-        foreach (Service service in TransientList)
-            hashCode = Combine(hashCode, service.GetHashCode());
-        foreach (Service service in DelegateList)
-            hashCode = Combine(hashCode, service.GetHashCode());
+        hashCode = CombineList(hashCode, SingletonList);
+        hashCode = CombineList(hashCode, ScopedList);
+        hashCode = CombineList(hashCode, TransientList);
+        hashCode = CombineList(hashCode, DelegateList);
 
         if (ErrorList != null)
-            foreach (Diagnostic error in ErrorList)
-                hashCode = Combine(hashCode, error.GetHashCode());
+            hashCode = CombineList(hashCode, ErrorList);
 
         return hashCode;
 
 
+        static int CombineList<T>(int hashCode, IEnumerable<T> list) where T : notnull {
+            foreach (T item in list)
+                hashCode = Combine(hashCode, item.GetHashCode());
+            return hashCode;
+        }
+        
         static int Combine(int h1, int h2) {
             uint rol5 = ((uint)h1 << 5) | ((uint)h1 >> 27);
             return ((int)rol5 + h1) ^ h2;

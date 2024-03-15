@@ -558,20 +558,23 @@ public sealed class Service : IEquatable<Service> {
         hashCode = Combine(hashCode, CreationTime.GetHashCode());
         hashCode = Combine(hashCode, GetAccessor.GetHashCode());
 
-        foreach (ConstructorDependency constructorDependency in ConstructorDependencyList)
-            hashCode = Combine(hashCode, constructorDependency.GetHashCode());
-        foreach (PropertyDependency propertyDependency in PropertyDependencyList)
-            hashCode = Combine(hashCode, propertyDependency.GetHashCode());
+        hashCode = CombineList(hashCode, ConstructorDependencyList);
+        hashCode = CombineList(hashCode, PropertyDependencyList);
 
         hashCode = Combine(hashCode, IsDisposable.GetHashCode());
         hashCode = Combine(hashCode, IsAsyncDisposable.GetHashCode());
 
         if (ErrorList != null)
-            foreach (Diagnostic error in ErrorList)
-                hashCode = Combine(hashCode, error.GetHashCode());
+            hashCode = CombineList(hashCode, ErrorList);
 
         return hashCode;
 
+
+        static int CombineList(int hashCode, IEnumerable<object> list) {
+            foreach (object item in list)
+                hashCode = Combine(hashCode, item.GetHashCode());
+            return hashCode;
+        }
 
         static int Combine(int h1, int h2) {
             uint rol5 = ((uint)h1 << 5) | ((uint)h1 >> 27);

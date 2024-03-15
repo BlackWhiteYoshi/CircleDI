@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Microsoft.CodeAnalysis;
+using System.Text;
 
 namespace CircleDI;
 
@@ -59,6 +60,18 @@ public static class StringBuilderExtensions {
     public static void AppendNamespaceList(this StringBuilder builder, List<string> namespaceList) {
         for (int i = namespaceList.Count - 1; i >= 0; i--) {
             builder.Append(namespaceList[i]);
+            builder.Append(".");
+        }
+    }
+
+    /// <summary>
+    /// Appends the complete namespace with trailing '.'
+    /// </summary>
+    /// <param name="namespaceList"></param>
+    /// <returns></returns>
+    public static void AppendContainingTypeList(this StringBuilder builder, List<(string name, TypeKind type)> containingTypeList) {
+        for (int i = containingTypeList.Count - 1; i >= 0; i--) {
+            builder.Append(containingTypeList[i].name);
             builder.Append(".");
         }
     }

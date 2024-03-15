@@ -181,6 +181,69 @@ public static class ServiceProviderTests {
 
 
     [Fact]
+    public static Task ServiceProviderNestedType() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            
+            public sealed class Wrapper {
+                [ServiceProvider]
+                public sealed partial class TestProvider;
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ServiceProviderManyNestedTypes() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            
+            public sealed partial class Wrapper {
+                private partial struct Data {
+                    public partial interface Api {
+                        [ServiceProvider]
+                        public sealed partial class TestProvider;
+                    }
+                }
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+
+    [Fact]
     public static Task ServiceProviderInitServicesMethod() {
         const string input = """
             using CircleDIAttributes;

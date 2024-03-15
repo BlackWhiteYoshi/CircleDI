@@ -78,7 +78,7 @@ public static class SyntaxNodeExtensions {
     }
 
     /// <summary>
-    /// <para>A list of all types (name and type) the given type is contained in.</para>
+    /// <para>A list of all types (name and type) the given type is nested in.</para>
     /// <para>
     /// The first item is the most inner type and the last item is the most outer type.<br />
     /// So, to construct a fully-qualified name this list should be iterated backwards.
@@ -92,7 +92,7 @@ public static class SyntaxNodeExtensions {
         INamedTypeSymbol containingtypeSymbol = typeSymbol.ContainingType;
         while (containingtypeSymbol != null) {
             typeList.Add((containingtypeSymbol.Name, containingtypeSymbol.TypeKind));
-            containingtypeSymbol = typeSymbol.ContainingType;
+            containingtypeSymbol = containingtypeSymbol.ContainingType;
         }
 
         return typeList;
