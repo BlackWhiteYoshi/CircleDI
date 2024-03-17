@@ -90,14 +90,14 @@ partial class Wrapper {
         /// </para>
         /// </summary>
         public sealed partial class Scope : global::MyCode.Wrapper.ITestProvider.IScope, IServiceProvider {
-            private global::MyCode.Wrapper.ITestProvider __serviceProvider;
+            private global::MyCode.Wrapper.ITestProvider _testProvider;
 
             /// <summary>
             /// Creates an instance of <see cref="global::MyCode.Wrapper.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
             /// </summary>
-            /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-            public Scope(global::MyCode.Wrapper.ITestProvider serviceProvider) {
-                __serviceProvider = serviceProvider;
+            /// <param name="testProvider">An instance of the service provider this provider is the scope of.</param>
+            public Scope(global::MyCode.Wrapper.ITestProvider testProvider) {
+                _testProvider = testProvider;
             }
 
             /// <summary>
@@ -113,7 +113,7 @@ partial class Wrapper {
             /// Service type: <see cref="global::MyCode.Wrapper.ITestProvider"/><br />
             /// Implementation type:  <see cref="global::MyCode.Wrapper.TestProvider"/>
             /// </summary>
-            public global::MyCode.Wrapper.ITestProvider Self => __serviceProvider.Self;
+            public global::MyCode.Wrapper.ITestProvider Self => _testProvider.Self;
 
 
             /// <summary>

@@ -7,8 +7,10 @@ namespace CircleDI.Generation;
 public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serviceProvider) {
     private bool isScopeProvider = false;
     private List<Service> serviceList = serviceProvider.SingletonList;
+    private List<ConstructorDependency> constructorParameterList = serviceProvider.ConstructorParameterList;
     private ClassStructKeyword keyword = serviceProvider.Keyword;
     private DisposeGeneration generateDisposeMethods = serviceProvider.GenerateDisposeMethods;
+    private bool hasConstructor = serviceProvider.HasConstructor;
     private bool hasDisposeMethod = serviceProvider.HasDisposeMethod;
     private bool hasDisposeAsyncMethod = serviceProvider.HasDisposeAsyncMethod;
     private bool threadSafe = serviceProvider.ThreadSafe;
@@ -17,8 +19,10 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     public void SetToScope() {
         isScopeProvider = true;
         serviceList = serviceProvider.ScopedList;
+        constructorParameterList = serviceProvider.ConstructorParameterListScope;
         keyword = serviceProvider.KeywordScope;
         generateDisposeMethods = serviceProvider.GenerateDisposeMethodsScope;
+        hasConstructor = serviceProvider.HasConstructorScope;
         hasDisposeMethod = serviceProvider.HasDisposeMethodScope;
         hasDisposeAsyncMethod = serviceProvider.HasDisposeAsyncMethodScope;
         threadSafe = serviceProvider.ThreadSafeScope;
@@ -29,68 +33,189 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     #region Constructor Services
 
     /// <summary>
-    /// Appends MemberNotNullAttribute with all necessary members listed
+    /// Appends<br />
+    /// - the parameter fields<br />
+    /// - constructor/InitServices() summary<br />
+    /// - constructor parameterList<br />
+    /// - singleton/scoped services initialization
     /// </summary>
-    /// <param name="serviceList"><see cref="ServiceProvider.SingletonList"/> or <see cref="ServiceProvider.ScopedList"/></param>
-    /// <param name="isScopeProvider"></param>
-    public readonly void AppendInitServicesMemberNotNull() {
-        // if serviceList has Any()
-        for (int i = 0; i < serviceList.Count; i++) {
-            Service service = serviceList[i];
-            if (service.CreationTime == CreationTiming.Constructor && service.Implementation.Type != MemberType.Field) {
+    public readonly void AppendConstructor() {
+        // parameter fields
+        if (constructorParameterList.Count > 0) {
+            foreach (ConstructorDependency dependency in serviceProvider.ConstructorParameterListScope) {
                 builder.Append(indent.Sp4);
-                builder.Append($"[System.Diagnostics.CodeAnalysis.MemberNotNull(");
-                if (isScopeProvider)
-                    builder.Append("nameof(__serviceProvider), ");
-
-                while (true) {
-                    builder.Append("nameof(");
-                    builder.Append('_');
-                    builder.AppendFirstLower(service.Name);
-                    builder.Append(')');
-                    builder.Append(',');
-                    builder.Append(' ');
-
-                    do {
-                        i++;
-                        if (i == serviceList.Count)
-                            goto doubleBreak;
-                        service = serviceList[i];
-                    } while (service.CreationTime != CreationTiming.Constructor || service.Implementation.Type == MemberType.Field);
-                }
-                doubleBreak:
-
-                builder.Length -= 2;
-                builder.Append(')');
-                builder.Append(']');
+                builder.Append("private global::");
+                builder.Append(dependency.ServiceIdentifier);
+                builder.Append(' ');
+                builder.Append('_');
+                builder.AppendFirstLower(dependency.Name);
+                builder.Append(';');
                 builder.Append('\n');
-                return;
             }
+            builder.Append('\n');
         }
-        // else
-        {
-            if (isScopeProvider) {
-                builder.Append(indent.Sp4);
-                builder.Append($"[System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(__serviceProvider))]\n");
-            }
-        }
-    }
 
-    /// <summary>
-    /// Constructor service initialization
-    /// </summary>
-    /// <param name="serviceList"><see cref="ServiceProvider.SingletonList"/> or <see cref="ServiceProvider.ScopedList"/><</param>
-    public readonly void AppendConstructorServices() {
+        // <summary> + method name
+        AppendConstructionSummary();
+
+        // constructor parameters
+        AppendParameterDependencyList(constructorParameterList);
+        builder.Append(' ');
+        builder.Append('{');
+        builder.Append('\n');
+
+        // parameter field = parameter
+        if (constructorParameterList.Count > 0) {
+            foreach (ConstructorDependency dependency in constructorParameterList) {
+                builder.Append(indent.Sp8);
+                builder.Append('_');
+                builder.AppendFirstLower(dependency.Name);
+                builder.Append(' ');
+                builder.Append('=');
+                builder.Append(' ');
+                builder.AppendFirstLower(dependency.Name);
+                builder.Append(';');
+                builder.Append('\n');
+            }
+            builder.Append('\n');
+        }
+
+        // singleton/scoped services inizialization
         List<(Service, PropertyDependency)> circularDependencies = [];
         foreach (Service service in serviceList)
             AppendConstructorService(service, circularDependencies);
-
         AppendCircularDependencies(circularDependencies, indent.Sp8);
+        
+        if (builder[^2] == '\n')
+            builder.Length--;
 
         builder.Append(indent.Sp4);
         builder.Append('}');
         builder.Append('\n');
         builder.Append('\n');
+    }
+
+    private readonly void AppendConstructionSummary() {
+        if (!hasConstructor) {
+            if (!isScopeProvider) {
+                builder.Append(indent.Sp4);
+                builder.Append("/// <summary>\n");
+                builder.Append(indent.Sp4);
+                builder.Append("/// Creates an instance of <see cref=\"global::");
+                builder.AppendNamespaceList(serviceProvider.NameSpaceList);
+                builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
+                builder.Append(serviceProvider.Name);
+                builder.Append("\"/> together with all <see cref=\"global::CircleDIAttributes.CreationTiming.Constructor\">non-lazy</see> singleton services.\n");
+                builder.Append(indent.Sp4);
+                builder.Append("/// </summary>\n");
+                builder.Append(indent.Sp4);
+                builder.Append("public ");
+                builder.Append(serviceProvider.Name);
+            }
+            else {
+                AppendCreateScopeSummary();
+                builder.Append(indent.Sp4);
+                builder.Append("/// <param name=\"");
+                builder.AppendFirstLower(serviceProvider.Name);
+                builder.Append("\">An instance of the service provider this provider is the scope of.</param>\n");
+                builder.Append(indent.Sp4);
+                builder.Append("public Scope");
+            }
+        }
+        else {
+            if (!isScopeProvider) {
+                builder.Append(indent.Sp4);
+                builder.Append("/// <summary>\n");
+                builder.Append(indent.Sp4);
+                builder.Append("/// Constructs non-lazy singleton services. Should be called inside the constructor at the end.\n");
+                builder.Append(indent.Sp4);
+                builder.Append("/// </summary>\n");
+            }
+            else {
+                builder.Append(indent.Sp4);
+                builder.Append("/// <summary>\n");
+                builder.Append(indent.Sp4);
+                builder.Append("/// Constructs non-lazy scoped services. Should be called inside the constructor at the end.\n");
+                builder.Append(indent.Sp4);
+                builder.Append("/// </summary>\n");
+                builder.Append(indent.Sp4);
+                builder.Append("/// <param name=\"");
+                builder.AppendFirstLower(serviceProvider.Name);
+                builder.Append("\">\n");
+                builder.Append(indent.Sp4);
+                builder.Append("/// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />\n");
+                builder.Append(indent.Sp4);
+                builder.Append("/// public Scope([Dependency] ");
+                if (serviceProvider.HasInterface) {
+                    builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
+                    builder.Append(serviceProvider.InterfaceName);
+                }
+                else {
+                    builder.Append(serviceProvider.Name);
+                }
+                builder.Append(' ');
+                builder.AppendFirstLower(serviceProvider.Name);
+                builder.Append(") { ...\n");
+                builder.Append(indent.Sp4);
+                builder.Append("/// </param>\n");
+            }
+
+            // MemberNotNullAttribute
+            for (int i = 0; i < serviceList.Count; i++) {
+                Service service = serviceList[i];
+                
+                // if serviceList has Any()
+                if (service.CreationTime == CreationTiming.Constructor && service.Implementation.Type != MemberType.Field) {
+                    builder.Append(indent.Sp4);
+                    builder.Append("[System.Diagnostics.CodeAnalysis.MemberNotNull(");
+                    if (isScopeProvider) {
+                        builder.Append("nameof(_");
+                        builder.AppendFirstLower(serviceProvider.Name);
+                        builder.Append(')');
+                        builder.Append(',');
+                        builder.Append(' ');
+                    }
+
+                    while (true) {
+                        builder.Append("nameof(_");
+                        builder.AppendFirstLower(service.Name);
+                        builder.Append(')');
+                        builder.Append(',');
+                        builder.Append(' ');
+
+                        do {
+                            i++;
+                            if (i == serviceList.Count)
+                                goto doubleBreak;
+                            service = serviceList[i];
+                        } while (service.CreationTime != CreationTiming.Constructor || service.Implementation.Type == MemberType.Field);
+                    }
+                    doubleBreak:
+
+                    builder.Length -= 2;
+                    builder.Append(')');
+                    builder.Append(']');
+                    builder.Append('\n');
+                    goto memberNotNullAttributeEnd;
+                }
+            }
+            // else
+            {
+                if (isScopeProvider) {
+                    builder.Append(indent.Sp4);
+                    builder.Append("[System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(_");
+                    builder.AppendFirstLower(serviceProvider.Name);
+                    builder.Append(')');
+                    builder.Append(')');
+                    builder.Append(']');
+                    builder.Append('\n');
+                }
+            }
+            memberNotNullAttributeEnd:
+
+            builder.Append(indent.Sp4);
+            builder.Append("private void InitServices");
+        }
     }
 
     private readonly void AppendConstructorService(Service service, List<(Service, PropertyDependency)> circularDependencies) {
@@ -122,24 +247,14 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 AppendPropertyDependencyList(service, circularDependencies, indent.Sp8);
                 break;
             case MemberType.Method:
-                if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-                    builder.Append("((global::");
-                    builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-                    builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-                    builder.Append(serviceProvider.Name);
-                    builder.Append(")__serviceProvider).");
-                }
+                if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
+                    AppendServiceProviderFieldWithCast();
                 builder.Append(service.Implementation.Name);
                 AppendConstructorDependencyList(service);
                 break;
             case MemberType.Property:
-                if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-                    builder.Append("((global::");
-                    builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-                    builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-                    builder.Append(serviceProvider.Name);
-                    builder.Append(")__serviceProvider).");
-                }
+                if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
+                    AppendServiceProviderFieldWithCast();
                 builder.Append(service.Implementation.Name);
                 break;
         }
@@ -155,8 +270,6 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     /// <summary>
     /// Singletons/Scoped service Getter
     /// </summary>
-    /// <param name="serviceList"><see cref="ServiceProvider.SingletonList"/> or <see cref="ServiceProvider.ScopedList"/><</param>
-    /// <param name="threadSafe"></param>
     public readonly void AppendServicesGetter() {
         if (serviceList.Count > 0) {
             foreach (Service service in serviceList) {
@@ -191,13 +304,8 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     private readonly void AppendServicesGetterField(Service service, string refOrEmpty) {
         builder.Append(" => ");
         builder.Append(refOrEmpty);
-        if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-            builder.Append("((global::");
-            builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-            builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-            builder.Append(serviceProvider.Name);
-            builder.Append(")__serviceProvider).");
-        }
+        if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
+            AppendServiceProviderFieldWithCast();
         builder.Append(service.Implementation.Name);
         builder.Append(';');
         builder.Append('\n');
@@ -275,25 +383,15 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 AppendCircularDependencies(circularDependencies, indentCreation);
                 break;
             case MemberType.Property:
-                if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-                    builder.Append("((global::");
-                    builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-                    builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-                    builder.Append(serviceProvider.Name);
-                    builder.Append(")__serviceProvider).");
-                }
+                if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
+                    AppendServiceProviderFieldWithCast();
                 builder.Append(service.Implementation.Name);
                 builder.Append(';');
                 builder.Append('\n');
                 break;
             case MemberType.Method:
-                if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-                    builder.Append("((global::");
-                    builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-                    builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-                    builder.Append(serviceProvider.Name);
-                    builder.Append(")__serviceProvider).");
-                }
+                if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
+                    AppendServiceProviderFieldWithCast();
                 builder.Append(service.Implementation.Name);
                 AppendConstructorDependencyList(service);
                 builder.Append(';');
@@ -347,8 +445,6 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     /// <summary>
     /// Transients service Getter
     /// </summary>
-    /// <param name="generateDisposeMethods"></param>
-    /// <param name="isScopeProvider"></param>
     /// <returns></returns>
     public readonly (bool hasDisposeList, bool hasAsyncDisposeList) AppendServicesTransient() {
         bool hasDisposeList = false;
@@ -459,17 +555,15 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
 
         if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
             if (service.Lifetime == ServiceLifetime.Transient) {
-                builder.Append("__serviceProvider.");
+                builder.Append('_');
+                builder.AppendFirstLower(serviceProvider.Name);
+                builder.Append('.');
                 builder.AppendServiceGetter(service);
                 builder.Append(';');
                 return;
             }
 
-            builder.Append("((global::");
-            builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-            builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-            builder.Append(serviceProvider.Name);
-            builder.Append(")__serviceProvider).");
+            AppendServiceProviderFieldWithCast();
         }
 
         builder.Append(service.Implementation.Name);
@@ -486,7 +580,6 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     /// <summary>
     /// Delegates service Getter
     /// </summary>
-    /// <param name="isScopeProvider"></param>
     public readonly void AppendServicesDelegate() {
         int currentPosition = builder.Length;
 
@@ -501,13 +594,8 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             builder.Append(' ');
             builder.AppendServiceGetter(service);
             builder.Append(" => ");
-            if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-                builder.Append("((global::");
-                builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-                builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-                builder.Append(serviceProvider.Name);
-                builder.Append(")__serviceProvider).");
-            }
+            if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
+                AppendServiceProviderFieldWithCast();
             builder.Append(service.Implementation.Name);
             builder.Append(';');
             builder.Append('\n');
@@ -645,13 +733,8 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     /// <summary>
     /// Generates the Dispose/AsyncDispose methods and the corresponding disposeLists for the transient services.
     /// </summary>
-    /// <param name="serviceList"></param>
-    /// <param name="generateDisposeMethods"></param>
-    /// <param name="threadSafe"></param>
     /// <param name="hasDisposeList"></param>
     /// <param name="hasAsyncDisposeList"></param>
-    /// <param name="hasDisposeMethod"></param>
-    /// <param name="hasDisposeAsyncMethod"></param>
     public readonly void AppendDisposeMethods(bool hasDisposeList, bool hasAsyncDisposeList) {
         if (generateDisposeMethods == DisposeGeneration.NoDisposing)
             return;
@@ -1001,7 +1084,6 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     /// <summary>
     /// Generates the [UnsafeAccessor]-methods to access init-only circle dependencies.
     /// </summary>
-    /// <param name="serviceList"></param>
     public readonly void AppendUnsafeAccessorMethods() {
         int currentPosition = builder.Length;
 
@@ -1032,6 +1114,29 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     #endregion
 
 
+    /// <summary>
+    /// <para>Appends "(service1Type service1Name, service2Type service2Name, ..., serviceNType serviceNName)"</para>
+    /// <para>If dependencyList is empty, only "()" is appended.</para>
+    /// </summary>
+    /// <param name="dependencyList"></param>
+    public readonly void AppendParameterDependencyList(IEnumerable<Dependency> dependencyList) {
+        builder.Append('(');
+
+        foreach (Dependency dependency in dependencyList)
+            if (!dependency.HasAttribute) {
+                builder.Append("global::");
+                builder.Append(dependency.ServiceIdentifier);
+                builder.Append(' ');
+                builder.AppendFirstLower(dependency.Name);
+                builder.Append(',');
+                builder.Append(' ');
+            }
+        if (builder[^1] == ' ')
+            builder.Length -= 2;
+
+        builder.Append(')');
+    }
+    
     /// <summary>
     /// <para>Appends "(service1, service2, ..., serviceN)"</para>
     /// <para>If <see cref="Service.ConstructorDependencyList"/> is empty, only "()" is appended.</para>
@@ -1142,6 +1247,24 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append('\n');
             }
         }
+    }
+
+    /// <summary>
+    /// Appends serviceProvider field with casting to implementation type with trailing '.':<br />
+    /// "((<i>providerType</i>)<i>providerName</i>)."
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="serviceProvider"></param>
+    public readonly void AppendServiceProviderFieldWithCast() {
+        builder.Append("((global::");
+        builder.AppendNamespaceList(serviceProvider.NameSpaceList);
+        builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
+        builder.Append(serviceProvider.Name);
+        builder.Append(')');
+        builder.Append('_');
+        builder.AppendFirstLower(serviceProvider.Name);
+        builder.Append(')');
+        builder.Append('.');
     }
 
 

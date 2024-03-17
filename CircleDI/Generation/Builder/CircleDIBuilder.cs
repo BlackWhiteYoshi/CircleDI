@@ -106,36 +106,8 @@ public readonly struct CircleDIBuilder {
         }
         builder.Append("IServiceProvider {\n");
 
-
-        // constructor or InitServices()
-        if (!serviceProvider.HasConstructor) {
-            builder.Append(builderExtension.indent.Sp4);
-            builder.Append("/// <summary>\n");
-            builder.Append(builderExtension.indent.Sp4);
-            builder.Append("/// Creates an instance of <see cref=\"global::");
-            builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-            builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-            builder.Append(serviceProvider.Name);
-            builder.Append("\"/> together with all <see cref=\"global::CircleDIAttributes.CreationTiming.Constructor\">non-lazy</see> singleton services.\n");
-            builder.Append(builderExtension.indent.Sp4);
-            builder.Append("/// </summary>\n");
-            builder.Append(builderExtension.indent.Sp4);
-            builder.Append("public ");
-            builder.Append(serviceProvider.Name);
-            builder.Append("() {\n");
-        }
-        else {
-            builder.Append(builderExtension.indent.Sp4);
-            builder.Append("/// <summary>\n");
-            builder.Append(builderExtension.indent.Sp4);
-            builder.Append("/// Constructs non-lazy singleton services. Should be called inside the constructor at the end.\n");
-            builder.Append(builderExtension.indent.Sp4);
-            builder.Append("/// </summary>\n");
-            builderExtension.AppendInitServicesMemberNotNull();
-            builder.Append(builderExtension.indent.Sp4);
-            builder.Append("private void InitServices() {\n");
-        }
-        builderExtension.AppendConstructorServices();
+        // parameter fields, constructor or InitServices()
+        builderExtension.AppendConstructor();
 
         // "special" method CreateScope()
         if (serviceProvider.GenerateScope) {
@@ -152,19 +124,9 @@ public readonly struct CircleDIBuilder {
                 builder.Append(serviceProvider.Name);
                 builder.Append(".Scope");
             }
-            builder.Append(" CreateScope(");
-            foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
-                if (!dependency.HasAttribute) {
-                    builder.Append("global::");
-                    builder.Append(dependency.ServiceIdentifier);
-                    builder.Append(' ');
-                    builder.Append(dependency.Name);
-                    builder.Append(',');
-                    builder.Append(' ');
-                }
-            if (builder[^1] == ' ')
-                builder.Length -= 2;
-            builder.Append(") => new global::");
+            builder.Append(" CreateScope");
+            builderExtension.AppendParameterDependencyList(serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList));
+            builder.Append(" => new global::");
             builder.AppendNamespaceList(serviceProvider.NameSpaceList);
             builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
             builder.Append(serviceProvider.Name);
@@ -261,72 +223,9 @@ public readonly struct CircleDIBuilder {
             }
             builder.Append("IServiceProvider {\n");
 
-            // ServiceProviderField
-            {
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("private ");
-                if (serviceProvider.HasInterface) {
-                    builder.Append("global::");
-                    builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
-                    builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
-                    builder.Append(serviceProvider.InterfaceName);
-                }
-                else {
-                    builder.Append(serviceProvider.Name);
-                }
-                builder.Append(" __serviceProvider;");
-                builder.Append('\n');
-                builder.Append('\n');
-            }
+            // parameter fields, constructor or InitServices()
+            builderExtension.AppendConstructor();
 
-            // constructor or InitServices()
-            if (!serviceProvider.HasConstructorScope) {
-                builderExtension.AppendCreateScopeSummary();
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("/// <param name=\"serviceProvider\">An instance of the service provider this provider is the scope of.</param>\n");
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("public Scope(");
-            }
-            else {
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("/// <summary>\n");
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("/// Constructs non-lazy scoped services. Should be called inside the constructor at the end.\n");
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("/// </summary>\n");
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("/// <param name=\"serviceProvider\">\n");
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("/// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />\n");
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("/// public Scope([Dependency] ");
-                if (serviceProvider.HasInterface) {
-                    builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
-                    builder.Append(serviceProvider.InterfaceName);
-                }
-                else {
-                    builder.Append(serviceProvider.Name);
-                }
-                builder.Append(" serviceProvider) { ...\n");
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("/// </param>\n");
-                builderExtension.AppendInitServicesMemberNotNull();
-                builder.Append(builderExtension.indent.Sp4);
-                builder.Append("private void InitServices(");
-            }
-            if (serviceProvider.HasInterface) {
-                builder.Append("global::");
-                builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
-                builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
-                builder.Append(serviceProvider.InterfaceName);
-            }
-            else {
-                builder.Append(serviceProvider.Name);
-            }
-            builder.Append(" serviceProvider) {\n");
-            builder.Append(builderExtension.indent.Sp8);
-            builder.Append("__serviceProvider = serviceProvider;\n");
-            builderExtension.AppendConstructorServices();
 
             // scoped getter/getMethods
             builderExtension.AppendServicesGetter();
@@ -348,7 +247,9 @@ public readonly struct CircleDIBuilder {
                 builder.AppendServiceGetter(service);
                 builder.Append(" => ");
                 builder.Append(refOrEmpty);
-                builder.Append("__serviceProvider.");
+                builder.Append('_');
+                builder.AppendFirstLower(serviceProvider.Name);
+                builder.Append('.');
                 builder.AppendServiceGetter(service);
                 builder.Append(';');
                 builder.Append('\n');

@@ -108,6 +108,16 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
 
     /// <summary>
+    /// Parameters of the constructor or InitServices() in ServiceProvider.
+    /// </summary>
+    public List<ConstructorDependency> ConstructorParameterList { get; init; } = [];
+
+    /// <summary>
+    /// Parameters of the constructor or InitServices() in ScopeProvider.
+    /// </summary>
+    public List<ConstructorDependency> ConstructorParameterListScope { get; init; } = [];
+
+    /// <summary>
     /// Indicates if a custom constructor is defined.
     /// </summary>
     public bool HasConstructor { get; init; }
@@ -116,6 +126,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// Indicates if the Scope class inside ServiceProvider has a custom constructor defined.
     /// </summary>
     public bool HasConstructorScope { get; init; }
+
 
     /// <summary>
     /// Indicates if a custom Dispose()-method is defined.
@@ -565,6 +576,15 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 });
 
             if (generateScope) {
+                // add ServiceProvider as parameter to ConstructorParameterList
+                ConstructorParameterListScope.Add(new ConstructorDependency() {
+                    Name = Name,
+                    ServiceIdentifier = serviceType,
+                    IsNamed = false,
+                    HasAttribute = false,
+                    ByRef = RefKind.None
+                });
+
                 // Default Service ServiceProvider.Scope self
                 if (!hasServiceSelfScope)
                     ScopedList.Add(new Service() {
@@ -666,16 +686,16 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         SortedServiceList = [.. SingletonList, .. ScopedList, .. TransientList, .. DelegateList];
         SortedServiceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
 
-        CreateDependencyTreeCore core = new(this);
+        DependencyTreeInitializer initializer = new(this);
 
         if (CreateScope is not null)
-            core.InitNode(CreateScope);
+            initializer.InitNode(CreateScope);
 
         foreach (Service service in SortedServiceList)
-            core.InitNode(service);
+            initializer.InitNode(service);
     }
 
-    private readonly struct CreateDependencyTreeCore(ServiceProvider serviceProvider) {
+    private readonly struct DependencyTreeInitializer(ServiceProvider serviceProvider) {
         public readonly List<(Service node, Dependency edge)> path = [];
 
         public void InitNode(Service service) {
@@ -898,10 +918,15 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         if (!InterfaceContainingTypeList.SequenceEqual(other.InterfaceContainingTypeList))
             return false;
 
+        if (!ConstructorParameterList.SequenceEqual(other.ConstructorParameterList))
+            return false;
+        if (!ConstructorParameterListScope.SequenceEqual(other.ConstructorParameterListScope))
+            return false;
         if (HasConstructor != other.HasConstructor)
             return false;
         if (HasConstructorScope != other.HasConstructorScope)
             return false;
+
         if (HasDisposeMethod != other.HasDisposeMethod)
             return false;
         if (HasDisposeMethodScope != other.HasDisposeMethodScope)
@@ -954,8 +979,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         hashCode = CombineList(hashCode, InterfaceNameSpaceList);
         hashCode = CombineList(hashCode, InterfaceContainingTypeList);
 
+        hashCode = CombineList(hashCode, ConstructorParameterList);
+        hashCode = CombineList(hashCode, ConstructorParameterListScope);
         hashCode = Combine(hashCode, HasConstructor.GetHashCode());
         hashCode = Combine(hashCode, HasConstructorScope.GetHashCode());
+
         hashCode = Combine(hashCode, HasDisposeMethod.GetHashCode());
         hashCode = Combine(hashCode, HasDisposeMethodScope.GetHashCode());
         hashCode = Combine(hashCode, HasDisposeAsyncMethod.GetHashCode());

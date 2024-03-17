@@ -144,14 +144,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.ITestProvider __serviceProvider;
+        private global::MyCode.ITestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(global::MyCode.ITestProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="testProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::MyCode.ITestProvider testProvider) {
+            _testProvider = testProvider;
         }
 
         /// <summary>
@@ -167,42 +167,42 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.TestStruct"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestStruct"/>
         /// </summary>
-        public ref global::MyCode.TestStruct TestStruct => ref __serviceProvider.TestStruct;
+        public ref global::MyCode.TestStruct TestStruct => ref _testProvider.TestStruct;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.RefInject"/><br />
         /// Implementation type:  <see cref="global::MyCode.RefInject"/>
         /// </summary>
-        public global::MyCode.RefInject RefInject => __serviceProvider.RefInject;
+        public global::MyCode.RefInject RefInject => _testProvider.RefInject;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.InInject"/><br />
         /// Implementation type:  <see cref="global::MyCode.InInject"/>
         /// </summary>
-        public global::MyCode.InInject InInject => __serviceProvider.InInject;
+        public global::MyCode.InInject InInject => _testProvider.InInject;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.OutInject"/><br />
         /// Implementation type:  <see cref="global::MyCode.OutInject"/>
         /// </summary>
-        public global::MyCode.OutInject OutInject => __serviceProvider.OutInject;
+        public global::MyCode.OutInject OutInject => _testProvider.OutInject;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.RefReadonlyInject"/><br />
         /// Implementation type:  <see cref="global::MyCode.RefReadonlyInject"/>
         /// </summary>
-        public global::MyCode.RefReadonlyInject RefReadonlyInject => __serviceProvider.RefReadonlyInject;
+        public global::MyCode.RefReadonlyInject RefReadonlyInject => _testProvider.RefReadonlyInject;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
         /// </summary>
-        public global::MyCode.ITestProvider Self => __serviceProvider.Self;
+        public global::MyCode.ITestProvider Self => _testProvider.Self;
 
 
         /// <summary>

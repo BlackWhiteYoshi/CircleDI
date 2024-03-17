@@ -32,7 +32,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// <summary>
     /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope(global::MyCode.IService1 service1, global::MyCode.IService3 Service3) => new global::MyCode.TestProvider.Scope(Self, service1) {
+    public global::MyCode.ITestProvider.IScope CreateScope(global::MyCode.IService1 service1, global::MyCode.IService3 service3) => new global::MyCode.TestProvider.Scope(Self, service1) {
         Service2 = Service2,
         Service3 = Service3
     };
@@ -120,18 +120,18 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.ITestProvider __serviceProvider;
+        private global::MyCode.ITestProvider _testProvider;
 
         /// <summary>
         /// Constructs non-lazy scoped services. Should be called inside the constructor at the end.
         /// </summary>
-        /// <param name="serviceProvider">
+        /// <param name="testProvider">
         /// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />
-        /// public Scope([Dependency] ITestProvider serviceProvider) { ...
+        /// public Scope([Dependency] ITestProvider testProvider) { ...
         /// </param>
-        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(__serviceProvider))]
-        private void InitServices(global::MyCode.ITestProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(_testProvider))]
+        private void InitServices(global::MyCode.ITestProvider testProvider) {
+            _testProvider = testProvider;
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
         /// </summary>
-        public global::MyCode.ITestProvider Self => __serviceProvider.Self;
+        public global::MyCode.ITestProvider Self => _testProvider.Self;
 
 
         /// <summary>

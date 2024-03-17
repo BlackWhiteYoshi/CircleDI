@@ -599,8 +599,8 @@ public static class ServiceProviderTests {
             [Transient<ITestService2, TestService2>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
-                    public required ITestService1 TestService1 { private get; init; }
-                    public required ITestService2 TestService2 { private get; init; }
+                    public required ITestService1 TestService3 { private get; init; }
+                    public required ITestService2 TestService4 { private get; init; }
 
                     public Scope(ITestProvider testProvider, ITestService1 testService1, ITestService2 testService2) {
                         InitServices(testProvider);

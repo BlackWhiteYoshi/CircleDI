@@ -110,18 +110,18 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.ITestProvider __serviceProvider;
+        private global::MyCode.ITestProvider _testProvider;
 
         /// <summary>
         /// Constructs non-lazy scoped services. Should be called inside the constructor at the end.
         /// </summary>
-        /// <param name="serviceProvider">
+        /// <param name="testProvider">
         /// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />
-        /// public Scope([Dependency] ITestProvider serviceProvider) { ...
+        /// public Scope([Dependency] ITestProvider testProvider) { ...
         /// </param>
-        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(__serviceProvider))]
-        private void InitServices(global::MyCode.ITestProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(_testProvider))]
+        private void InitServices(global::MyCode.ITestProvider testProvider) {
+            _testProvider = testProvider;
         }
 
         /// <summary>
@@ -137,14 +137,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.ITestService1"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestService1"/>
         /// </summary>
-        public global::MyCode.ITestService1 TestService1 => __serviceProvider.TestService1;
+        public global::MyCode.ITestService1 TestService1 => _testProvider.TestService1;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
         /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
         /// </summary>
-        public global::MyCode.ITestProvider Self => __serviceProvider.Self;
+        public global::MyCode.ITestProvider Self => _testProvider.Self;
 
 
         /// <summary>
