@@ -340,3 +340,7 @@ And code conventions, structure, and quality is important to me. So there is a g
 - 0.3.0
   Added support for passing value type services by reference.
   ServiceProvider can now also be struct, record or record struct.
+- 0.4.0
+  Added "NoDispose"-property to disable disposing for each distinct service.  
+  Added functionality for omitting interface generation when *InterfaceName* is empty.  
+  Added Attribute *ServiceProvider&lt;TInterface&gt;* to generate the interface into an existing one.
