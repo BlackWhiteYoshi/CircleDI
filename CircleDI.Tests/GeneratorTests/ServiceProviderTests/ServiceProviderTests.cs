@@ -827,6 +827,42 @@ public static class ServiceProviderTests {
 
 
     [Fact]
+    public static Task AttributeServiceProviderWithInterfaceTypeParameter() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MySpace {
+                [ServiceProvider<Interface.IWrapper.IProvider>]
+                public sealed partial class MyProvider;
+            }
+
+            namespace MySpace.Interface {
+                public partial interface IWrapper {
+                    internal partial interface IProvider {
+                        public partial interface IScope;
+                    }
+                }
+            }
+            
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+
+    [Fact]
     public static Task AttributeServiceProviderWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;

@@ -12,15 +12,8 @@ public static partial class Attributes {
         using System;
     
         namespace CircleDIAttributes;
-
-        /// <summary>
-        /// <para>A class decorated with this attribute becomes a service provider. That class must be partial.</para>
-        /// <para>
-        /// To add services to that class, add additional attributes to that class:<br />
-        /// <see cref="SingletonAttribute{TService, TImplementation}" />, <see cref="ScopedAttribute{TService, TImplementation}" />, <see cref="TransientAttribute{TService, TImplementation}" />, <see cref="DelegateAttribute{TService}" />.
-        /// </para>
-        /// <para>The source generator will generate a complete service provider, but you can add additional custom implementation to it.</para>
-        /// </summary>
+        
+        {{ServiceProviderAttributeSummary}}
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ServiceProviderAttribute : Attribute {
@@ -30,7 +23,39 @@ public static partial class Attributes {
             /// </summary>
             public string InterfaceName { get; init; }
 
-            /// <summary>
+            {{ServiceProviderAttributeContentWithoutInterfaceName}}
+        }
+
+        {{ServiceProviderAttributeSummary}}
+        /// <typeparam name="TInterface">
+        /// An explicit declared interface the generated interface will be based on: The name, access modifier, namespace and containing types will be inferred.<br />
+        /// That interface must be partial.<br />
+        /// If the generated interface is used without declaring the interface yourself, it will have no effect.
+        /// </typeparam>
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
+        internal sealed class ServiceProviderAttribute<TInterface> : Attribute {
+            {{ServiceProviderAttributeContentWithoutInterfaceName}}
+        }
+
+        #endif
+
+        """;
+
+
+    private const string ServiceProviderAttributeSummary = """
+        /// <summary>
+        /// <para>A class decorated with this attribute becomes a service provider. That class must be partial.</para>
+        /// <para>
+        /// To add services to that class, add additional attributes to that class:<br />
+        /// <see cref="SingletonAttribute{TService, TImplementation}" />, <see cref="ScopedAttribute{TService, TImplementation}" />, <see cref="TransientAttribute{TService, TImplementation}" />, <see cref="DelegateAttribute{TService}" />.
+        /// </para>
+        /// <para>The source generator will generate a complete service provider, but you can add additional custom implementation to it.</para>
+        /// </summary>
+        """;
+
+    private const string ServiceProviderAttributeContentWithoutInterfaceName = """
+        /// <summary>
             /// <para>
             /// Decides whether services defaulting to lazy construction or instantiation inside the constructor.
             /// This option applies to all services where the "CreationTime"-attribute is not set.
@@ -70,9 +95,5 @@ public static partial class Attributes {
             /// <para>Default is true.</para>
             /// </summary>
             public bool ThreadSafe { get; init; }
-        }
-
-        #endif
-
         """;
 }

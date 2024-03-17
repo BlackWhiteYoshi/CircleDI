@@ -175,7 +175,8 @@ public class MyService : IMyService {
   - [Implementation Property](Readme_md/ConfigurationAndCustomization.md#implementation-property)
   - [Named Services](Readme_md/ConfigurationAndCustomization.md#named-services)
 - [Implicit Configurations](Readme_md/ConfigurationAndCustomization.md#implicit-configurations)
-  - [Name, Namespace and Modifier](Readme_md/ConfigurationAndCustomization.md#name-namespace-and-modifier)
+  - [Name, Namespace, Modifiers and Containing Types](Readme_md/ConfigurationAndCustomization.md#name-namespace-modifiers-and-containing-types)
+  - [Interface name, namespace, access modifier and containing types](Readme_md/ConfigurationAndCustomization.md#interface-name-namespace-access-modifier-and-containing-types)
   - [Overwriting default services](Readme_md/ConfigurationAndCustomization.md#overwriting-default-services)
   - [Custom Constructor](Readme_md/ConfigurationAndCustomization.md#custom-constructor)
   - [Custom Dispose](Readme_md/ConfigurationAndCustomization.md#custom-dispose)
@@ -193,6 +194,7 @@ public class MyService : IMyService {
 ## Attributes and Enums
 
 - [ServiceProviderAttribute](Readme_md/TypeTables.md#serviceproviderattribute)
+- [ServiceProviderAttribute&lt;TInterface&gt;](Readme_md/TypeTables.md#serviceproviderattributetinterface)
 - [ScopedProviderAttribute](Readme_md/TypeTables.md#scopedproviderattribute)
 - [SingletonAttribute](Readme_md/TypeTables.md#singletonattribute)
 - [ScopedAttribute](Readme_md/TypeTables.md#scopedattribute)

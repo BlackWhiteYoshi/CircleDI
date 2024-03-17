@@ -353,40 +353,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             ModifiersScope = ["public", "sealed"];
 
 
-        // TODO interface handling here
-
-
-        // parameters on ServiceProviderAttribute
-        CreationTiming creationTimeMainProvider;
-        GetAccess getAccessorMainProvider;
-        if (serviceProviderAttribute.NamedArguments.Length > 0) {
-            InterfaceName = serviceProviderAttribute.NamedArguments.GetArgument<string?>("InterfaceName") ?? (Name != "ServiceProvider" ? $"I{Name}" : "IServiceprovider");
-            GenerateDisposeMethods = (DisposeGeneration?)serviceProviderAttribute.NamedArguments.GetArgument<int?>("GenerateDisposeMethods") ?? DisposeGeneration.GenerateBoth;
-            ThreadSafe = serviceProviderAttribute.NamedArguments.GetArgument<bool?>("ThreadSafe") ?? true;
-            creationTimeMainProvider = (CreationTiming?)serviceProviderAttribute.NamedArguments.GetArgument<int?>("CreationTime") ?? CreationTiming.Constructor;
-            getAccessorMainProvider = (GetAccess?)serviceProviderAttribute.NamedArguments.GetArgument<int?>("GetAccessor") ?? GetAccess.Property;
-        }
-        else {
-            InterfaceName = Name != "ServiceProvider" ? $"I{Name}" : "IServiceprovider";
-            GenerateDisposeMethods = DisposeGeneration.GenerateBoth;
-            ThreadSafe = true;
-            creationTimeMainProvider = CreationTiming.Constructor;
-            getAccessorMainProvider = GetAccess.Property;
-        }
-
-        if (InterfaceName == "IServiceProvider") {
-            Diagnostic error = serviceProviderAttribute.CreateInterfaceNameIServiceProviderError();
-            ErrorList ??= [];
-            ErrorList.Add(error);
-        }
-
         // interface type
         InterfaceAccessibility = Accessibility.Public;
         InterfaceAccessibilityScope = Accessibility.Public;
         InterfaceNameSpaceList = NameSpaceList;
         InterfaceContainingTypeList = ContainingTypeList;
-        INamedTypeSymbol? interfaceSymbol = syntaxContext.SemanticModel.Compilation.GetTypeByMetadataName(InterfaceName);
-        if (interfaceSymbol != null && interfaceSymbol.TypeKind == TypeKind.Interface) {
+        if (serviceProviderAttribute.AttributeClass!.TypeArguments.Length > 0 && serviceProviderAttribute.AttributeClass.TypeArguments[0] is INamedTypeSymbol { TypeKind: TypeKind.Interface } interfaceSymbol) {
             InterfaceName = interfaceSymbol.Name;
 
             InterfaceAccessibility = interfaceSymbol.DeclaredAccessibility;
@@ -395,6 +367,33 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
             InterfaceNameSpaceList = interfaceSymbol.GetNamespaceList();
             InterfaceContainingTypeList = interfaceSymbol.GetContainingTypeList();
+        }
+        else if (serviceProviderAttribute.NamedArguments.Length > 0 && serviceProviderAttribute.NamedArguments.GetArgument<string?>("InterfaceName") is string interfaceName)
+            InterfaceName = interfaceName;
+        else
+            InterfaceName = Name != "ServiceProvider" ? $"I{Name}" : "IServiceprovider";
+
+        if (InterfaceName == "IServiceProvider") {
+            Diagnostic error = serviceProviderAttribute.CreateInterfaceNameIServiceProviderError();
+            ErrorList ??= [];
+            ErrorList.Add(error);
+        }
+
+
+        // parameters on ServiceProviderAttribute
+        CreationTiming creationTimeMainProvider = CreationTiming.Constructor;
+        GetAccess getAccessorMainProvider = GetAccess.Property;
+        GenerateDisposeMethods = DisposeGeneration.GenerateBoth;
+        ThreadSafe = true;
+        if (serviceProviderAttribute.NamedArguments.Length > 0) {
+            if (serviceProviderAttribute.NamedArguments.GetArgument<int?>("CreationTime") is int creationTime)
+                creationTimeMainProvider = (CreationTiming)creationTime;
+            if (serviceProviderAttribute.NamedArguments.GetArgument<int?>("GetAccessor") is int getAccessor)
+                getAccessorMainProvider = (GetAccess)getAccessor;
+            if (serviceProviderAttribute.NamedArguments.GetArgument<int?>("GenerateDisposeMethods") is int generateDisposeMethods)
+                GenerateDisposeMethods = (DisposeGeneration)generateDisposeMethods;
+            if (serviceProviderAttribute.NamedArguments.GetArgument<bool?>("ThreadSafe") is bool threadSafe)
+                ThreadSafe = threadSafe;
         }
 
 
@@ -414,22 +413,22 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             }
         }
 
-        bool generateScope;
-        CreationTiming creationTimeScopeProvider;
-        GetAccess getAccessorScopeProvider;
+        bool generateScope = true;
+        CreationTiming creationTimeScopeProvider = creationTimeMainProvider;
+        GetAccess getAccessorScopeProvider = getAccessorMainProvider;
+        GenerateDisposeMethodsScope = GenerateDisposeMethods;
+        ThreadSafeScope = ThreadSafe;
         if (scopedProviderAttribute != null) {
-            generateScope = scopedProviderAttribute.NamedArguments.GetArgument<bool?>("Generate") ?? true;
-            GenerateDisposeMethodsScope = (DisposeGeneration?)scopedProviderAttribute.NamedArguments.GetArgument<int?>("GenerateDisposeMethods") ?? GenerateDisposeMethods;
-            ThreadSafeScope = scopedProviderAttribute.NamedArguments.GetArgument<bool?>("ThreadSafe") ?? ThreadSafe;
-            creationTimeScopeProvider = (CreationTiming?)scopedProviderAttribute.NamedArguments.GetArgument<int?>("CreationTime") ?? creationTimeMainProvider;
-            getAccessorScopeProvider = (GetAccess?)scopedProviderAttribute.NamedArguments.GetArgument<int?>("GetAccessor") ?? getAccessorMainProvider;
-        }
-        else {
-            generateScope = true;
-            GenerateDisposeMethodsScope = GenerateDisposeMethods;
-            ThreadSafeScope = ThreadSafe;
-            creationTimeScopeProvider = creationTimeMainProvider;
-            getAccessorScopeProvider = getAccessorMainProvider;
+            if (scopedProviderAttribute.NamedArguments.GetArgument<bool?>("Generate") is bool generate)
+                generateScope = generate;
+            if (scopedProviderAttribute.NamedArguments.GetArgument<int?>("CreationTime") is int creationTime)
+                creationTimeScopeProvider = (CreationTiming)creationTime;
+            if (scopedProviderAttribute.NamedArguments.GetArgument<int?>("GetAccessor") is int getAccessor)
+                getAccessorScopeProvider = (GetAccess)getAccessor;
+            if (scopedProviderAttribute.NamedArguments.GetArgument<int?>("GenerateDisposeMethods") is int generateDisposeMethods)
+                GenerateDisposeMethodsScope = (DisposeGeneration)generateDisposeMethods;
+            if (scopedProviderAttribute.NamedArguments.GetArgument<bool?>("ThreadSafe") is bool threadSafe)
+                ThreadSafeScope = threadSafe;
         }
 
 
@@ -721,7 +720,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                                 if (serviceProvider.HasInterface)
                                     if (dependency.ServiceIdentifier == serviceProvider.InterfaceName || dependency.ServiceIdentifier == $"{serviceProvider.InterfaceName}.IScope") {
-                                        // TODO
                                         Diagnostic hintError = serviceProvider.serviceProviderAttribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceIdentifier, string.Join(".", serviceProvider.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceName);
                                         serviceProvider.ErrorList.Add(hintError);
                                     }

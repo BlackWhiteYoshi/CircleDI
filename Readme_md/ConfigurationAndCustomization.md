@@ -9,7 +9,8 @@
   - [Implementation Property](#implementation-property)
   - [Named Services](#named-services)
 - [Implicit Configurations](#implicit-configurations)
-  - [Name, Namespace and Modifier](#name-namespace-and-modifier)
+  - [Name, Namespace, Modifiers and Containing Types](#name-namespace-modifiers-and-containing-types)
+  - [Interface name, namespace, access modifier and containing types](#interface-name-namespace-access-modifier-and-containing-types)
   - [Overwriting default services](#overwriting-default-services)
   - [Custom Constructor](#custom-constructor)
   - [Custom Dispose](#custom-dispose)
@@ -42,28 +43,29 @@ There are 6 attributes that are used at your ServiceProvider class and 2 other a
 <br></br>
 ### Attributes and their Properties on Service Provider
 
-The main usage of the [ServiceProviderAttribute](Readme_md/TypeTables.md#serviceproviderattribute) is to indicate that the class is a ServiceProvider, so the generator will generate code for that class.  
-The [ScopedProviderAttribute](Readme_md/TypeTables.md#scopedproviderattribute) without setting any properties does nothing.  
+The main usage of the [ServiceProviderAttribute](TypeTables.md#serviceproviderattribute) is to indicate that the class is a ServiceProvider, so the generator will generate code for that class.  
+The [ScopedProviderAttribute](TypeTables.md#scopedproviderattribute) without setting any properties does nothing.  
 The other 4 attributes are for registering services.  
 There are several properties that can be configured to change the generated code:
 
 - *InterfaceName*:
-Together with the class an interface will be generated based on the class and the class implements it.
+Together with the ServiceProvider an interface will be generated based on the ServiceProvider.
 This sets the name/identifier of the generated interface explicitly.
-When *InterfaceName* is explicitly set to an empty string, no interface will be generated.
-The default name is "I\{classname\}".  
+When *InterfaceName* is explicitly set to an empty string, no interface will be generated.  
+The default name is "I\{classname\}".
 An Exception is when the class name is "ServiceProvider", then the default interface name will be "IServiceprovider"
-and explicitly setting the interface name to "IServiceProvider" is not allowed, otherwise it will collide with [System.IServiceProvider](https://learn.microsoft.com/en-us//dotnet/api/system.iserviceprovider).
+and explicitly setting the interface name to "IServiceProvider" is not allowed, otherwise it will collide with [System.IServiceProvider](https://learn.microsoft.com/en-us//dotnet/api/system.iserviceprovider).  
+There is also the option to set the interface properties based on a declared interface, see [Interface name, namespace, access modifier and containing types](#interface-name-namespace-access-modifier-and-containing-types).
 
 - *CreationTime*:
 Sets when the instantiation of a service happens: at ServiceProvider instantiation (inside the constructor) or lazy (first time used).
-This option is available at the [ServiceProviderAttribute](Readme_md/TypeTables.md#serviceproviderattribute) to set all services, at the [ScopedProviderAttribute](Readme_md/TypeTables.md#scopedproviderattribute) to set all scoped services or at a [registration attribute](Readme_md/TypeTables.md#singletonattribute) to set this option for that specific service.
+This option is available at the [ServiceProviderAttribute](TypeTables.md#serviceproviderattribute) to set all services, at the [ScopedProviderAttribute](TypeTables.md#scopedproviderattribute) to set all scoped services or at a [registration attribute](TypeTables.md#singletonattribute) to set this option for that specific service.
 It is structured hierarchically: Specific service settings take priority over ScopedProvider settings and ScopedProvider settings take priority over ServiceProvider settings.  
-Note that [TransientAttribute](Readme_md/TypeTables.md#transientattribute) and [DelegateAttribute](Readme_md/TypeTables.md#delegateattribute) do not have a CreationTiming, this applies only for [SingletonAttribute](Readme_md/TypeTables.md#singletonattribute) and [ScopedAttribute](Readme_md/TypeTables.md#scopedattribute) services.
+Note that [TransientAttribute](TypeTables.md#transientattribute) and [DelegateAttribute](TypeTables.md#delegateattribute) do not have a CreationTiming, this applies only for [SingletonAttribute](TypeTables.md#singletonattribute) and [ScopedAttribute](TypeTables.md#scopedattribute) services.
 
 - *GetAccessor*:
 The type of the member to access the service: tt can be either a get property or a parameterless method.
-This option is available at the [ServiceProviderAttribute](Readme_md/TypeTables.md#serviceproviderattribute) to set all services, at the [ScopedProviderAttribute](Readme_md/TypeTables.md#scopedproviderattribute) to set all scoped services or at a [registration attribute](Readme_md/TypeTables.md#singletonattribute) to set this option for that specific service.
+This option is available at the [ServiceProviderAttribute](TypeTables.md#serviceproviderattribute) to set all services, at the [ScopedProviderAttribute](TypeTables.md#scopedproviderattribute) to set all scoped services or at a [registration attribute](TypeTables.md#singletonattribute) to set this option for that specific service.
 It is structured hierarchically: Specific service settings take priority over ScopedProvider settings and ScopedProvider settings take priority over ServiceProvider settings. 
 
 - *Implementation*:
@@ -110,7 +112,7 @@ public sealed class MyServiceImplementation {
 ```
 
 Another usage is for Named Services.
-When at the [DependencyAttribute](Readme_md/TypeTables.md#dependencyattribute) the *Name*-property is specified, the service will be injected by name instead by service type.
+When at the [DependencyAttribute](TypeTables.md#dependencyattribute) the *Name*-property is specified, the service will be injected by name instead by service type.
 For in depth explanation see [Named Services](#named-services).
 
 
@@ -255,7 +257,7 @@ public sealed class Service : IService, IService2;
 ```
 
 When you have multiple services with the same service type, the normal approach injecting the service by service type is ambiguous and will fail in a compile error.
-In that case you must inject the service by name using the [DependencyAttribute](Readme_md/TypeTables.md#dependencyattribute).
+In that case you must inject the service by name using the [DependencyAttribute](TypeTables.md#dependencyattribute).
 
 ```csharp
 [ServiceProvider]
@@ -279,22 +281,54 @@ public sealed class MyService([Dependency(Name = "Service")] IService firstServi
 
 
 <br></br>
-### Name, Namespace and Modifier
+### Name, Namespace, Modifiers and Containing Types
 
-The class name, type and the namespace are given with partial class under the [ServiceProviderAttribute](Readme_md/TypeTables.md#serviceproviderattribute).
+The class name, type, namespace and containing types are given with partial class under the [ServiceProviderAttribute](TypeTables.md#serviceproviderattribute).
 The modifiers are also inferred from the class definition.
 
 ```csharp
 namespace MySpace;
 
-[ServiceProvider]
-internal sealed partial record class MyProvider;
+public partial class Wrapper {
+    [ServiceProvider]
+    internal sealed partial record class MyProvider;
+}
 
 // generated ServiceProvider will have:
 //   name: "MyProvider"
 //   type: "record class"
 //   namespace: "MySpace"
 //   modifier: "internal", "sealed", "partial"
+//   containing types: "class Wrapper"
+```
+
+
+<br></br>
+### Interface name, namespace, access modifier and containing types
+
+When using [ServiceProviderAttribute&lt;TInterface&gt;](TypeTables.md#serviceproviderattributetinterface) the interface specified as type parameter is used for inferring the properties for the generated interface.
+The generated interface will have the same name, same access modifiers, will be in the same namespace and will be nested in the same types.
+
+```csharp
+namespace MySpace {
+    [ServiceProvider<Interface.IWrapper.IProvider>]
+    public sealed partial class MyProvider;
+}
+
+namespace MySpace.Interface {
+    public partial interface IWrapper {
+        internal partial interface IProvider {
+            public partial interface IScope;
+        }
+    }
+}
+
+
+// generated interface will have:
+//   name: "IProvider"
+//   namespace: "MySpace.Interface"
+//   access modifier: "internal", Scope -> "public"
+//   containing types: "interface IWrapper"
 ```
 
 

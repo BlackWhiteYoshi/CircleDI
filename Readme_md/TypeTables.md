@@ -20,6 +20,33 @@ The source generator will generate a complete service provider, but you can add 
 
 
 <br></br>
+# ServiceProviderAttribute&lt;TInterface&gt;
+
+A class decorated with this attribute becomes a service provider. That class must be partial.
+
+To add services to that class, add additional attributes to that class:  
+[SingletonAttribute](#singletonattribute), [ScopedAttribute](#scopedattribute), [TransientAttribute](#transientattribute), [DelegateAttribute](#delegateattribute).
+
+The source generator will generate a complete service provider, but you can add additional custom implementation to it.
+
+## Type Parameters
+
+| **Name**   | **TypeConstraints** |  **Dexcription**                                                                                                                                                                                                                                                                          |
+| ---------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TInterface | interface           | An explicit declared interface the generated interface will be based on: The name, access modifier, namespace and containing types will be inferred. That interface must be partial. If the generated interface is used without declaring the interface yourself, it will have no effect. |
+
+## Properties
+
+| **Name**               | **Type**                                     | **Description**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CreationTime           | [CreationTiming](#creationtiming-enum)       | Decides whether services defaulting to lazy construction or instantiation inside the constructor. This option applies to all services where the "CreationTime"-attribute is not set. Default is [CreationTiming.Constructor](#creationtiming-enum).                                                                                                                                                                                                                                                      |
+| GetAccessor            | [GetAccess](#getaccess-enum)                 | Decides whether the members to access the services in the ServiceProvider defaulting to properties or methods. This option applies to all services where the "GetAccessor"-attribute is not set. Default is [GetAccess.Property](#getaccess-enum).                                                                                                                                                                                                                                                       |
+| GenerateDisposeMethods | [DisposeGeneration](#disposegeneration-enum) | Toggles the generation of the Dispose methods: public void Dispose(); public ValueTask DisposeAsync(); It can be toggled that both are generated, only one of them or the generation is skipped entirely. Default is [DisposeGeneration.GenerateBoth](#disposegeneration-enum)                                                                                                                                                                                                                           |
+| ThreadSafe             | bool                                         | Indicates if the generated code will be thread safe or a little bit more efficient. Affects performance for lazy constructed singleton services and disposables transient services: Singletons acquire a lock for construction; Disposable transient services acquire a lock when constructed and disposed to synchronize access on a dispose-list. This option should be set to false, if the provider is used in a single threaded scenario or only accessed by one thread at a time. Default is true. |
+
+
+
+<br></br>
 # ScopedProviderAttribute
 
 This attribute can be applied to the ServiceProvider itself, so right next to the [ServiceProviderAttribute](#serviceproviderattribute) or to a class named "Scope" inside the ServiceProvider, but not both.

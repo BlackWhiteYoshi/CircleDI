@@ -24,13 +24,19 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             context.AddSource("DisposeGenerationEnum.g.cs", Attributes.DisposeGenerationEnum);
         });
 
-        // all classes with ServiceProviderAttribute
+        CircleDIBuilder circleDIBuilder = new();
+        context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute", circleDIBuilder);
+        context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute`1", circleDIBuilder);
+    }
+}
+
+file static class CircleDIGeneratorRegisterExtension {
+    public static void RegisterServiceProviderAttribute(this IncrementalGeneratorInitializationContext context, string serviceProviderAttributeName, CircleDIBuilder circleDIBuilder) {
         IncrementalValuesProvider<ServiceProvider> serviceProviderList = context.SyntaxProvider.ForAttributeWithMetadataName(
-            "CircleDIAttributes.ServiceProviderAttribute",
+            serviceProviderAttributeName,
             static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
             static (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new ServiceProvider(generatorAttributeSyntaxContext));
 
-        CircleDIBuilder circleDIBuilder = new();
         context.RegisterSourceOutput(serviceProviderList, circleDIBuilder.GenerateClass);
         context.RegisterSourceOutput(serviceProviderList, circleDIBuilder.GenerateInterface);
     }

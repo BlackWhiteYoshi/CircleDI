@@ -157,16 +157,25 @@ public sealed class Service : IEquatable<Service> {
         ServiceTypeArity = serviceType.Arity;
         IsRefable = lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped && serviceType.IsValueType && SymbolEqualityComparer.Default.Equals(serviceType, implementationType);
         ImplementationType = implementationType.ToFullQualifiedName();
-        Name = attributeData.NamedArguments.GetArgument<string>("Name") ?? implementationType.Name.Replace('.', '_');
-        CreationTime = (CreationTiming?)attributeData.NamedArguments.GetArgument<int?>("CreationTime") ?? creationTimeProvider;
-        GetAccessor = (GetAccess?)attributeData.NamedArguments.GetArgument<int?>("GetAccessor") ?? getAccessorProvider;
 
-        bool noDispose = attributeData.NamedArguments.GetArgument<bool>("NoDispose");
-        IsDisposable = !noDispose && implementationType.HasInterface("IDisposable");
-        IsAsyncDisposable = !noDispose && implementationType.HasInterface("IAsyncDisposable");
+        Name = implementationType.Name;
+        CreationTime = creationTimeProvider;
+        GetAccessor = getAccessorProvider;
+        string? implementationName = null;
+        bool noDispose = false;
+        if (attributeData.NamedArguments.Length > 0) {
+            if (attributeData.NamedArguments.GetArgument<string>("Name") is string name)
+                Name = name;
+            if (attributeData.NamedArguments.GetArgument<int?>("CreationTime") is int creationTime)
+                CreationTime = (CreationTiming)creationTime;
+            if (attributeData.NamedArguments.GetArgument<int?>("GetAccessor") is int getAccessor)
+                GetAccessor = (GetAccess)getAccessor;
+            implementationName = attributeData.NamedArguments.GetArgument<string>("Implementation");
+            noDispose = attributeData.NamedArguments.GetArgument<bool>("NoDispose");
+        }
 
         // Implementation, ConstructorDependencyList, PropertyDependencyList
-        if (attributeData.NamedArguments.GetArgument<string>("Implementation") is not string implementationName) {
+        if (implementationName == null) {
             Implementation = default;
             
             (IMethodSymbol? constructor, Diagnostic? constructorListError) = FindConstructor(implementationType, attributeData);
@@ -298,6 +307,10 @@ public sealed class Service : IEquatable<Service> {
 
             PropertyDependencyList = [];
         }
+
+        IsDisposable = !noDispose && implementationType.HasInterface("IDisposable");
+        IsAsyncDisposable = !noDispose && implementationType.HasInterface("IAsyncDisposable");
+
         Dependencies = DependenciesDefaultIterator;
     }
 

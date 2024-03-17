@@ -1064,6 +1064,8 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         if (service.PropertyDependencyList.Count > 0) {
             builder.Append(' ');
             builder.Append('{');
+
+            int builderLength = builder.Length;
             foreach (PropertyDependency dependency in service.PropertyDependencyList) {
                 if (dependency.IsCircular) {
                     if (dependency.IsRequired) {
@@ -1071,7 +1073,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                         builder.Append(indentation);
                         builder.Append(Indent.SP4);
                         builder.Append(dependency.Name);
-                        builder.Append(" = default!");
+                        builder.Append(" = default!,");
                     }
                     circularDependencies.Add((service, dependency));
                 }
@@ -1084,13 +1086,20 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     builder.Append('=');
                     builder.Append(' ');
                     builder.AppendServiceGetter(dependency.Service!);
+                    builder.Append(',');
                 }
-                builder.Append(',');
             }
-            builder.Length--;
-            builder.Append('\n');
-            builder.Append(indentation);
-            builder.Append('}');
+
+            if (builderLength != builder.Length) {
+                // at least one item got appended
+                builder.Length--; // remove ','
+                builder.Append('\n');
+                builder.Append(indentation);
+                builder.Append('}');
+            }
+            else
+                // nothing got appended
+                builder.Length -= 2; // remove " {"
         }
     }
 
