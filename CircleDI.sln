@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CircleDI", "CircleDI\Circle
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CircleDI.Tests", "CircleDI.Tests\CircleDI.Tests.csproj", "{38D34E31-8972-4157-8AF0-927A0ABB57F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CircleDI.Blazor", "CircleDI.Blazor\CircleDI.Blazor.csproj", "{4DA16169-90F0-4ADE-82F2-76FCF1AE863A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{38D34E31-8972-4157-8AF0-927A0ABB57F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38D34E31-8972-4157-8AF0-927A0ABB57F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38D34E31-8972-4157-8AF0-927A0ABB57F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DA16169-90F0-4ADE-82F2-76FCF1AE863A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DA16169-90F0-4ADE-82F2-76FCF1AE863A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DA16169-90F0-4ADE-82F2-76FCF1AE863A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DA16169-90F0-4ADE-82F2-76FCF1AE863A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

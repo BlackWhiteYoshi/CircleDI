@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CircleDI\CircleDI.csproj" />
+    <ProjectReference Include="..\CircleDI.Blazor\CircleDI.Blazor.csproj" />
   </ItemGroup>
 
 </Project>
