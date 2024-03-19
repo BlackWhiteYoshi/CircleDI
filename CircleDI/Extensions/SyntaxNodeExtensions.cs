@@ -110,35 +110,35 @@ public static class SyntaxNodeExtensions {
     /// </summary>
     /// <param name="constructor"></param>
     /// <returns></returns>
-    public static ConstructorDependency[] CreateConstructorDependencyList(this IMethodSymbol constructor) {
-        ConstructorDependency[] result = new ConstructorDependency[constructor.Parameters.Length];
+    public static List<ConstructorDependency> CreateConstructorDependencyList(this IMethodSymbol constructor) {
+        List<ConstructorDependency> result = new(constructor.Parameters.Length);
 
-        for (int i = 0; i < constructor.Parameters.Length; i++)
-            if (constructor.Parameters[i].GetAttribute("DependencyAttribute") is AttributeData attributeData)
+        foreach (IParameterSymbol parameter in constructor.Parameters)
+            if (parameter.GetAttribute("DependencyAttribute") is AttributeData attributeData)
                 if (attributeData.NamedArguments.GetArgument<string>("Name") is string dependencyName)
-                    result[i] = new ConstructorDependency() {
-                        Name = constructor.Parameters[i].Name,
+                    result.Add(new ConstructorDependency() {
+                        Name = parameter.Name,
                         IsNamed = true,
                         ServiceIdentifier = dependencyName,
                         HasAttribute = true,
-                        ByRef = constructor.Parameters[i].RefKind
-                    };
+                        ByRef = parameter.RefKind
+                    });
                 else
-                    result[i] = new ConstructorDependency() {
-                        Name = constructor.Parameters[i].Name,
+                    result.Add(new ConstructorDependency() {
+                        Name = parameter.Name,
                         IsNamed = false,
-                        ServiceIdentifier = constructor.Parameters[i].Type.ToFullQualifiedName(),
+                        ServiceIdentifier = parameter.Type.ToFullQualifiedName(),
                         HasAttribute = true,
-                        ByRef = constructor.Parameters[i].RefKind
-                    };
+                        ByRef = parameter.RefKind
+                    });
             else
-                result[i] = new ConstructorDependency() {
-                    Name = constructor.Parameters[i].Name,
+                result.Add(new ConstructorDependency() {
+                    Name = parameter.Name,
                     IsNamed = false,
-                    ServiceIdentifier = constructor.Parameters[i].Type.ToFullQualifiedName(),
+                    ServiceIdentifier = parameter.Type.ToFullQualifiedName(),
                     HasAttribute = false,
-                    ByRef = constructor.Parameters[i].RefKind
-                };
+                    ByRef = parameter.RefKind
+                });
 
         return result;
     }

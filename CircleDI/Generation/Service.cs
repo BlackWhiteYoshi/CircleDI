@@ -68,7 +68,7 @@ public sealed class Service : IEquatable<Service> {
     /// e.g. the first item in the list is the service for the first parameter of the constructor/function.
     /// </para>
     /// </summary>
-    public required ConstructorDependency[] ConstructorDependencyList { get; init; }
+    public required List<ConstructorDependency> ConstructorDependencyList { get; init; }
 
     /// <summary>
     /// <para>Dependencies that are listed as properties.</para>
@@ -234,7 +234,7 @@ public sealed class Service : IEquatable<Service> {
                         throw new Exception($"Invalid enum LifeTime: '{Lifetime}', only the defined values are allowed.");
                     }
 
-                    static (ImplementationMember implementation, ISymbol? implementationSymbol, ConstructorDependency[] constructorDependencyList) GetImplementation(INamedTypeSymbol provider, string implementationName, bool isScoped)
+                    static (ImplementationMember implementation, ISymbol? implementationSymbol, List<ConstructorDependency> constructorDependencyList) GetImplementation(INamedTypeSymbol provider, string implementationName, bool isScoped)
                         => provider.GetMembers(implementationName) switch {
                             [IFieldSymbol field, ..] => (new ImplementationMember(MemberType.Field, field.Name, field.IsStatic, isScoped), field, []),
                             [IPropertySymbol property, ..] => (new ImplementationMember(MemberType.Property, property.Name, property.IsStatic, isScoped), property, []),

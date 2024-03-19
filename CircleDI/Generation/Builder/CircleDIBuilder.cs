@@ -132,7 +132,7 @@ public static class CircleDIBuilder {
             // AppendConstructorDependencyList of serviceProvider.CreateScope
             {
                 builder.Append('(');
-                if (serviceProvider.CreateScope.ConstructorDependencyList.Length > 0) {
+                if (serviceProvider.CreateScope.ConstructorDependencyList.Count > 0) {
                     foreach (ConstructorDependency dependency in serviceProvider.CreateScope.ConstructorDependencyList) {
                         if (!dependency.HasAttribute)
                             builder.Append(dependency.Name);

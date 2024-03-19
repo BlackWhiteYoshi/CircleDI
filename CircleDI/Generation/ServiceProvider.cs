@@ -587,7 +587,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
 
                 // "special" method CreateScope()
-                ConstructorDependency[] constructorDependencyList;
+                List<ConstructorDependency> constructorDependencyList;
                 List<PropertyDependency> propertyDependencyList;
                 if (serviceProviderScope != null) {
                     if (HasConstructorScope) {

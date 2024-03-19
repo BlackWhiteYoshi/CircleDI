@@ -12,10 +12,8 @@ public static partial class Attributes {
         namespace CircleDIAttributes;
 
         /// <summary>
-        /// <para>
         /// Configuration when the instantiation of the service happens.<br />
         /// At ServiceProvider instantiation (inside the constructor) or lazy (first time used).
-        /// </para>
         /// </summary>
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal enum CreationTiming {

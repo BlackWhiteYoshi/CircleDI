@@ -23,7 +23,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             // enums
             context.AddSource("CreationTiming.g.cs", Attributes.CreationTimingEnum);
             context.AddSource("GetAccess.g.cs", Attributes.GetAccessEnum);
-            context.AddSource("DisposeGenerationEnum.g.cs", Attributes.DisposeGenerationEnum);
+            context.AddSource("DisposeGeneration.g.cs", Attributes.DisposeGenerationEnum);
         });
 
         ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();

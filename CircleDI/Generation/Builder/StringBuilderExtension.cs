@@ -1144,7 +1144,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     /// <param name="service"></param>
     public readonly void AppendConstructorDependencyList(Service service) {
         builder.Append('(');
-        if (service.ConstructorDependencyList.Length > 0) {
+        if (service.ConstructorDependencyList.Count > 0) {
             foreach (ConstructorDependency dependency in service.ConstructorDependencyList) {
                 if (dependency.Service!.IsRefable && !keyword.HasFlag(ClassStructKeyword.Struct))
                     builder.Append(dependency.ByRef.AsString());
