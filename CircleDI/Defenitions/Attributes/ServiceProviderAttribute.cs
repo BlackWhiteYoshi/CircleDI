@@ -43,7 +43,7 @@ public static partial class Attributes {
         """;
 
 
-    private const string ServiceProviderAttributeSummary = """
+    public const string ServiceProviderAttributeSummary = """
         /// <summary>
         /// <para>A class decorated with this attribute becomes a service provider. That class must be partial.</para>
         /// <para>
@@ -54,7 +54,7 @@ public static partial class Attributes {
         /// </summary>
         """;
 
-    private const string ServiceProviderAttributeContentWithoutInterfaceName = """
+    public const string ServiceProviderAttributeContentWithoutInterfaceName = """
         /// <summary>
             /// <para>
             /// Decides whether services defaulting to lazy construction or instantiation inside the constructor.

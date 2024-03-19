@@ -609,7 +609,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     #endregion
 
 
-    #region IServiceProvider Switch Expression
+    #region IServiceProvider GetService()
 
     /// <summary>
     /// <see cref="IServiceProvider.GetService(Type)"/> switch content filtered to Singleton and Transient services.
@@ -1387,7 +1387,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append("\"/><br />\n");
 
         builder.Append(indent.Sp4);
-        builder.Append("/// Implementation type:  <see cref=\"global::");
+        builder.Append("/// Implementation type: <see cref=\"global::");
         builder.Append(service.ImplementationType);
         builder.Append("\"/>\n");
 

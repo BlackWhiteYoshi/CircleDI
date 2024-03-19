@@ -1,6 +1,8 @@
 ﻿using CircleDI.Defenitions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.ObjectPool;
+using System.Text;
 
 namespace CircleDI.Generation;
 
@@ -24,20 +26,20 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             context.AddSource("DisposeGenerationEnum.g.cs", Attributes.DisposeGenerationEnum);
         });
 
-        CircleDIBuilder circleDIBuilder = new();
-        context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute", circleDIBuilder);
-        context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute`1", circleDIBuilder);
+        ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
+        context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute", stringBuilderPool);
+        context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute`1", stringBuilderPool);
     }
 }
 
 file static class CircleDIGeneratorRegisterExtension {
-    public static void RegisterServiceProviderAttribute(this IncrementalGeneratorInitializationContext context, string serviceProviderAttributeName, CircleDIBuilder circleDIBuilder) {
+    public static void RegisterServiceProviderAttribute(this IncrementalGeneratorInitializationContext context, string serviceProviderAttributeName, ObjectPool<StringBuilder> stringBuilderPool) {
         IncrementalValuesProvider<ServiceProvider> serviceProviderList = context.SyntaxProvider.ForAttributeWithMetadataName(
             serviceProviderAttributeName,
             static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
             static (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new ServiceProvider(generatorAttributeSyntaxContext));
 
-        context.RegisterSourceOutput(serviceProviderList, circleDIBuilder.GenerateClass);
-        context.RegisterSourceOutput(serviceProviderList, circleDIBuilder.GenerateInterface);
+        context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateClass);
+        context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateInterface);
     }
 }

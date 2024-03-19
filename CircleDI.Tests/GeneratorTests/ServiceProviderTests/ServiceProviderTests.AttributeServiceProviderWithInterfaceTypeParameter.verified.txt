@@ -38,7 +38,7 @@ public sealed partial class MyProvider : global::MySpace.Interface.IWrapper.IPro
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::MySpace.Interface.IWrapper.IProvider"/><br />
-    /// Implementation type:  <see cref="global::MySpace.MyProvider"/>
+    /// Implementation type: <see cref="global::MySpace.MyProvider"/>
     /// </summary>
     public global::MySpace.Interface.IWrapper.IProvider Self => this;
 
@@ -102,7 +102,7 @@ public sealed partial class MyProvider : global::MySpace.Interface.IWrapper.IPro
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MySpace.Interface.IWrapper.IProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::MySpace.MyProvider.Scope"/>
+        /// Implementation type: <see cref="global::MySpace.MyProvider.Scope"/>
         /// </summary>
         public global::MySpace.Interface.IWrapper.IProvider.IScope SelfScope => this;
 
@@ -110,7 +110,7 @@ public sealed partial class MyProvider : global::MySpace.Interface.IWrapper.IPro
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MySpace.Interface.IWrapper.IProvider"/><br />
-        /// Implementation type:  <see cref="global::MySpace.MyProvider"/>
+        /// Implementation type: <see cref="global::MySpace.MyProvider"/>
         /// </summary>
         public global::MySpace.Interface.IWrapper.IProvider Self => _myProvider.Self;
 
@@ -186,7 +186,7 @@ partial interface IWrapper {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MySpace.Interface.IWrapper.IProvider"/><br />
-        /// Implementation type:  <see cref="global::MySpace.MyProvider"/>
+        /// Implementation type: <see cref="global::MySpace.MyProvider"/>
         /// </summary>
         global::MySpace.Interface.IWrapper.IProvider Self { get; }
 
@@ -209,14 +209,14 @@ partial interface IWrapper {
             /// <summary>
             /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
             /// Service type: <see cref="global::MySpace.Interface.IWrapper.IProvider"/><br />
-            /// Implementation type:  <see cref="global::MySpace.MyProvider"/>
+            /// Implementation type: <see cref="global::MySpace.MyProvider"/>
             /// </summary>
             global::MySpace.Interface.IWrapper.IProvider Self { get; }
 
             /// <summary>
             /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
             /// Service type: <see cref="global::MySpace.Interface.IWrapper.IProvider.IScope"/><br />
-            /// Implementation type:  <see cref="global::MySpace.MyProvider.Scope"/>
+            /// Implementation type: <see cref="global::MySpace.MyProvider.Scope"/>
             /// </summary>
             global::MySpace.Interface.IWrapper.IProvider.IScope SelfScope { get; }
         }

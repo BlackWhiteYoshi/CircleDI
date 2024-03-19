@@ -61,22 +61,4 @@ public static class CollectionExtensions {
 
         return GetFullyQualifiedName(input, namespaceList, containingTypeList);
     }
-
-
-    /// <summary>
-    /// Determines whether two sequences are equal by comparing the elements by using the default equality comparer for their type.
-    /// </summary>
-    /// <typeparam name="T">The type of the elements of the input sequences.</typeparam>
-    /// <param name="first"></param>
-    /// <param name="second"></param>
-    /// <returns>
-    /// true if both are null or the two source sequences are of equal length and their corresponding elements are equal according to the default equality comparer for their type<br />
-    /// false if one source sequence is null or the item length or an item in the sequence differs.
-    /// </returns>
-    public static bool SequenceNullEqual<T>(this IEnumerable<T>? first, IEnumerable<T>? second)
-        => (first, second) switch {
-            (null, null) => true,
-            (not null, null) or (null, not null) => false,
-            (not null, not null) => first.SequenceEqual(second)
-        };
 }

@@ -6,18 +6,16 @@ using System.Text;
 
 namespace CircleDI.Generation;
 
-public readonly struct CircleDIBuilder {
-    private readonly ObjectPool<StringBuilder> stringBuilderPool;
-
-    public CircleDIBuilder() => stringBuilderPool = new DefaultObjectPoolProvider().CreateStringBuilderPool(initialCapacity: 8192, maximumRetainedCapacity: 1024 * 1024);
+public static class CircleDIBuilder {
+    public static ObjectPool<StringBuilder> CreateStringBuilderPool() => new DefaultObjectPoolProvider().CreateStringBuilderPool(initialCapacity: 8192, maximumRetainedCapacity: 1024 * 1024);
 
 
-    public void GenerateClass(SourceProductionContext context, ServiceProvider serviceProvider) {
+    public static void GenerateClass(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
         // check ErrorLists
         {
             bool errorReported = false;
 
-            if (serviceProvider.ErrorList != null) {
+            if (serviceProvider.ErrorList.Count > 0) {
                 foreach (Diagnostic error in serviceProvider.ErrorList)
                     context.ReportDiagnostic(error);
                 errorReported = true;
@@ -25,7 +23,7 @@ public readonly struct CircleDIBuilder {
 
             // serviceProvider.SortedServiceList is still empty at this point
             foreach (Service service in serviceProvider.SingletonList.Concat(serviceProvider.ScopedList).Concat(serviceProvider.TransientList).Concat(serviceProvider.DelegateList))
-                if (service.ErrorList != null) {
+                if (service.ErrorList.Count > 0) {
                     foreach (Diagnostic error in service.ErrorList)
                         context.ReportDiagnostic(error);
                     errorReported = true;
@@ -37,7 +35,7 @@ public readonly struct CircleDIBuilder {
 
         // create dependency tree
         serviceProvider.CreateDependencyTree();
-        if (serviceProvider.ErrorList != null) {
+        if (serviceProvider.ErrorList.Count > 0) {
             foreach (Diagnostic error in serviceProvider.ErrorList)
                 context.ReportDiagnostic(error);
             return;
@@ -301,7 +299,7 @@ public readonly struct CircleDIBuilder {
         stringBuilderPool.Return(builder);
     }
 
-    public void GenerateInterface(SourceProductionContext context, ServiceProvider serviceProvider) {
+    public static void GenerateInterface(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
         if (!serviceProvider.HasInterface)
             return;
 

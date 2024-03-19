@@ -39,7 +39,7 @@ partial class Wrapper {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.Wrapper.ITestProvider"/><br />
-        /// Implementation type:  <see cref="global::MyCode.Wrapper.TestProvider"/>
+        /// Implementation type: <see cref="global::MyCode.Wrapper.TestProvider"/>
         /// </summary>
         public global::MyCode.Wrapper.ITestProvider Self => this;
 
@@ -103,7 +103,7 @@ partial class Wrapper {
             /// <summary>
             /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
             /// Service type: <see cref="global::MyCode.Wrapper.ITestProvider.IScope"/><br />
-            /// Implementation type:  <see cref="global::MyCode.Wrapper.TestProvider.Scope"/>
+            /// Implementation type: <see cref="global::MyCode.Wrapper.TestProvider.Scope"/>
             /// </summary>
             public global::MyCode.Wrapper.ITestProvider.IScope SelfScope => this;
 
@@ -111,7 +111,7 @@ partial class Wrapper {
             /// <summary>
             /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
             /// Service type: <see cref="global::MyCode.Wrapper.ITestProvider"/><br />
-            /// Implementation type:  <see cref="global::MyCode.Wrapper.TestProvider"/>
+            /// Implementation type: <see cref="global::MyCode.Wrapper.TestProvider"/>
             /// </summary>
             public global::MyCode.Wrapper.ITestProvider Self => _testProvider.Self;
 
@@ -188,7 +188,7 @@ partial class Wrapper {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.Wrapper.ITestProvider"/><br />
-        /// Implementation type:  <see cref="global::MyCode.Wrapper.TestProvider"/>
+        /// Implementation type: <see cref="global::MyCode.Wrapper.TestProvider"/>
         /// </summary>
         global::MyCode.Wrapper.ITestProvider Self { get; }
 
@@ -211,14 +211,14 @@ partial class Wrapper {
             /// <summary>
             /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
             /// Service type: <see cref="global::MyCode.Wrapper.ITestProvider"/><br />
-            /// Implementation type:  <see cref="global::MyCode.Wrapper.TestProvider"/>
+            /// Implementation type: <see cref="global::MyCode.Wrapper.TestProvider"/>
             /// </summary>
             global::MyCode.Wrapper.ITestProvider Self { get; }
 
             /// <summary>
             /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
             /// Service type: <see cref="global::MyCode.Wrapper.ITestProvider.IScope"/><br />
-            /// Implementation type:  <see cref="global::MyCode.Wrapper.TestProvider.Scope"/>
+            /// Implementation type: <see cref="global::MyCode.Wrapper.TestProvider.Scope"/>
             /// </summary>
             global::MyCode.Wrapper.ITestProvider.IScope SelfScope { get; }
         }

@@ -39,7 +39,7 @@ public partial struct TestProvider : global::MyCode.ITestProvider, IServiceProvi
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::MyCode.TestStruct"/><br />
-    /// Implementation type:  <see cref="global::MyCode.TestStruct"/>
+    /// Implementation type: <see cref="global::MyCode.TestStruct"/>
     /// </summary>
     public global::MyCode.TestStruct TestStruct => _testStruct;
     private global::MyCode.TestStruct _testStruct;
@@ -47,7 +47,7 @@ public partial struct TestProvider : global::MyCode.ITestProvider, IServiceProvi
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
-    /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
+    /// Implementation type: <see cref="global::MyCode.TestProvider"/>
     /// </summary>
     public global::MyCode.ITestProvider Self => this;
 
@@ -115,7 +115,7 @@ public partial struct TestProvider : global::MyCode.ITestProvider, IServiceProvi
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MyCode.TestStruct"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestStruct"/>
+        /// Implementation type: <see cref="global::MyCode.TestStruct"/>
         /// </summary>
         public ref global::MyCode.TestStruct TestStructScoped => ref _testStructScoped;
         private global::MyCode.TestStruct _testStructScoped;
@@ -123,7 +123,7 @@ public partial struct TestProvider : global::MyCode.ITestProvider, IServiceProvi
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestProvider.Scope"/>
+        /// Implementation type: <see cref="global::MyCode.TestProvider.Scope"/>
         /// </summary>
         public global::MyCode.ITestProvider.IScope SelfScope => this;
 
@@ -131,14 +131,14 @@ public partial struct TestProvider : global::MyCode.ITestProvider, IServiceProvi
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.TestStruct"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestStruct"/>
+        /// Implementation type: <see cref="global::MyCode.TestStruct"/>
         /// </summary>
         public global::MyCode.TestStruct TestStruct => _testProvider.TestStruct;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
+        /// Implementation type: <see cref="global::MyCode.TestProvider"/>
         /// </summary>
         public global::MyCode.ITestProvider Self => _testProvider.Self;
 
@@ -215,14 +215,14 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
-    /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
+    /// Implementation type: <see cref="global::MyCode.TestProvider"/>
     /// </summary>
     global::MyCode.ITestProvider Self { get; }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::MyCode.TestStruct"/><br />
-    /// Implementation type:  <see cref="global::MyCode.TestStruct"/>
+    /// Implementation type: <see cref="global::MyCode.TestStruct"/>
     /// </summary>
     global::MyCode.TestStruct TestStruct { get; }
 
@@ -245,28 +245,28 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
+        /// Implementation type: <see cref="global::MyCode.TestProvider"/>
         /// </summary>
         global::MyCode.ITestProvider Self { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestProvider.Scope"/>
+        /// Implementation type: <see cref="global::MyCode.TestProvider.Scope"/>
         /// </summary>
         global::MyCode.ITestProvider.IScope SelfScope { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.TestStruct"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestStruct"/>
+        /// Implementation type: <see cref="global::MyCode.TestStruct"/>
         /// </summary>
         global::MyCode.TestStruct TestStruct { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MyCode.TestStruct"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestStruct"/>
+        /// Implementation type: <see cref="global::MyCode.TestStruct"/>
         /// </summary>
         ref global::MyCode.TestStruct TestStructScoped { get; }
     }

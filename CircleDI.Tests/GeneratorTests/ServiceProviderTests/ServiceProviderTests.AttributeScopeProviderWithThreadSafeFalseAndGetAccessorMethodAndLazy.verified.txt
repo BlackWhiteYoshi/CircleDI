@@ -39,7 +39,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::MyCode.ISingleton"/><br />
-    /// Implementation type:  <see cref="global::MyCode.Singleton"/>
+    /// Implementation type: <see cref="global::MyCode.Singleton"/>
     /// </summary>
     public global::MyCode.ISingleton Singleton => _singleton;
     private global::MyCode.Singleton _singleton;
@@ -47,7 +47,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
-    /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
+    /// Implementation type: <see cref="global::MyCode.TestProvider"/>
     /// </summary>
     public global::MyCode.ITestProvider Self => this;
 
@@ -55,7 +55,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITransient"/><br />
-    /// Implementation type:  <see cref="global::MyCode.Transient"/>
+    /// Implementation type: <see cref="global::MyCode.Transient"/>
     /// </summary>
     public global::MyCode.ITransient Transient => new global::MyCode.Transient();
 
@@ -123,7 +123,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MyCode.IScoped"/><br />
-        /// Implementation type:  <see cref="global::MyCode.Scoped"/>
+        /// Implementation type: <see cref="global::MyCode.Scoped"/>
         /// </summary>
         public global::MyCode.IScoped GetScoped() {
             if (_scoped == null) {
@@ -137,7 +137,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestProvider.Scope"/>
+        /// Implementation type: <see cref="global::MyCode.TestProvider.Scope"/>
         /// </summary>
         public global::MyCode.ITestProvider.IScope GetSelfScope() => this;
 
@@ -145,14 +145,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ISingleton"/><br />
-        /// Implementation type:  <see cref="global::MyCode.Singleton"/>
+        /// Implementation type: <see cref="global::MyCode.Singleton"/>
         /// </summary>
         public global::MyCode.ISingleton Singleton => _testProvider.Singleton;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
-        /// Implementation type:  <see cref="global::MyCode.TestProvider"/>
+        /// Implementation type: <see cref="global::MyCode.TestProvider"/>
         /// </summary>
         public global::MyCode.ITestProvider Self => _testProvider.Self;
 
@@ -160,7 +160,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITransient"/><br />
-        /// Implementation type:  <see cref="global::MyCode.Transient"/>
+        /// Implementation type: <see cref="global::MyCode.Transient"/>
         /// </summary>
         public global::MyCode.ITransient Transient => new global::MyCode.Transient();
 
