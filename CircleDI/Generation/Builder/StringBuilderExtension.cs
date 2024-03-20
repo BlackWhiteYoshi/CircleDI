@@ -182,7 +182,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 }
 
                 foreach (Service service in serviceList) {
-                    if (service.CreationTime == CreationTiming.Constructor && service.Implementation.Type != MemberType.Field) {
+                    if (service.CreationTimeTransitive == CreationTiming.Constructor && service.Implementation.Type != MemberType.Field) {
                         builder.Append("nameof(_");
                         builder.AppendFirstLower(service.Name);
                         builder.Append(')');
@@ -211,7 +211,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             return;
         service.TreeState |= DependencyTreeFlags.Generated;
 
-        if (service.CreationTime == CreationTiming.Lazy)
+        if (service.CreationTimeTransitive == CreationTiming.Lazy)
             return;
         if (service.Implementation.Type == MemberType.Field)
             return;
@@ -277,7 +277,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
 
                 if (service.Implementation.Type == MemberType.Field)
                     AppendServicesGetterField(service, refOrEmpty);
-                else if (service.CreationTime == CreationTiming.Constructor)
+                else if (service.CreationTimeTransitive == CreationTiming.Constructor)
                     AppendServicesGetterConstructor(service, refOrEmpty);
                 else
                     AppendServicesGetterLazy(service, refOrEmpty);
@@ -781,7 +781,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     builder.Append(indent.Sp8);
                     builder.Append("_ = ");
                     builder.Append('(');
-                    if (service.CreationTime == CreationTiming.Constructor) {
+                    if (service.CreationTimeTransitive == CreationTiming.Constructor) {
                         builder.Append("(IAsyncDisposable)");
                         builder.AppendServiceField(service);
                         builder.Append(')');
@@ -864,7 +864,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     builder.Append(indent.Sp8);
                     builder.Append("return ");
                     builder.Append('(');
-                    if (asyncDisposableService.CreationTime == CreationTiming.Constructor) {
+                    if (asyncDisposableService.CreationTimeTransitive == CreationTiming.Constructor) {
                         builder.Append("(IAsyncDisposable)");
                         builder.AppendServiceField(asyncDisposableService);
                         builder.Append(").DisposeAsync();\n");
@@ -975,7 +975,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     private readonly void AppendDispose(Service service) {
         builder.Append(indent.Sp8);
         builder.Append('(');
-        if (service.CreationTime == CreationTiming.Constructor) {
+        if (service.CreationTimeTransitive == CreationTiming.Constructor) {
             builder.Append("(IDisposable)");
             builder.AppendServiceField(service);
             builder.Append(')');
@@ -993,7 +993,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append(index);
         builder.Append("] = ");
         builder.Append('(');
-        if (service.CreationTime == CreationTiming.Constructor) {
+        if (service.CreationTimeTransitive == CreationTiming.Constructor) {
             builder.Append("(IAsyncDisposable)");
             builder.AppendServiceField(service);
             builder.Append(").DisposeAsync().AsTask();\n");

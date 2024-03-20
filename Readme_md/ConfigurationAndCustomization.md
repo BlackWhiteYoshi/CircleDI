@@ -62,6 +62,7 @@ Sets when the instantiation of a service happens: at ServiceProvider instantiati
 This option is available at the [ServiceProviderAttribute](TypeTables.md#serviceproviderattribute) to set all services, at the [ScopedProviderAttribute](TypeTables.md#scopedproviderattribute) to set all scoped services or at a [registration attribute](TypeTables.md#singletonattribute) to set this option for that specific service.
 It is structured hierarchically: Specific service settings take priority over ScopedProvider settings and ScopedProvider settings take priority over ServiceProvider settings.  
 Note that [TransientAttribute](TypeTables.md#transientattribute) and [DelegateAttribute](TypeTables.md#delegateattribute) do not have a CreationTiming, this applies only for [SingletonAttribute](TypeTables.md#singletonattribute) and [ScopedAttribute](TypeTables.md#scopedattribute) services.
+If a service with CreationTiming.Constructor has a dependency on a service with CreationTiming.Lazy, the lazy instantiated service will automatically also become constructor instantiated.
 
 - *GetAccessor*:
 The type of the member to access the service: tt can be either a get property or a parameterless method.

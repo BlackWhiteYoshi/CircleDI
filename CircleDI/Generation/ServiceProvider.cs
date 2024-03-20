@@ -763,11 +763,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     }
 
                     // check CreationTiming
-                    if (service.CreationTime == CreationTiming.Constructor && dependencyService.CreationTime == CreationTiming.Lazy)
-                        if (!service.Lifetime.HasFlag(ServiceLifetime.Transient) && !dependencyService.Lifetime.HasFlag(ServiceLifetime.Transient)) {
-                            serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateDependencyCreationTimingError(service.Name, dependency.ServiceIdentifier));
-                            return;
-                        }
+                    if (service.CreationTimeTransitive == CreationTiming.Constructor && dependencyService.CreationTimeTransitive == CreationTiming.Lazy)
+                        if (!service.Lifetime.HasFlag(ServiceLifetime.Transient) && !dependencyService.Lifetime.HasFlag(ServiceLifetime.Transient))
+                            dependencyService.CreationTimeTransitive = CreationTiming.Constructor;
 
                     // check circle
                     for (int index = 0; index < path.Count; index++)

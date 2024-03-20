@@ -1490,26 +1490,52 @@ public static class DependencyTreeTests {
 
     [Fact]
     public static void CreationTiming_ConstructorToLazy() {
-        const string input = """
-            using CircleDIAttributes;
-            
-            namespace MyCode;
+        Service service1 = new() {
+            Name = "service1",
+            Lifetime = ServiceLifetime.Singleton,
+            ImplementationType = string.Empty,
+            ServiceType = "Service1",
 
-            [ServiceProvider]
-            [Singleton<TestService1>]
-            [Singleton<TestService2>(CreationTime = CreationTiming.Lazy)]
-            public sealed partial class TestProvider;
-            
-            public sealed class TestService1(TestService2 testService2);
-            public sealed class TestService2;
+            CreationTime = CreationTiming.Constructor,
+            CreationTimeTransitive = CreationTiming.Constructor,
 
-            """;
+            ConstructorDependencyList = [
+                new ConstructorDependency() {
+                    Name = string.Empty,
+                    ServiceIdentifier = "Service2",
+                    IsNamed = false,
+                    HasAttribute = false,
+                    ByRef = RefKind.None
+                }
+            ],
+            PropertyDependencyList = [],
+            Dependencies = null!
+        };
+        SetDefaultDependenciesIterator(service1);
 
-        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+        Service service2 = new() {
+            Name = "service2",
+            Lifetime = ServiceLifetime.Singleton,
+            ImplementationType = string.Empty,
+            ServiceType = "Service2",
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI029", diagnostics[0].Id);
-        Assert.Equal("CreationTime Collision: Service 'TestService1' has CreationTiming.Constructor, but dependency 'MyCode.TestService2' has CreationTiming.Lazy. A CreationTiming.Constructor service may only have CreationTiming.Constructor dependencies", diagnostics[0].GetMessage());
+            CreationTime = CreationTiming.Lazy,
+            CreationTimeTransitive = CreationTiming.Lazy,
+
+            ConstructorDependencyList = [],
+            PropertyDependencyList = [],
+            Dependencies = null!
+        };
+        SetDefaultDependenciesIterator(service2);
+
+        ServiceProvider serviceProvider = CreateProvider([service1, service2]);
+
+
+        serviceProvider.CreateDependencyTree();
+
+
+        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+        Assert.Equal(CreationTiming.Constructor, service2.CreationTimeTransitive);
     }
 
     [Fact]

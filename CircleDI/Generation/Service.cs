@@ -54,6 +54,15 @@ public sealed class Service : IEquatable<Service> {
     public CreationTiming CreationTime { get; init; } = CreationTiming.Constructor;
 
     /// <summary>
+    /// <para>
+    /// The same value as <see cref="CreationTime"/>
+    /// except the service is dependency of a <see cref="CreationTiming.Constructor"/> service, then it will be also set to <see cref="CreationTiming.Constructor"/>.
+    /// </para>
+    /// <para>This value can change inside DependencyTree initialization, for caching equals check only <see cref="CreationTime"/> is used.</para>
+    /// </summary>
+    public CreationTiming CreationTimeTransitive { get; set; } = CreationTiming.Constructor;
+
+    /// <summary>
     /// <para>>Decides whether this service accessor will be a property or method.</para
     /// <para>Default is <see cref="GetAccess.Property"/>.</para>
     /// </summary>
@@ -163,6 +172,7 @@ public sealed class Service : IEquatable<Service> {
             implementationName = attributeData.NamedArguments.GetArgument<string>("Implementation");
             noDispose = attributeData.NamedArguments.GetArgument<bool>("NoDispose");
         }
+        CreationTimeTransitive = CreationTime;
 
         // Implementation, ConstructorDependencyList, PropertyDependencyList
         if (implementationName == null) {
@@ -293,6 +303,7 @@ public sealed class Service : IEquatable<Service> {
         Name = attributeData.NamedArguments.GetArgument<string>("Name") ?? serviceType.Name.Replace(".", "");
         Lifetime = ServiceLifetime.Delegate;
         CreationTime = CreationTiming.Constructor;
+        CreationTimeTransitive = CreationTiming.Constructor;
         GetAccessor = (GetAccess?)attributeData.NamedArguments.GetArgument<int?>("GetAccessor") ?? getAccessorProvider;
 
         ConstructorDependencyList = [];

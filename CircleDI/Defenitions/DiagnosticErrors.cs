@@ -370,18 +370,6 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateDependencyCreationTimingError(this AttributeData serviceProviderAttribute, string serviceName, string dependencyServiceIdentifier)
-        => Diagnostic.Create(DependencyCreationTiming, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier]);
-
-    private static DiagnosticDescriptor DependencyCreationTiming { get; } = new(
-        id: "CDI029",
-        title: "Dependency CreationTiming: Constructor on Lazy",
-        messageFormat: "CreationTime Collision: Service '{0}' has CreationTiming.Constructor, but dependency '{1}' has CreationTiming.Lazy. A CreationTiming.Constructor service may only have CreationTiming.Constructor dependencies",
-        category: "CircleDI",
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true);
-
-
     public static Diagnostic CreateScopedProviderUnregisteredError(this AttributeData serviceProviderAttribute, string serviceProviderName, string dependencyServiceIdentifier)
         => Diagnostic.Create(ScopedProviderUnregistered, serviceProviderAttribute.ToLocation(), [serviceProviderName, dependencyServiceIdentifier]);
 
