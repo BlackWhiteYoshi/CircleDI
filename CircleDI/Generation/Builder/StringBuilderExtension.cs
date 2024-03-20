@@ -96,7 +96,9 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     }
 
     private readonly void AppendConstructionSummary() {
+        // constructor
         if (!hasConstructor) {
+            // ServiceProvider
             if (!isScopeProvider) {
                 builder.Append(indent.Sp4);
                 builder.Append("/// <summary>\n");
@@ -112,6 +114,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append("public ");
                 builder.Append(serviceProvider.Name);
             }
+            // ScopeProvider
             else {
                 AppendCreateScopeSummary();
                 builder.Append(indent.Sp4);
@@ -122,7 +125,9 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append("public Scope");
             }
         }
+        // InitServices()
         else {
+            // ServiceProvider
             if (!isScopeProvider) {
                 builder.Append(indent.Sp4);
                 builder.Append("/// <summary>\n");
@@ -131,6 +136,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append(indent.Sp4);
                 builder.Append("/// </summary>\n");
             }
+            // ScopeProvider
             else {
                 builder.Append(indent.Sp4);
                 builder.Append("/// <summary>\n");
@@ -161,57 +167,39 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             }
 
             // MemberNotNullAttribute
-            for (int i = 0; i < serviceList.Count; i++) {
-                Service service = serviceList[i];
-                
-                // if serviceList has Any()
-                if (service.CreationTime == CreationTiming.Constructor && service.Implementation.Type != MemberType.Field) {
-                    builder.Append(indent.Sp4);
-                    builder.Append("[System.Diagnostics.CodeAnalysis.MemberNotNull(");
-                    if (isScopeProvider) {
-                        builder.Append("nameof(_");
-                        builder.AppendFirstLower(serviceProvider.Name);
-                        builder.Append(')');
-                        builder.Append(',');
-                        builder.Append(' ');
-                    }
+            {
+                int initialLength = builder.Length;
+                builder.Append(indent.Sp4);
+                builder.Append("[System.Diagnostics.CodeAnalysis.MemberNotNull(");
+                int startLength = builder.Length;
 
-                    while (true) {
+                foreach (ConstructorDependency dependency in constructorParameterList) {
+                    builder.Append("nameof(_");
+                    builder.AppendFirstLower(dependency.Name);
+                    builder.Append(')');
+                    builder.Append(',');
+                    builder.Append(' ');
+                }
+
+                foreach (Service service in serviceList) {
+                    if (service.CreationTime == CreationTiming.Constructor && service.Implementation.Type != MemberType.Field) {
                         builder.Append("nameof(_");
                         builder.AppendFirstLower(service.Name);
                         builder.Append(')');
                         builder.Append(',');
                         builder.Append(' ');
-
-                        do {
-                            i++;
-                            if (i == serviceList.Count)
-                                goto doubleBreak;
-                            service = serviceList[i];
-                        } while (service.CreationTime != CreationTiming.Constructor || service.Implementation.Type == MemberType.Field);
                     }
-                    doubleBreak:
+                }
 
+                if (builder.Length > startLength) {
                     builder.Length -= 2;
                     builder.Append(')');
                     builder.Append(']');
                     builder.Append('\n');
-                    goto memberNotNullAttributeEnd;
                 }
+                else
+                    builder.Length = initialLength;
             }
-            // else
-            {
-                if (isScopeProvider) {
-                    builder.Append(indent.Sp4);
-                    builder.Append("[System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(_");
-                    builder.AppendFirstLower(serviceProvider.Name);
-                    builder.Append(')');
-                    builder.Append(')');
-                    builder.Append(']');
-                    builder.Append('\n');
-                }
-            }
-            memberNotNullAttributeEnd:
 
             builder.Append(indent.Sp4);
             builder.Append("private void InitServices");
