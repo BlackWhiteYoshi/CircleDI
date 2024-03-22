@@ -62,9 +62,7 @@ public static class CircleDIBuilder {
             builder.Append("namespace ");
             builder.AppendNamespaceList(serviceProvider.NameSpaceList);
             builder.Length--;
-            builder.Append(';');
-            builder.Append('\n');
-            builder.Append('\n');
+            builder.Append(";\n\n");
         }
 
         // containing types
@@ -74,9 +72,7 @@ public static class CircleDIBuilder {
             builder.Append(serviceProvider.ContainingTypeList[i].type.AsString());
             builder.Append(' ');
             builder.Append(serviceProvider.ContainingTypeList[i].name);
-            builder.Append(' ');
-            builder.Append('{');
-            builder.Append('\n');
+            builder.Append(" {\n");
             builderExtension.indent.IncreaseLevel();
         }
 
@@ -91,16 +87,13 @@ public static class CircleDIBuilder {
         builder.Append(serviceProvider.Keyword.AsString());
         builder.Append(' ');
         builder.Append(serviceProvider.Name);
-        builder.Append(' ');
-        builder.Append(':');
-        builder.Append(' ');
+        builder.Append(" : ");
         if (serviceProvider.HasInterface) {
             builder.Append("global::");
             builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
             builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
             builder.Append(serviceProvider.InterfaceName);
-            builder.Append(',');
-            builder.Append(' ');
+            builder.Append(", ");
         }
         builder.Append("IServiceProvider {\n");
 
@@ -141,8 +134,7 @@ public static class CircleDIBuilder {
                                 builder.Append(dependency.ByRef.AsString());
                             builder.AppendServiceGetter(dependency.Service!);
                         }
-                        builder.Append(',');
-                        builder.Append(' ');
+                        builder.Append(", ");
                     }
                     builder.Length -= 2;
                 }
@@ -151,31 +143,24 @@ public static class CircleDIBuilder {
             // AppendPropertyDependencyList of serviceProvider.CreateScope
             {
                 if (serviceProvider.CreateScope.PropertyDependencyList.Count > 0) {
-                    builder.Append(' ');
-                    builder.Append('{');
+                    builder.Append(" {");
                     foreach (PropertyDependency dependency in serviceProvider.CreateScope.PropertyDependencyList) {
                         builder.Append('\n');
                         builder.Append(builderExtension.indent.Sp8);
                         builder.Append(dependency.Name);
-                        builder.Append(' ');
-                        builder.Append('=');
-                        builder.Append(' ');
+                        builder.Append(" = ");
                         if (!dependency.HasAttribute)
                             builder.Append(dependency.Name);
                         else
                             builder.AppendServiceGetter(dependency.Service!);
                         builder.Append(',');
                     }
-                    builder.Length--;
-                    builder.Append('\n');
+                    builder[^1] = '\n'; // remove last ','
                     builder.Append(builderExtension.indent.Sp4);
                     builder.Append('}');
                 }
             }
-            builder.Append(';');
-            builder.Append('\n');
-            builder.Append('\n');
-            builder.Append('\n');
+            builder.Append(";\n\n\n");
         }
 
         // singletons getter/getMethods
@@ -249,9 +234,7 @@ public static class CircleDIBuilder {
                 builder.AppendFirstLower(serviceProvider.Name);
                 builder.Append('.');
                 builder.AppendServiceGetter(service);
-                builder.Append(';');
-                builder.Append('\n');
-                builder.Append('\n');
+                builder.Append(";\n\n");
             }
             builder.Append('\n');
 
@@ -272,8 +255,7 @@ public static class CircleDIBuilder {
 
             builder.Length -= 2;
             builder.Append(builderExtension.indent.Sp0);
-            builder.Append('}');
-            builder.Append('\n');
+            builder.Append("}\n");
 
             builderExtension.indent.DecreaseLevel();
         }
@@ -281,15 +263,13 @@ public static class CircleDIBuilder {
             builder.Length -= 2;
 
         builder.Append(builderExtension.indent.Sp0);
-        builder.Append('}');
-        builder.Append('\n');
+        builder.Append("}\n");
 
         // containing types closing
         for (int i = 0; i < serviceProvider.ContainingTypeList.Count; i++) {
             builderExtension.indent.DecreaseLevel();
             builder.Append(builderExtension.indent.Sp0);
-            builder.Append('}');
-            builder.Append('\n');
+            builder.Append("}\n");
         }
 
         string hintName = serviceProvider.Name.GetFullyQualifiedName("g.cs", serviceProvider.NameSpaceList, serviceProvider.ContainingTypeList);
@@ -320,9 +300,7 @@ public static class CircleDIBuilder {
             builder.Append("namespace ");
             builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
             builder.Length--;
-            builder.Append(';');
-            builder.Append('\n');
-            builder.Append('\n');
+            builder.Append(";\n\n");
         }
 
         // containing types
@@ -332,9 +310,7 @@ public static class CircleDIBuilder {
             builder.Append(serviceProvider.InterfaceContainingTypeList[i].type.AsString());
             builder.Append(' ');
             builder.Append(serviceProvider.InterfaceContainingTypeList[i].name);
-            builder.Append(' ');
-            builder.Append('{');
-            builder.Append('\n');
+            builder.Append(" {\n");
             builderExtension.indent.IncreaseLevel();
         }
 
@@ -345,14 +321,13 @@ public static class CircleDIBuilder {
         builder.Append("partial interface ");
         builder.Append(serviceProvider.InterfaceName);
         builder.Append(serviceProvider.GenerateDisposeMethods switch {
-            DisposeGeneration.NoDisposing => " ",
-            DisposeGeneration.Dispose => " : IDisposable ",
-            DisposeGeneration.DisposeAsync => " : IAsyncDisposable ",
-            DisposeGeneration.GenerateBoth => " : IDisposable, IAsyncDisposable ",
+            DisposeGeneration.NoDisposing => string.Empty,
+            DisposeGeneration.Dispose => " : IDisposable",
+            DisposeGeneration.DisposeAsync => " : IAsyncDisposable",
+            DisposeGeneration.GenerateBoth => " : IDisposable, IAsyncDisposable",
             _ => throw new Exception($"Invalid DisposeGenerationEnum value: serviceProvider.GenerateDisposeMethods = {serviceProvider.GenerateDisposeMethods}")
         });
-        builder.Append('{');
-        builder.Append('\n');
+        builder.Append(" {\n");
 
         // "special" method CreateScope()
         if (serviceProvider.GenerateScope) {
@@ -369,8 +344,7 @@ public static class CircleDIBuilder {
                     builder.Append(dependency.ServiceIdentifier);
                     builder.Append(' ');
                     builder.Append(dependency.Name);
-                    builder.Append(',');
-                    builder.Append(' ');
+                    builder.Append(", ");
                 }
             if (builder[^1] == ' ')
                 builder.Length -= 2;
@@ -400,11 +374,9 @@ public static class CircleDIBuilder {
             else {
                 builder.Append("Get");
                 builder.Append(service.Name);
-                builder.Append("()");
-                builder.Append(';');
+                builder.Append("();");
             }
-            builder.Append('\n');
-            builder.Append('\n');
+            builder.Append("\n\n");
         }
 
         // Scope
@@ -418,14 +390,13 @@ public static class CircleDIBuilder {
             builder.Append(serviceProvider.InterfaceAccessibilityScope.AsString());
             builder.Append("partial interface IScope");
             builder.Append(serviceProvider.GenerateDisposeMethodsScope switch {
-                DisposeGeneration.NoDisposing => " ",
-                DisposeGeneration.Dispose => " : IDisposable ",
-                DisposeGeneration.DisposeAsync => " : IAsyncDisposable ",
-                DisposeGeneration.GenerateBoth => " : IDisposable, IAsyncDisposable ",
+                DisposeGeneration.NoDisposing => string.Empty,
+                DisposeGeneration.Dispose => " : IDisposable",
+                DisposeGeneration.DisposeAsync => " : IAsyncDisposable",
+                DisposeGeneration.GenerateBoth => " : IDisposable, IAsyncDisposable",
                 _ => throw new Exception($"Invalid DisposeGenerationEnum value: serviceProvider.GenerateDisposeMethodsScope = {serviceProvider.GenerateDisposeMethodsScope}")
             });
-            builder.Append('{');
-            builder.Append('\n');
+            builder.Append(" {\n");
 
             // service getter
             foreach (Service service in serviceProvider.SortedServiceList) {
@@ -446,17 +417,14 @@ public static class CircleDIBuilder {
                 else {
                     builder.Append("Get");
                     builder.Append(service.Name);
-                    builder.Append("()");
-                    builder.Append(';');
+                    builder.Append("();");
                 }
-                builder.Append('\n');
-                builder.Append('\n');
+                builder.Append("\n\n");
             }
 
             builder.Length--;
             builder.Append(builderExtension.indent.Sp0);
-            builder.Append('}');
-            builder.Append('\n');
+            builder.Append("}\n");
 
             builderExtension.indent.DecreaseLevel();
         }
@@ -464,15 +432,13 @@ public static class CircleDIBuilder {
             builder.Length--;
 
         builder.Append(builderExtension.indent.Sp0);
-        builder.Append('}');
-        builder.Append('\n');
+        builder.Append("}\n");
 
         // containing types closing
         for (int i = 0; i < serviceProvider.InterfaceContainingTypeList.Count; i++) {
             builderExtension.indent.DecreaseLevel();
             builder.Append(builderExtension.indent.Sp0);
-            builder.Append('}');
-            builder.Append('\n');
+            builder.Append("}\n");
         }
 
         string hintName = serviceProvider.InterfaceName.GetFullyQualifiedName("g.cs", serviceProvider.NameSpaceList, serviceProvider.ContainingTypeList);

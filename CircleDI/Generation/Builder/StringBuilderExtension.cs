@@ -46,11 +46,9 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append(indent.Sp4);
                 builder.Append("private global::");
                 builder.Append(dependency.ServiceIdentifier);
-                builder.Append(' ');
-                builder.Append('_');
+                builder.Append(" _");
                 builder.AppendFirstLower(dependency.Name);
-                builder.Append(';');
-                builder.Append('\n');
+                builder.Append(";\n");
             }
             builder.Append('\n');
         }
@@ -60,9 +58,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
 
         // constructor parameters
         AppendParameterDependencyList(constructorParameterList);
-        builder.Append(' ');
-        builder.Append('{');
-        builder.Append('\n');
+        builder.Append(" {\n");
 
         // parameter field = parameter
         if (constructorParameterList.Count > 0) {
@@ -70,12 +66,9 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append(indent.Sp8);
                 builder.Append('_');
                 builder.AppendFirstLower(dependency.Name);
-                builder.Append(' ');
-                builder.Append('=');
-                builder.Append(' ');
+                builder.Append(" = ");
                 builder.AppendFirstLower(dependency.Name);
-                builder.Append(';');
-                builder.Append('\n');
+                builder.Append(";\n");
             }
             builder.Append('\n');
         }
@@ -90,9 +83,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             builder.Length--;
 
         builder.Append(indent.Sp4);
-        builder.Append('}');
-        builder.Append('\n');
-        builder.Append('\n');
+        builder.Append("}\n\n");
     }
 
     private readonly void AppendConstructionSummary() {
@@ -176,26 +167,20 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 foreach (ConstructorDependency dependency in constructorParameterList) {
                     builder.Append("nameof(_");
                     builder.AppendFirstLower(dependency.Name);
-                    builder.Append(')');
-                    builder.Append(',');
-                    builder.Append(' ');
+                    builder.Append("), ");
                 }
 
                 foreach (Service service in serviceList) {
                     if (service.CreationTimeTransitive == CreationTiming.Constructor && service.Implementation.Type != MemberType.Field) {
                         builder.Append("nameof(_");
                         builder.AppendFirstLower(service.Name);
-                        builder.Append(')');
-                        builder.Append(',');
-                        builder.Append(' ');
+                        builder.Append("), ");
                     }
                 }
 
                 if (builder.Length > startLength) {
                     builder.Length -= 2;
-                    builder.Append(')');
-                    builder.Append(']');
-                    builder.Append('\n');
+                    builder.Append(")]\n");
                 }
                 else
                     builder.Length = initialLength;
@@ -246,8 +231,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append(service.Implementation.Name);
                 break;
         }
-        builder.Append(';');
-        builder.Append('\n');
+        builder.Append(";\n");
     }
 
     #endregion
@@ -295,8 +279,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
             AppendServiceProviderFieldWithCast();
         builder.Append(service.Implementation.Name);
-        builder.Append(';');
-        builder.Append('\n');
+        builder.Append(";\n");
     }
 
     private readonly void AppendServicesGetterConstructor(Service service, string refOrEmpty) {
@@ -304,17 +287,14 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append(refOrEmpty);
         builder.Append('_');
         builder.AppendFirstLower(service.Name);
-        builder.Append(';');
-        builder.Append('\n');
+        builder.Append(";\n");
 
         builder.Append(indent.Sp4);
         builder.Append("private global::");
         builder.Append(service.ImplementationType);
-        builder.Append(' ');
-        builder.Append('_');
+        builder.Append(" _");
         builder.AppendFirstLower(service.Name);
-        builder.Append(';');
-        builder.Append('\n');
+        builder.Append(";\n");
     }
 
     private readonly void AppendServicesGetterLazy(Service service, string refOrEmpty) {
@@ -365,8 +345,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
 
                 List<(Service, PropertyDependency)> circularDependencies = [];
                 AppendPropertyDependencyList(service, circularDependencies, indentCreation);
-                builder.Append(';');
-                builder.Append('\n');
+                builder.Append(";\n");
 
                 AppendCircularDependencies(circularDependencies, indentCreation);
                 break;
@@ -374,55 +353,44 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
                     AppendServiceProviderFieldWithCast();
                 builder.Append(service.Implementation.Name);
-                builder.Append(';');
-                builder.Append('\n');
+                builder.Append(";\n");
                 break;
             case MemberType.Method:
                 if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
                     AppendServiceProviderFieldWithCast();
                 builder.Append(service.Implementation.Name);
                 AppendConstructorDependencyList(service);
-                builder.Append(';');
-                builder.Append('\n');
+                builder.Append(";\n");
                 break;
         }
 
         builder.Append(indentClosebracket);
-        builder.Append('}');
-        builder.Append('\n');
-        builder.Append('\n');
+        builder.Append("}\n\n");
 
         builder.Append(sp8);
         builder.Append("return ");
         builder.Append(refOrEmpty);
         builder.Append("(global::");
         builder.Append(service.ServiceType);
-        builder.Append(')');
-        builder.Append('_');
+        builder.Append(")_");
         builder.AppendFirstLower(service.Name);
-        builder.Append(';');
-        builder.Append('\n');
+        builder.Append(";\n");
 
         if (service.GetAccessor == GetAccess.Property) {
             builder.Append(indent.Sp8);
-            builder.Append('}');
-            builder.Append('\n');
+            builder.Append("}\n");
         }
 
         builder.Append(indent.Sp4);
-        builder.Append('}');
-        builder.Append('\n');
+        builder.Append("}\n");
 
         builder.Append(indent.Sp4);
         builder.Append("private ");
         builder.Append("global::");
         builder.Append(service.ImplementationType);
-        builder.Append('?');
-        builder.Append(' ');
-        builder.Append('_');
+        builder.Append("? _");
         builder.AppendFirstLower(service.Name);
-        builder.Append(';');
-        builder.Append('\n');
+        builder.Append(";\n");
     }
 
     #endregion
@@ -465,8 +433,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     break;
             }
 
-            builder.Append('\n');
-            builder.Append('\n');
+            builder.Append("\n\n");
         }
 
         if (builder.Length > currentPosition)
@@ -483,16 +450,14 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             builder.Append("get {\n");
             AppendTransientGetterWithDisposeListCore(disposeListName, service, indent.Sp12);
             builder.Append(indent.Sp8);
-            builder.Append('}');
-            builder.Append('\n');
+            builder.Append("}\n");
             builder.Append(indent.Sp4);
             builder.Append('}');
         }
         else {
             builder.Append("Get");
             builder.Append(service.Name);
-            builder.Append("()");
-            builder.Append(" {\n");
+            builder.Append("() {\n");
             AppendTransientGetterWithDisposeListCore(disposeListName, service, indent.Sp8);
             builder.Append(indent.Sp4);
             builder.Append('}');
@@ -513,9 +478,8 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             builder.Append(indentation);
             builder.Append("lock (");
             builder.Append(disposeListName);
-            builder.Append(')');
-            builder.Append('\n');
-            builder.Append(Indent.SP4);
+            builder.Append(")\n");
+            builder.Append(Indent.SP4);  // add 1 indent to next indent
         }
         builder.Append(indentation);
         builder.Append(disposeListName);
@@ -526,8 +490,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append(indentation);
         builder.Append("return ");
         builder.AppendFirstLower(service.Name);
-        builder.Append(';');
-        builder.Append('\n');
+        builder.Append(";\n");
     }
 
 
@@ -585,9 +548,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
                 AppendServiceProviderFieldWithCast();
             builder.Append(service.Implementation.Name);
-            builder.Append(';');
-            builder.Append('\n');
-            builder.Append('\n');
+            builder.Append(";\n\n");
         }
 
         if (builder.Length > currentPosition)
@@ -638,9 +599,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             builder.Append(indent.Sp8);
             builder.Append("if (serviceType == typeof(global::");
             builder.Append(service.ServiceType);
-            builder.Append(')');
-            builder.Append(')');
-            builder.Append('\n');
+            builder.Append("))\n");
 
             builder.Append(indent.Sp12);
             builder.Append("return ");
@@ -648,29 +607,22 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             Service? nextService = GetNextService();
             if (service.ServiceType != nextService?.ServiceType) {
                 builder.AppendServiceGetter(service);
-                builder.Append(';');
-                builder.Append('\n');
+                builder.Append(";\n");
             }
             else {
                 builder.Append("(global::");
                 builder.Append(service.ServiceType);
-                builder.Append('[');
-                builder.Append(']');
-                builder.Append(')');
+                builder.Append("[])[");
 
-                builder.Append('[');
                 builder.AppendServiceGetter(service);
                 do {
-                    builder.Append(',');
-                    builder.Append(' ');
+                    builder.Append(", ");
                     builder.AppendServiceGetter(nextService!);
                     nextService = GetNextService();
                 }
                 while (service.ServiceType == nextService?.ServiceType);
 
-                builder.Append(']');
-                builder.Append(';');
-                builder.Append('\n');
+                builder.Append("];\n");
             }
 
             service = nextService;
@@ -680,10 +632,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append("return null;\n");
 
         builder.Append(indent.Sp4);
-        builder.Append('}');
-        builder.Append('\n');
-        builder.Append('\n');
-        builder.Append('\n');
+        builder.Append("}\n\n\n");
     }
 
     private struct ServiceListIterator(ServiceProvider serviceProvider) {
@@ -730,15 +679,13 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         // disposeList
         if (hasDisposeList) {
             builder.Append(indent.Sp4);
-            builder.Append("private global::System.Collections.Generic.List<IDisposable> disposeList = [];\n");
-            builder.Append('\n');
+            builder.Append("private global::System.Collections.Generic.List<IDisposable> disposeList = [];\n\n");
         }
 
         // asyncDisposeList
         if (hasAsyncDisposeList) {
             builder.Append(indent.Sp4);
-            builder.Append("private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];\n");
-            builder.Append('\n');
+            builder.Append("private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];\n\n");
         }
 
         uint singeltonDisposablesCount = 0;
@@ -779,8 +726,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 else if (service.IsAsyncDisposable) {
                     singeltonAsyncDisposablesCount++;
                     builder.Append(indent.Sp8);
-                    builder.Append("_ = ");
-                    builder.Append('(');
+                    builder.Append("_ = (");
                     if (service.CreationTimeTransitive == CreationTiming.Constructor) {
                         builder.Append("(IAsyncDisposable)");
                         builder.AppendServiceField(service);
@@ -804,9 +750,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             if (builder[^2] == '\n')
                 builder.Length--;
             builder.Append(indent.Sp4);
-            builder.Append('}');
-            builder.Append('\n');
-            builder.Append('\n');
+            builder.Append("}\n\n");
         }
 
         // DisposeAsync()
@@ -862,8 +806,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                         AppendDisposingDisposeList();
 
                     builder.Append(indent.Sp8);
-                    builder.Append("return ");
-                    builder.Append('(');
+                    builder.Append("return (");
                     if (asyncDisposableService.CreationTimeTransitive == CreationTiming.Constructor) {
                         builder.Append("(IAsyncDisposable)");
                         builder.AppendServiceField(asyncDisposableService);
@@ -887,8 +830,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                         AppendDisposingDisposeList();
 
                     builder.Append(indent.Sp8);
-                    builder.Append("Task[] disposeTasks = new Task[asyncDisposeList.Count];\n");
-                    builder.Append('\n');
+                    builder.Append("Task[] disposeTasks = new Task[asyncDisposeList.Count];\n\n");
 
                     builder.Append(indent.Sp8);
                     builder.Append("int index = 0;\n");
@@ -912,8 +854,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     builder.Append(indent.Sp8);
                     builder.Append("Task[] disposeTasks = new Task[");
                     builder.Append(singeltonAsyncDisposablesCount);
-                    builder.Append("];\n");
-                    builder.Append('\n');
+                    builder.Append("];\n\n");
 
                     int index = 0;
                     foreach (Service service in serviceList)
@@ -939,9 +880,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     builder.Append(indent.Sp8);
                     builder.Append("Task[] disposeTasks = new Task[");
                     builder.Append(singeltonAsyncDisposablesCount);
-                    builder.Append(" + asyncDisposeList.Count");
-                    builder.Append("];\n");
-                    builder.Append('\n');
+                    builder.Append(" + asyncDisposeList.Count];\n\n");
 
                     int index = 0;
                     foreach (Service service in serviceList)
@@ -952,8 +891,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     builder.Append(indent.Sp8);
                     builder.Append("int index = ");
                     builder.Append(singeltonAsyncDisposablesCount);
-                    builder.Append(';');
-                    builder.Append('\n');
+                    builder.Append(";\n");
                     AppendDisposingAsyncDisposeListArray();
 
                     builder.Append(indent.Sp8);
@@ -963,9 +901,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             }
 
             builder.Append(indent.Sp4);
-            builder.Append('}');
-            builder.Append('\n');
-            builder.Append('\n');
+            builder.Append("}\n\n");
         }
 
         builder.Append('\n');
@@ -991,8 +927,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append(indent.Sp8);
         builder.Append("disposeTasks[");
         builder.Append(index);
-        builder.Append("] = ");
-        builder.Append('(');
+        builder.Append("] = (");
         if (service.CreationTimeTransitive == CreationTiming.Constructor) {
             builder.Append("(IAsyncDisposable)");
             builder.AppendServiceField(service);
@@ -1018,8 +953,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append(sp8);
         builder.Append("foreach (IDisposable disposable in disposeList)\n");
         builder.Append(sp12);
-        builder.Append("disposable.Dispose();\n");
-        builder.Append('\n');
+        builder.Append("disposable.Dispose();\n\n");
     }
 
     private readonly void AppendDisposingAsyncDisposeListDiscard() {
@@ -1043,8 +977,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append(sp12);
         builder.Append("else\n");
         builder.Append(sp16);
-        builder.Append("_ = asyncDisposable.DisposeAsync().Preserve();\n");
-        builder.Append('\n');
+        builder.Append("_ = asyncDisposable.DisposeAsync().Preserve();\n\n");
     }
 
     private readonly void AppendDisposingAsyncDisposeListArray() {
@@ -1060,8 +993,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append(sp8);
         builder.Append("foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)\n");
         builder.Append(sp12);
-        builder.Append("disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();\n");
-        builder.Append('\n');
+        builder.Append("disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();\n\n");
     }
 
     #endregion
@@ -1116,8 +1048,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append(dependency.ServiceIdentifier);
                 builder.Append(' ');
                 builder.AppendFirstLower(dependency.Name);
-                builder.Append(',');
-                builder.Append(' ');
+                builder.Append(", ");
             }
         if (builder[^1] == ' ')
             builder.Length -= 2;
@@ -1137,8 +1068,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 if (dependency.Service!.IsRefable && !keyword.HasFlag(ClassStructKeyword.Struct))
                     builder.Append(dependency.ByRef.AsString());
                 builder.AppendServiceGetter(dependency.Service!);
-                builder.Append(',');
-                builder.Append(' ');
+                builder.Append(", ");
             }
             builder.Length -= 2;
         }
@@ -1155,8 +1085,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     /// <param name="indentation"></param>
     public readonly void AppendPropertyDependencyList(Service service, List<(Service, PropertyDependency)> circularDependencies, string indentation) {
         if (service.PropertyDependencyList.Count > 0) {
-            builder.Append(' ');
-            builder.Append('{');
+            builder.Append(" {");
 
             int builderLength = builder.Length;
             foreach (PropertyDependency dependency in service.PropertyDependencyList) {
@@ -1175,9 +1104,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     builder.Append(indentation);
                     builder.Append(Indent.SP4);
                     builder.Append(dependency.Name);
-                    builder.Append(' ');
-                    builder.Append('=');
-                    builder.Append(' ');
+                    builder.Append(" = ");
                     builder.AppendServiceGetter(dependency.Service!);
                     builder.Append(',');
                 }
@@ -1185,8 +1112,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
 
             if (builderLength != builder.Length) {
                 // at least one item got appended
-                builder.Length--; // remove ','
-                builder.Append('\n');
+                builder[^1] = '\n'; // remove last ','
                 builder.Append(indentation);
                 builder.Append('}');
             }
@@ -1219,8 +1145,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     builder.Append(dependency.Name);
                     builder.Append('(');
                     builder.AppendServiceField(service);
-                    builder.Append(',');
-                    builder.Append(' ');
+                    builder.Append(", ");
                     builder.AppendServiceGetter(dependency.Service!);
                     builder.Append(')');
                 }
@@ -1231,8 +1156,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     builder.Append(" = ");
                     builder.AppendServiceGetter(dependency.Service!);
                 }
-                builder.Append(';');
-                builder.Append('\n');
+                builder.Append(";\n");
             }
         }
     }
@@ -1248,11 +1172,9 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.AppendNamespaceList(serviceProvider.NameSpaceList);
         builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
         builder.Append(serviceProvider.Name);
-        builder.Append(')');
-        builder.Append('_');
+        builder.Append(")_");
         builder.AppendFirstLower(serviceProvider.Name);
-        builder.Append(')');
-        builder.Append('.');
+        builder.Append(").");
     }
 
 
