@@ -22,19 +22,20 @@ public static class EnumAsStringExtension {
        };
 
     /// <summary>
-    /// Maps <see cref="ClassStructKeyword"/> to <see cref="string"/>.
+    /// Maps <see cref="TypeKeyword"/> to <see cref="string"/>.
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public static string AsString(this ClassStructKeyword value)
+    public static string AsString(this TypeKeyword value)
         => value switch {
-            ClassStructKeyword.Class => "class",
-            ClassStructKeyword.Struct => "struct",
-            ClassStructKeyword.Record => "record",
-            ClassStructKeyword.RecordClass => "record class",
-            ClassStructKeyword.RecordStruct => "record struct",
-            _ => throw new Exception($"Invalid enum Type '{nameof(ClassStructKeyword)}': {value}")
+            TypeKeyword.Class => "class",
+            TypeKeyword.Struct => "struct",
+            TypeKeyword.Record => "record",
+            TypeKeyword.RecordClass => "record class",
+            TypeKeyword.RecordStruct => "record struct",
+            TypeKeyword.Interface => "interface",
+            _ => throw new Exception($"Invalid enum Type '{nameof(TypeKeyword)}': {value}")
         };
 
     /// <summary>
@@ -49,26 +50,6 @@ public static class EnumAsStringExtension {
             RefKind.Out => "out ",
             RefKind.In => "in ",
             RefKind.RefReadOnly or _ => throw new Exception($"Invalid enum Type '{nameof(RefKind)}': {value}")
-        };
-
-    /// <summary>
-    /// <para>Maps <see cref="TypeKind"/> to <see cref="string"/>.</para>
-    /// <para>
-    /// But only the top level types are mapped:<br />
-    /// class, struct, interface, enum, delegate
-    /// </para>
-    /// <para>All other types are mapped to "unknownType".</para>
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    public static string AsString(this TypeKind value)
-        => value switch {
-            TypeKind.Class => "class",
-            TypeKind.Struct => "strcut",
-            TypeKind.Interface => "interface",
-            TypeKind.Enum => "enum",
-            TypeKind.Delegate => "delegate",
-            _ => "unknownType"
         };
 
     /// <summary>

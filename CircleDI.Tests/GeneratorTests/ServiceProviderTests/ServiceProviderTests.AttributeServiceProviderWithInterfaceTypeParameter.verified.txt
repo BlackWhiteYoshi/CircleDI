@@ -24,13 +24,13 @@ namespace MySpace;
 /// </summary>
 public sealed partial class MyProvider : global::MySpace.Interface.IWrapper.IProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::MySpace.MyProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public MyProvider() {
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::MySpace.MyProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::MySpace.Interface.IWrapper.IProvider.IScope CreateScope() => new global::MySpace.MyProvider.Scope(Self);
 
@@ -92,7 +92,7 @@ public sealed partial class MyProvider : global::MySpace.Interface.IWrapper.IPro
         private global::MySpace.Interface.IWrapper.IProvider _myProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::MySpace.MyProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
         /// <param name="myProvider">An instance of the service provider this provider is the scope of.</param>
         public Scope(global::MySpace.Interface.IWrapper.IProvider myProvider) {
@@ -179,7 +179,7 @@ partial interface IWrapper {
     /// </summary>
     internal partial interface IProvider : IDisposable, IAsyncDisposable {
         /// <summary>
-        /// Creates an instance of <see cref="global::MySpace.MyProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
         global::MySpace.Interface.IWrapper.IProvider.IScope CreateScope();
 

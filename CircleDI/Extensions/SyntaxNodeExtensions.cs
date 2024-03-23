@@ -87,12 +87,12 @@ public static class SyntaxNodeExtensions {
     /// </summary>
     /// <param name="typeSymbol"></param>
     /// <returns></returns>
-    public static List<(string name, TypeKind type)> GetContainingTypeList(this INamedTypeSymbol typeSymbol) {
-        List<(string name, TypeKind type)> typeList = [];
+    public static List<ContainingType> GetContainingTypeList(this INamedTypeSymbol typeSymbol) {
+        List<ContainingType> typeList = [];
 
         INamedTypeSymbol containingtypeSymbol = typeSymbol.ContainingType;
         while (containingtypeSymbol != null) {
-            typeList.Add((containingtypeSymbol.Name, containingtypeSymbol.TypeKind));
+            typeList.Add(new ContainingType(containingtypeSymbol));
             containingtypeSymbol = containingtypeSymbol.ContainingType;
         }
 

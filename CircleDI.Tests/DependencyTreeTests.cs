@@ -12,8 +12,10 @@ namespace CircleDI.Tests;
 public static class DependencyTreeTests {
     private static ServiceProvider CreateProvider(List<Service> serviceList) {
         ServiceProvider serviceProvider = new(null!) {
-            Name = "TestProvider",
-            InterfaceName = $"ITestProvider"
+            Identifier = new TypeName("TestProvider", [], [], []),
+            IdentifierScope = new TypeName("TestProvider.Scope", [], [], []),
+            InterfaceIdentifier = new TypeName("ITestProvider", [], [], []),
+            InterfaceIdentifierScope = new TypeName("ITestProvider.IScope", [], [], []),
         };
 
         foreach (Service service in serviceList)

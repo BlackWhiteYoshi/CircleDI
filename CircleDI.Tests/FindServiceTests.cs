@@ -20,8 +20,10 @@ public static class FindServiceTests {
         serviceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
 
         ServiceProvider serviceProvider = new(null!) {
-            Name = "TestProvider",
-            InterfaceName = "ITestProvider"
+            Identifier = new TypeName("TestProvider", [], [], []),
+            IdentifierScope = new TypeName("TestProviderScope", [], [], []),
+            InterfaceIdentifier = new TypeName("ITestProvider", [], [], []),
+            InterfaceIdentifierScope = new TypeName("ITestProvider.IScope", [], [], []),
         };
         SetSortedServiceList(serviceProvider, serviceList);
         return serviceProvider;

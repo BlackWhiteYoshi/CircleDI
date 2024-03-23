@@ -24,14 +24,14 @@ namespace MyCode;
 /// </summary>
 public partial struct TestProvider : global::MyCode.ITestProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::MyCode.TestProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public TestProvider() {
         _testStruct = new global::MyCode.TestStruct();
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
 
@@ -103,7 +103,7 @@ public partial struct TestProvider : global::MyCode.ITestProvider, IServiceProvi
         private global::MyCode.ITestProvider _testProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
         /// <param name="testProvider">An instance of the service provider this provider is the scope of.</param>
         public Scope(global::MyCode.ITestProvider testProvider) {
@@ -208,7 +208,7 @@ namespace MyCode;
 /// </summary>
 public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     /// <summary>
-    /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     global::MyCode.ITestProvider.IScope CreateScope();
 

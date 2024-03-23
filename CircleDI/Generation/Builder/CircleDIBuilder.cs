@@ -58,20 +58,18 @@ public static class CircleDIBuilder {
             builder.Append("using System.Threading.Tasks;\n");
         builder.Append('\n');
 
-        if (serviceProvider.NameSpaceList.Count > 0) {
-            builder.Append("namespace ");
-            builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-            builder.Length--;
-            builder.Append(";\n\n");
+        if (serviceProvider.Identifier.NameSpaceList.Count > 0) {
+            builder.AppendNamespace(serviceProvider.Identifier.NameSpaceList);
+            builder.Append("\n\n");
         }
 
         // containing types
-        for (int i = serviceProvider.ContainingTypeList.Count - 1; i >= 0; i--) {
+        for (int i = serviceProvider.Identifier.ContainingTypeList.Count - 1; i >= 0; i--) {
             builder.Append(builderExtension.indent.Sp0);
             builder.Append("partial ");
-            builder.Append(serviceProvider.ContainingTypeList[i].type.AsString());
+            builder.Append(serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
-            builder.Append(serviceProvider.ContainingTypeList[i].name);
+            builder.AppendContainingType(serviceProvider.Identifier.ContainingTypeList[i]);
             builder.Append(" {\n");
             builderExtension.indent.IncreaseLevel();
         }
@@ -86,13 +84,11 @@ public static class CircleDIBuilder {
         builder.Append("partial ");
         builder.Append(serviceProvider.Keyword.AsString());
         builder.Append(' ');
-        builder.Append(serviceProvider.Name);
+        builder.Append(serviceProvider.Identifier.Name);
         builder.Append(" : ");
         if (serviceProvider.HasInterface) {
             builder.Append("global::");
-            builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
-            builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
-            builder.Append(serviceProvider.InterfaceName);
+            builder.AppendFullyQualifiedName(serviceProvider.InterfaceIdentifier);
             builder.Append(", ");
         }
         builder.Append("IServiceProvider {\n");
@@ -105,23 +101,14 @@ public static class CircleDIBuilder {
             builderExtension.AppendCreateScopeSummary();
             builder.Append(builderExtension.indent.Sp4);
             builder.Append("public global::");
-            builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
-            builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
-            if (serviceProvider.HasInterface) {
-                builder.Append(serviceProvider.InterfaceName);
-                builder.Append(".IScope");
-            }
-            else {
-                builder.Append(serviceProvider.Name);
-                builder.Append(".Scope");
-            }
+            if (serviceProvider.HasInterface)
+                builder.AppendFullyQualifiedName(serviceProvider.InterfaceIdentifierScope);
+            else
+                builder.AppendFullyQualifiedName(serviceProvider.IdentifierScope);
             builder.Append(" CreateScope");
             builderExtension.AppendParameterDependencyList(serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList));
             builder.Append(" => new global::");
-            builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-            builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-            builder.Append(serviceProvider.Name);
-            builder.Append(".Scope");
+            builder.AppendFullyQualifiedName(serviceProvider.IdentifierScope);
             // AppendConstructorDependencyList of serviceProvider.CreateScope
             {
                 builder.Append('(');
@@ -130,7 +117,7 @@ public static class CircleDIBuilder {
                         if (!dependency.HasAttribute)
                             builder.Append(dependency.Name);
                         else {
-                            if (dependency.Service!.IsRefable && !serviceProvider.Keyword.HasFlag(ClassStructKeyword.Struct))
+                            if (dependency.Service!.IsRefable && !serviceProvider.Keyword.HasFlag(TypeKeyword.Struct))
                                 builder.Append(dependency.ByRef.AsString());
                             builder.AppendServiceGetter(dependency.Service!);
                         }
@@ -199,10 +186,8 @@ public static class CircleDIBuilder {
             builder.Append(" Scope : ");
             if (serviceProvider.HasInterface) {
                 builder.Append("global::");
-                builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
-                builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
-                builder.Append(serviceProvider.InterfaceName);
-                builder.Append(".IScope, ");
+                builder.AppendFullyQualifiedName(serviceProvider.InterfaceIdentifierScope);
+                builder.Append(", ");
             }
             builder.Append("IServiceProvider {\n");
 
@@ -215,7 +200,7 @@ public static class CircleDIBuilder {
 
             // singleton exposing
             foreach (Service service in serviceProvider.SingletonList) {
-                string refOrEmpty = (service.IsRefable && !serviceProvider.KeywordScope.HasFlag(ClassStructKeyword.Struct) && !serviceProvider.Keyword.HasFlag(ClassStructKeyword.Struct)) switch {
+                string refOrEmpty = (service.IsRefable && !serviceProvider.KeywordScope.HasFlag(TypeKeyword.Struct) && !serviceProvider.Keyword.HasFlag(TypeKeyword.Struct)) switch {
                     true => "ref ",
                     false => string.Empty
                 };
@@ -231,7 +216,7 @@ public static class CircleDIBuilder {
                 builder.Append(" => ");
                 builder.Append(refOrEmpty);
                 builder.Append('_');
-                builder.AppendFirstLower(serviceProvider.Name);
+                builder.AppendFirstLower(serviceProvider.Identifier.Name);
                 builder.Append('.');
                 builder.AppendServiceGetter(service);
                 builder.Append(";\n\n");
@@ -266,13 +251,13 @@ public static class CircleDIBuilder {
         builder.Append("}\n");
 
         // containing types closing
-        for (int i = 0; i < serviceProvider.ContainingTypeList.Count; i++) {
+        for (int i = 0; i < serviceProvider.Identifier.ContainingTypeList.Count; i++) {
             builderExtension.indent.DecreaseLevel();
             builder.Append(builderExtension.indent.Sp0);
             builder.Append("}\n");
         }
 
-        string hintName = serviceProvider.Name.GetFullyQualifiedName("g.cs", serviceProvider.NameSpaceList, serviceProvider.ContainingTypeList);
+        string hintName = serviceProvider.Identifier.CreateHintName(".g.cs");
         string source = builder.ToString();
         context.AddSource(hintName, source);
 
@@ -296,20 +281,18 @@ public static class CircleDIBuilder {
     
             
             """);
-        if (serviceProvider.InterfaceNameSpaceList.Count > 0) {
-            builder.Append("namespace ");
-            builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
-            builder.Length--;
-            builder.Append(";\n\n");
+        if (serviceProvider.InterfaceIdentifier.NameSpaceList.Count > 0) {
+            builder.AppendNamespace(serviceProvider.InterfaceIdentifier.NameSpaceList);
+            builder.Append("\n\n");
         }
 
         // containing types
-        for (int i = serviceProvider.InterfaceContainingTypeList.Count - 1; i >= 0; i--) {
+        for (int i = serviceProvider.InterfaceIdentifier.ContainingTypeList.Count - 1; i >= 0; i--) {
             builder.Append(builderExtension.indent.Sp0);
             builder.Append("partial ");
-            builder.Append(serviceProvider.InterfaceContainingTypeList[i].type.AsString());
+            builder.Append(serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
-            builder.Append(serviceProvider.InterfaceContainingTypeList[i].name);
+            builder.AppendContainingType(serviceProvider.InterfaceIdentifier.ContainingTypeList[i]);
             builder.Append(" {\n");
             builderExtension.indent.IncreaseLevel();
         }
@@ -319,7 +302,7 @@ public static class CircleDIBuilder {
         builder.Append(builderExtension.indent.Sp0);
         builder.Append(serviceProvider.InterfaceAccessibility.AsString());
         builder.Append("partial interface ");
-        builder.Append(serviceProvider.InterfaceName);
+        builder.Append(serviceProvider.InterfaceIdentifier.Name);
         builder.Append(serviceProvider.GenerateDisposeMethods switch {
             DisposeGeneration.NoDisposing => string.Empty,
             DisposeGeneration.Dispose => " : IDisposable",
@@ -334,10 +317,8 @@ public static class CircleDIBuilder {
             builderExtension.AppendCreateScopeSummary();
             builder.Append(builderExtension.indent.Sp4);
             builder.Append("global::");
-            builder.AppendNamespaceList(serviceProvider.InterfaceNameSpaceList);
-            builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
-            builder.Append(serviceProvider.InterfaceName);
-            builder.Append(".IScope CreateScope(");
+            builder.AppendFullyQualifiedName(serviceProvider.InterfaceIdentifierScope);
+            builder.Append(" CreateScope(");
             foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
                 if (!dependency.HasAttribute) {
                     builder.Append("global::");
@@ -361,7 +342,7 @@ public static class CircleDIBuilder {
             builderExtension.AppendServiceSummary(service);
             builder.Append(builderExtension.indent.Sp4);
 
-            if (service.IsRefable && !serviceProvider.Keyword.HasFlag(ClassStructKeyword.Struct))
+            if (service.IsRefable && !serviceProvider.Keyword.HasFlag(TypeKeyword.Struct))
                 builder.Append("ref ");
 
             builder.Append("global::");
@@ -403,8 +384,8 @@ public static class CircleDIBuilder {
                 builderExtension.AppendServiceSummary(service);
                 builder.Append(builderExtension.indent.Sp4);
 
-                bool isSingletonNotRefable = service.Lifetime == ServiceLifetime.Singleton && serviceProvider.Keyword.HasFlag(ClassStructKeyword.Struct);
-                if (service.IsRefable && !serviceProvider.KeywordScope.HasFlag(ClassStructKeyword.Struct) && !isSingletonNotRefable)
+                bool isSingletonNotRefable = service.Lifetime == ServiceLifetime.Singleton && serviceProvider.Keyword.HasFlag(TypeKeyword.Struct);
+                if (service.IsRefable && !serviceProvider.KeywordScope.HasFlag(TypeKeyword.Struct) && !isSingletonNotRefable)
                     builder.Append("ref ");
 
                 builder.Append("global::");
@@ -435,13 +416,13 @@ public static class CircleDIBuilder {
         builder.Append("}\n");
 
         // containing types closing
-        for (int i = 0; i < serviceProvider.InterfaceContainingTypeList.Count; i++) {
+        for (int i = 0; i < serviceProvider.InterfaceIdentifier.ContainingTypeList.Count; i++) {
             builderExtension.indent.DecreaseLevel();
             builder.Append(builderExtension.indent.Sp0);
             builder.Append("}\n");
         }
 
-        string hintName = serviceProvider.InterfaceName.GetFullyQualifiedName("g.cs", serviceProvider.NameSpaceList, serviceProvider.ContainingTypeList);
+        string hintName = serviceProvider.InterfaceIdentifier.CreateHintName(".g.cs");
         string source = builder.ToString();
         context.AddSource(hintName, source);
 

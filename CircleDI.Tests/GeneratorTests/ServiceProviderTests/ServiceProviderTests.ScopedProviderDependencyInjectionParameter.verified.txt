@@ -24,14 +24,14 @@ namespace MyCode;
 /// </summary>
 public sealed partial class TestProvider : global::MyCode.ITestProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::MyCode.TestProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public TestProvider() {
         _testService1 = new global::MyCode.TestService1();
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::MyCode.TestProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::MyCode.ITestProvider.IScope CreateScope(global::MyCode.ITestProvider testProvider, global::MyCode.ITestService1 testService1, global::MyCode.ITestService2 testService2) => new global::MyCode.TestProvider.Scope(testProvider, testService1, testService2);
 

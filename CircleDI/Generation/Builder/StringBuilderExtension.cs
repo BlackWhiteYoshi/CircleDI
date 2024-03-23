@@ -8,7 +8,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     private bool isScopeProvider = false;
     private List<Service> serviceList = serviceProvider.SingletonList;
     private List<ConstructorDependency> constructorParameterList = serviceProvider.ConstructorParameterList;
-    private ClassStructKeyword keyword = serviceProvider.Keyword;
+    private TypeKeyword keyword = serviceProvider.Keyword;
     private DisposeGeneration generateDisposeMethods = serviceProvider.GenerateDisposeMethods;
     private bool hasConstructor = serviceProvider.HasConstructor;
     private bool hasDisposeMethod = serviceProvider.HasDisposeMethod;
@@ -94,23 +94,19 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append(indent.Sp4);
                 builder.Append("/// <summary>\n");
                 builder.Append(indent.Sp4);
-                builder.Append("/// Creates an instance of <see cref=\"global::");
-                builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-                builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-                builder.Append(serviceProvider.Name);
-                builder.Append("\"/> together with all <see cref=\"global::CircleDIAttributes.CreationTiming.Constructor\">non-lazy</see> singleton services.\n");
+                builder.Append("/// Creates an instance of a ServiceProvider together with all <see cref=\"global::CircleDIAttributes.CreationTiming.Constructor\">non-lazy</see> singleton services.\n");
                 builder.Append(indent.Sp4);
                 builder.Append("/// </summary>\n");
                 builder.Append(indent.Sp4);
                 builder.Append("public ");
-                builder.Append(serviceProvider.Name);
+                builder.Append(serviceProvider.Identifier.Name);
             }
             // ScopeProvider
             else {
                 AppendCreateScopeSummary();
                 builder.Append(indent.Sp4);
                 builder.Append("/// <param name=\"");
-                builder.AppendFirstLower(serviceProvider.Name);
+                builder.AppendFirstLower(serviceProvider.Identifier.Name);
                 builder.Append("\">An instance of the service provider this provider is the scope of.</param>\n");
                 builder.Append(indent.Sp4);
                 builder.Append("public Scope");
@@ -137,21 +133,18 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append("/// </summary>\n");
                 builder.Append(indent.Sp4);
                 builder.Append("/// <param name=\"");
-                builder.AppendFirstLower(serviceProvider.Name);
+                builder.AppendFirstLower(serviceProvider.Identifier.Name);
                 builder.Append("\">\n");
                 builder.Append(indent.Sp4);
                 builder.Append("/// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />\n");
                 builder.Append(indent.Sp4);
                 builder.Append("/// public Scope([Dependency] ");
-                if (serviceProvider.HasInterface) {
-                    builder.AppendContainingTypeList(serviceProvider.InterfaceContainingTypeList);
-                    builder.Append(serviceProvider.InterfaceName);
-                }
-                else {
-                    builder.Append(serviceProvider.Name);
-                }
+                if (serviceProvider.HasInterface)
+                    builder.Append(serviceProvider.InterfaceIdentifier.Name);
+                else
+                    builder.Append(serviceProvider.Identifier.Name);
                 builder.Append(' ');
-                builder.AppendFirstLower(serviceProvider.Name);
+                builder.AppendFirstLower(serviceProvider.Identifier.Name);
                 builder.Append(") { ...\n");
                 builder.Append(indent.Sp4);
                 builder.Append("/// </param>\n");
@@ -245,7 +238,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     public readonly void AppendServicesGetter() {
         if (serviceList.Count > 0) {
             foreach (Service service in serviceList) {
-                string refOrEmpty = (service.IsRefable && !keyword.HasFlag(ClassStructKeyword.Struct)) switch {
+                string refOrEmpty = (service.IsRefable && !keyword.HasFlag(TypeKeyword.Struct)) switch {
                     true => "ref ",
                     false => string.Empty
                 };
@@ -507,7 +500,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
             if (service.Lifetime == ServiceLifetime.Transient) {
                 builder.Append('_');
-                builder.AppendFirstLower(serviceProvider.Name);
+                builder.AppendFirstLower(serviceProvider.Identifier.Name);
                 builder.Append('.');
                 builder.AppendServiceGetter(service);
                 builder.Append(';');
@@ -1065,7 +1058,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append('(');
         if (service.ConstructorDependencyList.Count > 0) {
             foreach (ConstructorDependency dependency in service.ConstructorDependencyList) {
-                if (dependency.Service!.IsRefable && !keyword.HasFlag(ClassStructKeyword.Struct))
+                if (dependency.Service!.IsRefable && !keyword.HasFlag(TypeKeyword.Struct))
                     builder.Append(dependency.ByRef.AsString());
                 builder.AppendServiceGetter(dependency.Service!);
                 builder.Append(", ");
@@ -1169,11 +1162,9 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     /// <param name="serviceProvider"></param>
     public readonly void AppendServiceProviderFieldWithCast() {
         builder.Append("((global::");
-        builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-        builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-        builder.Append(serviceProvider.Name);
+        builder.AppendFullyQualifiedName(serviceProvider.Identifier);
         builder.Append(")_");
-        builder.AppendFirstLower(serviceProvider.Name);
+        builder.AppendFirstLower(serviceProvider.Identifier.Name);
         builder.Append(").");
     }
 
@@ -1318,11 +1309,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append("/// <summary>\n");
 
         builder.Append(indent.Sp4);
-        builder.Append("/// Creates an instance of <see cref=\"global::");
-        builder.AppendNamespaceList(serviceProvider.NameSpaceList);
-        builder.AppendContainingTypeList(serviceProvider.ContainingTypeList);
-        builder.Append(serviceProvider.Name);
-        builder.Append(".Scope\"/> together with all <see cref=\"global::CircleDIAttributes.CreationTiming.Constructor\">non-lazy</see> scoped services.\n");
+        builder.Append("/// Creates an instance of a ScopeProvider together with all <see cref=\"global::CircleDIAttributes.CreationTiming.Constructor\">non-lazy</see> scoped services.\n");
 
         builder.Append(indent.Sp4);
         builder.Append("/// </summary>\n");

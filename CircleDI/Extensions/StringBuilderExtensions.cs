@@ -1,6 +1,5 @@
 ﻿using CircleDI.Defenitions;
 using CircleDI.Generation;
-using Microsoft.CodeAnalysis;
 using System.Text;
 
 namespace CircleDI.Extensions;
@@ -55,26 +54,61 @@ public static class StringBuilderExtensions {
 
 
     /// <summary>
-    /// Appends the complete namespace with trailing '.'
+    /// Appends the fully qualified name:<br />
+    /// <see cref="TypeName.NameSpaceList">NameSpaceList</see>.<see cref="TypeName.ContainingTypeList">ContainingTypeList</see>.<see cref="TypeName.Name">Name</see>&lt;<see cref="TypeName.TypeParameterList">TypeParameterList</see>&gt;
     /// </summary>
-    /// <param name="namespaceList"></param>
-    /// <returns></returns>
-    public static void AppendNamespaceList(this StringBuilder builder, List<string> namespaceList) {
-        for (int i = namespaceList.Count - 1; i >= 0; i--) {
-            builder.Append(namespaceList[i]);
-            builder.Append(".");
+    /// <param name="builder"></param>
+    public static void AppendFullyQualifiedName(this StringBuilder builder, TypeName type) {
+        for (int i = type.NameSpaceList.Count - 1; i >= 0; i--) {
+            builder.Append(type.NameSpaceList[i]);
+            builder.Append('.');
+        }
+
+        for (int i = type.ContainingTypeList.Count - 1; i >= 0; i--) {
+            builder.AppendContainingType(type.ContainingTypeList[i]);
+            builder.Append('.');
+        }
+
+        builder.Append(type.Name);
+
+        if (type.TypeParameterList.Count > 0) {
+            builder.Append('<');
+            foreach (TypeName? typeParameter in type.TypeParameterList)
+                if (typeParameter != null)
+                    builder.AppendFullyQualifiedName(typeParameter.Value);
+            builder.Append('>');
         }
     }
 
     /// <summary>
-    /// Appends the complete namespace with trailing '.'
+    /// Appdends a string beginning with "namespace" and ending with ';':<br />
+    /// "namespace {name1}.{name2}.{name3}.[...].{itemN};"
     /// </summary>
+    /// <param name="builder"></param>
     /// <param name="namespaceList"></param>
-    /// <returns></returns>
-    public static void AppendContainingTypeList(this StringBuilder builder, List<(string name, TypeKind type)> containingTypeList) {
-        for (int i = containingTypeList.Count - 1; i >= 0; i--) {
-            builder.Append(containingTypeList[i].name);
+    public static void AppendNamespace(this StringBuilder builder, List<string> namespaceList) {
+        builder.Append("namespace ");
+        for (int i = namespaceList.Count - 1; i > 0; i--) {
+            builder.Append(namespaceList[i]);
             builder.Append(".");
+        }
+        builder.Append(namespaceList[0]);
+        builder.Append(';');
+    }
+
+    public static void AppendContainingType(this StringBuilder builder, ContainingType containingType) {
+        builder.Append(containingType.Name);
+
+        if (containingType.TypeParameterList.Count > 0) {
+            builder.Append('<');
+
+            builder.Append(containingType.TypeParameterList[0]);
+            for (int i = 1; i < containingType.TypeParameterList.Count; i++) {
+                builder.Append(", ");
+                builder.Append(containingType.TypeParameterList[i]);
+            }
+
+            builder.Append('>');
         }
     }
 }
