@@ -45,16 +45,16 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public sealed partial class MyProvider : IMyProvider, IServiceProvider {
+public sealed partial class MyProvider : global::IMyProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::MyProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public MyProvider() {
         _service3 = new global::Service3();
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::MyProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::IMyProvider.IScope CreateScope() => new global::MyProvider.Scope(Self);
 
@@ -62,7 +62,7 @@ public sealed partial class MyProvider : IMyProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IService3"/><br />
-    /// Implementation type:  <see cref="global::Service3"/>
+    /// Implementation type: <see cref="global::Service3"/>
     /// </summary>
     public global::IService3 Service3 => _service3;
     private global::Service3 _service3;
@@ -70,7 +70,7 @@ public sealed partial class MyProvider : IMyProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyProvider"/><br />
-    /// Implementation type:  <see cref="global::MyProvider"/>
+    /// Implementation type: <see cref="global::MyProvider"/>
     /// </summary>
     public global::IMyProvider Self => this;
 
@@ -85,11 +85,11 @@ public sealed partial class MyProvider : IMyProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "IMyProvider" => Self,
-            "IService3" => Service3,
-            _ => null
-        };
+        if (serviceType == typeof(global::IMyProvider))
+            return Self;
+        if (serviceType == typeof(global::IService3))
+            return Service3;
+        return null;
     }
 
 
@@ -122,22 +122,23 @@ public sealed partial class MyProvider : IMyProvider, IServiceProvider {
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : IMyProvider.IScope, IServiceProvider {
-        private IMyProvider __serviceProvider;
+    public sealed partial class Scope : global::IMyProvider.IScope, IServiceProvider {
+        private global::IMyProvider _myProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::MyProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(IMyProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="myProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::IMyProvider myProvider) {
+            _myProvider = myProvider;
+
             _service2 = new global::Service2(Service3);
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::IService2"/><br />
-        /// Implementation type:  <see cref="global::Service2"/>
+        /// Implementation type: <see cref="global::Service2"/>
         /// </summary>
         public global::IService2 Service2 => _service2;
         private global::Service2 _service2;
@@ -145,7 +146,7 @@ public sealed partial class MyProvider : IMyProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::IMyProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::MyProvider.Scope"/>
+        /// Implementation type: <see cref="global::MyProvider.Scope"/>
         /// </summary>
         public global::IMyProvider.IScope SelfScope => this;
 
@@ -153,22 +154,22 @@ public sealed partial class MyProvider : IMyProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IService3"/><br />
-        /// Implementation type:  <see cref="global::Service3"/>
+        /// Implementation type: <see cref="global::Service3"/>
         /// </summary>
-        public global::IService3 Service3 => __serviceProvider.Service3;
+        public global::IService3 Service3 => _myProvider.Service3;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyProvider"/><br />
-        /// Implementation type:  <see cref="global::MyProvider"/>
+        /// Implementation type: <see cref="global::MyProvider"/>
         /// </summary>
-        public global::IMyProvider Self => __serviceProvider.Self;
+        public global::IMyProvider Self => _myProvider.Self;
 
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::Service1"/><br />
-        /// Implementation type:  <see cref="global::Service1"/>
+        /// Implementation type: <see cref="global::Service1"/>
         /// </summary>
         public global::Service1 Service1 => new global::Service1(Service2, Service3);
 
@@ -183,14 +184,17 @@ public sealed partial class MyProvider : IMyProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "IMyProvider" => Self,
-                "IMyProvider.IScope" => SelfScope,
-                "IService2" => Service2,
-                "IService3" => Service3,
-                "Service1" => Service1,
-                _ => null
-            };
+            if (serviceType == typeof(global::IMyProvider))
+                return Self;
+            if (serviceType == typeof(global::IMyProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::IService2))
+                return Service2;
+            if (serviceType == typeof(global::IService3))
+                return Service3;
+            if (serviceType == typeof(global::Service1))
+                return Service1;
+            return null;
         }
 
 
@@ -256,9 +260,9 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class CircleExampleProvider : ICircleExampleProvider, IServiceProvider {
+public partial class CircleExampleProvider : global::ICircleExampleProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::CircleExampleProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public CircleExampleProvider() {
         _myService2 = new global::MyService2() {
@@ -270,7 +274,7 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::CircleExampleProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::ICircleExampleProvider.IScope CreateScope() => new global::CircleExampleProvider.Scope(Self);
 
@@ -278,7 +282,7 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService1"/><br />
-    /// Implementation type:  <see cref="global::MyService1"/>
+    /// Implementation type: <see cref="global::MyService1"/>
     /// </summary>
     public global::IMyService1 MyService1 => _myService1;
     private global::MyService1 _myService1;
@@ -286,7 +290,7 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService2"/><br />
-    /// Implementation type:  <see cref="global::MyService2"/>
+    /// Implementation type: <see cref="global::MyService2"/>
     /// </summary>
     public global::IMyService2 MyService2 => _myService2;
     private global::MyService2 _myService2;
@@ -294,7 +298,7 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::ICircleExampleProvider"/><br />
-    /// Implementation type:  <see cref="global::CircleExampleProvider"/>
+    /// Implementation type: <see cref="global::CircleExampleProvider"/>
     /// </summary>
     public global::ICircleExampleProvider Self => this;
 
@@ -309,12 +313,13 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "ICircleExampleProvider" => Self,
-            "IMyService1" => MyService1,
-            "IMyService2" => MyService2,
-            _ => null
-        };
+        if (serviceType == typeof(global::ICircleExampleProvider))
+            return Self;
+        if (serviceType == typeof(global::IMyService1))
+            return MyService1;
+        if (serviceType == typeof(global::IMyService2))
+            return MyService2;
+        return null;
     }
 
 
@@ -347,21 +352,21 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : ICircleExampleProvider.IScope, IServiceProvider {
-        private ICircleExampleProvider __serviceProvider;
+    public sealed partial class Scope : global::ICircleExampleProvider.IScope, IServiceProvider {
+        private global::ICircleExampleProvider _circleExampleProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::CircleExampleProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(ICircleExampleProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="circleExampleProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::ICircleExampleProvider circleExampleProvider) {
+            _circleExampleProvider = circleExampleProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::ICircleExampleProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::CircleExampleProvider.Scope"/>
+        /// Implementation type: <see cref="global::CircleExampleProvider.Scope"/>
         /// </summary>
         public global::ICircleExampleProvider.IScope SelfScope => this;
 
@@ -369,23 +374,23 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService1"/><br />
-        /// Implementation type:  <see cref="global::MyService1"/>
+        /// Implementation type: <see cref="global::MyService1"/>
         /// </summary>
-        public global::IMyService1 MyService1 => __serviceProvider.MyService1;
+        public global::IMyService1 MyService1 => _circleExampleProvider.MyService1;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService2"/><br />
-        /// Implementation type:  <see cref="global::MyService2"/>
+        /// Implementation type: <see cref="global::MyService2"/>
         /// </summary>
-        public global::IMyService2 MyService2 => __serviceProvider.MyService2;
+        public global::IMyService2 MyService2 => _circleExampleProvider.MyService2;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::ICircleExampleProvider"/><br />
-        /// Implementation type:  <see cref="global::CircleExampleProvider"/>
+        /// Implementation type: <see cref="global::CircleExampleProvider"/>
         /// </summary>
-        public global::ICircleExampleProvider Self => __serviceProvider.Self;
+        public global::ICircleExampleProvider Self => _circleExampleProvider.Self;
 
 
         /// <summary>
@@ -398,13 +403,15 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "ICircleExampleProvider" => Self,
-                "ICircleExampleProvider.IScope" => SelfScope,
-                "IMyService1" => MyService1,
-                "IMyService2" => MyService2,
-                _ => null
-            };
+            if (serviceType == typeof(global::ICircleExampleProvider))
+                return Self;
+            if (serviceType == typeof(global::ICircleExampleProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::IMyService1))
+                return MyService1;
+            if (serviceType == typeof(global::IMyService2))
+                return MyService2;
+            return null;
         }
 
 
@@ -470,9 +477,9 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class CircleExampleProvider : ICircleExampleProvider, IServiceProvider {
+public partial class CircleExampleProvider : global::ICircleExampleProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::CircleExampleProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public CircleExampleProvider() {
         _myService2 = new global::MyService2() {
@@ -484,7 +491,7 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::CircleExampleProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::ICircleExampleProvider.IScope CreateScope() => new global::CircleExampleProvider.Scope(Self);
 
@@ -492,7 +499,7 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService1"/><br />
-    /// Implementation type:  <see cref="global::MyService1"/>
+    /// Implementation type: <see cref="global::MyService1"/>
     /// </summary>
     public global::IMyService1 MyService1 => _myService1;
     private global::MyService1 _myService1;
@@ -500,7 +507,7 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService2"/><br />
-    /// Implementation type:  <see cref="global::MyService2"/>
+    /// Implementation type: <see cref="global::MyService2"/>
     /// </summary>
     public global::IMyService2 MyService2 => _myService2;
     private global::MyService2 _myService2;
@@ -508,7 +515,7 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::ICircleExampleProvider"/><br />
-    /// Implementation type:  <see cref="global::CircleExampleProvider"/>
+    /// Implementation type: <see cref="global::CircleExampleProvider"/>
     /// </summary>
     public global::ICircleExampleProvider Self => this;
 
@@ -523,12 +530,13 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "ICircleExampleProvider" => Self,
-            "IMyService1" => MyService1,
-            "IMyService2" => MyService2,
-            _ => null
-        };
+        if (serviceType == typeof(global::ICircleExampleProvider))
+            return Self;
+        if (serviceType == typeof(global::IMyService1))
+            return MyService1;
+        if (serviceType == typeof(global::IMyService2))
+            return MyService2;
+        return null;
     }
 
 
@@ -565,21 +573,21 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : ICircleExampleProvider.IScope, IServiceProvider {
-        private ICircleExampleProvider __serviceProvider;
+    public sealed partial class Scope : global::ICircleExampleProvider.IScope, IServiceProvider {
+        private global::ICircleExampleProvider _circleExampleProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::CircleExampleProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(ICircleExampleProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="circleExampleProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::ICircleExampleProvider circleExampleProvider) {
+            _circleExampleProvider = circleExampleProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::ICircleExampleProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::CircleExampleProvider.Scope"/>
+        /// Implementation type: <see cref="global::CircleExampleProvider.Scope"/>
         /// </summary>
         public global::ICircleExampleProvider.IScope SelfScope => this;
 
@@ -587,23 +595,23 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService1"/><br />
-        /// Implementation type:  <see cref="global::MyService1"/>
+        /// Implementation type: <see cref="global::MyService1"/>
         /// </summary>
-        public global::IMyService1 MyService1 => __serviceProvider.MyService1;
+        public global::IMyService1 MyService1 => _circleExampleProvider.MyService1;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService2"/><br />
-        /// Implementation type:  <see cref="global::MyService2"/>
+        /// Implementation type: <see cref="global::MyService2"/>
         /// </summary>
-        public global::IMyService2 MyService2 => __serviceProvider.MyService2;
+        public global::IMyService2 MyService2 => _circleExampleProvider.MyService2;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::ICircleExampleProvider"/><br />
-        /// Implementation type:  <see cref="global::CircleExampleProvider"/>
+        /// Implementation type: <see cref="global::CircleExampleProvider"/>
         /// </summary>
-        public global::ICircleExampleProvider Self => __serviceProvider.Self;
+        public global::ICircleExampleProvider Self => _circleExampleProvider.Self;
 
 
         /// <summary>
@@ -616,13 +624,15 @@ public partial class CircleExampleProvider : ICircleExampleProvider, IServicePro
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "ICircleExampleProvider" => Self,
-                "ICircleExampleProvider.IScope" => SelfScope,
-                "IMyService1" => MyService1,
-                "IMyService2" => MyService2,
-                _ => null
-            };
+            if (serviceType == typeof(global::ICircleExampleProvider))
+                return Self;
+            if (serviceType == typeof(global::ICircleExampleProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::IMyService1))
+                return MyService1;
+            if (serviceType == typeof(global::IMyService2))
+                return MyService2;
+            return null;
         }
 
 
@@ -683,15 +693,15 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class DelegateProvider : IDelegateProvider, IServiceProvider {
+public partial class DelegateProvider : global::IDelegateProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::DelegateProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public DelegateProvider() {
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::DelegateProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::IDelegateProvider.IScope CreateScope() => new global::DelegateProvider.Scope(Self);
 
@@ -699,7 +709,7 @@ public partial class DelegateProvider : IDelegateProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IDelegateProvider"/><br />
-    /// Implementation type:  <see cref="global::DelegateProvider"/>
+    /// Implementation type: <see cref="global::DelegateProvider"/>
     /// </summary>
     public global::IDelegateProvider Self => this;
 
@@ -707,7 +717,7 @@ public partial class DelegateProvider : IDelegateProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.DelegateAttribute{TService}">Delegate</see><br />
     /// Service type: <see cref="global::IntToString"/><br />
-    /// Implementation type:  <see cref="global::IntToString"/>
+    /// Implementation type: <see cref="global::IntToString"/>
     /// </summary>
     public global::IntToString IntToString => ConvertToString;
 
@@ -722,11 +732,11 @@ public partial class DelegateProvider : IDelegateProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "IDelegateProvider" => Self,
-            "IntToString" => IntToString,
-            _ => null
-        };
+        if (serviceType == typeof(global::IDelegateProvider))
+            return Self;
+        if (serviceType == typeof(global::IntToString))
+            return IntToString;
+        return null;
     }
 
 
@@ -759,21 +769,21 @@ public partial class DelegateProvider : IDelegateProvider, IServiceProvider {
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : IDelegateProvider.IScope, IServiceProvider {
-        private IDelegateProvider __serviceProvider;
+    public sealed partial class Scope : global::IDelegateProvider.IScope, IServiceProvider {
+        private global::IDelegateProvider _delegateProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::DelegateProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(IDelegateProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="delegateProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::IDelegateProvider delegateProvider) {
+            _delegateProvider = delegateProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::IDelegateProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::DelegateProvider.Scope"/>
+        /// Implementation type: <see cref="global::DelegateProvider.Scope"/>
         /// </summary>
         public global::IDelegateProvider.IScope SelfScope => this;
 
@@ -781,15 +791,15 @@ public partial class DelegateProvider : IDelegateProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IDelegateProvider"/><br />
-        /// Implementation type:  <see cref="global::DelegateProvider"/>
+        /// Implementation type: <see cref="global::DelegateProvider"/>
         /// </summary>
-        public global::IDelegateProvider Self => __serviceProvider.Self;
+        public global::IDelegateProvider Self => _delegateProvider.Self;
 
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.DelegateAttribute{TService}">Delegate</see><br />
         /// Service type: <see cref="global::IntToString"/><br />
-        /// Implementation type:  <see cref="global::IntToString"/>
+        /// Implementation type: <see cref="global::IntToString"/>
         /// </summary>
         public global::IntToString IntToString => ConvertToString;
 
@@ -804,12 +814,13 @@ public partial class DelegateProvider : IDelegateProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "IDelegateProvider" => Self,
-                "IDelegateProvider.IScope" => SelfScope,
-                "IntToString" => IntToString,
-                _ => null
-            };
+            if (serviceType == typeof(global::IDelegateProvider))
+                return Self;
+            if (serviceType == typeof(global::IDelegateProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::IntToString))
+                return IntToString;
+            return null;
         }
 
 
@@ -876,7 +887,7 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class FieldProvider : IFieldProvider, IServiceProvider {
+public partial class FieldProvider : global::IFieldProvider, IServiceProvider {
     /// <summary>
     /// Constructs non-lazy singleton services. Should be called inside the constructor at the end.
     /// </summary>
@@ -884,7 +895,7 @@ public partial class FieldProvider : IFieldProvider, IServiceProvider {
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::FieldProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::IFieldProvider.IScope CreateScope() => new global::FieldProvider.Scope(Self);
 
@@ -892,14 +903,14 @@ public partial class FieldProvider : IFieldProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService"/><br />
-    /// Implementation type:  <see cref="global::MyService"/>
+    /// Implementation type: <see cref="global::MyService"/>
     /// </summary>
     public global::IMyService MyService => myService;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IFieldProvider"/><br />
-    /// Implementation type:  <see cref="global::FieldProvider"/>
+    /// Implementation type: <see cref="global::FieldProvider"/>
     /// </summary>
     public global::IFieldProvider Self => this;
 
@@ -914,11 +925,11 @@ public partial class FieldProvider : IFieldProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "IFieldProvider" => Self,
-            "IMyService" => MyService,
-            _ => null
-        };
+        if (serviceType == typeof(global::IFieldProvider))
+            return Self;
+        if (serviceType == typeof(global::IMyService))
+            return MyService;
+        return null;
     }
 
 
@@ -951,21 +962,21 @@ public partial class FieldProvider : IFieldProvider, IServiceProvider {
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : IFieldProvider.IScope, IServiceProvider {
-        private IFieldProvider __serviceProvider;
+    public sealed partial class Scope : global::IFieldProvider.IScope, IServiceProvider {
+        private global::IFieldProvider _fieldProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::FieldProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(IFieldProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="fieldProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::IFieldProvider fieldProvider) {
+            _fieldProvider = fieldProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::IFieldProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::FieldProvider.Scope"/>
+        /// Implementation type: <see cref="global::FieldProvider.Scope"/>
         /// </summary>
         public global::IFieldProvider.IScope SelfScope => this;
 
@@ -973,16 +984,16 @@ public partial class FieldProvider : IFieldProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService"/><br />
-        /// Implementation type:  <see cref="global::MyService"/>
+        /// Implementation type: <see cref="global::MyService"/>
         /// </summary>
-        public global::IMyService MyService => __serviceProvider.MyService;
+        public global::IMyService MyService => _fieldProvider.MyService;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IFieldProvider"/><br />
-        /// Implementation type:  <see cref="global::FieldProvider"/>
+        /// Implementation type: <see cref="global::FieldProvider"/>
         /// </summary>
-        public global::IFieldProvider Self => __serviceProvider.Self;
+        public global::IFieldProvider Self => _fieldProvider.Self;
 
 
         /// <summary>
@@ -995,12 +1006,13 @@ public partial class FieldProvider : IFieldProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "IFieldProvider" => Self,
-                "IFieldProvider.IScope" => SelfScope,
-                "IMyService" => MyService,
-                _ => null
-            };
+            if (serviceType == typeof(global::IFieldProvider))
+                return Self;
+            if (serviceType == typeof(global::IFieldProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::IMyService))
+                return MyService;
+            return null;
         }
 
 
@@ -1062,16 +1074,16 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class PropertyProvider : IPropertyProvider, IServiceProvider {
+public partial class PropertyProvider : global::IPropertyProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::PropertyProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public PropertyProvider() {
         _myService = MyServiceImplementation;
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::PropertyProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::IPropertyProvider.IScope CreateScope() => new global::PropertyProvider.Scope(Self);
 
@@ -1079,7 +1091,7 @@ public partial class PropertyProvider : IPropertyProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService"/><br />
-    /// Implementation type:  <see cref="global::MyService"/>
+    /// Implementation type: <see cref="global::MyService"/>
     /// </summary>
     public global::IMyService MyService => _myService;
     private global::MyService _myService;
@@ -1087,7 +1099,7 @@ public partial class PropertyProvider : IPropertyProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IPropertyProvider"/><br />
-    /// Implementation type:  <see cref="global::PropertyProvider"/>
+    /// Implementation type: <see cref="global::PropertyProvider"/>
     /// </summary>
     public global::IPropertyProvider Self => this;
 
@@ -1102,11 +1114,11 @@ public partial class PropertyProvider : IPropertyProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "IMyService" => MyService,
-            "IPropertyProvider" => Self,
-            _ => null
-        };
+        if (serviceType == typeof(global::IMyService))
+            return MyService;
+        if (serviceType == typeof(global::IPropertyProvider))
+            return Self;
+        return null;
     }
 
 
@@ -1139,21 +1151,21 @@ public partial class PropertyProvider : IPropertyProvider, IServiceProvider {
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : IPropertyProvider.IScope, IServiceProvider {
-        private IPropertyProvider __serviceProvider;
+    public sealed partial class Scope : global::IPropertyProvider.IScope, IServiceProvider {
+        private global::IPropertyProvider _propertyProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::PropertyProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(IPropertyProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="propertyProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::IPropertyProvider propertyProvider) {
+            _propertyProvider = propertyProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::IPropertyProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::PropertyProvider.Scope"/>
+        /// Implementation type: <see cref="global::PropertyProvider.Scope"/>
         /// </summary>
         public global::IPropertyProvider.IScope SelfScope => this;
 
@@ -1161,16 +1173,16 @@ public partial class PropertyProvider : IPropertyProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService"/><br />
-        /// Implementation type:  <see cref="global::MyService"/>
+        /// Implementation type: <see cref="global::MyService"/>
         /// </summary>
-        public global::IMyService MyService => __serviceProvider.MyService;
+        public global::IMyService MyService => _propertyProvider.MyService;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IPropertyProvider"/><br />
-        /// Implementation type:  <see cref="global::PropertyProvider"/>
+        /// Implementation type: <see cref="global::PropertyProvider"/>
         /// </summary>
-        public global::IPropertyProvider Self => __serviceProvider.Self;
+        public global::IPropertyProvider Self => _propertyProvider.Self;
 
 
         /// <summary>
@@ -1183,12 +1195,13 @@ public partial class PropertyProvider : IPropertyProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "IMyService" => MyService,
-                "IPropertyProvider" => Self,
-                "IPropertyProvider.IScope" => SelfScope,
-                _ => null
-            };
+            if (serviceType == typeof(global::IMyService))
+                return MyService;
+            if (serviceType == typeof(global::IPropertyProvider))
+                return Self;
+            if (serviceType == typeof(global::IPropertyProvider.IScope))
+                return SelfScope;
+            return null;
         }
 
 
@@ -1254,9 +1267,9 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class MethodProvider : IMethodProvider, IServiceProvider {
+public partial class MethodProvider : global::IMethodProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::MethodProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public MethodProvider() {
         _myService1 = new global::MyService1();
@@ -1264,7 +1277,7 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::MethodProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::IMethodProvider.IScope CreateScope() => new global::MethodProvider.Scope(Self);
 
@@ -1272,7 +1285,7 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService1"/><br />
-    /// Implementation type:  <see cref="global::MyService1"/>
+    /// Implementation type: <see cref="global::MyService1"/>
     /// </summary>
     public global::IMyService1 MyService1 => _myService1;
     private global::MyService1 _myService1;
@@ -1280,7 +1293,7 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService2"/><br />
-    /// Implementation type:  <see cref="global::MyService2"/>
+    /// Implementation type: <see cref="global::MyService2"/>
     /// </summary>
     public global::IMyService2 MyService2 => _myService2;
     private global::MyService2 _myService2;
@@ -1288,7 +1301,7 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMethodProvider"/><br />
-    /// Implementation type:  <see cref="global::MethodProvider"/>
+    /// Implementation type: <see cref="global::MethodProvider"/>
     /// </summary>
     public global::IMethodProvider Self => this;
 
@@ -1303,12 +1316,13 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "IMethodProvider" => Self,
-            "IMyService1" => MyService1,
-            "IMyService2" => MyService2,
-            _ => null
-        };
+        if (serviceType == typeof(global::IMethodProvider))
+            return Self;
+        if (serviceType == typeof(global::IMyService1))
+            return MyService1;
+        if (serviceType == typeof(global::IMyService2))
+            return MyService2;
+        return null;
     }
 
 
@@ -1341,21 +1355,21 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : IMethodProvider.IScope, IServiceProvider {
-        private IMethodProvider __serviceProvider;
+    public sealed partial class Scope : global::IMethodProvider.IScope, IServiceProvider {
+        private global::IMethodProvider _methodProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::MethodProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(IMethodProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="methodProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::IMethodProvider methodProvider) {
+            _methodProvider = methodProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::IMethodProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::MethodProvider.Scope"/>
+        /// Implementation type: <see cref="global::MethodProvider.Scope"/>
         /// </summary>
         public global::IMethodProvider.IScope SelfScope => this;
 
@@ -1363,23 +1377,23 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService1"/><br />
-        /// Implementation type:  <see cref="global::MyService1"/>
+        /// Implementation type: <see cref="global::MyService1"/>
         /// </summary>
-        public global::IMyService1 MyService1 => __serviceProvider.MyService1;
+        public global::IMyService1 MyService1 => _methodProvider.MyService1;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService2"/><br />
-        /// Implementation type:  <see cref="global::MyService2"/>
+        /// Implementation type: <see cref="global::MyService2"/>
         /// </summary>
-        public global::IMyService2 MyService2 => __serviceProvider.MyService2;
+        public global::IMyService2 MyService2 => _methodProvider.MyService2;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMethodProvider"/><br />
-        /// Implementation type:  <see cref="global::MethodProvider"/>
+        /// Implementation type: <see cref="global::MethodProvider"/>
         /// </summary>
-        public global::IMethodProvider Self => __serviceProvider.Self;
+        public global::IMethodProvider Self => _methodProvider.Self;
 
 
         /// <summary>
@@ -1392,13 +1406,15 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "IMethodProvider" => Self,
-                "IMethodProvider.IScope" => SelfScope,
-                "IMyService1" => MyService1,
-                "IMyService2" => MyService2,
-                _ => null
-            };
+            if (serviceType == typeof(global::IMethodProvider))
+                return Self;
+            if (serviceType == typeof(global::IMethodProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::IMyService1))
+                return MyService1;
+            if (serviceType == typeof(global::IMyService2))
+                return MyService2;
+            return null;
         }
 
 
@@ -1480,9 +1496,9 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
+public partial class DisposingProvider : global::IDisposingProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::DisposingProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public DisposingProvider() {
         _myService1 = new global::MyService1();
@@ -1490,7 +1506,7 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::DisposingProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::IDisposingProvider.IScope CreateScope() => new global::DisposingProvider.Scope(Self);
 
@@ -1498,7 +1514,7 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService1"/><br />
-    /// Implementation type:  <see cref="global::MyService1"/>
+    /// Implementation type: <see cref="global::MyService1"/>
     /// </summary>
     public global::IMyService1 MyService1 => _myService1;
     private global::MyService1 _myService1;
@@ -1506,7 +1522,7 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService2"/><br />
-    /// Implementation type:  <see cref="global::MyService2"/>
+    /// Implementation type: <see cref="global::MyService2"/>
     /// </summary>
     public global::IMyService2 MyService2 => _myService2;
     private global::MyService2 _myService2;
@@ -1514,7 +1530,7 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IDisposingProvider"/><br />
-    /// Implementation type:  <see cref="global::DisposingProvider"/>
+    /// Implementation type: <see cref="global::DisposingProvider"/>
     /// </summary>
     public global::IDisposingProvider Self => this;
 
@@ -1522,7 +1538,7 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::IMyService3"/><br />
-    /// Implementation type:  <see cref="global::MyService3"/>
+    /// Implementation type: <see cref="global::MyService3"/>
     /// </summary>
     public global::IMyService3 MyService3 {
         get {
@@ -1536,7 +1552,7 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::IMyService4"/><br />
-    /// Implementation type:  <see cref="global::MyService4"/>
+    /// Implementation type: <see cref="global::MyService4"/>
     /// </summary>
     public global::IMyService4 MyService4 {
         get {
@@ -1558,14 +1574,17 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "IDisposingProvider" => Self,
-            "IMyService1" => MyService1,
-            "IMyService2" => MyService2,
-            "IMyService3" => MyService3,
-            "IMyService4" => MyService4,
-            _ => null
-        };
+        if (serviceType == typeof(global::IDisposingProvider))
+            return Self;
+        if (serviceType == typeof(global::IMyService1))
+            return MyService1;
+        if (serviceType == typeof(global::IMyService2))
+            return MyService2;
+        if (serviceType == typeof(global::IMyService3))
+            return MyService3;
+        if (serviceType == typeof(global::IMyService4))
+            return MyService4;
+        return null;
     }
 
 
@@ -1630,21 +1649,21 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : IDisposingProvider.IScope, IServiceProvider {
-        private IDisposingProvider __serviceProvider;
+    public sealed partial class Scope : global::IDisposingProvider.IScope, IServiceProvider {
+        private global::IDisposingProvider _disposingProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::DisposingProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(IDisposingProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="disposingProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::IDisposingProvider disposingProvider) {
+            _disposingProvider = disposingProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::IDisposingProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::DisposingProvider.Scope"/>
+        /// Implementation type: <see cref="global::DisposingProvider.Scope"/>
         /// </summary>
         public global::IDisposingProvider.IScope SelfScope => this;
 
@@ -1652,29 +1671,29 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService1"/><br />
-        /// Implementation type:  <see cref="global::MyService1"/>
+        /// Implementation type: <see cref="global::MyService1"/>
         /// </summary>
-        public global::IMyService1 MyService1 => __serviceProvider.MyService1;
+        public global::IMyService1 MyService1 => _disposingProvider.MyService1;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService2"/><br />
-        /// Implementation type:  <see cref="global::MyService2"/>
+        /// Implementation type: <see cref="global::MyService2"/>
         /// </summary>
-        public global::IMyService2 MyService2 => __serviceProvider.MyService2;
+        public global::IMyService2 MyService2 => _disposingProvider.MyService2;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IDisposingProvider"/><br />
-        /// Implementation type:  <see cref="global::DisposingProvider"/>
+        /// Implementation type: <see cref="global::DisposingProvider"/>
         /// </summary>
-        public global::IDisposingProvider Self => __serviceProvider.Self;
+        public global::IDisposingProvider Self => _disposingProvider.Self;
 
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::IMyService3"/><br />
-        /// Implementation type:  <see cref="global::MyService3"/>
+        /// Implementation type: <see cref="global::MyService3"/>
         /// </summary>
         public global::IMyService3 MyService3 {
             get {
@@ -1688,7 +1707,7 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::IMyService4"/><br />
-        /// Implementation type:  <see cref="global::MyService4"/>
+        /// Implementation type: <see cref="global::MyService4"/>
         /// </summary>
         public global::IMyService4 MyService4 {
             get {
@@ -1710,15 +1729,19 @@ public partial class DisposingProvider : IDisposingProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "IDisposingProvider" => Self,
-                "IDisposingProvider.IScope" => SelfScope,
-                "IMyService1" => MyService1,
-                "IMyService2" => MyService2,
-                "IMyService3" => MyService3,
-                "IMyService4" => MyService4,
-                _ => null
-            };
+            if (serviceType == typeof(global::IDisposingProvider))
+                return Self;
+            if (serviceType == typeof(global::IDisposingProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::IMyService1))
+                return MyService1;
+            if (serviceType == typeof(global::IMyService2))
+                return MyService2;
+            if (serviceType == typeof(global::IMyService3))
+                return MyService3;
+            if (serviceType == typeof(global::IMyService4))
+                return MyService4;
+            return null;
         }
 
 
@@ -1803,15 +1826,15 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class LazyProvider : ILazyProvider, IServiceProvider {
+public partial class LazyProvider : global::ILazyProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::LazyProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public LazyProvider() {
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::LazyProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::ILazyProvider.IScope CreateScope() => new global::LazyProvider.Scope(Self);
 
@@ -1819,7 +1842,7 @@ public partial class LazyProvider : ILazyProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService"/><br />
-    /// Implementation type:  <see cref="global::MyService"/>
+    /// Implementation type: <see cref="global::MyService"/>
     /// </summary>
     public global::IMyService MyService {
         get {
@@ -1837,7 +1860,7 @@ public partial class LazyProvider : ILazyProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::ILazyProvider"/><br />
-    /// Implementation type:  <see cref="global::LazyProvider"/>
+    /// Implementation type: <see cref="global::LazyProvider"/>
     /// </summary>
     public global::ILazyProvider Self => this;
 
@@ -1852,11 +1875,11 @@ public partial class LazyProvider : ILazyProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "ILazyProvider" => Self,
-            "IMyService" => MyService,
-            _ => null
-        };
+        if (serviceType == typeof(global::ILazyProvider))
+            return Self;
+        if (serviceType == typeof(global::IMyService))
+            return MyService;
+        return null;
     }
 
 
@@ -1889,21 +1912,21 @@ public partial class LazyProvider : ILazyProvider, IServiceProvider {
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : ILazyProvider.IScope, IServiceProvider {
-        private ILazyProvider __serviceProvider;
+    public sealed partial class Scope : global::ILazyProvider.IScope, IServiceProvider {
+        private global::ILazyProvider _lazyProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::LazyProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(ILazyProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="lazyProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::ILazyProvider lazyProvider) {
+            _lazyProvider = lazyProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::ILazyProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::LazyProvider.Scope"/>
+        /// Implementation type: <see cref="global::LazyProvider.Scope"/>
         /// </summary>
         public global::ILazyProvider.IScope SelfScope => this;
 
@@ -1911,16 +1934,16 @@ public partial class LazyProvider : ILazyProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService"/><br />
-        /// Implementation type:  <see cref="global::MyService"/>
+        /// Implementation type: <see cref="global::MyService"/>
         /// </summary>
-        public global::IMyService MyService => __serviceProvider.MyService;
+        public global::IMyService MyService => _lazyProvider.MyService;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::ILazyProvider"/><br />
-        /// Implementation type:  <see cref="global::LazyProvider"/>
+        /// Implementation type: <see cref="global::LazyProvider"/>
         /// </summary>
-        public global::ILazyProvider Self => __serviceProvider.Self;
+        public global::ILazyProvider Self => _lazyProvider.Self;
 
 
         /// <summary>
@@ -1933,12 +1956,13 @@ public partial class LazyProvider : ILazyProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "ILazyProvider" => Self,
-                "ILazyProvider.IScope" => SelfScope,
-                "IMyService" => MyService,
-                _ => null
-            };
+            if (serviceType == typeof(global::ILazyProvider))
+                return Self;
+            if (serviceType == typeof(global::ILazyProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::IMyService))
+                return MyService;
+            return null;
         }
 
 
@@ -1998,16 +2022,16 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class MethodProvider : IMethodProvider, IServiceProvider {
+public partial class MethodProvider : global::IMethodProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::MethodProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public MethodProvider() {
         _myService = new global::MyService();
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::MethodProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::IMethodProvider.IScope CreateScope() => new global::MethodProvider.Scope(GetSelf());
 
@@ -2015,7 +2039,7 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService"/><br />
-    /// Implementation type:  <see cref="global::MyService"/>
+    /// Implementation type: <see cref="global::MyService"/>
     /// </summary>
     public global::IMyService GetMyService() => _myService;
     private global::MyService _myService;
@@ -2023,7 +2047,7 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMethodProvider"/><br />
-    /// Implementation type:  <see cref="global::MethodProvider"/>
+    /// Implementation type: <see cref="global::MethodProvider"/>
     /// </summary>
     public global::IMethodProvider GetSelf() => this;
 
@@ -2038,11 +2062,11 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "IMethodProvider" => GetSelf(),
-            "IMyService" => GetMyService(),
-            _ => null
-        };
+        if (serviceType == typeof(global::IMethodProvider))
+            return GetSelf();
+        if (serviceType == typeof(global::IMyService))
+            return GetMyService();
+        return null;
     }
 
 
@@ -2075,21 +2099,21 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : IMethodProvider.IScope, IServiceProvider {
-        private IMethodProvider __serviceProvider;
+    public sealed partial class Scope : global::IMethodProvider.IScope, IServiceProvider {
+        private global::IMethodProvider _methodProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::MethodProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(IMethodProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="methodProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::IMethodProvider methodProvider) {
+            _methodProvider = methodProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::IMethodProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::MethodProvider.Scope"/>
+        /// Implementation type: <see cref="global::MethodProvider.Scope"/>
         /// </summary>
         public global::IMethodProvider.IScope GetSelfScope() => this;
 
@@ -2097,16 +2121,16 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService"/><br />
-        /// Implementation type:  <see cref="global::MyService"/>
+        /// Implementation type: <see cref="global::MyService"/>
         /// </summary>
-        public global::IMyService GetMyService() => __serviceProvider.GetMyService();
+        public global::IMyService GetMyService() => _methodProvider.GetMyService();
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMethodProvider"/><br />
-        /// Implementation type:  <see cref="global::MethodProvider"/>
+        /// Implementation type: <see cref="global::MethodProvider"/>
         /// </summary>
-        public global::IMethodProvider GetSelf() => __serviceProvider.GetSelf();
+        public global::IMethodProvider GetSelf() => _methodProvider.GetSelf();
 
 
         /// <summary>
@@ -2119,12 +2143,13 @@ public partial class MethodProvider : IMethodProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "IMethodProvider" => GetSelf(),
-                "IMethodProvider.IScope" => GetSelfScope(),
-                "IMyService" => GetMyService(),
-                _ => null
-            };
+            if (serviceType == typeof(global::IMethodProvider))
+                return GetSelf();
+            if (serviceType == typeof(global::IMethodProvider.IScope))
+                return GetSelfScope();
+            if (serviceType == typeof(global::IMyService))
+                return GetMyService();
+            return null;
         }
 
 
@@ -2184,9 +2209,9 @@ using System;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class SkipGenerationProvider : ISkipGenerationProvider, IServiceProvider {
+public partial class SkipGenerationProvider : global::ISkipGenerationProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::SkipGenerationProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public SkipGenerationProvider() {
         _myService = new global::MyService();
@@ -2195,7 +2220,7 @@ public partial class SkipGenerationProvider : ISkipGenerationProvider, IServiceP
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService"/><br />
-    /// Implementation type:  <see cref="global::MyService"/>
+    /// Implementation type: <see cref="global::MyService"/>
     /// </summary>
     public global::IMyService MyService => _myService;
     private global::MyService _myService;
@@ -2203,7 +2228,7 @@ public partial class SkipGenerationProvider : ISkipGenerationProvider, IServiceP
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::ISkipGenerationProvider"/><br />
-    /// Implementation type:  <see cref="global::SkipGenerationProvider"/>
+    /// Implementation type: <see cref="global::SkipGenerationProvider"/>
     /// </summary>
     public global::ISkipGenerationProvider Self => this;
 
@@ -2218,11 +2243,11 @@ public partial class SkipGenerationProvider : ISkipGenerationProvider, IServiceP
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "IMyService" => MyService,
-            "ISkipGenerationProvider" => Self,
-            _ => null
-        };
+        if (serviceType == typeof(global::IMyService))
+            return MyService;
+        if (serviceType == typeof(global::ISkipGenerationProvider))
+            return Self;
+        return null;
     }
 }
 ```
@@ -2274,15 +2299,15 @@ using System.Threading.Tasks;
 /// and is not thread safe.
 /// </para>
 /// </summary>
-public partial class FastProvider : IFastProvider, IServiceProvider {
+public partial class FastProvider : global::IFastProvider, IServiceProvider {
     /// <summary>
-    /// Creates an instance of <see cref="global::FastProvider"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public FastProvider() {
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::FastProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::IFastProvider.IScope CreateScope() => new global::FastProvider.Scope(Self);
 
@@ -2290,7 +2315,7 @@ public partial class FastProvider : IFastProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IMyService"/><br />
-    /// Implementation type:  <see cref="global::MyService"/>
+    /// Implementation type: <see cref="global::MyService"/>
     /// </summary>
     public global::IMyService MyService {
         get {
@@ -2306,7 +2331,7 @@ public partial class FastProvider : IFastProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IFastProvider"/><br />
-    /// Implementation type:  <see cref="global::FastProvider"/>
+    /// Implementation type: <see cref="global::FastProvider"/>
     /// </summary>
     public global::IFastProvider Self => this;
 
@@ -2314,7 +2339,7 @@ public partial class FastProvider : IFastProvider, IServiceProvider {
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::IDisposableService"/><br />
-    /// Implementation type:  <see cref="global::DisposableService"/>
+    /// Implementation type: <see cref="global::DisposableService"/>
     /// </summary>
     public global::IDisposableService DisposableService {
         get {
@@ -2335,12 +2360,13 @@ public partial class FastProvider : IFastProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "IDisposableService" => DisposableService,
-            "IFastProvider" => Self,
-            "IMyService" => MyService,
-            _ => null
-        };
+        if (serviceType == typeof(global::IDisposableService))
+            return DisposableService;
+        if (serviceType == typeof(global::IFastProvider))
+            return Self;
+        if (serviceType == typeof(global::IMyService))
+            return MyService;
+        return null;
     }
 
 
@@ -2380,21 +2406,21 @@ public partial class FastProvider : IFastProvider, IServiceProvider {
     /// and is not thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : IFastProvider.IScope, IServiceProvider {
-        private IFastProvider __serviceProvider;
+    public sealed partial class Scope : global::IFastProvider.IScope, IServiceProvider {
+        private global::IFastProvider _fastProvider;
 
         /// <summary>
-        /// Creates an instance of <see cref="global::FastProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="serviceProvider">An instance of the service provider this provider is the scope of.</param>
-        public Scope(IFastProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        /// <param name="fastProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::IFastProvider fastProvider) {
+            _fastProvider = fastProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::IFastProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::FastProvider.Scope"/>
+        /// Implementation type: <see cref="global::FastProvider.Scope"/>
         /// </summary>
         public global::IFastProvider.IScope SelfScope => this;
 
@@ -2402,22 +2428,22 @@ public partial class FastProvider : IFastProvider, IServiceProvider {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IMyService"/><br />
-        /// Implementation type:  <see cref="global::MyService"/>
+        /// Implementation type: <see cref="global::MyService"/>
         /// </summary>
-        public global::IMyService MyService => __serviceProvider.MyService;
+        public global::IMyService MyService => _fastProvider.MyService;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IFastProvider"/><br />
-        /// Implementation type:  <see cref="global::FastProvider"/>
+        /// Implementation type: <see cref="global::FastProvider"/>
         /// </summary>
-        public global::IFastProvider Self => __serviceProvider.Self;
+        public global::IFastProvider Self => _fastProvider.Self;
 
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::IDisposableService"/><br />
-        /// Implementation type:  <see cref="global::DisposableService"/>
+        /// Implementation type: <see cref="global::DisposableService"/>
         /// </summary>
         public global::IDisposableService DisposableService {
             get {
@@ -2438,13 +2464,15 @@ public partial class FastProvider : IFastProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "IDisposableService" => DisposableService,
-                "IFastProvider" => Self,
-                "IFastProvider.IScope" => SelfScope,
-                "IMyService" => MyService,
-                _ => null
-            };
+            if (serviceType == typeof(global::IDisposableService))
+                return DisposableService;
+            if (serviceType == typeof(global::IFastProvider))
+                return Self;
+            if (serviceType == typeof(global::IFastProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::IMyService))
+                return MyService;
+            return null;
         }
 
 
@@ -2537,7 +2565,7 @@ using System.Threading.Tasks;
 /// and is thread safe.
 /// </para>
 /// </summary>
-public partial class OverwritingProvider : IOverwritingProvider, IServiceProvider {
+public partial class OverwritingProvider : global::IOverwritingProvider, IServiceProvider {
     /// <summary>
     /// Constructs non-lazy singleton services. Should be called inside the constructor at the end.
     /// </summary>
@@ -2545,7 +2573,7 @@ public partial class OverwritingProvider : IOverwritingProvider, IServiceProvide
     }
 
     /// <summary>
-    /// Creates an instance of <see cref="global::OverwritingProvider.Scope"/> together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::IOverwritingProvider.IScope CreateScope() => new global::OverwritingProvider.Scope(Me);
 
@@ -2553,7 +2581,7 @@ public partial class OverwritingProvider : IOverwritingProvider, IServiceProvide
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
     /// Service type: <see cref="global::IOverwritingProvider"/><br />
-    /// Implementation type:  <see cref="global::OverwritingProvider"/>
+    /// Implementation type: <see cref="global::OverwritingProvider"/>
     /// </summary>
     public global::IOverwritingProvider Me => this;
 
@@ -2568,10 +2596,9 @@ public partial class OverwritingProvider : IOverwritingProvider, IServiceProvide
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        return serviceType.FullName switch {
-            "IOverwritingProvider" => Me,
-            _ => null
-        };
+        if (serviceType == typeof(global::IOverwritingProvider))
+            return Me;
+        return null;
     }
 
 
@@ -2604,25 +2631,25 @@ public partial class OverwritingProvider : IOverwritingProvider, IServiceProvide
     /// and is thread safe.
     /// </para>
     /// </summary>
-    public sealed partial class Scope : IOverwritingProvider.IScope, IServiceProvider {
-        private IOverwritingProvider __serviceProvider;
+    public sealed partial class Scope : global::IOverwritingProvider.IScope, IServiceProvider {
+        private global::IOverwritingProvider _overwritingProvider;
 
         /// <summary>
         /// Constructs non-lazy scoped services. Should be called inside the constructor at the end.
         /// </summary>
-        /// <param name="serviceProvider">
+        /// <param name="overwritingProvider">
         /// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />
-        /// public Scope(IOverwritingProvider serviceProvider) { ...
+        /// public Scope([Dependency] IOverwritingProvider overwritingProvider) { ...
         /// </param>
-        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(__serviceProvider))]
-        private void InitServices(IOverwritingProvider serviceProvider) {
-            __serviceProvider = serviceProvider;
+        [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(_overwritingProvider))]
+        private void InitServices(global::IOverwritingProvider overwritingProvider) {
+            _overwritingProvider = overwritingProvider;
         }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::IOverwritingProvider.IScope"/><br />
-        /// Implementation type:  <see cref="global::OverwritingProvider.Scope"/>
+        /// Implementation type: <see cref="global::OverwritingProvider.Scope"/>
         /// </summary>
         public global::IOverwritingProvider.IScope MeScope => this;
 
@@ -2630,9 +2657,9 @@ public partial class OverwritingProvider : IOverwritingProvider, IServiceProvide
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::IOverwritingProvider"/><br />
-        /// Implementation type:  <see cref="global::OverwritingProvider"/>
+        /// Implementation type: <see cref="global::OverwritingProvider"/>
         /// </summary>
-        public global::IOverwritingProvider Me => __serviceProvider.Me;
+        public global::IOverwritingProvider Me => _overwritingProvider.Me;
 
 
         /// <summary>
@@ -2645,11 +2672,11 @@ public partial class OverwritingProvider : IOverwritingProvider, IServiceProvide
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            return serviceType.FullName switch {
-                "IOverwritingProvider" => Me,
-                "IOverwritingProvider.IScope" => MeScope,
-                _ => null
-            };
+            if (serviceType == typeof(global::IOverwritingProvider))
+                return Me;
+            if (serviceType == typeof(global::IOverwritingProvider.IScope))
+                return MeScope;
+            return null;
         }
 
 

@@ -119,12 +119,12 @@ The *DefaultServiceGeneration* can have multiple values depending in which envir
  
   - **Blazor Hybrid**: That environment has the least amount of default services. All these services are also available in the other environments.
   - **Blazor Webassembly**: All default services that are available in webassembly. Has some unique services (*LazyAssemblyLoader*, *WebAssemblyHostEnvironment*) that are only available in this environment.
-  - **Blazor Server**: Has over one hundred of default services, most of them are omitted.
+  - **Blazor Server**: Has over one hundred default services, most of them are omitted.
   - **Blazor Server and Webassembly**: All services that are compatible for server and webassembly environment are generated. This is the default.
   - **None**: No default services are generated.
 
   
-Additionally, if enabled (other value than **None**), a *System.IServiceProvider* parameter gets added to the constructor to wire up the default services.
+Additionally, if enabled (other value than **None**), a *System.IServiceProvider* parameter gets added to the constructor/InitServices()-method to wire up the default services.
 
 The singleton services have CreationTime constructor and the scoped services have CreationTime lazy.
 
@@ -139,10 +139,10 @@ There is no guarantee that all default services are present, especially not in t
 ### Framework Injection and Parameters
 
 This package does not disable the built-in service provider or it's injection mechanism,
-so the normal [Inject]/[Parameter]/[CascadingParameter] works as expected.
+so the normal *[Inject]*/*[Parameter]*/*[CascadingParameter]* works as expected.
 When using [Parameter]/[CascadingParameter] you must not use the *required* keyword,
 otherwise CircleDI is forced to dependency inject that parameter only to get overridden by the framework afterwards.
-To avoid nullable warnings, just assign a "null!" to the property.
+To avoid nullable warnings, just assign a "*null!*" to the property.
 
 <br></br>
 ### Manually Registering Components
@@ -226,7 +226,7 @@ To differentiate between disposed from renderer or disposed from service provide
 ```csharp
 public class MyScopedComponent : ServiceComponentBase {
     public override void Dispose() {
-        íf (HasRenderHandle) {
+        if (HasRenderHandle) {
             base.Dispose();
             // logic for disposing when disposed by renderer (when no longer be rendered)
         }

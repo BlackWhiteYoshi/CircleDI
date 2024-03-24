@@ -343,12 +343,12 @@ And code conventions, structure, and quality is important to me. So there is a g
   Breaking Change: *CreateScope()* lists dependencies without [Dependency]-attribute as parameters and dependencies with [Dependency]-attribute are supplied by the ServiceProvider.  
   Native/Built-in types are supported.
 - 0.3.0
-  Added support for passing value type services by reference.
+  Added support for passing value type services by reference.  
   ServiceProvider can now also be struct, record or record struct.
 - 0.4.0
   Added "NoDispose"-property to disable disposing for each distinct service.  
   Added functionality for omitting interface generation when *InterfaceName* is empty.  
   Added Attribute *ServiceProvider&lt;TInterface&gt;* to generate the interface into an existing one.
 - 0.5.0
-  Added CicleDI.Blazor
+  Added CicleDI.Blazor.  
   Removed Error *CDI029* "Dependency CreationTiming: Constructor on Lazy" and instead the lazy instantiated service will become constructor instantiated.
