@@ -349,3 +349,6 @@ And code conventions, structure, and quality is important to me. So there is a g
   Added "NoDispose"-property to disable disposing for each distinct service.  
   Added functionality for omitting interface generation when *InterfaceName* is empty.  
   Added Attribute *ServiceProvider&lt;TInterface&gt;* to generate the interface into an existing one.
+- 0.5.0
+  Added CicleDI.Blazor
+  Removed Error *CDI029* "Dependency CreationTiming: Constructor on Lazy" and instead the lazy instantiated service will become constructor instantiated.
