@@ -17,7 +17,7 @@ The world only full-power circular Service Provider wired up with Blazor.
 Extra Blazor features are
 
 - CircleDIComponentActivator.cs
-- All components get added as transient services.
+- Automatic component registration as transient services.
 - Default services of *Microsoft.Extensions.DependencyInjection* provider get added.
 
 This package is not compatible with [CircleDI](https://www.nuget.org/packages/CircleDI).

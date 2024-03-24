@@ -87,7 +87,7 @@ public class MyService {
 <br></br>
 ## Get Started
 
-1. Add PackageReference to your .csproj file
+1. Add PackageReference to your .csproj file.
 
 ```xml
 <ItemGroup>
@@ -153,6 +153,9 @@ public class MyService : IMyService {
     public required IService2 Service2 { private get; init; }
 }
 ```
+
+<br></br>
+## [Get Started - Blazor](Readme_md/Blazor.md#GetStarted)
 
 
 <br></br>
@@ -331,6 +334,8 @@ And code conventions, structure, and quality is important to me. So there is a g
 
 <br></br>
 ## Versions
+
+### CircleDI
 
 - 0.1.0
   First version. Includes all basic functionalities for generating a Service Provider.

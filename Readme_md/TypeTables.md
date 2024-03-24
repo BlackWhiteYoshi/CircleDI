@@ -31,7 +31,7 @@ The source generator will generate a complete service provider, but you can add 
 
 ## Type Parameters
 
-| **Name**   | **TypeConstraints** |  **Dexcription**                                                                                                                                                                                                                                                                          |
+| **Name**   | **TypeConstraints** |  **Description**                                                                                                                                                                                                                                                                          |
 | ---------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | TInterface | interface           | An explicit declared interface the generated interface will be based on: The name, access modifier, namespace and containing types will be inferred. That interface must be partial. If the generated interface is used without declaring the interface yourself, it will have no effect. |
 
