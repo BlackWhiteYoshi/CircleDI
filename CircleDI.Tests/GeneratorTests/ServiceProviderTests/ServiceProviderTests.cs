@@ -244,6 +244,153 @@ public static class ServiceProviderTests {
 
 
     [Fact]
+    public static Task ServiceProviderGeneric() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            [ServiceProvider]
+            public sealed partial class TestProvider<T>;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ScopeProviderGeneric() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            [ServiceProvider]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope<T>;
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task InterfaceGeneric() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            [ServiceProvider<ITestProvider<int>>]
+            public sealed partial class TestProvider<T>;
+
+            public partial interface ITestProvider<T>;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task InterfaceScopeGeneric() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            [ServiceProvider<ITestProvider>]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope<T>;
+            }
+
+            public partial interface ITestProvider {
+                public partial interface IScope<T>;
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task AllGeneric() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            [ServiceProvider<ITestProvider<int>>]
+            public sealed partial class TestProvider<T1> {
+                public sealed partial class Scope<T2>;
+            }
+
+            public partial interface ITestProvider<T1> {
+                public partial interface IScope<T2>;
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+
+    [Fact]
     public static Task ServiceProviderInitServicesMethod() {
         const string input = """
             using CircleDIAttributes;

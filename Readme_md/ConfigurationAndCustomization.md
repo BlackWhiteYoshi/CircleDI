@@ -9,8 +9,8 @@
   - [Implementation Property](#implementation-property)
   - [Named Services](#named-services)
 - [Implicit Configurations](#implicit-configurations)
-  - [Name, Namespace, Modifiers and Containing Types](#name-namespace-modifiers-and-containing-types)
-  - [Interface name, namespace, access modifier and containing types](#interface-name-namespace-access-modifier-and-containing-types)
+  - [Name, Namespace, Modifiers, Containing Types and Generic](#name-namespace-modifiers-containing-types-and-generic)
+  - [Interface name, namespace, access modifier, containing types and generic](#interface-name-namespace-access-modifier-containing-types-and-generic)
   - [Overwriting default services](#overwriting-default-services)
   - [Custom Constructor](#custom-constructor)
   - [Custom Dispose](#custom-dispose)
@@ -282,9 +282,9 @@ public sealed class MyService([Dependency(Name = "Service")] IService firstServi
 
 
 <br></br>
-### Name, Namespace, Modifiers and Containing Types
+### Name, Namespace, Modifiers, Containing Types and Generic
 
-The class name, type, namespace and containing types are given with partial class under the [ServiceProviderAttribute](TypeTables.md#serviceproviderattribute).
+The class name, type, namespace, containing types and type parameters are given with partial class under the [ServiceProviderAttribute](TypeTables.md#serviceproviderattribute).
 The modifiers are also inferred from the class definition.
 
 ```csharp
@@ -292,7 +292,7 @@ namespace MySpace;
 
 public partial class Wrapper {
     [ServiceProvider]
-    internal sealed partial record class MyProvider;
+    internal sealed partial record class MyProvider<T>;
 }
 
 // generated ServiceProvider will have:
@@ -301,25 +301,30 @@ public partial class Wrapper {
 //   namespace: "MySpace"
 //   modifier: "internal", "sealed", "partial"
 //   containing types: "class Wrapper"
+//   type parameter: "T"
 ```
 
 
 <br></br>
-### Interface name, namespace, access modifier and containing types
+### Interface name, namespace, access modifier, containing types and generic
 
 When using [ServiceProviderAttribute&lt;TInterface&gt;](TypeTables.md#serviceproviderattributetinterface) the interface specified as type parameter is used for inferring the properties for the generated interface.
-The generated interface will have the same name, same access modifiers, will be in the same namespace and will be nested in the same types.
+The generated interface will have the same name, access modifiers, type parameters, will be in the same namespace and will be nested in the same types.  
+If the interface is generic, you must fill its type parameters with concrete types, because an unbound type is not allowed here.
+The concrete types have no effect.
 
 ```csharp
 namespace MySpace {
-    [ServiceProvider<Interface.IWrapper.IProvider>]
-    public sealed partial class MyProvider;
+    [ServiceProvider<Interface.IWrapper.IProvider<int>>]
+    public sealed partial class MyProvider<T> {
+        public sealed partial class Scope<U>;
+    }
 }
 
 namespace MySpace.Interface {
     public partial interface IWrapper {
-        internal partial interface IProvider {
-            public partial interface IScope;
+        internal partial interface IProvider<T> {
+            public partial interface IScope<U>;
         }
     }
 }
@@ -330,6 +335,7 @@ namespace MySpace.Interface {
 //   namespace: "MySpace.Interface"
 //   access modifier: "internal", Scope -> "public"
 //   containing types: "interface IWrapper"
+//   type parameter: "T", Scope -> "U"
 ```
 
 

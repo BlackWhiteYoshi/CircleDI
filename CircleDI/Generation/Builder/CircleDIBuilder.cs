@@ -85,6 +85,7 @@ public static class CircleDIBuilder {
         builder.Append(serviceProvider.Keyword.AsString());
         builder.Append(' ');
         builder.Append(serviceProvider.Identifier.Name);
+        builder.AppendTypeParameterList(serviceProvider.Identifier.TypeParameterList);
         builder.Append(" : ");
         if (serviceProvider.HasInterface) {
             builder.Append("global::");
@@ -106,6 +107,7 @@ public static class CircleDIBuilder {
             else
                 builder.AppendFullyQualifiedName(serviceProvider.IdentifierScope);
             builder.Append(" CreateScope");
+            builder.AppendTypeParameterList(serviceProvider.IdentifierScope.TypeParameterList);
             builderExtension.AppendParameterDependencyList(serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList));
             builder.Append(" => new global::");
             builder.AppendFullyQualifiedName(serviceProvider.IdentifierScope);
@@ -183,7 +185,9 @@ public static class CircleDIBuilder {
             }
             builder.Append("partial ");
             builder.Append(serviceProvider.KeywordScope.AsString());
-            builder.Append(" Scope : ");
+            builder.Append(" Scope");
+            builder.AppendTypeParameterList(serviceProvider.IdentifierScope.TypeParameterList);
+            builder.Append(" : ");
             if (serviceProvider.HasInterface) {
                 builder.Append("global::");
                 builder.AppendFullyQualifiedName(serviceProvider.InterfaceIdentifierScope);
@@ -303,6 +307,7 @@ public static class CircleDIBuilder {
         builder.Append(serviceProvider.InterfaceAccessibility.AsString());
         builder.Append("partial interface ");
         builder.Append(serviceProvider.InterfaceIdentifier.Name);
+        builder.AppendTypeParameterList(serviceProvider.InterfaceIdentifier.TypeParameterList);
         builder.Append(serviceProvider.GenerateDisposeMethods switch {
             DisposeGeneration.NoDisposing => string.Empty,
             DisposeGeneration.Dispose => " : IDisposable",
@@ -318,7 +323,9 @@ public static class CircleDIBuilder {
             builder.Append(builderExtension.indent.Sp4);
             builder.Append("global::");
             builder.AppendFullyQualifiedName(serviceProvider.InterfaceIdentifierScope);
-            builder.Append(" CreateScope(");
+            builder.Append(" CreateScope");
+            builder.AppendTypeParameterList(serviceProvider.IdentifierScope.TypeParameterList);
+            builder.Append('(');
             foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
                 if (!dependency.HasAttribute) {
                     builder.Append("global::");
@@ -370,6 +377,7 @@ public static class CircleDIBuilder {
             builder.Append(builderExtension.indent.Sp0);
             builder.Append(serviceProvider.InterfaceAccessibilityScope.AsString());
             builder.Append("partial interface IScope");
+            builder.AppendTypeParameterList(serviceProvider.InterfaceIdentifierScope.TypeParameterList);
             builder.Append(serviceProvider.GenerateDisposeMethodsScope switch {
                 DisposeGeneration.NoDisposing => string.Empty,
                 DisposeGeneration.Dispose => " : IDisposable",

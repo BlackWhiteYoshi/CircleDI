@@ -73,11 +73,59 @@ public static class StringBuilderExtensions {
 
         if (type.TypeParameterList.Count > 0) {
             builder.Append('<');
-            foreach (TypeName? typeParameter in type.TypeParameterList)
+            foreach (TypeName typeParameter in type.TypeParameterList)
                 if (typeParameter != null)
-                    builder.AppendFullyQualifiedName(typeParameter.Value);
+                    builder.AppendFullyQualifiedName(typeParameter);
             builder.Append('>');
         }
+    }
+
+    /// <summary>
+    /// <para>
+    /// Appends:<br />
+    /// "{name}&lt;{p1}, {p2}, ..., {pN}&gt;"
+    /// </para>
+    /// <para>If <see cref="ContainingType.TypeParameterList">TypeParameterList list</see> is empty, only "{name}" is appended.</para>
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="containingType"></param>
+    public static void AppendContainingType(this StringBuilder builder, ContainingType containingType) {
+        builder.Append(containingType.Name);
+
+        if (containingType.TypeParameterList.Count > 0) {
+            builder.Append('<');
+
+            builder.Append(containingType.TypeParameterList[0]);
+            for (int i = 1; i < containingType.TypeParameterList.Count; i++) {
+                builder.Append(", ");
+                builder.Append(containingType.TypeParameterList[i]);
+            }
+
+            builder.Append('>');
+        }
+    }
+
+    /// <summary>
+    /// <para>
+    /// Appends:<br />
+    /// "&lt;{p1}, {p2}, ..., {pN}&gt;"
+    /// </para>
+    /// <para>If list is empty, nothing is appended.</para>
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="typeParameterList"></param>
+    public static void AppendTypeParameterList(this StringBuilder builder, List<TypeName> typeParameterList) {
+        if (typeParameterList.Count == 0)
+            return;
+
+        builder.Append('<');
+        builder.AppendFullyQualifiedName(typeParameterList[0]);
+        for (int i = 1; i < typeParameterList.Count; i++) {
+            builder.Append(", ");
+            builder.AppendFullyQualifiedName(typeParameterList[i]);
+        }
+
+        builder.Append('>');
     }
 
     /// <summary>
@@ -94,21 +142,5 @@ public static class StringBuilderExtensions {
         }
         builder.Append(namespaceList[0]);
         builder.Append(';');
-    }
-
-    public static void AppendContainingType(this StringBuilder builder, ContainingType containingType) {
-        builder.Append(containingType.Name);
-
-        if (containingType.TypeParameterList.Count > 0) {
-            builder.Append('<');
-
-            builder.Append(containingType.TypeParameterList[0]);
-            for (int i = 1; i < containingType.TypeParameterList.Count; i++) {
-                builder.Append(", ");
-                builder.Append(containingType.TypeParameterList[i]);
-            }
-
-            builder.Append('>');
-        }
     }
 }
