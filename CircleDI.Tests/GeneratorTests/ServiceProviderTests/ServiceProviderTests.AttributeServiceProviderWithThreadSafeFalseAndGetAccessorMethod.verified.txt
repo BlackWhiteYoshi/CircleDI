@@ -72,10 +72,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     object? IServiceProvider.GetService(Type serviceType) {
         if (serviceType == typeof(global::MyCode.ISingleton))
             return GetSingleton();
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return GetSelf();
         if (serviceType == typeof(global::MyCode.ITransient))
             return GetTransient();
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return GetSelf();
         return null;
     }
 
@@ -171,16 +171,16 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return GetSelfScope();
             if (serviceType == typeof(global::MyCode.IScoped))
                 return GetScoped();
             if (serviceType == typeof(global::MyCode.ISingleton))
                 return GetSingleton();
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return GetSelf();
-            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
-                return GetSelfScope();
             if (serviceType == typeof(global::MyCode.ITransient))
                 return GetTransient();
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return GetSelf();
             return null;
         }
 

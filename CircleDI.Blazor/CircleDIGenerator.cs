@@ -98,8 +98,8 @@ file static class CircleDIGeneratorExtensions {
         // constructor parameter IServiceProvider
         ConstructorDependency constructorDependency = new() {
             Name = "builtinServiceProvider",
-            IsNamed = false,
-            ServiceIdentifier = "System.IServiceProvider",
+            ServiceName = string.Empty,
+            ServiceType = new TypeName("IServiceProvider", ["System"], [], []),
             HasAttribute = false,
             ByRef = RefKind.None
         };
@@ -110,30 +110,30 @@ file static class CircleDIGeneratorExtensions {
 
         // default services
         {
-            AddSingletonService(serviceProvider, "LoggerFactory", "GetLoggerFactory", "Microsoft.Extensions.Logging.ILoggerFactory");
-            AddScopedService(serviceProvider, "JSRuntime", "GetJSRuntime", "Microsoft.JSInterop.IJSRuntime");
-            AddScopedService(serviceProvider, "NavigationManager", "GetNavigationManager", "Microsoft.AspNetCore.Components.NavigationManager");
-            AddScopedService(serviceProvider, "NavigationInterception", "GetNavigationInterception", "Microsoft.AspNetCore.Components.Routing.INavigationInterception");
-            AddScopedService(serviceProvider, "ScrollToLocationHash", "GetScrollToLocationHash", "Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash");
-            AddScopedService(serviceProvider, "ErrorBoundaryLogger", "GetErrorBoundaryLogger", "Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger");
+            AddSingletonService(serviceProvider, "LoggerFactory", "GetLoggerFactory", new TypeName("ILoggerFactory", ["Logging", "Extensions", "Microsoft"], [], []));
+            AddScopedService(serviceProvider, "JSRuntime", "GetJSRuntime", new TypeName("IJSRuntime", ["JSInterop", "Microsoft"], [], []));
+            AddScopedService(serviceProvider, "NavigationManager", "GetNavigationManager", new TypeName("NavigationManager", ["Components", "AspNetCore", "Microsoft"], [], []));
+            AddScopedService(serviceProvider, "NavigationInterception", "GetNavigationInterception", new TypeName("INavigationInterception", ["Routing", "Components", "AspNetCore", "Microsoft"], [], []));
+            AddScopedService(serviceProvider, "ScrollToLocationHash", "GetScrollToLocationHash", new TypeName("IScrollToLocationHash", ["Routing", "Components", "AspNetCore", "Microsoft"], [], []));
+            AddScopedService(serviceProvider, "ErrorBoundaryLogger", "GetErrorBoundaryLogger", new TypeName("IErrorBoundaryLogger", ["Web", "Components", "AspNetCore", "Microsoft"], [], []));
             // when support for unbound/open generics
             // AddSingletonService(serviceProvider, "Logger", "GetLogger<T>", "Microsoft.Extensions.Logging.ILogger<>")
 
             if (!blazorServiceGeneration.HasFlag(BlazorServiceGeneration.Hybrid)) {
                 // server or webassembly
-                AddSingletonService(serviceProvider, "Configuration", "GetConfiguration", "Microsoft.Extensions.Configuration.IConfiguration");
-                AddScopedService(serviceProvider, "ComponentStatePersistenceManager", "GetComponentStatePersistenceManager", "Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager");
-                AddScopedService(serviceProvider, "PersistentComponentState", "GetPersistentComponentState", "Microsoft.AspNetCore.Components.PersistentComponentState");
-                AddScopedService(serviceProvider, "AntiforgeryStateProvider", "GetAntiforgeryStateProvider", "Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider");
+                AddSingletonService(serviceProvider, "Configuration", "GetConfiguration", new TypeName("IConfiguration", ["Configuration", "Extensions", "Microsoft"], [], []));
+                AddScopedService(serviceProvider, "ComponentStatePersistenceManager", "GetComponentStatePersistenceManager", new TypeName("ComponentStatePersistenceManager", ["Infrastructure", "Components", "AspNetCore", "Microsoft"], [], []));
+                AddScopedService(serviceProvider, "PersistentComponentState", "GetPersistentComponentState", new TypeName("PersistentComponentState", ["Components", "AspNetCore", "Microsoft"], [], []));
+                AddScopedService(serviceProvider, "AntiforgeryStateProvider", "GetAntiforgeryStateProvider", new TypeName("AntiforgeryStateProvider", ["Forms", "Components", "AspNetCore", "Microsoft"], [], []));
             }
 
             switch (blazorServiceGeneration) {
                 case BlazorServiceGeneration.Webassembly: // webassembly only
-                    AddSingletonService(serviceProvider, "LazyAssemblyLoader", "GetLazyAssemblyLoader", "Microsoft.AspNetCore.Components.WebAssembly.Services.LazyAssemblyLoader");
-                    AddSingletonService(serviceProvider, "WebAssemblyHostEnvironment", "GetWebAssemblyHostEnvironment", "Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment");
+                    AddSingletonService(serviceProvider, "LazyAssemblyLoader", "GetLazyAssemblyLoader", new TypeName("LazyAssemblyLoader", ["Services", "WebAssembly", "Components", "AspNetCore", "Microsoft"], [], []));
+                    AddSingletonService(serviceProvider, "WebAssemblyHostEnvironment", "GetWebAssemblyHostEnvironment", new TypeName("IWebAssemblyHostEnvironment", ["Hosting", "WebAssembly", "Components", "AspNetCore", "Microsoft"], [], []));
                     break;
                 case BlazorServiceGeneration.Server: // server only
-                    AddSingletonService(serviceProvider, "WebHostEnvironment", "GetWebHostEnvironment", "Microsoft.AspNetCore.Hosting.IWebHostEnvironment");
+                    AddSingletonService(serviceProvider, "WebHostEnvironment", "GetWebHostEnvironment", new TypeName("IWebHostEnvironment", ["Hosting", "AspNetCore", "Microsoft"], [], []));
                     break;
             }
         }
@@ -141,7 +141,7 @@ file static class CircleDIGeneratorExtensions {
         return (serviceProvider, blazorServiceGeneration, addRazorComponents);
 
 
-        static void AddSingletonService(ServiceProvider serviceProvider, string name, string methodName, string type) {
+        static void AddSingletonService(ServiceProvider serviceProvider, string name, string methodName, TypeName type) {
             if (!serviceProvider.SingletonList.Any((Service service) => service.ServiceType == type))
                 serviceProvider.SingletonList.Add(new Service() {
                     Name = name,
@@ -162,7 +162,7 @@ file static class CircleDIGeneratorExtensions {
 
         }
 
-        static void AddScopedService(ServiceProvider serviceProvider, string name, string methodName, string type) {
+        static void AddScopedService(ServiceProvider serviceProvider, string name, string methodName, TypeName type) {
             if (!serviceProvider.ScopedList.Any((Service service) => service.ServiceType == type))
                 serviceProvider.ScopedList.Add(new Service() {
                     Name = name,
@@ -344,22 +344,17 @@ file static class CircleDIGeneratorExtensions {
             if (component is null)
                 continue;
 
-            string serviceType = component.ToFullQualifiedName();
+            TypeName serviceType = new(component);
             if (serviceProvider.SingletonList.Concat(serviceProvider.ScopedList).Concat(serviceProvider.TransientList).Any((Service service) => service.ServiceType == serviceType))
                 continue;
 
 
-            List<ConstructorDependency> constructorDependencyList;
-            (IMethodSymbol? constructor, Diagnostic? constructorListError) = Service.FindConstructor(component, serviceProvider.Attribute);
-            if (constructor != null)
-                constructorDependencyList = constructor!.CreateConstructorDependencyList();
-            else {
-                constructorDependencyList = [];
-                serviceProvider.ErrorList.Add(constructorListError!);
-            }
+            (List<ConstructorDependency> constructorDependencyList, Diagnostic? constructorListError) = Service.CreateConstructorDependencyList(component, serviceProvider.Attribute);
+            if (constructorListError is not null)
+                serviceProvider.ErrorList.Add(constructorListError);
 
             (List<PropertyDependency> propertyDependencyList, Diagnostic? propertyListError) = Service.CreatePropertyDependencyList(component, serviceProvider.Attribute);
-            if (propertyListError != null)
+            if (propertyListError is not null)
                 serviceProvider.ErrorList.Add(propertyListError);
 
             serviceProvider.TransientList.Add(new Service() {

@@ -88,14 +88,14 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -108,14 +108,14 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service3",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service3"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -128,8 +128,8 @@ public static class DependencyTreeTests {
         Service service3 = new() {
             Name = "service3",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service3",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service3"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -152,17 +152,17 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [
                 new PropertyDependency() {
                     Name = "Service2",
-                    ServiceIdentifier = "Service2",
+                    ServiceType = new TypeName("Service2"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 }
             ],
@@ -173,17 +173,17 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [
                 new PropertyDependency() {
                     Name = "Service3",
-                    ServiceIdentifier = "Service3",
+                    ServiceType = new TypeName("Service3"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 }
             ],
@@ -194,8 +194,8 @@ public static class DependencyTreeTests {
         Service service3 = new() {
             Name = "service3",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service3",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service3"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -220,25 +220,25 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [
                 new PropertyDependency() {
                     Name = "Service2",
-                    ServiceIdentifier = "Service2",
+                    ServiceType = new TypeName("Service2"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 },
                 new PropertyDependency() {
                     Name = "Service3",
-                    ServiceIdentifier = "Service3",
+                    ServiceType = new TypeName("Service3"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 }
             ],
@@ -249,21 +249,21 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service4",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service4"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 },
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service5",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service5"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -276,25 +276,25 @@ public static class DependencyTreeTests {
         Service service3 = new() {
             Name = "service3",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service3",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service3"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [
                 new PropertyDependency() {
                     Name = "Service6",
-                    ServiceIdentifier = "Service6",
+                    ServiceType = new TypeName("Service6"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 },
                 new PropertyDependency() {
                     Name = "Service7",
-                    ServiceIdentifier = "Service7",
+                    ServiceType = new TypeName("Service7"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 }
             ],
@@ -305,8 +305,8 @@ public static class DependencyTreeTests {
         Service service4 = new() {
             Name = "service4",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service4",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service4"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -317,8 +317,8 @@ public static class DependencyTreeTests {
         Service service5 = new() {
             Name = "service5",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service5",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service5"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -329,8 +329,8 @@ public static class DependencyTreeTests {
         Service service6 = new() {
             Name = "service6",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service6",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service6"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -341,8 +341,8 @@ public static class DependencyTreeTests {
         Service service7 = new() {
             Name = "service7",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service7",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service7"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -371,21 +371,21 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 },
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -398,8 +398,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -422,21 +422,21 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 },
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service3",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service3"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -449,14 +449,14 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service3",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service3"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -469,8 +469,8 @@ public static class DependencyTreeTests {
         Service service3 = new() {
             Name = "service3",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service3",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service3"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -494,21 +494,21 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 },
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service3",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service3"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -521,14 +521,14 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service4",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service4"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -541,14 +541,14 @@ public static class DependencyTreeTests {
         Service service3 = new() {
             Name = "service3",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service3",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service3"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service4",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service4"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -561,8 +561,8 @@ public static class DependencyTreeTests {
         Service service4 = new() {
             Name = "service4",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service4",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service4"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -664,14 +664,14 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service3",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service3"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -684,14 +684,14 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service3",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service3"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -704,8 +704,8 @@ public static class DependencyTreeTests {
         Service service3 = new() {
             Name = "service3",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service3",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service3"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -728,14 +728,14 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service4",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service4"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -748,14 +748,14 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service3",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service3"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -768,14 +768,14 @@ public static class DependencyTreeTests {
         Service service3 = new() {
             Name = "service3",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service3",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service3"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service4",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service4"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -788,8 +788,8 @@ public static class DependencyTreeTests {
         Service service4 = new() {
             Name = "service4",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service4",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service4"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -818,8 +818,8 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -830,8 +830,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -853,14 +853,14 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service4",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service4"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -873,14 +873,14 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service3",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service3"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -893,14 +893,14 @@ public static class DependencyTreeTests {
         Service service3 = new() {
             Name = "service3",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service3",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service3"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service4",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service4"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -913,8 +913,8 @@ public static class DependencyTreeTests {
         Service service4 = new() {
             Name = "service4",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service4",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service4"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -925,17 +925,17 @@ public static class DependencyTreeTests {
         Service service5 = new() {
             Name = "service5",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service5",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service5"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [
                 new PropertyDependency() {
                     Name = "Service6",
-                    ServiceIdentifier = "Service6",
+                    ServiceType = new TypeName("Service6"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 }
             ],
@@ -946,8 +946,8 @@ public static class DependencyTreeTests {
         Service service6 = new() {
             Name = "service6",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service6",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service6"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -977,17 +977,17 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [
                 new PropertyDependency() {
                     Name = "Service2",
-                    ServiceIdentifier = "Service2",
+                    ServiceType = new TypeName("Service2"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 }
             ],
@@ -998,17 +998,17 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [
                 new PropertyDependency() {
                     Name = "Service1",
-                    ServiceIdentifier = "Service1",
+                    ServiceType = new TypeName("Service1"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 }
             ],
@@ -1032,17 +1032,17 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [
                 new PropertyDependency() {
                     Name = "Service1",
-                    ServiceIdentifier = "Service1",
+                    ServiceType = new TypeName("Service1"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 }
             ],
@@ -1065,14 +1065,14 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None,
                 }
@@ -1085,17 +1085,17 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [
                 new PropertyDependency() {
                     Name = "Service1",
-                    ServiceIdentifier = "Service1",
+                    ServiceType = new TypeName("Service1"),
                     IsRequired = true,
                     IsInit = true,
-                    IsNamed = false,
+                    ServiceName = string.Empty,
                     HasAttribute = false
                 }
             ],
@@ -1146,14 +1146,14 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -1166,8 +1166,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Transient,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -1190,14 +1190,14 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Scoped,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -1210,8 +1210,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -1233,14 +1233,14 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Scoped,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -1253,8 +1253,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Transient,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -1277,14 +1277,14 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Transient,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -1297,8 +1297,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -1321,14 +1321,14 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Transient,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -1341,8 +1341,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Scoped,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -1448,16 +1448,16 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             CreationTime = CreationTiming.Constructor,
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -1470,8 +1470,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             CreationTime = CreationTiming.Constructor,
 
@@ -1495,8 +1495,8 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             CreationTime = CreationTiming.Constructor,
             CreationTimeTransitive = CreationTiming.Constructor,
@@ -1504,8 +1504,8 @@ public static class DependencyTreeTests {
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -1518,8 +1518,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             CreationTime = CreationTiming.Lazy,
             CreationTimeTransitive = CreationTiming.Lazy,
@@ -1545,16 +1545,16 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             CreationTime = CreationTiming.Lazy,
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -1567,8 +1567,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             CreationTime = CreationTiming.Constructor,
 
@@ -1592,16 +1592,16 @@ public static class DependencyTreeTests {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service1",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service1"),
 
             CreationTime = CreationTiming.Lazy,
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
                     Name = string.Empty,
-                    ServiceIdentifier = "Service2",
-                    IsNamed = false,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
                     HasAttribute = false,
                     ByRef = RefKind.None
                 }
@@ -1614,8 +1614,8 @@ public static class DependencyTreeTests {
         Service service2 = new() {
             Name = "service2",
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = string.Empty,
-            ServiceType = "Service2",
+            ImplementationType = default,
+            ServiceType = new TypeName("Service2"),
 
             CreationTime = CreationTiming.Lazy,
 

@@ -125,10 +125,10 @@ public sealed partial class MyProvider : global::MySpace.Interface.IWrapper.IPro
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MySpace.Interface.IWrapper.IProvider))
-                return Self;
             if (serviceType == typeof(global::MySpace.Interface.IWrapper.IProvider.IScope))
                 return SelfScope;
+            if (serviceType == typeof(global::MySpace.Interface.IWrapper.IProvider))
+                return Self;
             return null;
         }
 
@@ -207,18 +207,18 @@ partial interface IWrapper {
         /// </summary>
         public partial interface IScope : IDisposable, IAsyncDisposable {
             /// <summary>
-            /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-            /// Service type: <see cref="global::MySpace.Interface.IWrapper.IProvider"/><br />
-            /// Implementation type: <see cref="global::MySpace.MyProvider"/>
-            /// </summary>
-            global::MySpace.Interface.IWrapper.IProvider Self { get; }
-
-            /// <summary>
             /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
             /// Service type: <see cref="global::MySpace.Interface.IWrapper.IProvider.IScope"/><br />
             /// Implementation type: <see cref="global::MySpace.MyProvider.Scope"/>
             /// </summary>
             global::MySpace.Interface.IWrapper.IProvider.IScope SelfScope { get; }
+
+            /// <summary>
+            /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+            /// Service type: <see cref="global::MySpace.Interface.IWrapper.IProvider"/><br />
+            /// Implementation type: <see cref="global::MySpace.MyProvider"/>
+            /// </summary>
+            global::MySpace.Interface.IWrapper.IProvider Self { get; }
         }
     }
 }

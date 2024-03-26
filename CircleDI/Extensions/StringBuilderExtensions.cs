@@ -55,7 +55,7 @@ public static class StringBuilderExtensions {
 
     /// <summary>
     /// Appends the fully qualified name:<br />
-    /// <see cref="TypeName.NameSpaceList">NameSpaceList</see>.<see cref="TypeName.ContainingTypeList">ContainingTypeList</see>.<see cref="TypeName.Name">Name</see>&lt;<see cref="TypeName.TypeParameterList">TypeParameterList</see>&gt;
+    /// <see cref="TypeName.NameSpaceList">NameSpaceList</see>.<see cref="TypeName.ContainingTypeList">ContainingTypeList</see>.<see cref="TypeName.Name">Name</see>&lt;<see cref="TypeName.TypeArgumentList">TypeParameterList</see>&gt;
     /// </summary>
     /// <param name="builder"></param>
     public static void AppendFullyQualifiedName(this StringBuilder builder, TypeName type) {
@@ -71,13 +71,7 @@ public static class StringBuilderExtensions {
 
         builder.Append(type.Name);
 
-        if (type.TypeParameterList.Count > 0) {
-            builder.Append('<');
-            foreach (TypeName typeParameter in type.TypeParameterList)
-                if (typeParameter != null)
-                    builder.AppendFullyQualifiedName(typeParameter);
-            builder.Append('>');
-        }
+        builder.AppendTypeParameterList(type.TypeArgumentList);
     }
 
     /// <summary>
@@ -114,15 +108,22 @@ public static class StringBuilderExtensions {
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="typeParameterList"></param>
-    public static void AppendTypeParameterList(this StringBuilder builder, List<TypeName> typeParameterList) {
+    public static void AppendTypeParameterList(this StringBuilder builder, List<(TypeName typeArgument, bool isClosed)> typeParameterList) {
         if (typeParameterList.Count == 0)
             return;
 
         builder.Append('<');
-        builder.AppendFullyQualifiedName(typeParameterList[0]);
+
+        if (typeParameterList[0].isClosed)
+            builder.Append("global::");
+        builder.AppendFullyQualifiedName(typeParameterList[0].typeArgument);
+
         for (int i = 1; i < typeParameterList.Count; i++) {
             builder.Append(", ");
-            builder.AppendFullyQualifiedName(typeParameterList[i]);
+
+            if (typeParameterList[i].isClosed)
+                builder.Append("global::");
+            builder.AppendFullyQualifiedName(typeParameterList[i].typeArgument);
         }
 
         builder.Append('>');

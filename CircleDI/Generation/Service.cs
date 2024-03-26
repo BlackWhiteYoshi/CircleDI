@@ -21,7 +21,7 @@ public sealed class Service : IEquatable<Service> {
     /// <para>The type of the service to interact with. Often it is an interface.</para>
     /// <para>If only 1 TypeArgument in the register attribute is present, then ServiceType and ImplementationType is the same.</para>
     /// </summary>
-    public required string ServiceType { get; init; }
+    public required TypeName ServiceType { get; init; }
 
     /// <summary>
     /// Is true, when service is singleton/scoped and service and implementation are the same and they are a struct, record struct or native/built-in type.<br />
@@ -33,7 +33,7 @@ public sealed class Service : IEquatable<Service> {
     /// <para>The type of the actual object that will be instatiated.</para>
     /// <para>If only 1 TypeArgument in the register attribute is present, then ServiceType and ImplementationType is the same.</para>
     /// </summary>
-    public required string ImplementationType { get; init; }
+    public required TypeName ImplementationType { get; init; }
 
     /// <summary>
     /// <para>Information about a custom implementation for retrieving an object for the Service.</para>
@@ -153,9 +153,9 @@ public sealed class Service : IEquatable<Service> {
         };
         
         Lifetime = lifetime;
-        ServiceType = serviceType.ToFullQualifiedName();
+        ServiceType = new TypeName(serviceType);
         IsRefable = lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped && serviceType.IsValueType && SymbolEqualityComparer.Default.Equals(serviceType, implementationType);
-        ImplementationType = implementationType.ToFullQualifiedName();
+        ImplementationType = new TypeName(implementationType);
 
         Name = implementationType.Name;
         CreationTime = creationTimeProvider;
@@ -175,19 +175,15 @@ public sealed class Service : IEquatable<Service> {
         CreationTimeTransitive = CreationTime;
 
         // Implementation, ConstructorDependencyList, PropertyDependencyList
-        if (implementationName == null) {
+        if (implementationName is null) {
             Implementation = default;
             
-            (IMethodSymbol? constructor, Diagnostic? constructorListError) = FindConstructor(implementationType, attributeData);
-            if (constructor != null)
-                ConstructorDependencyList = constructor!.CreateConstructorDependencyList();
-            else {
-                ConstructorDependencyList = [];
-                ErrorList.Add(constructorListError!);
-            }
+            (ConstructorDependencyList, Diagnostic? constructorListError) = CreateConstructorDependencyList(implementationType, attributeData);            
+            if (constructorListError is not null)
+                ErrorList.Add(constructorListError);
 
             (PropertyDependencyList, Diagnostic? propertyListError) = CreatePropertyDependencyList(implementationType, attributeData);
-            if (propertyListError != null)
+            if (propertyListError is not null)
                 ErrorList.Add(propertyListError);
         }
         else {
@@ -297,7 +293,7 @@ public sealed class Service : IEquatable<Service> {
         INamedTypeSymbol attribute = attributeData.AttributeClass!;
         INamedTypeSymbol serviceType = (INamedTypeSymbol)attribute.TypeArguments[0];
 
-        ServiceType = serviceType.ToFullQualifiedName();
+        ServiceType = new TypeName(serviceType);
         ImplementationType = ServiceType;
 
         Name = attributeData.NamedArguments.GetArgument<string>("Name") ?? serviceType.Name.Replace(".", "");
@@ -314,7 +310,7 @@ public sealed class Service : IEquatable<Service> {
 
 
         // check serviceType is delegate
-        if (serviceType.DelegateInvokeMethod == null) {
+        if (serviceType.DelegateInvokeMethod is null) {
             ErrorList.Add(attributeData.CreateDelegateServiceIsNotDelegateError(ServiceType));
             return;
         }
@@ -356,7 +352,7 @@ public sealed class Service : IEquatable<Service> {
     /// <param name="implementation"></param>
     /// <param name="attributeData"></param>
     /// <returns></returns>
-    public static (IMethodSymbol? constructor, Diagnostic? error) FindConstructor(INamedTypeSymbol implementation, AttributeData attributeData) {
+    private static (IMethodSymbol? constructor, Diagnostic? error) FindConstructor(INamedTypeSymbol implementation, AttributeData attributeData) {
         switch (implementation.InstanceConstructors.Length) {
             case 0:
                 return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
@@ -375,8 +371,8 @@ public sealed class Service : IEquatable<Service> {
                     availableConstructors++;
                     lastAvailableConstructor = ctor;
 
-                    if (ctor.GetAttribute("ConstructorAttribute") != null)
-                        if (attributeConstructor == null)
+                    if (ctor.GetAttribute("ConstructorAttribute") is not null)
+                        if (attributeConstructor is null)
                             attributeConstructor = ctor;
                         else {
                             AttributeData firstAttribute = attributeConstructor.GetAttribute("ConstructorAttribute")!;
@@ -391,7 +387,7 @@ public sealed class Service : IEquatable<Service> {
                     case 1:
                         return (lastAvailableConstructor, null);
                     default:
-                        if (attributeConstructor == null)
+                        if (attributeConstructor is null)
                             return (null, attributeData.CreateMissingConstructorAttributesError(implementation, implementation.ToDisplayString()));
                         else
                             return (attributeConstructor, null);
@@ -399,6 +395,20 @@ public sealed class Service : IEquatable<Service> {
         }
     }
 
+    /// <summary>
+    /// <para>First <see cref="FindConstructor(INamedTypeSymbol, AttributeData)">finds the constructor</see> and if found, <see cref="Extensions.SyntaxNodeExtensions.CreateConstructorDependencyList(IMethodSymbol)">creates the constructor dependency list.</see></para>
+    /// <para>If no constructor found or an invalid constructor dependency was found, an empty list and an error is returned.</para>
+    /// </summary>
+    /// <param name="implementation"></param>
+    /// <param name="attributeData"></param>
+    /// <returns></returns>
+    public static (List<ConstructorDependency> constructorDependencyList, Diagnostic? error) CreateConstructorDependencyList(INamedTypeSymbol implementation, AttributeData attributeData) {
+        (IMethodSymbol? constructor, Diagnostic? constructorListError) = FindConstructor(implementation, attributeData);
+        if (constructor is not null)
+            return (constructor.CreateConstructorDependencyList(), null);
+        else
+            return ([], constructorListError);
+    }
 
     /// <summary>
     /// Creates the PropertyDependencyList based on the given class/implementation.<br />
@@ -416,31 +426,34 @@ public sealed class Service : IEquatable<Service> {
                 if (member is not IPropertySymbol { Name.Length: > 0 } property)
                     continue;
 
-                bool isNamed;
-                string serviceIdentifier;
+                string serviceName;
+                TypeName serviceType;
                 bool hasAttribute;
                 if (property.GetAttribute("DependencyAttribute") is AttributeData propertyAttribute) {
-                    if (property.SetMethod == null)
+                    if (property.Type is not INamedTypeSymbol namedType)
+                        continue;
+                    if (property.SetMethod is null)
                         return ([], attributeData.CreateMissingSetAccessorError(property, baseType, property.ToDisplayString()));
 
                     if (propertyAttribute.NamedArguments.GetArgument<string>("Name") is string dependencyName) {
-                        isNamed = true;
-                        serviceIdentifier = dependencyName;
+                        serviceName = dependencyName;
+                        serviceType = default;
                         hasAttribute = true;
                     }
                     else {
-                        isNamed = false;
-                        serviceIdentifier = property.Type.ToFullQualifiedName();
+                        serviceName = string.Empty;
+                        serviceType = new TypeName(namedType);
                         hasAttribute = true;
                     }
                 }
                 else if (property.IsRequired) {
-                    if (property.SetMethod == null)
-                        // natuaral syntax error when required and no setMethod
+                    if (property.Type is not INamedTypeSymbol namedType)
                         continue;
+                    if (property.SetMethod is null)
+                        return ([], attributeData.CreateMissingSetAccessorError(property, baseType, property.ToDisplayString()));
 
-                    isNamed = false;
-                    serviceIdentifier = property.Type.ToFullQualifiedName();
+                    serviceName = string.Empty;
+                    serviceType = new TypeName(namedType);
                     hasAttribute = false;
                 }
                 else
@@ -448,8 +461,8 @@ public sealed class Service : IEquatable<Service> {
 
                 propertyDependencyList.Add(new PropertyDependency() {
                     Name = property.Name,
-                    IsNamed = isNamed,
-                    ServiceIdentifier = serviceIdentifier,
+                    ServiceName = serviceName,
+                    ServiceType = serviceType,
                     HasAttribute = hasAttribute,
                     IsInit = property.SetMethod.IsInitOnly,
                     IsRequired = property.IsRequired,

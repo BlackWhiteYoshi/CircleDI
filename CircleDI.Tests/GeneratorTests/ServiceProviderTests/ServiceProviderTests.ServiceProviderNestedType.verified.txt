@@ -126,10 +126,10 @@ partial class Wrapper {
             /// </para>
             /// </summary>
             object? IServiceProvider.GetService(Type serviceType) {
-                if (serviceType == typeof(global::MyCode.Wrapper.ITestProvider))
-                    return Self;
                 if (serviceType == typeof(global::MyCode.Wrapper.ITestProvider.IScope))
                     return SelfScope;
+                if (serviceType == typeof(global::MyCode.Wrapper.ITestProvider))
+                    return Self;
                 return null;
             }
 
@@ -209,18 +209,18 @@ partial class Wrapper {
         /// </summary>
         public partial interface IScope : IDisposable, IAsyncDisposable {
             /// <summary>
-            /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-            /// Service type: <see cref="global::MyCode.Wrapper.ITestProvider"/><br />
-            /// Implementation type: <see cref="global::MyCode.Wrapper.TestProvider"/>
-            /// </summary>
-            global::MyCode.Wrapper.ITestProvider Self { get; }
-
-            /// <summary>
             /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
             /// Service type: <see cref="global::MyCode.Wrapper.ITestProvider.IScope"/><br />
             /// Implementation type: <see cref="global::MyCode.Wrapper.TestProvider.Scope"/>
             /// </summary>
             global::MyCode.Wrapper.ITestProvider.IScope SelfScope { get; }
+
+            /// <summary>
+            /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+            /// Service type: <see cref="global::MyCode.Wrapper.ITestProvider"/><br />
+            /// Implementation type: <see cref="global::MyCode.Wrapper.TestProvider"/>
+            /// </summary>
+            global::MyCode.Wrapper.ITestProvider Self { get; }
         }
     }
 }

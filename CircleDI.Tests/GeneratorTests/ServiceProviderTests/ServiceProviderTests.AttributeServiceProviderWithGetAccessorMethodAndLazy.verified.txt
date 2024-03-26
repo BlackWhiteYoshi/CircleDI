@@ -41,9 +41,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.Singleton"/>
     /// </summary>
     public global::MyCode.ISingleton GetSingleton() {
-        if (_singleton == null)
+        if (_singleton is null)
             lock (this)
-                if (_singleton == null) {
+                if (_singleton is null) {
                     _singleton = new global::MyCode.Singleton();
                 }
 
@@ -79,10 +79,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     object? IServiceProvider.GetService(Type serviceType) {
         if (serviceType == typeof(global::MyCode.ISingleton))
             return GetSingleton();
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return GetSelf();
         if (serviceType == typeof(global::MyCode.ITransient))
             return GetTransient();
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return GetSelf();
         return null;
     }
 
@@ -133,9 +133,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Implementation type: <see cref="global::MyCode.Scoped"/>
         /// </summary>
         public global::MyCode.IScoped GetScoped() {
-            if (_scoped == null)
+            if (_scoped is null)
                 lock (this)
-                    if (_scoped == null) {
+                    if (_scoped is null) {
                         _scoped = new global::MyCode.Scoped();
                     }
 
@@ -184,16 +184,16 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return GetSelfScope();
             if (serviceType == typeof(global::MyCode.IScoped))
                 return GetScoped();
             if (serviceType == typeof(global::MyCode.ISingleton))
                 return GetSingleton();
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return GetSelf();
-            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
-                return GetSelfScope();
             if (serviceType == typeof(global::MyCode.ITransient))
                 return GetTransient();
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return GetSelf();
             return null;
         }
 

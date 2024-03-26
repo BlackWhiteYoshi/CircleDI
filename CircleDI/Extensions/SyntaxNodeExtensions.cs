@@ -91,7 +91,7 @@ public static class SyntaxNodeExtensions {
         List<ContainingType> typeList = [];
 
         INamedTypeSymbol containingtypeSymbol = typeSymbol.ContainingType;
-        while (containingtypeSymbol != null) {
+        while (containingtypeSymbol is not null) {
             typeList.Add(new ContainingType(containingtypeSymbol));
             containingtypeSymbol = containingtypeSymbol.ContainingType;
         }
@@ -118,65 +118,36 @@ public static class SyntaxNodeExtensions {
                 if (attributeData.NamedArguments.GetArgument<string>("Name") is string dependencyName)
                     result.Add(new ConstructorDependency() {
                         Name = parameter.Name,
-                        IsNamed = true,
-                        ServiceIdentifier = dependencyName,
+                        ServiceName = dependencyName,
+                        ServiceType = default,
                         HasAttribute = true,
                         ByRef = parameter.RefKind
                     });
-                else
+                else {
+                    if (parameter.Type is not INamedTypeSymbol namedType)
+                        continue;
+
                     result.Add(new ConstructorDependency() {
                         Name = parameter.Name,
-                        IsNamed = false,
-                        ServiceIdentifier = parameter.Type.ToFullQualifiedName(),
+                        ServiceName = string.Empty,
+                        ServiceType = new TypeName(namedType),
                         HasAttribute = true,
                         ByRef = parameter.RefKind
                     });
-            else
+                }
+            else {
+                if (parameter.Type is not INamedTypeSymbol namedType)
+                    continue;
+
                 result.Add(new ConstructorDependency() {
                     Name = parameter.Name,
-                    IsNamed = false,
-                    ServiceIdentifier = parameter.Type.ToFullQualifiedName(),
+                    ServiceName = string.Empty,
+                    ServiceType = new TypeName(namedType),
                     HasAttribute = false,
                     ByRef = parameter.RefKind
                 });
+            }
 
         return result;
-    }
-
-    /// <summary>
-    /// <para>
-    /// It executes <see cref="ISymbol.ToDisplayString(SymbolDisplayFormat?)"/> and then maps built-in types from '<i>C# type keyword</i>' to '<i>.NET type</i>'<br />
-    /// e.g. string -> System.String
-    /// </para>
-    /// <para>If it is not a '<i>C# type keyword</i>', it just returns the output of <see cref="ISymbol.ToDisplayString(SymbolDisplayFormat?)"/>.</para>
-    /// </summary>
-    /// <param name="typeSymbol"
-    /// <returns></returns>
-    public static string ToFullQualifiedName(this ITypeSymbol typeSymbol) {
-        string type = typeSymbol.ToDisplayString();
-
-        return type switch {
-            "bool" => "System.Boolean",
-            "byte" => "System.Byte",
-            "sbyte" => "System.SByte",
-            "char" => "System.Char",
-            "decimal" => "System.Decimal",
-            "double" => "System.Double",
-            "float" => "System.Single",
-            "int" => "System.Int32",
-            "uint" => "System.UInt32",
-            "nint" => "System.IntPtr",
-            "nuint" => "System.UIntPtr",
-            "long" => "System.Int64",
-            "ulong" => "System.UInt64",
-            "short" => "System.Int16",
-            "ushort" => "System.UInt16",
-
-            "object" => "System.Object",
-            "string" => "System.String",
-            "dynamic" => "System.Object",
-
-            _ => type
-        };
     }
 }

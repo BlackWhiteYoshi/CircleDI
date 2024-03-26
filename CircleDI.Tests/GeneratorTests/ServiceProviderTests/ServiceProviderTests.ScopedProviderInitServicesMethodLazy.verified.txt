@@ -110,9 +110,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.IScoped Scoped {
             get {
-                if (_scoped == null)
+                if (_scoped is null)
                     lock (this)
-                        if (_scoped == null) {
+                        if (_scoped is null) {
                             _scoped = new global::MyCode.Scoped();
                         }
 
@@ -128,9 +128,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.Scoped2 Scoped2 {
             get {
-                if (_scoped2 == null)
+                if (_scoped2 is null)
                     lock (this)
-                        if (_scoped2 == null) {
+                        if (_scoped2 is null) {
                             _scoped2 = new global::MyCode.Scoped2();
                         }
 
@@ -165,14 +165,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.IScoped))
-                return Scoped;
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
             if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                 return SelfScope;
+            if (serviceType == typeof(global::MyCode.IScoped))
+                return Scoped;
             if (serviceType == typeof(global::MyCode.Scoped2))
                 return Scoped2;
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
             return null;
         }
 

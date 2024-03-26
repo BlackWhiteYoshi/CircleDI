@@ -133,12 +133,12 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
             if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                 return SelfScope;
             if (serviceType == typeof(global::MyCode.TestDelegate))
                 return TestDelegate;
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
             return null;
         }
 
@@ -216,13 +216,6 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     /// </summary>
     public partial interface IScope : IDisposable, IAsyncDisposable {
         /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-        /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestProvider"/>
-        /// </summary>
-        global::MyCode.ITestProvider Self { get; }
-
-        /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
         /// Implementation type: <see cref="global::MyCode.TestProvider.Scope"/>
@@ -235,5 +228,12 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
         /// Implementation type: <see cref="global::MyCode.TestDelegate"/>
         /// </summary>
         global::MyCode.TestDelegate TestDelegate { get; }
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+        /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestProvider"/>
+        /// </summary>
+        global::MyCode.ITestProvider Self { get; }
     }
 }

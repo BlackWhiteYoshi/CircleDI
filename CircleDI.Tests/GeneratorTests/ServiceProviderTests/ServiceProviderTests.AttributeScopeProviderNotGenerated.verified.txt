@@ -66,10 +66,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     object? IServiceProvider.GetService(Type serviceType) {
         if (serviceType == typeof(global::MyCode.ISingleton))
             return Singleton;
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
         if (serviceType == typeof(global::MyCode.ITransient))
             return Transient;
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
         return null;
     }
 
@@ -125,16 +125,16 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     global::MyCode.ISingleton Singleton { get; }
 
     /// <summary>
-    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
-    /// Implementation type: <see cref="global::MyCode.TestProvider"/>
-    /// </summary>
-    global::MyCode.ITestProvider Self { get; }
-
-    /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITransient"/><br />
     /// Implementation type: <see cref="global::MyCode.Transient"/>
     /// </summary>
     global::MyCode.ITransient Transient { get; }
+
+    /// <summary>
+    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+    /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestProvider"/>
+    /// </summary>
+    global::MyCode.ITestProvider Self { get; }
 }

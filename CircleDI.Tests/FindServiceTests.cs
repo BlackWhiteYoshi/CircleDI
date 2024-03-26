@@ -9,9 +9,9 @@ namespace CircleDI.Tests;
 public static class FindServiceTests {
     private static ServiceProvider CreateProvider(string[] serviceTypeList) {
         List<Service> serviceList = serviceTypeList.Select((string serviceType) => new Service() {
-            ServiceType = serviceType,
+            ServiceType = new TypeName(serviceType),
             Name = string.Empty,
-            ImplementationType = string.Empty,
+            ImplementationType = default,
             Lifetime = ServiceLifetime.Singleton,
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -37,7 +37,7 @@ public static class FindServiceTests {
     public static void NotFound() {
         ServiceProvider serviceProvider = CreateProvider(["test1, test2, test3"]);
 
-        (int index, int count) = serviceProvider.FindService("notPresent");
+        (int index, int count) = serviceProvider.FindService(new TypeName("notPresent"));
         
         Assert.Equal(-1, index);
         Assert.Equal(0, count);
@@ -47,7 +47,7 @@ public static class FindServiceTests {
     public static void Empty() {
         ServiceProvider serviceProvider = CreateProvider([]);
 
-        (int index, int count) = serviceProvider.FindService("notPresent");
+        (int index, int count) = serviceProvider.FindService(new TypeName("notPresent"));
 
         Assert.Equal(-1, index);
         Assert.Equal(0, count);
@@ -57,7 +57,7 @@ public static class FindServiceTests {
     public static void OneElement() {
         ServiceProvider serviceProvider = CreateProvider(["test1"]);
 
-        (int index, int count) = serviceProvider.FindService("test1");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test1"));
 
         Assert.Equal(0, index);
         Assert.Equal(1, count);
@@ -68,7 +68,7 @@ public static class FindServiceTests {
     public static void TwoElements_FindFirst() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2"]);
 
-        (int index, int count) = serviceProvider.FindService("test1");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test1"));
 
         Assert.Equal(0, index);
         Assert.Equal(1, count);
@@ -78,7 +78,7 @@ public static class FindServiceTests {
     public static void TwoElements_FindSecond() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2"]);
 
-        (int index, int count) = serviceProvider.FindService("test2");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test2"));
 
         Assert.Equal(1, index);
         Assert.Equal(1, count);
@@ -88,7 +88,7 @@ public static class FindServiceTests {
     public static void TwoElements_BothEqual() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test1"]);
 
-        (int index, int count) = serviceProvider.FindService("test1");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test1"));
 
         Assert.Equal(0, index);
         Assert.Equal(2, count);
@@ -99,7 +99,7 @@ public static class FindServiceTests {
     public static void ThreeElements_FindFirst() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
-        (int index, int count) = serviceProvider.FindService("test1");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test1"));
 
         Assert.Equal(0, index);
         Assert.Equal(1, count);
@@ -109,7 +109,7 @@ public static class FindServiceTests {
     public static void ThreeElements_FindSecond() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
-        (int index, int count) = serviceProvider.FindService("test2");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test2"));
 
         Assert.Equal(1, index);
         Assert.Equal(1, count);
@@ -119,7 +119,7 @@ public static class FindServiceTests {
     public static void ThreeElements_FindThird() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
-        (int index, int count) = serviceProvider.FindService("test3");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test3"));
 
         Assert.Equal(2, index);
         Assert.Equal(1, count);
@@ -129,7 +129,7 @@ public static class FindServiceTests {
     public static void ThreeElements_FindFirst2() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test1", "test3"]);
 
-        (int index, int count) = serviceProvider.FindService("test1");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test1"));
 
         Assert.Equal(0, index);
         Assert.Equal(2, count);
@@ -139,7 +139,7 @@ public static class FindServiceTests {
     public static void ThreeElements_FindLast2() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test2"]);
 
-        (int index, int count) = serviceProvider.FindService("test2");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test2"));
 
         Assert.Equal(1, index);
         Assert.Equal(2, count);
@@ -149,7 +149,7 @@ public static class FindServiceTests {
     public static void ThreeElements_FindAll3() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test1", "test1"]);
 
-        (int index, int count) = serviceProvider.FindService("test1");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test1"));
 
         Assert.Equal(0, index);
         Assert.Equal(3, count);
@@ -181,7 +181,7 @@ public static class FindServiceTests {
             "test20"
         ]);
 
-        (int index, int count) = serviceProvider.FindService("test07");
+        (int index, int count) = serviceProvider.FindService(new TypeName("test07"));
 
         Assert.Equal(3, index);
         Assert.Equal(4, count);

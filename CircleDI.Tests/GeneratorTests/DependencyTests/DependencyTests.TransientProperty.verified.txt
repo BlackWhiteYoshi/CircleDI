@@ -70,12 +70,12 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::MyCode.ITestDependency))
-            return TestDependency;
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
         if (serviceType == typeof(global::MyCode.ITestService))
             return TestService;
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
+        if (serviceType == typeof(global::MyCode.ITestDependency))
+            return TestDependency;
         return null;
     }
 
@@ -163,14 +163,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.ITestDependency))
-                return TestDependency;
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
             if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                 return SelfScope;
             if (serviceType == typeof(global::MyCode.ITestService))
                 return TestService;
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
+            if (serviceType == typeof(global::MyCode.ITestDependency))
+                return TestDependency;
             return null;
         }
 

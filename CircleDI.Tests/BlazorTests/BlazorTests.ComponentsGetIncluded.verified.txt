@@ -91,16 +91,16 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::Microsoft.Extensions.Configuration.IConfiguration))
-            return Configuration;
-        if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILoggerFactory))
-            return LoggerFactory;
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
         if (serviceType == typeof(global::MyCode.MyComponent))
             return MyComponent;
         if (serviceType == typeof(global::MyCode.MyComponent2))
             return MyComponent2;
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
+        if (serviceType == typeof(global::Microsoft.Extensions.Configuration.IConfiguration))
+            return Configuration;
+        if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILoggerFactory))
+            return LoggerFactory;
         return null;
     }
 
@@ -161,9 +161,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.JSInterop.IJSRuntime JSRuntime {
             get {
-                if (_jSRuntime == null)
+                if (_jSRuntime is null)
                     lock (this)
-                        if (_jSRuntime == null) {
+                        if (_jSRuntime is null) {
                             _jSRuntime = GetJSRuntime();
                         }
 
@@ -179,9 +179,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.NavigationManager NavigationManager {
             get {
-                if (_navigationManager == null)
+                if (_navigationManager is null)
                     lock (this)
-                        if (_navigationManager == null) {
+                        if (_navigationManager is null) {
                             _navigationManager = GetNavigationManager();
                         }
 
@@ -197,9 +197,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.Routing.INavigationInterception NavigationInterception {
             get {
-                if (_navigationInterception == null)
+                if (_navigationInterception is null)
                     lock (this)
-                        if (_navigationInterception == null) {
+                        if (_navigationInterception is null) {
                             _navigationInterception = GetNavigationInterception();
                         }
 
@@ -215,9 +215,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash ScrollToLocationHash {
             get {
-                if (_scrollToLocationHash == null)
+                if (_scrollToLocationHash is null)
                     lock (this)
-                        if (_scrollToLocationHash == null) {
+                        if (_scrollToLocationHash is null) {
                             _scrollToLocationHash = GetScrollToLocationHash();
                         }
 
@@ -233,9 +233,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger ErrorBoundaryLogger {
             get {
-                if (_errorBoundaryLogger == null)
+                if (_errorBoundaryLogger is null)
                     lock (this)
-                        if (_errorBoundaryLogger == null) {
+                        if (_errorBoundaryLogger is null) {
                             _errorBoundaryLogger = GetErrorBoundaryLogger();
                         }
 
@@ -251,9 +251,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager ComponentStatePersistenceManager {
             get {
-                if (_componentStatePersistenceManager == null)
+                if (_componentStatePersistenceManager is null)
                     lock (this)
-                        if (_componentStatePersistenceManager == null) {
+                        if (_componentStatePersistenceManager is null) {
                             _componentStatePersistenceManager = GetComponentStatePersistenceManager();
                         }
 
@@ -269,9 +269,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.PersistentComponentState PersistentComponentState {
             get {
-                if (_persistentComponentState == null)
+                if (_persistentComponentState is null)
                     lock (this)
-                        if (_persistentComponentState == null) {
+                        if (_persistentComponentState is null) {
                             _persistentComponentState = GetPersistentComponentState();
                         }
 
@@ -287,9 +287,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider AntiforgeryStateProvider {
             get {
-                if (_antiforgeryStateProvider == null)
+                if (_antiforgeryStateProvider is null)
                     lock (this)
-                        if (_antiforgeryStateProvider == null) {
+                        if (_antiforgeryStateProvider is null) {
                             _antiforgeryStateProvider = GetAntiforgeryStateProvider();
                         }
 
@@ -346,34 +346,34 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider))
-                return AntiforgeryStateProvider;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager))
-                return ComponentStatePersistenceManager;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.NavigationManager))
-                return NavigationManager;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.PersistentComponentState))
-                return PersistentComponentState;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Routing.INavigationInterception))
-                return NavigationInterception;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash))
-                return ScrollToLocationHash;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger))
-                return ErrorBoundaryLogger;
-            if (serviceType == typeof(global::Microsoft.Extensions.Configuration.IConfiguration))
-                return Configuration;
-            if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILoggerFactory))
-                return LoggerFactory;
-            if (serviceType == typeof(global::Microsoft.JSInterop.IJSRuntime))
-                return JSRuntime;
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
             if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                 return SelfScope;
+            if (serviceType == typeof(global::Microsoft.JSInterop.IJSRuntime))
+                return JSRuntime;
             if (serviceType == typeof(global::MyCode.MyComponent))
                 return MyComponent;
             if (serviceType == typeof(global::MyCode.MyComponent2))
                 return MyComponent2;
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
+            if (serviceType == typeof(global::Microsoft.Extensions.Configuration.IConfiguration))
+                return Configuration;
+            if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILoggerFactory))
+                return LoggerFactory;
+            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.NavigationManager))
+                return NavigationManager;
+            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger))
+                return ErrorBoundaryLogger;
+            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash))
+                return ScrollToLocationHash;
+            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Routing.INavigationInterception))
+                return NavigationInterception;
+            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider))
+                return AntiforgeryStateProvider;
+            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.PersistentComponentState))
+                return PersistentComponentState;
+            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager))
+                return ComponentStatePersistenceManager;
             return null;
         }
 
@@ -428,27 +428,6 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     global::MyCode.ITestProvider.IScope CreateScope(global::System.IServiceProvider builtinServiceProvider);
 
     /// <summary>
-    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::Microsoft.Extensions.Configuration.IConfiguration"/><br />
-    /// Implementation type: <see cref="global::Microsoft.Extensions.Configuration.IConfiguration"/>
-    /// </summary>
-    global::Microsoft.Extensions.Configuration.IConfiguration Configuration { get; }
-
-    /// <summary>
-    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::Microsoft.Extensions.Logging.ILoggerFactory"/><br />
-    /// Implementation type: <see cref="global::Microsoft.Extensions.Logging.ILoggerFactory"/>
-    /// </summary>
-    global::Microsoft.Extensions.Logging.ILoggerFactory LoggerFactory { get; }
-
-    /// <summary>
-    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
-    /// Implementation type: <see cref="global::MyCode.TestProvider"/>
-    /// </summary>
-    global::MyCode.ITestProvider Self { get; }
-
-    /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.MyComponent"/><br />
     /// Implementation type: <see cref="global::MyCode.MyComponent"/>
@@ -461,6 +440,27 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     /// Implementation type: <see cref="global::MyCode.MyComponent2"/>
     /// </summary>
     global::MyCode.MyComponent2 MyComponent2 { get; }
+
+    /// <summary>
+    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+    /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestProvider"/>
+    /// </summary>
+    global::MyCode.ITestProvider Self { get; }
+
+    /// <summary>
+    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+    /// Service type: <see cref="global::Microsoft.Extensions.Configuration.IConfiguration"/><br />
+    /// Implementation type: <see cref="global::Microsoft.Extensions.Configuration.IConfiguration"/>
+    /// </summary>
+    global::Microsoft.Extensions.Configuration.IConfiguration Configuration { get; }
+
+    /// <summary>
+    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+    /// Service type: <see cref="global::Microsoft.Extensions.Logging.ILoggerFactory"/><br />
+    /// Implementation type: <see cref="global::Microsoft.Extensions.Logging.ILoggerFactory"/>
+    /// </summary>
+    global::Microsoft.Extensions.Logging.ILoggerFactory LoggerFactory { get; }
 
 
     /// <summary>
@@ -480,52 +480,38 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     public partial interface IScope : IDisposable, IAsyncDisposable {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider"/><br />
-        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider"/>
+        /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestProvider.Scope"/>
         /// </summary>
-        global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider AntiforgeryStateProvider { get; }
+        global::MyCode.ITestProvider.IScope SelfScope { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager"/><br />
-        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager"/>
+        /// Service type: <see cref="global::Microsoft.JSInterop.IJSRuntime"/><br />
+        /// Implementation type: <see cref="global::Microsoft.JSInterop.IJSRuntime"/>
         /// </summary>
-        global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager ComponentStatePersistenceManager { get; }
+        global::Microsoft.JSInterop.IJSRuntime JSRuntime { get; }
 
         /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.NavigationManager"/><br />
-        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.NavigationManager"/>
+        /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
+        /// Service type: <see cref="global::MyCode.MyComponent"/><br />
+        /// Implementation type: <see cref="global::MyCode.MyComponent"/>
         /// </summary>
-        global::Microsoft.AspNetCore.Components.NavigationManager NavigationManager { get; }
+        global::MyCode.MyComponent MyComponent { get; }
 
         /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.PersistentComponentState"/><br />
-        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.PersistentComponentState"/>
+        /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
+        /// Service type: <see cref="global::MyCode.MyComponent2"/><br />
+        /// Implementation type: <see cref="global::MyCode.MyComponent2"/>
         /// </summary>
-        global::Microsoft.AspNetCore.Components.PersistentComponentState PersistentComponentState { get; }
+        global::MyCode.MyComponent2 MyComponent2 { get; }
 
         /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.Routing.INavigationInterception"/><br />
-        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.Routing.INavigationInterception"/>
+        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+        /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestProvider"/>
         /// </summary>
-        global::Microsoft.AspNetCore.Components.Routing.INavigationInterception NavigationInterception { get; }
-
-        /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash"/><br />
-        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash"/>
-        /// </summary>
-        global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash ScrollToLocationHash { get; }
-
-        /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger"/><br />
-        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger"/>
-        /// </summary>
-        global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger ErrorBoundaryLogger { get; }
+        global::MyCode.ITestProvider Self { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -543,37 +529,51 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::Microsoft.JSInterop.IJSRuntime"/><br />
-        /// Implementation type: <see cref="global::Microsoft.JSInterop.IJSRuntime"/>
+        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.NavigationManager"/><br />
+        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.NavigationManager"/>
         /// </summary>
-        global::Microsoft.JSInterop.IJSRuntime JSRuntime { get; }
-
-        /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-        /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestProvider"/>
-        /// </summary>
-        global::MyCode.ITestProvider Self { get; }
+        global::Microsoft.AspNetCore.Components.NavigationManager NavigationManager { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestProvider.Scope"/>
+        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger"/><br />
+        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger"/>
         /// </summary>
-        global::MyCode.ITestProvider.IScope SelfScope { get; }
+        global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger ErrorBoundaryLogger { get; }
 
         /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-        /// Service type: <see cref="global::MyCode.MyComponent"/><br />
-        /// Implementation type: <see cref="global::MyCode.MyComponent"/>
+        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
+        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash"/><br />
+        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash"/>
         /// </summary>
-        global::MyCode.MyComponent MyComponent { get; }
+        global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash ScrollToLocationHash { get; }
 
         /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-        /// Service type: <see cref="global::MyCode.MyComponent2"/><br />
-        /// Implementation type: <see cref="global::MyCode.MyComponent2"/>
+        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
+        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.Routing.INavigationInterception"/><br />
+        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.Routing.INavigationInterception"/>
         /// </summary>
-        global::MyCode.MyComponent2 MyComponent2 { get; }
+        global::Microsoft.AspNetCore.Components.Routing.INavigationInterception NavigationInterception { get; }
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
+        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider"/><br />
+        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider"/>
+        /// </summary>
+        global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider AntiforgeryStateProvider { get; }
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
+        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.PersistentComponentState"/><br />
+        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.PersistentComponentState"/>
+        /// </summary>
+        global::Microsoft.AspNetCore.Components.PersistentComponentState PersistentComponentState { get; }
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
+        /// Service type: <see cref="global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager"/><br />
+        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager"/>
+        /// </summary>
+        global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager ComponentStatePersistenceManager { get; }
     }
 }

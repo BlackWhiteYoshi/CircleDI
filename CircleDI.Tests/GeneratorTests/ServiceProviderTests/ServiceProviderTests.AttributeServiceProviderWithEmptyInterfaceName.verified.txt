@@ -129,10 +129,10 @@ public sealed partial class TestProvider : IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.TestProvider))
-                return Me;
             if (serviceType == typeof(global::MyCode.TestProvider.Scope))
                 return MeScope;
+            if (serviceType == typeof(global::MyCode.TestProvider))
+                return Me;
             return null;
         }
 

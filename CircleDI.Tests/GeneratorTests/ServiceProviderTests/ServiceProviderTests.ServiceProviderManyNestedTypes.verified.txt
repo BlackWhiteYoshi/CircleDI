@@ -128,10 +128,10 @@ partial class Wrapper {
                     /// </para>
                     /// </summary>
                     object? IServiceProvider.GetService(Type serviceType) {
-                        if (serviceType == typeof(global::MyCode.Wrapper.Data.Api.ITestProvider))
-                            return Self;
                         if (serviceType == typeof(global::MyCode.Wrapper.Data.Api.ITestProvider.IScope))
                             return SelfScope;
+                        if (serviceType == typeof(global::MyCode.Wrapper.Data.Api.ITestProvider))
+                            return Self;
                         return null;
                     }
 
@@ -215,18 +215,18 @@ partial class Wrapper {
                 /// </summary>
                 public partial interface IScope : IDisposable, IAsyncDisposable {
                     /// <summary>
-                    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-                    /// Service type: <see cref="global::MyCode.Wrapper.Data.Api.ITestProvider"/><br />
-                    /// Implementation type: <see cref="global::MyCode.Wrapper.Data.Api.TestProvider"/>
-                    /// </summary>
-                    global::MyCode.Wrapper.Data.Api.ITestProvider Self { get; }
-
-                    /// <summary>
                     /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
                     /// Service type: <see cref="global::MyCode.Wrapper.Data.Api.ITestProvider.IScope"/><br />
                     /// Implementation type: <see cref="global::MyCode.Wrapper.Data.Api.TestProvider.Scope"/>
                     /// </summary>
                     global::MyCode.Wrapper.Data.Api.ITestProvider.IScope SelfScope { get; }
+
+                    /// <summary>
+                    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+                    /// Service type: <see cref="global::MyCode.Wrapper.Data.Api.ITestProvider"/><br />
+                    /// Implementation type: <see cref="global::MyCode.Wrapper.Data.Api.TestProvider"/>
+                    /// </summary>
+                    global::MyCode.Wrapper.Data.Api.ITestProvider Self { get; }
                 }
             }
         }

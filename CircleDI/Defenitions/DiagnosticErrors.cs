@@ -115,8 +115,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
     
-    public static Diagnostic CreateWrongFieldImplementationTypeError(this AttributeData serviceAttribute, string implementationName, string actualType, string expectedType)
-        => Diagnostic.Create(WrongFieldImplementationTypeError, serviceAttribute.ToLocation(), [implementationName, actualType, expectedType]);
+    public static Diagnostic CreateWrongFieldImplementationTypeError(this AttributeData serviceAttribute, string implementationName, string actualType, TypeName expectedType)
+        => Diagnostic.Create(WrongFieldImplementationTypeError, serviceAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]);
 
     private static DiagnosticDescriptor WrongFieldImplementationTypeError { get; } = new(
         id: "CDI009",
@@ -127,8 +127,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateWrongPropertyImplementationTypeError(this AttributeData serviceAttribute, string implementationName, string actualType, string expectedType)
-        => Diagnostic.Create(WrongPropertyImplementationTypeError, serviceAttribute.ToLocation(), [implementationName, actualType, expectedType]);
+    public static Diagnostic CreateWrongPropertyImplementationTypeError(this AttributeData serviceAttribute, string implementationName, string actualType, TypeName expectedType)
+        => Diagnostic.Create(WrongPropertyImplementationTypeError, serviceAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]);
 
     private static DiagnosticDescriptor WrongPropertyImplementationTypeError { get; } = new(
         id: "CDI010",
@@ -139,8 +139,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateWrongMethodImplementationTypeError(this AttributeData serviceAttribute, string implementationName, string actualType, string expectedType)
-        => Diagnostic.Create(WrongMethodImplementationTypeError, serviceAttribute.ToLocation(), [implementationName, actualType, expectedType]);
+    public static Diagnostic CreateWrongMethodImplementationTypeError(this AttributeData serviceAttribute, string implementationName, string actualType, TypeName expectedType)
+        => Diagnostic.Create(WrongMethodImplementationTypeError, serviceAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]);
 
     private static DiagnosticDescriptor WrongMethodImplementationTypeError { get; } = new(
         id: "CDI011",
@@ -151,8 +151,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateDelegateServiceIsNotDelegateError(this AttributeData serviceAttribute, string serviceType)
-        => Diagnostic.Create(DelegateServiceIsNotDelegate, serviceAttribute.ToLocation(), [serviceType]);
+    public static Diagnostic CreateDelegateServiceIsNotDelegateError(this AttributeData serviceAttribute, TypeName serviceType)
+        => Diagnostic.Create(DelegateServiceIsNotDelegate, serviceAttribute.ToLocation(), [serviceType.CreateFullyQualifiedName()]);
 
     private static DiagnosticDescriptor DelegateServiceIsNotDelegate { get; } = new(
         id: "CDI012",
@@ -274,8 +274,8 @@ public static class DiagnosticErrors {
 
     #region Dependency Tree Generation
 
-    public static Diagnostic CreateDependencyUnregisteredError(this AttributeData serviceProviderAttribute, string serviceName, string dependencyServiceIdentifier)
-        => Diagnostic.Create(DependencyUnregistered, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier]);
+    public static Diagnostic CreateDependencyUnregisteredError(this AttributeData serviceProviderAttribute, string serviceName, TypeName dependencyServiceIdentifier)
+        => Diagnostic.Create(DependencyUnregistered, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName()]);
 
     private static DiagnosticDescriptor DependencyUnregistered { get; } = new(
         id: "CDI021",
@@ -286,8 +286,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateDependencyInterfaceUndeclaredError(this AttributeData serviceProviderAttribute, string dependencyServiceIdentifier, string namspace, string interfaceType)
-        => Diagnostic.Create(DependencyInterfaceUndeclared, serviceProviderAttribute.ToLocation(), [dependencyServiceIdentifier, namspace, interfaceType]);
+    public static Diagnostic CreateDependencyInterfaceUndeclaredError(this AttributeData serviceProviderAttribute, TypeName dependencyServiceIdentifier, string namspace, string interfaceType)
+        => Diagnostic.Create(DependencyInterfaceUndeclared, serviceProviderAttribute.ToLocation(), [dependencyServiceIdentifier.CreateFullyQualifiedName(), namspace, interfaceType]);
 
     private static DiagnosticDescriptor DependencyInterfaceUndeclared { get; } = new(
         id: "CDI022",
@@ -298,8 +298,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateDependencyAmbiguousError(this AttributeData serviceProviderAttribute, string serviceName, string dependencyServiceIdentifier, IEnumerable<string> servicesWithSameType, bool isParameter)
-        => Diagnostic.Create(DependencyAmbiguous, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier, string.Join("\", \"", servicesWithSameType), isParameter ? "parameter" : "property"]);
+    public static Diagnostic CreateDependencyAmbiguousError(this AttributeData serviceProviderAttribute, string serviceName, TypeName dependencyServiceIdentifier, IEnumerable<string> servicesWithSameType, bool isParameter)
+        => Diagnostic.Create(DependencyAmbiguous, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName(), string.Join("\", \"", servicesWithSameType), isParameter ? "parameter" : "property"]);
 
     private static DiagnosticDescriptor DependencyAmbiguous { get; } = new(
         id: "CDI023",
@@ -334,8 +334,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateDependencyLifetimeScopeError(this AttributeData serviceProviderAttribute, string serviceName, string dependencyServiceIdentifier)
-        => Diagnostic.Create(DependencyLifetimeScope, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier]);
+    public static Diagnostic CreateDependencyLifetimeScopeError(this AttributeData serviceProviderAttribute, string serviceName, TypeName dependencyServiceIdentifier)
+        => Diagnostic.Create(DependencyLifetimeScope, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName()]);
 
     private static DiagnosticDescriptor DependencyLifetimeScope { get; } = new(
         id: "CDI026",
@@ -346,8 +346,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateDependencyLifetimeTransientError(this AttributeData serviceProviderAttribute, string serviceName, string dependencyServiceIdentifier)
-        => Diagnostic.Create(DependencyLifetimeTransient, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier]);
+    public static Diagnostic CreateDependencyLifetimeTransientError(this AttributeData serviceProviderAttribute, string serviceName, TypeName dependencyServiceIdentifier)
+        => Diagnostic.Create(DependencyLifetimeTransient, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName()]);
 
     private static DiagnosticDescriptor DependencyLifetimeTransient { get; } = new(
         id: "CDI027",
@@ -358,8 +358,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateDependencyLifetimeAllServicesError(this AttributeData serviceProviderAttribute, string serviceName, string dependencyServiceIdentifier, IEnumerable<string> servicesWithSameType)
-        => Diagnostic.Create(DependencyLifetimeAllServices, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier, string.Join("\", \"", servicesWithSameType)]);
+    public static Diagnostic CreateDependencyLifetimeAllServicesError(this AttributeData serviceProviderAttribute, string serviceName, TypeName dependencyServiceIdentifier, IEnumerable<string> servicesWithSameType)
+        => Diagnostic.Create(DependencyLifetimeAllServices, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName(), string.Join("\", \"", servicesWithSameType)]);
 
     private static DiagnosticDescriptor DependencyLifetimeAllServices { get; } = new(
         id: "CDI028",
@@ -370,8 +370,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateScopedProviderUnregisteredError(this AttributeData serviceProviderAttribute, string serviceProviderName, string dependencyServiceIdentifier)
-        => Diagnostic.Create(ScopedProviderUnregistered, serviceProviderAttribute.ToLocation(), [serviceProviderName, dependencyServiceIdentifier]);
+    public static Diagnostic CreateScopedProviderUnregisteredError(this AttributeData serviceProviderAttribute, TypeName serviceProvider, TypeName dependencyServiceIdentifier)
+        => Diagnostic.Create(ScopedProviderUnregistered, serviceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName()]);
 
     private static DiagnosticDescriptor ScopedProviderUnregistered { get; } = new(
         id: "CDI030",
@@ -382,8 +382,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateScopedProviderAmbiguousError(this AttributeData serviceProviderAttribute, string serviceProviderName, string dependencyServiceIdentifier, IEnumerable<string> servicesWithSameType, bool isParameter)
-        => Diagnostic.Create(ScopedProviderAmbiguous, serviceProviderAttribute.ToLocation(), [serviceProviderName, dependencyServiceIdentifier, string.Join("\", \"", servicesWithSameType), isParameter ? "parameter" : "property"]);
+    public static Diagnostic CreateScopedProviderAmbiguousError(this AttributeData serviceProviderAttribute, TypeName serviceProvider, TypeName dependencyServiceIdentifier, IEnumerable<string> servicesWithSameType, bool isParameter)
+        => Diagnostic.Create(ScopedProviderAmbiguous, serviceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName(), string.Join("\", \"", servicesWithSameType), isParameter ? "parameter" : "property"]);
 
     private static DiagnosticDescriptor ScopedProviderAmbiguous { get; } = new(
         id: "CDI031",
@@ -394,8 +394,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateScopedProviderNamedUnregisteredError(this AttributeData serviceProviderAttribute, string serviceProviderName, string dependencyServiceIdentifier)
-        => Diagnostic.Create(ScopedProviderNamedUnregistered, serviceProviderAttribute.ToLocation(), [serviceProviderName, dependencyServiceIdentifier]);
+    public static Diagnostic CreateScopedProviderNamedUnregisteredError(this AttributeData serviceProviderAttribute, TypeName serviceProvider, string dependencyServiceIdentifier)
+        => Diagnostic.Create(ScopedProviderNamedUnregistered, serviceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier]);
 
     private static DiagnosticDescriptor ScopedProviderNamedUnregistered { get; } = new(
         id: "CDI032",
@@ -406,8 +406,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateScopedProviderLifetimeScopeError(this AttributeData serviceProviderAttribute, string serviceProviderName, string dependencyServiceIdentifier)
-        => Diagnostic.Create(ScopedProviderLifetimeScope, serviceProviderAttribute.ToLocation(), [serviceProviderName, dependencyServiceIdentifier]);
+    public static Diagnostic CreateScopedProviderLifetimeScopeError(this AttributeData serviceProviderAttribute, TypeName serviceProvider, TypeName dependencyServiceIdentifier)
+        => Diagnostic.Create(ScopedProviderLifetimeScope, serviceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName()]);
 
     private static DiagnosticDescriptor ScopedProviderLifetimeScope { get; } = new(
         id: "CDI033",
@@ -418,8 +418,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateScopedProviderLifetimeTransientError(this AttributeData serviceProviderAttribute, string serviceProviderName, string dependencyServiceIdentifier)
-        => Diagnostic.Create(ScopedProviderLifetimeTransient, serviceProviderAttribute.ToLocation(), [serviceProviderName, dependencyServiceIdentifier]);
+    public static Diagnostic CreateScopedProviderLifetimeTransientError(this AttributeData serviceProviderAttribute, TypeName serviceProvider, TypeName dependencyServiceIdentifier)
+        => Diagnostic.Create(ScopedProviderLifetimeTransient, serviceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName()]);
 
     private static DiagnosticDescriptor ScopedProviderLifetimeTransient { get; } = new(
         id: "CDI034",

@@ -89,16 +89,16 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
+        if (serviceType == typeof(global::MyCode.ITestService))
+            return TestService;
+        if (serviceType == typeof(global::MyCode.ITestProvider))
+            return Self;
         if (serviceType == typeof(global::MyCode.ITestDependency1))
             return TestDependency1;
         if (serviceType == typeof(global::MyCode.ITestDependency2))
             return TestDependency2;
         if (serviceType == typeof(global::MyCode.ITestDependency3))
             return TestDependency3;
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
-        if (serviceType == typeof(global::MyCode.ITestService))
-            return TestService;
         return null;
     }
 
@@ -197,18 +197,18 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
+            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                return SelfScope;
+            if (serviceType == typeof(global::MyCode.ITestService))
+                return TestService;
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
             if (serviceType == typeof(global::MyCode.ITestDependency1))
                 return TestDependency1;
             if (serviceType == typeof(global::MyCode.ITestDependency2))
                 return TestDependency2;
             if (serviceType == typeof(global::MyCode.ITestDependency3))
                 return TestDependency3;
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
-            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::MyCode.ITestService))
-                return TestService;
             return null;
         }
 

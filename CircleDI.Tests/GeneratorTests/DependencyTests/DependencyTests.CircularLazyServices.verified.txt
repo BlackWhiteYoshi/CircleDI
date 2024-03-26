@@ -42,9 +42,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService1 TestService1 {
         get {
-            if (_testService1 == null)
+            if (_testService1 is null)
                 lock (this)
-                    if (_testService1 == null) {
+                    if (_testService1 is null) {
                         _testService1 = new global::MyCode.TestService1(TestService2);
                     }
 
@@ -60,9 +60,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService2 TestService2 {
         get {
-            if (_testService2 == null)
+            if (_testService2 is null)
                 lock (this)
-                    if (_testService2 == null) {
+                    if (_testService2 is null) {
                         _testService2 = new global::MyCode.TestService2() {
                             TestService1 = default!
                         };
@@ -187,10 +187,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
             if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                 return SelfScope;
+            if (serviceType == typeof(global::MyCode.ITestProvider))
+                return Self;
             if (serviceType == typeof(global::MyCode.ITestService1))
                 return TestService1;
             if (serviceType == typeof(global::MyCode.ITestService2))

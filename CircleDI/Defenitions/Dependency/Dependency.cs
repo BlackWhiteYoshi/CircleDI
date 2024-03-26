@@ -18,19 +18,16 @@ public abstract class Dependency {
     public required string Name { get; init; }
 
     /// <summary>
-    /// <para>Whether the service is mapped by name or by type.</para>
-    /// <para>
-    /// True => <see cref="ServiceIdentifier"/> contains the name of the service.
-    /// False => <see cref="ServiceIdentifier"/> contains the type of the service.
-    /// </para>
+    /// If the service is mapped by name this contains the name.<br />
+    /// If the service is mapped by type this is an empty string.
     /// </summary>
-    public required bool IsNamed { get; init; }
+    public required string ServiceName { get; init; }
 
     /// <summary>
-    /// The Identifier of the service. Can be either the name or the type of the service.<br />
-    /// <see cref="IsNamed"/> specifies if this field contains the name or the type.
+    /// The type of the service.<br />
+    /// Should only be used when <see cref="ServiceName"/> is empty.
     /// </summary>
-    public required string ServiceIdentifier { get; init; }
+    public required TypeName ServiceType { get; init; }
 
     /// <summary>
     /// Indicates if a [Dependency]-attribute is present.
@@ -43,9 +40,9 @@ public abstract class Dependency {
     protected bool Equals(Dependency other) {
         if (Name != other.Name)
             return false;
-        if (IsNamed != other.IsNamed)
+        if (ServiceName != other.ServiceName)
             return false;
-        if (ServiceIdentifier != other.ServiceIdentifier)
+        if (ServiceType != other.ServiceType)
             return false;
         if (HasAttribute != other.HasAttribute)
             return false;
@@ -55,8 +52,8 @@ public abstract class Dependency {
 
     public override int GetHashCode() {
         int hashCode = Name.GetHashCode();
-        hashCode = Combine(hashCode, IsNamed.GetHashCode());
-        hashCode = Combine(hashCode, ServiceIdentifier.GetHashCode());
+        hashCode = Combine(hashCode, ServiceName.GetHashCode());
+        hashCode = Combine(hashCode, ServiceType.GetHashCode());
         hashCode = Combine(hashCode, HasAttribute.GetHashCode());
         return hashCode;
 
