@@ -33,5 +33,10 @@ public enum TypeKeyword {
     /// <summary>
     /// A valuetype with integrated Equals() and ToString().
     /// </summary>
-    RecordStruct = 0b0101
+    RecordStruct = 0b0101,
+
+    /// <summary>
+    /// Not a class, struct or interface
+    /// </summary>
+    Unsupported = 0
 }

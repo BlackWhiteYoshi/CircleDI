@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Text;
 
 namespace CircleDI.Defenitions;
 
@@ -443,4 +444,10 @@ public static class DiagnosticErrors {
             SyntaxReference reference => [Location.Create(reference.SyntaxTree, reference.Span)],
             _ => []
         };
+
+    private static string CreateFullyQualifiedName(this TypeName typeName) {
+        StringBuilder builder = new();
+        typeName.AppendClosedFullyQualified(builder);
+        return builder.ToString();
+    }
 }

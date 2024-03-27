@@ -37,8 +37,8 @@ public sealed partial class TestProvider<T1> : global::MyCode.ITestProvider<T1>,
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::MyCode.ITestProvider<T1>"/><br />
-    /// Implementation type: <see cref="global::MyCode.TestProvider<T1>"/>
+    /// Service type: <see cref="global::MyCode.ITestProvider{T1}"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestProvider{T1}"/>
     /// </summary>
     public global::MyCode.ITestProvider<T1> Self => this;
 
@@ -101,16 +101,16 @@ public sealed partial class TestProvider<T1> : global::MyCode.ITestProvider<T1>,
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::MyCode.ITestProvider<T1>.IScope<T2>"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestProvider<T1>.Scope<T2>"/>
+        /// Service type: <see cref="global::MyCode.ITestProvider{T1}.IScope{T2}"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestProvider{T1}.Scope{T2}"/>
         /// </summary>
         public global::MyCode.ITestProvider<T1>.IScope<T2> SelfScope => this;
 
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-        /// Service type: <see cref="global::MyCode.ITestProvider<T1>"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestProvider<T1>"/>
+        /// Service type: <see cref="global::MyCode.ITestProvider{T1}"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestProvider{T1}"/>
         /// </summary>
         public global::MyCode.ITestProvider<T1> Self => _testProvider.Self;
 
@@ -184,8 +184,8 @@ public partial interface ITestProvider<T1> : IDisposable, IAsyncDisposable {
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::MyCode.ITestProvider<T1>"/><br />
-    /// Implementation type: <see cref="global::MyCode.TestProvider<T1>"/>
+    /// Service type: <see cref="global::MyCode.ITestProvider{T1}"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestProvider{T1}"/>
     /// </summary>
     global::MyCode.ITestProvider<T1> Self { get; }
 
@@ -207,15 +207,15 @@ public partial interface ITestProvider<T1> : IDisposable, IAsyncDisposable {
     public partial interface IScope<T2> : IDisposable, IAsyncDisposable {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
-        /// Service type: <see cref="global::MyCode.ITestProvider<T1>.IScope<T2>"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestProvider<T1>.Scope<T2>"/>
+        /// Service type: <see cref="global::MyCode.ITestProvider{T1}.IScope{T2}"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestProvider{T1}.Scope{T2}"/>
         /// </summary>
         global::MyCode.ITestProvider<T1>.IScope<T2> SelfScope { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-        /// Service type: <see cref="global::MyCode.ITestProvider<T1>"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestProvider<T1>"/>
+        /// Service type: <see cref="global::MyCode.ITestProvider{T1}"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestProvider{T1}"/>
         /// </summary>
         global::MyCode.ITestProvider<T1> Self { get; }
     }

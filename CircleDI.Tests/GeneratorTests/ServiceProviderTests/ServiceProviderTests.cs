@@ -303,7 +303,7 @@ public static class ServiceProviderTests {
             using CircleDIAttributes;
             
             namespace MyCode;
-            [ServiceProvider<ITestProvider<int>>]
+            [ServiceProvider<ITestProvider<T>>]
             public sealed partial class TestProvider<T>;
 
             public partial interface ITestProvider<T>;
@@ -363,7 +363,7 @@ public static class ServiceProviderTests {
             using CircleDIAttributes;
             
             namespace MyCode;
-            [ServiceProvider<ITestProvider<int>>]
+            [ServiceProvider<ITestProvider<T1>>]
             public sealed partial class TestProvider<T1> {
                 public sealed partial class Scope<T2>;
             }

@@ -1,5 +1,4 @@
-﻿using CircleDI.Defenitions;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
 namespace CircleDI.Extensions;
@@ -54,100 +53,5 @@ public static class SyntaxNodeExtensions {
                 return true;
 
         return false;
-    }
-
-
-    /// <summary>
-    /// <para>A list of namespace names the given type is located.</para>
-    /// <para>
-    /// The first item is the most inner namespace and the last item is the most outer namespace.<br />
-    /// So, to construct a fully-qualified name this list should be iterated backwards.
-    /// </para>
-    /// </summary>
-    /// <param name="typeSymbol"></param>
-    /// <returns></returns>
-    public static List<string> GetNamespaceList(this INamedTypeSymbol typeSymbol) {
-        List<string> namcespaceList = [];
-
-        INamespaceSymbol namespaceSymbol = typeSymbol.ContainingNamespace;
-        while (namespaceSymbol.Name != string.Empty) {
-            namcespaceList.Add(namespaceSymbol.Name);
-            namespaceSymbol = namespaceSymbol.ContainingNamespace;
-        }
-
-        return namcespaceList;
-    }
-
-    /// <summary>
-    /// <para>A list of all types (name and type) the given type is nested in.</para>
-    /// <para>
-    /// The first item is the most inner type and the last item is the most outer type.<br />
-    /// So, to construct a fully-qualified name this list should be iterated backwards.
-    /// </para>
-    /// </summary>
-    /// <param name="typeSymbol"></param>
-    /// <returns></returns>
-    public static List<ContainingType> GetContainingTypeList(this INamedTypeSymbol typeSymbol) {
-        List<ContainingType> typeList = [];
-
-        INamedTypeSymbol containingtypeSymbol = typeSymbol.ContainingType;
-        while (containingtypeSymbol is not null) {
-            typeList.Add(new ContainingType(containingtypeSymbol));
-            containingtypeSymbol = containingtypeSymbol.ContainingType;
-        }
-
-        return typeList;
-    }
-
-
-    /// <summary>
-    /// <para>Creates an array by mapping <see cref="IMethodSymbol.Parameters"/> to <see cref="ConstructorDependency"/>.</para>
-    /// <para>
-    /// Checks for attribute "DependencyAttribute" with argument "Name" -> [Dependency(Name = "...")]<br />
-    /// If present, <see cref="IsNamed"/> is set to true and <see cref="ServiceIdentifier"/> is set to it's value.<br />
-    /// Otherwise <see cref="IsNamed"/> is set to false, and <see cref="ServiceIdentifier"/> is set to parameter type.
-    /// </para>
-    /// </summary>
-    /// <param name="constructor"></param>
-    /// <returns></returns>
-    public static List<ConstructorDependency> CreateConstructorDependencyList(this IMethodSymbol constructor) {
-        List<ConstructorDependency> result = new(constructor.Parameters.Length);
-
-        foreach (IParameterSymbol parameter in constructor.Parameters)
-            if (parameter.GetAttribute("DependencyAttribute") is AttributeData attributeData)
-                if (attributeData.NamedArguments.GetArgument<string>("Name") is string dependencyName)
-                    result.Add(new ConstructorDependency() {
-                        Name = parameter.Name,
-                        ServiceName = dependencyName,
-                        ServiceType = default,
-                        HasAttribute = true,
-                        ByRef = parameter.RefKind
-                    });
-                else {
-                    if (parameter.Type is not INamedTypeSymbol namedType)
-                        continue;
-
-                    result.Add(new ConstructorDependency() {
-                        Name = parameter.Name,
-                        ServiceName = string.Empty,
-                        ServiceType = new TypeName(namedType),
-                        HasAttribute = true,
-                        ByRef = parameter.RefKind
-                    });
-                }
-            else {
-                if (parameter.Type is not INamedTypeSymbol namedType)
-                    continue;
-
-                result.Add(new ConstructorDependency() {
-                    Name = parameter.Name,
-                    ServiceName = string.Empty,
-                    ServiceType = new TypeName(namedType),
-                    HasAttribute = false,
-                    ByRef = parameter.RefKind
-                });
-            }
-
-        return result;
     }
 }

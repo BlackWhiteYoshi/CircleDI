@@ -310,20 +310,19 @@ public partial class Wrapper {
 
 When using [ServiceProviderAttribute&lt;TInterface&gt;](TypeTables.md#serviceproviderattributetinterface) the interface specified as type parameter is used for inferring the properties for the generated interface.
 The generated interface will have the same name, access modifiers, type parameters, will be in the same namespace and will be nested in the same types.  
-If the interface is generic, you must fill its type parameters with concrete types, because an unbound type is not allowed here.
-The concrete types have no effect.
+A generic interface is not possible, because an unbound type is not allowed here. However the scoped interface may be generic.
 
 ```csharp
 namespace MySpace {
-    [ServiceProvider<Interface.IWrapper.IProvider<int>>]
-    public sealed partial class MyProvider<T> {
+    [ServiceProvider<Interface.IWrapper.IProvider>]
+    internal sealed partial class MyProvider<T> {
         public sealed partial class Scope<U>;
     }
 }
 
 namespace MySpace.Interface {
     public partial interface IWrapper {
-        internal partial interface IProvider<T> {
+        internal partial interface IProvider {
             public partial interface IScope<U>;
         }
     }
@@ -335,7 +334,7 @@ namespace MySpace.Interface {
 //   namespace: "MySpace.Interface"
 //   access modifier: "internal", Scope -> "public"
 //   containing types: "interface IWrapper"
-//   type parameter: "T", Scope -> "U"
+//   type parameter: Scope -> "U"
 ```
 
 
@@ -365,7 +364,9 @@ namespace MySpace;
 public sealed partial class MyProvider;
 
 // declaring the interface type in the same namespace
-public partial interface IMyProvider;
+public partial interface IMyProvider {
+    public partial interface IScope;
+}
 ```
 
 

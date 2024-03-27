@@ -2539,7 +2539,9 @@ public partial class OverwritingProvider {
     }
 }
 
-public partial interface IOverwritingProvider;
+public partial interface IOverwritingProvider {
+    public partial interface IScope;
+}
 ```
 
 ```csharp

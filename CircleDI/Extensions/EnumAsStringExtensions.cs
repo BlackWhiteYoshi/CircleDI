@@ -35,6 +35,7 @@ public static class EnumAsStringExtension {
             TypeKeyword.RecordClass => "record class",
             TypeKeyword.RecordStruct => "record struct",
             TypeKeyword.Interface => "interface",
+            TypeKeyword.Unsupported => "UNSUPPORTED",
             _ => throw new Exception($"Invalid enum Type '{nameof(TypeKeyword)}': {value}")
         };
 

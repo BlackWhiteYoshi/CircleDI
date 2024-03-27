@@ -244,7 +244,7 @@ public sealed class Service : IEquatable<Service> {
                         => provider.GetMembers(implementationName) switch {
                             [IFieldSymbol field, ..] => (new ImplementationMember(MemberType.Field, field.Name, field.IsStatic, isScoped), field, []),
                             [IPropertySymbol property, ..] => (new ImplementationMember(MemberType.Property, property.Name, property.IsStatic, isScoped), property, []),
-                            [IMethodSymbol method, ..] => (new ImplementationMember(MemberType.Method, method.Name, method.IsStatic, isScoped), method, method.CreateConstructorDependencyList()),
+                            [IMethodSymbol method, ..] => (new ImplementationMember(MemberType.Method, method.Name, method.IsStatic, isScoped), method, CreateConstructorDependencyList(method)),
                             _ => (default, null, [])
                         };
                 }
@@ -346,56 +346,6 @@ public sealed class Service : IEquatable<Service> {
 
 
     /// <summary>
-    /// Creates the ConstructorDependencyList by analyzing the available constructors at the given class/implementation.<br />
-    /// When an applicable constructor is found, the list will be created based on that constructor, otherwise an error will be created and the list will be empty.
-    /// </summary>
-    /// <param name="implementation"></param>
-    /// <param name="attributeData"></param>
-    /// <returns></returns>
-    private static (IMethodSymbol? constructor, Diagnostic? error) FindConstructor(INamedTypeSymbol implementation, AttributeData attributeData) {
-        switch (implementation.InstanceConstructors.Length) {
-            case 0:
-                return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
-            case 1:
-                if (implementation.InstanceConstructors[0].DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
-                    return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
-                return (implementation.InstanceConstructors[0], null);
-            default:
-                IMethodSymbol? attributeConstructor = null;
-                IMethodSymbol? lastAvailableConstructor = null;
-                int availableConstructors = 0;
-                foreach (IMethodSymbol ctor in implementation.InstanceConstructors) {
-                    if (ctor.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
-                        continue;
-
-                    availableConstructors++;
-                    lastAvailableConstructor = ctor;
-
-                    if (ctor.GetAttribute("ConstructorAttribute") is not null)
-                        if (attributeConstructor is null)
-                            attributeConstructor = ctor;
-                        else {
-                            AttributeData firstAttribute = attributeConstructor.GetAttribute("ConstructorAttribute")!;
-                            AttributeData secondAttribute = ctor.GetAttribute("ConstructorAttribute")!;
-                            return (null, firstAttribute.CreateMultipleConstructorAttributesError(secondAttribute, implementation, implementation.ToDisplayString()));
-                        }
-                }
-
-                switch (availableConstructors) {
-                    case 0:
-                        return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
-                    case 1:
-                        return (lastAvailableConstructor, null);
-                    default:
-                        if (attributeConstructor is null)
-                            return (null, attributeData.CreateMissingConstructorAttributesError(implementation, implementation.ToDisplayString()));
-                        else
-                            return (attributeConstructor, null);
-                }
-        }
-    }
-
-    /// <summary>
     /// <para>First <see cref="FindConstructor(INamedTypeSymbol, AttributeData)">finds the constructor</see> and if found, <see cref="Extensions.SyntaxNodeExtensions.CreateConstructorDependencyList(IMethodSymbol)">creates the constructor dependency list.</see></para>
     /// <para>If no constructor found or an invalid constructor dependency was found, an empty list and an error is returned.</para>
     /// </summary>
@@ -405,7 +355,7 @@ public sealed class Service : IEquatable<Service> {
     public static (List<ConstructorDependency> constructorDependencyList, Diagnostic? error) CreateConstructorDependencyList(INamedTypeSymbol implementation, AttributeData attributeData) {
         (IMethodSymbol? constructor, Diagnostic? constructorListError) = FindConstructor(implementation, attributeData);
         if (constructor is not null)
-            return (constructor.CreateConstructorDependencyList(), null);
+            return (CreateConstructorDependencyList(constructor), null);
         else
             return ([], constructorListError);
     }
@@ -470,6 +420,107 @@ public sealed class Service : IEquatable<Service> {
             }
 
         return (propertyDependencyList, null);
+    }
+
+    /// <summary>
+    /// Creates the ConstructorDependencyList by analyzing the available constructors at the given class/implementation.<br />
+    /// When an applicable constructor is found, the list will be created based on that constructor, otherwise an error will be created and the list will be empty.
+    /// </summary>
+    /// <param name="implementation"></param>
+    /// <param name="attributeData"></param>
+    /// <returns></returns>
+    private static (IMethodSymbol? constructor, Diagnostic? error) FindConstructor(INamedTypeSymbol implementation, AttributeData attributeData) {
+        switch (implementation.InstanceConstructors.Length) {
+            case 0:
+                return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
+            case 1:
+                if (implementation.InstanceConstructors[0].DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
+                    return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
+                return (implementation.InstanceConstructors[0], null);
+            default:
+                IMethodSymbol? attributeConstructor = null;
+                IMethodSymbol? lastAvailableConstructor = null;
+                int availableConstructors = 0;
+                foreach (IMethodSymbol ctor in implementation.InstanceConstructors) {
+                    if (ctor.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
+                        continue;
+
+                    availableConstructors++;
+                    lastAvailableConstructor = ctor;
+
+                    if (ctor.GetAttribute("ConstructorAttribute") is not null)
+                        if (attributeConstructor is null)
+                            attributeConstructor = ctor;
+                        else {
+                            AttributeData firstAttribute = attributeConstructor.GetAttribute("ConstructorAttribute")!;
+                            AttributeData secondAttribute = ctor.GetAttribute("ConstructorAttribute")!;
+                            return (null, firstAttribute.CreateMultipleConstructorAttributesError(secondAttribute, implementation, implementation.ToDisplayString()));
+                        }
+                }
+
+                switch (availableConstructors) {
+                    case 0:
+                        return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
+                    case 1:
+                        return (lastAvailableConstructor, null);
+                    default:
+                        if (attributeConstructor is null)
+                            return (null, attributeData.CreateMissingConstructorAttributesError(implementation, implementation.ToDisplayString()));
+                        else
+                            return (attributeConstructor, null);
+                }
+        }
+    }
+
+    /// <summary>
+    /// <para>Creates an array by mapping <see cref="IMethodSymbol.Parameters"/> to <see cref="ConstructorDependency"/>.</para>
+    /// <para>
+    /// Checks for attribute "DependencyAttribute" with argument "Name" -> [Dependency(Name = "...")]<br />
+    /// If present, <see cref="IsNamed"/> is set to true and <see cref="ServiceIdentifier"/> is set to it's value.<br />
+    /// Otherwise <see cref="IsNamed"/> is set to false, and <see cref="ServiceIdentifier"/> is set to parameter type.
+    /// </para>
+    /// </summary>
+    /// <param name="constructor"></param>
+    /// <returns></returns>
+    public static List<ConstructorDependency> CreateConstructorDependencyList(IMethodSymbol constructor) {
+        List<ConstructorDependency> result = new(constructor.Parameters.Length);
+
+        foreach (IParameterSymbol parameter in constructor.Parameters)
+            if (parameter.GetAttribute("DependencyAttribute") is AttributeData attributeData)
+                if (attributeData.NamedArguments.GetArgument<string>("Name") is string dependencyName)
+                    result.Add(new ConstructorDependency() {
+                        Name = parameter.Name,
+                        ServiceName = dependencyName,
+                        ServiceType = default,
+                        HasAttribute = true,
+                        ByRef = parameter.RefKind
+                    });
+                else {
+                    if (parameter.Type is not INamedTypeSymbol namedType)
+                        continue;
+
+                    result.Add(new ConstructorDependency() {
+                        Name = parameter.Name,
+                        ServiceName = string.Empty,
+                        ServiceType = new TypeName(namedType),
+                        HasAttribute = true,
+                        ByRef = parameter.RefKind
+                    });
+                }
+            else {
+                if (parameter.Type is not INamedTypeSymbol namedType)
+                    continue;
+
+                result.Add(new ConstructorDependency() {
+                    Name = parameter.Name,
+                    ServiceName = string.Empty,
+                    ServiceType = new TypeName(namedType),
+                    HasAttribute = false,
+                    ByRef = parameter.RefKind
+                });
+            }
+
+        return result;
     }
 
 

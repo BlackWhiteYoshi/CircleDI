@@ -99,7 +99,7 @@ file static class CircleDIGeneratorExtensions {
         ConstructorDependency constructorDependency = new() {
             Name = "builtinServiceProvider",
             ServiceName = string.Empty,
-            ServiceType = new TypeName("IServiceProvider", ["System"], [], []),
+            ServiceType = new TypeName("IServiceProvider", TypeKeyword.Interface, ["System"], [], [], []),
             HasAttribute = false,
             ByRef = RefKind.None
         };
@@ -110,30 +110,30 @@ file static class CircleDIGeneratorExtensions {
 
         // default services
         {
-            AddSingletonService(serviceProvider, "LoggerFactory", "GetLoggerFactory", new TypeName("ILoggerFactory", ["Logging", "Extensions", "Microsoft"], [], []));
-            AddScopedService(serviceProvider, "JSRuntime", "GetJSRuntime", new TypeName("IJSRuntime", ["JSInterop", "Microsoft"], [], []));
-            AddScopedService(serviceProvider, "NavigationManager", "GetNavigationManager", new TypeName("NavigationManager", ["Components", "AspNetCore", "Microsoft"], [], []));
-            AddScopedService(serviceProvider, "NavigationInterception", "GetNavigationInterception", new TypeName("INavigationInterception", ["Routing", "Components", "AspNetCore", "Microsoft"], [], []));
-            AddScopedService(serviceProvider, "ScrollToLocationHash", "GetScrollToLocationHash", new TypeName("IScrollToLocationHash", ["Routing", "Components", "AspNetCore", "Microsoft"], [], []));
-            AddScopedService(serviceProvider, "ErrorBoundaryLogger", "GetErrorBoundaryLogger", new TypeName("IErrorBoundaryLogger", ["Web", "Components", "AspNetCore", "Microsoft"], [], []));
+            AddSingletonService(serviceProvider, "LoggerFactory", "GetLoggerFactory", new TypeName("ILoggerFactory", TypeKeyword.Interface, ["Logging", "Extensions", "Microsoft"], [], [], []));
+            AddScopedService(serviceProvider, "JSRuntime", "GetJSRuntime", new TypeName("IJSRuntime", TypeKeyword.Interface, ["JSInterop", "Microsoft"], [], [], []));
+            AddScopedService(serviceProvider, "NavigationManager", "GetNavigationManager", new TypeName("NavigationManager", TypeKeyword.Class, ["Components", "AspNetCore", "Microsoft"], [], [], []));
+            AddScopedService(serviceProvider, "NavigationInterception", "GetNavigationInterception", new TypeName("INavigationInterception", TypeKeyword.Interface, ["Routing", "Components", "AspNetCore", "Microsoft"], [], [], []));
+            AddScopedService(serviceProvider, "ScrollToLocationHash", "GetScrollToLocationHash", new TypeName("IScrollToLocationHash", TypeKeyword.Interface, ["Routing", "Components", "AspNetCore", "Microsoft"], [], [], []));
+            AddScopedService(serviceProvider, "ErrorBoundaryLogger", "GetErrorBoundaryLogger", new TypeName("IErrorBoundaryLogger", TypeKeyword.Interface, ["Web", "Components", "AspNetCore", "Microsoft"], [], [], []));
             // when support for unbound/open generics
             // AddSingletonService(serviceProvider, "Logger", "GetLogger<T>", "Microsoft.Extensions.Logging.ILogger<>")
 
             if (!blazorServiceGeneration.HasFlag(BlazorServiceGeneration.Hybrid)) {
                 // server or webassembly
-                AddSingletonService(serviceProvider, "Configuration", "GetConfiguration", new TypeName("IConfiguration", ["Configuration", "Extensions", "Microsoft"], [], []));
-                AddScopedService(serviceProvider, "ComponentStatePersistenceManager", "GetComponentStatePersistenceManager", new TypeName("ComponentStatePersistenceManager", ["Infrastructure", "Components", "AspNetCore", "Microsoft"], [], []));
-                AddScopedService(serviceProvider, "PersistentComponentState", "GetPersistentComponentState", new TypeName("PersistentComponentState", ["Components", "AspNetCore", "Microsoft"], [], []));
-                AddScopedService(serviceProvider, "AntiforgeryStateProvider", "GetAntiforgeryStateProvider", new TypeName("AntiforgeryStateProvider", ["Forms", "Components", "AspNetCore", "Microsoft"], [], []));
+                AddSingletonService(serviceProvider, "Configuration", "GetConfiguration", new TypeName("IConfiguration", TypeKeyword.Interface, ["Configuration", "Extensions", "Microsoft"], [], [], []));
+                AddScopedService(serviceProvider, "ComponentStatePersistenceManager", "GetComponentStatePersistenceManager", new TypeName("ComponentStatePersistenceManager", TypeKeyword.Class, ["Infrastructure", "Components", "AspNetCore", "Microsoft"], [], [], []));
+                AddScopedService(serviceProvider, "PersistentComponentState", "GetPersistentComponentState", new TypeName("PersistentComponentState", TypeKeyword.Class, ["Components", "AspNetCore", "Microsoft"], [], [], []));
+                AddScopedService(serviceProvider, "AntiforgeryStateProvider", "GetAntiforgeryStateProvider", new TypeName("AntiforgeryStateProvider", TypeKeyword.Class, ["Forms", "Components", "AspNetCore", "Microsoft"], [], [], []));
             }
 
             switch (blazorServiceGeneration) {
                 case BlazorServiceGeneration.Webassembly: // webassembly only
-                    AddSingletonService(serviceProvider, "LazyAssemblyLoader", "GetLazyAssemblyLoader", new TypeName("LazyAssemblyLoader", ["Services", "WebAssembly", "Components", "AspNetCore", "Microsoft"], [], []));
-                    AddSingletonService(serviceProvider, "WebAssemblyHostEnvironment", "GetWebAssemblyHostEnvironment", new TypeName("IWebAssemblyHostEnvironment", ["Hosting", "WebAssembly", "Components", "AspNetCore", "Microsoft"], [], []));
+                    AddSingletonService(serviceProvider, "LazyAssemblyLoader", "GetLazyAssemblyLoader", new TypeName("LazyAssemblyLoader", TypeKeyword.Class, ["Services", "WebAssembly", "Components", "AspNetCore", "Microsoft"], [], [], []));
+                    AddSingletonService(serviceProvider, "WebAssemblyHostEnvironment", "GetWebAssemblyHostEnvironment", new TypeName("IWebAssemblyHostEnvironment", TypeKeyword.Interface, ["Hosting", "WebAssembly", "Components", "AspNetCore", "Microsoft"], [], [], []));
                     break;
                 case BlazorServiceGeneration.Server: // server only
-                    AddSingletonService(serviceProvider, "WebHostEnvironment", "GetWebHostEnvironment", new TypeName("IWebHostEnvironment", ["Hosting", "AspNetCore", "Microsoft"], [], []));
+                    AddSingletonService(serviceProvider, "WebHostEnvironment", "GetWebHostEnvironment", new TypeName("IWebHostEnvironment", TypeKeyword.Interface, ["Hosting", "AspNetCore", "Microsoft"], [], [], []));
                     break;
             }
         }
@@ -209,11 +209,7 @@ file static class CircleDIGeneratorExtensions {
             
             """);
 
-        if (serviceProvider.Identifier.NameSpaceList.Count > 0) {
-            builder.AppendNamespace(serviceProvider.Identifier.NameSpaceList);
-            builder.Append('\n');
-            builder.Append('\n');
-        }
+        builder.AppendNamespace(serviceProvider.Identifier.NameSpaceList);
 
         // containing types
         for (int i = serviceProvider.Identifier.ContainingTypeList.Count - 1; i >= 0; i--) {
@@ -221,7 +217,7 @@ file static class CircleDIGeneratorExtensions {
             builder.Append("partial ");
             builder.Append(serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
-            builder.AppendContainingType(serviceProvider.Identifier.ContainingTypeList[i]);
+            serviceProvider.Identifier.ContainingTypeList[i].AppendOpenContainingType(builder);
             builder.Append(" {\n");
             indent.IncreaseLevel();
         }
@@ -286,8 +282,8 @@ file static class CircleDIGeneratorExtensions {
         }
 
 
-        string hintName = serviceProvider.Identifier.CreateHintName(".DefaultServiceMethods.g.cs");
         string source = builder.ToString();
+        string hintName = serviceProvider.Identifier.CreateHintName(builder, ".DefaultServiceMethods.g.cs");
         context.AddSource(hintName, source);
 
         stringBuilderPool.Return(builder);

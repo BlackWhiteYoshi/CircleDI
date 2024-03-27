@@ -45,7 +45,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             foreach (ConstructorDependency dependency in serviceProvider.ConstructorParameterListScope) {
                 builder.Append(indent.Sp4);
                 builder.Append("private global::");
-                builder.AppendFullyQualifiedName(dependency.ServiceType);
+                dependency.ServiceType.AppendClosedFullyQualified(builder);
                 builder.Append(" _");
                 builder.AppendFirstLower(dependency.Name);
                 builder.Append(";\n");
@@ -208,7 +208,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         switch (service.Implementation.Type) {
             case MemberType.None:
                 builder.Append("new global::");
-                builder.AppendFullyQualifiedName(service.ImplementationType);
+                service.ImplementationType.AppendClosedFullyQualified(builder);
                 AppendConstructorDependencyList(service);
                 AppendPropertyDependencyList(service, circularDependencies, indent.Sp8);
                 break;
@@ -248,7 +248,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                 builder.Append("public ");
                 builder.Append(refOrEmpty);
                 builder.Append("global::");
-                builder.AppendFullyQualifiedName(service.ServiceType);
+                service.ServiceType.AppendClosedFullyQualified(builder);
                 builder.Append(' ');
                 builder.AppendServiceGetter(service);
 
@@ -284,7 +284,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
 
         builder.Append(indent.Sp4);
         builder.Append("private global::");
-        builder.AppendFullyQualifiedName(service.ImplementationType);
+        service.ImplementationType.AppendClosedFullyQualified(builder);
         builder.Append(" _");
         builder.AppendFirstLower(service.Name);
         builder.Append(";\n");
@@ -333,7 +333,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         switch (service.Implementation.Type) {
             case MemberType.None:
                 builder.Append("new global::");
-                builder.AppendFullyQualifiedName(service.ImplementationType);
+                service.ImplementationType.AppendClosedFullyQualified(builder);
                 AppendConstructorDependencyList(service);
 
                 List<(Service, PropertyDependency)> circularDependencies = [];
@@ -364,7 +364,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append("return ");
         builder.Append(refOrEmpty);
         builder.Append("(global::");
-        builder.AppendFullyQualifiedName(service.ServiceType);
+        service.ServiceType.AppendClosedFullyQualified(builder);
         builder.Append(")_");
         builder.AppendFirstLower(service.Name);
         builder.Append(";\n");
@@ -380,7 +380,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append(indent.Sp4);
         builder.Append("private ");
         builder.Append("global::");
-        builder.AppendFullyQualifiedName(service.ImplementationType);
+        service.ImplementationType.AppendClosedFullyQualified(builder);
         builder.Append("? _");
         builder.AppendFirstLower(service.Name);
         builder.Append(";\n");
@@ -407,7 +407,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             AppendServiceSummary(service);
             builder.Append(indent.Sp4);
             builder.Append("public global::");
-            builder.AppendFullyQualifiedName(service.ServiceType);
+            service.ServiceType.AppendClosedFullyQualified(builder);
             builder.Append(' ');
 
             switch ((service.IsDisposable, service.IsAsyncDisposable, generateDisposeMethods)) {
@@ -460,7 +460,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     private readonly void AppendTransientGetterWithDisposeListCore(string disposeListName, Service service, string indentation) {
         builder.Append(indentation);
         builder.Append("global::");
-        builder.AppendFullyQualifiedName(service.ImplementationType);
+        service.ImplementationType.AppendClosedFullyQualified(builder);
         builder.Append(' ');
         builder.AppendFirstLower(service.Name);
         builder.Append(" = ");
@@ -490,7 +490,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     private readonly void AppendServiceCreationTransient(Service service, string indentation) {
         if (service.Implementation.Type == MemberType.None) {
             builder.Append("new global::");
-            builder.AppendFullyQualifiedName(service.ImplementationType);
+            service.ImplementationType.AppendClosedFullyQualified(builder);
             AppendConstructorDependencyList(service);
             AppendPropertyDependencyList(service, null!, indentation); // Transient is not allowed to have circular dependencies, so circularList is not accessed
             builder.Append(';');
@@ -534,7 +534,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             AppendServiceSummary(service);
             builder.Append(indent.Sp4);
             builder.Append("public global::");
-            builder.AppendFullyQualifiedName(service.ServiceType);
+            service.ServiceType.AppendClosedFullyQualified(builder);
             builder.Append(' ');
             builder.AppendServiceGetter(service);
             builder.Append(" => ");
@@ -591,7 +591,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         while (service is not null) {
             builder.Append(indent.Sp8);
             builder.Append("if (serviceType == typeof(global::");
-            builder.AppendFullyQualifiedName(service.ServiceType);
+            service.ServiceType.AppendClosedFullyQualified(builder);
             builder.Append("))\n");
 
             builder.Append(indent.Sp12);
@@ -604,7 +604,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             }
             else {
                 builder.Append("(global::");
-                builder.AppendFullyQualifiedName(service.ServiceType);
+                service.ServiceType.AppendClosedFullyQualified(builder);
                 builder.Append("[])[");
 
                 builder.AppendServiceGetter(service);
@@ -1014,9 +1014,9 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
                     builder.Append('_');
                     builder.Append(dependency.Name);
                     builder.Append("(global::");
-                    builder.AppendFullyQualifiedName(service.ImplementationType);
+                    service.ImplementationType.AppendClosedFullyQualified(builder);
                     builder.Append(" instance, global::");
-                    builder.AppendFullyQualifiedName(dependency.Service!.ServiceType);
+                    dependency.Service!.ServiceType.AppendClosedFullyQualified(builder);
                     builder.Append(" value);\n\n");
                 }
 
@@ -1038,7 +1038,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         foreach (Dependency dependency in dependencyList)
             if (!dependency.HasAttribute) {
                 builder.Append("global::");
-                builder.AppendFullyQualifiedName(dependency.ServiceType);
+                dependency.ServiceType.AppendClosedFullyQualified(builder);
                 builder.Append(' ');
                 builder.AppendFirstLower(dependency.Name);
                 builder.Append(", ");
@@ -1162,7 +1162,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
     /// <param name="serviceProvider"></param>
     public readonly void AppendServiceProviderFieldWithCast() {
         builder.Append("((global::");
-        builder.AppendFullyQualifiedName(serviceProvider.Identifier);
+        serviceProvider.Identifier.AppendClosedFullyQualified(builder);
         builder.Append(")_");
         builder.AppendFirstLower(serviceProvider.Identifier.Name);
         builder.Append(").");
@@ -1284,12 +1284,22 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
 
         builder.Append(indent.Sp4);
         builder.Append("/// Service type: <see cref=\"global::");
-        builder.AppendFullyQualifiedName(service.ServiceType);
+        {
+            int startIndex = builder.Length;
+            service.ServiceType.AppendClosedFullyQualified(builder);
+            builder.Replace('<', '{', startIndex, builder.Length - startIndex);
+            builder.Replace('>', '}', startIndex, builder.Length - startIndex);
+        }
         builder.Append("\"/><br />\n");
 
         builder.Append(indent.Sp4);
         builder.Append("/// Implementation type: <see cref=\"global::");
-        builder.AppendFullyQualifiedName(service.ImplementationType);
+        {
+            int startIndex = builder.Length;
+            service.ImplementationType.AppendClosedFullyQualified(builder);
+            builder.Replace('<', '{', startIndex, builder.Length - startIndex);
+            builder.Replace('>', '}', startIndex, builder.Length - startIndex);
+        }
         builder.Append("\"/>\n");
 
         builder.Append(indent.Sp4);

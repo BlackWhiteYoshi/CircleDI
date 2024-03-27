@@ -102,7 +102,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestProvider.Scope<T>"/>
+        /// Implementation type: <see cref="global::MyCode.TestProvider.Scope{T}"/>
         /// </summary>
         public global::MyCode.ITestProvider.IScope SelfScope => this;
 
@@ -208,7 +208,7 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestProvider.Scope<T>"/>
+        /// Implementation type: <see cref="global::MyCode.TestProvider.Scope{T}"/>
         /// </summary>
         global::MyCode.ITestProvider.IScope SelfScope { get; }
 

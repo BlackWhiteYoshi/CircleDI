@@ -298,7 +298,9 @@ public static class SourceCodeMarkDownGenerator {
                 }
             }
 
-            public partial interface IOverwritingProvider;
+            public partial interface IOverwritingProvider {
+                public partial interface IScope;
+            }
 
             """);
 

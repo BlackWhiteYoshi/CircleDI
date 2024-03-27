@@ -311,7 +311,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         Identifier = new TypeName(serviceProvider);
         IdentifierScope = serviceProviderScope switch {
             INamedTypeSymbol typeSymbol => new TypeName(typeSymbol),
-            _ => IdentifierScope = new TypeName("Scope", Identifier.NameSpaceList, [new ContainingType(Identifier.Name, Keyword, []), .. Identifier.ContainingTypeList], [])
+            _ => IdentifierScope = new TypeName("Scope", KeywordScope, Identifier.NameSpaceList, [Identifier, .. Identifier.ContainingTypeList], [], [])
         };
 
         Modifiers = new string[serviceProviderSyntax.Modifiers.Count - 1];
@@ -339,13 +339,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         InterfaceAccessibility = Accessibility.Public;
         InterfaceAccessibilityScope = Accessibility.Public;
         if (interfaceSymbol is not null) {
-            InterfaceIdentifier = TypeName.CreateWithOpenGenerics(interfaceSymbol);
+            InterfaceIdentifier = new TypeName(interfaceSymbol);
             InterfaceAccessibility = interfaceSymbol.DeclaredAccessibility;
         }
         else if (Attribute.NamedArguments.Length > 0 && Attribute.NamedArguments.GetArgument<string?>("InterfaceName") is string interfaceName)
-            InterfaceIdentifier = new TypeName(interfaceName, Identifier.NameSpaceList, Identifier.ContainingTypeList, []);
+            InterfaceIdentifier = new TypeName(interfaceName, TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
         else
-            InterfaceIdentifier = new TypeName(Identifier.Name != "ServiceProvider" ? $"I{Identifier.Name}" : "IServiceprovider", Identifier.NameSpaceList, Identifier.ContainingTypeList, []);
+            InterfaceIdentifier = new TypeName(Identifier.Name != "ServiceProvider" ? $"I{Identifier.Name}" : "IServiceprovider", TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
 
         if (InterfaceIdentifier.Name == "IServiceProvider")
             ErrorList.Add(Attribute.CreateInterfaceNameIServiceProviderError());
@@ -355,7 +355,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             InterfaceAccessibilityScope = interfaceScopeSymbol.DeclaredAccessibility;
         }
         else
-            InterfaceIdentifierScope = new TypeName("IScope", InterfaceIdentifier.NameSpaceList, [new ContainingType(InterfaceIdentifier.Name, TypeKeyword.Interface, []), .. InterfaceIdentifier.ContainingTypeList], []);
+            InterfaceIdentifierScope = new TypeName("IScope", TypeKeyword.Interface, InterfaceIdentifier.NameSpaceList, [InterfaceIdentifier, .. InterfaceIdentifier.ContainingTypeList], [], []);
 
 
         // parameters on ServiceProviderAttribute
