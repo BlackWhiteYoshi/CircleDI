@@ -70,11 +70,18 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::MyCode.DerivedClass))
-            return DerivedClass;
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "DerivedClass":
+                if (serviceType == typeof(global::MyCode.DerivedClass))
+                    return DerivedClass;
+                return null;
+            case "ITestProvider":
+                if (serviceType == typeof(global::MyCode.ITestProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -161,13 +168,22 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::MyCode.DerivedClass))
-                return DerivedClass;
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "DerivedClass":
+                    if (serviceType == typeof(global::MyCode.DerivedClass))
+                        return DerivedClass;
+                    return null;
+                case "ITestProvider":
+                    if (serviceType == typeof(global::MyCode.ITestProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 

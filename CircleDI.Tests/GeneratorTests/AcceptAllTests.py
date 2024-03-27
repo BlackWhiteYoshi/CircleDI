@@ -10,9 +10,14 @@
 import os
 import subprocess
 
-for (dirpath, dirnames, filenames) in os.walk(os.path.dirname(__file__)):
-    for filename in filenames:
-        if filename.endswith(".received.txt"):
-            basename = filename[:-13]
-            os.system(f"move /y {dirpath}\{basename}.received.txt {dirpath}\{basename}.verified.txt")
-            print(f"accepted {basename}\n")
+def accept_folder(directory: str):
+    for (dirpath, dirnames, filenames) in os.walk(directory):
+        for filename in filenames:
+            if filename.endswith(".received.txt"):
+                basename = filename[:-13]
+                os.system(f"move /y {dirpath}\{basename}.received.txt {dirpath}\{basename}.verified.txt")
+                print(f"accepted {basename}\n")
+
+
+accept_folder(os.path.dirname(__file__));
+accept_folder(os.path.join(os.path.dirname(__file__), "..", "BlazorTests"));

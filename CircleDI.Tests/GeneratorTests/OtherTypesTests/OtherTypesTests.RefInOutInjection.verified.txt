@@ -98,19 +98,34 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::MyCode.InInject))
-            return InInject;
-        if (serviceType == typeof(global::MyCode.OutInject))
-            return OutInject;
-        if (serviceType == typeof(global::MyCode.RefInject))
-            return RefInject;
-        if (serviceType == typeof(global::MyCode.TestStruct))
-            return TestStruct;
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
-        if (serviceType == typeof(global::MyCode.RefReadonlyInject))
-            return RefReadonlyInject;
-        return null;
+        switch (serviceType.Name) {
+            case "InInject":
+                if (serviceType == typeof(global::MyCode.InInject))
+                    return InInject;
+                return null;
+            case "OutInject":
+                if (serviceType == typeof(global::MyCode.OutInject))
+                    return OutInject;
+                return null;
+            case "RefInject":
+                if (serviceType == typeof(global::MyCode.RefInject))
+                    return RefInject;
+                return null;
+            case "TestStruct":
+                if (serviceType == typeof(global::MyCode.TestStruct))
+                    return TestStruct;
+                return null;
+            case "ITestProvider":
+                if (serviceType == typeof(global::MyCode.ITestProvider))
+                    return Self;
+                return null;
+            case "RefReadonlyInject":
+                if (serviceType == typeof(global::MyCode.RefReadonlyInject))
+                    return RefReadonlyInject;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -215,21 +230,38 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::MyCode.InInject))
-                return InInject;
-            if (serviceType == typeof(global::MyCode.OutInject))
-                return OutInject;
-            if (serviceType == typeof(global::MyCode.RefInject))
-                return RefInject;
-            if (serviceType == typeof(global::MyCode.TestStruct))
-                return TestStruct;
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
-            if (serviceType == typeof(global::MyCode.RefReadonlyInject))
-                return RefReadonlyInject;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "InInject":
+                    if (serviceType == typeof(global::MyCode.InInject))
+                        return InInject;
+                    return null;
+                case "OutInject":
+                    if (serviceType == typeof(global::MyCode.OutInject))
+                        return OutInject;
+                    return null;
+                case "RefInject":
+                    if (serviceType == typeof(global::MyCode.RefInject))
+                        return RefInject;
+                    return null;
+                case "TestStruct":
+                    if (serviceType == typeof(global::MyCode.TestStruct))
+                        return TestStruct;
+                    return null;
+                case "ITestProvider":
+                    if (serviceType == typeof(global::MyCode.ITestProvider))
+                        return Self;
+                    return null;
+                case "RefReadonlyInject":
+                    if (serviceType == typeof(global::MyCode.RefReadonlyInject))
+                        return RefReadonlyInject;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 

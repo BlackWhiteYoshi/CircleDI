@@ -192,33 +192,62 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
-        if (serviceType == typeof(global::MyCode.ITestService1))
-            return TestService1;
-        if (serviceType == typeof(global::MyCode.ITestService2))
-            return TestService2;
-        if (serviceType == typeof(global::MyCode.ITestService3))
-            return TestService3;
-        if (serviceType == typeof(global::MyCode.ITestService4))
-            return TestService4;
-        if (serviceType == typeof(global::MyCode.ITestService5))
-            return TestService5;
-        if (serviceType == typeof(global::MyCode.ITestService6))
-            return TestService6;
-        if (serviceType == typeof(global::MyCode.ITestService7))
-            return TestService7;
-        if (serviceType == typeof(global::MyCode.ITestService8))
-            return TestService8;
-        if (serviceType == typeof(global::MyCode.ITestService9))
-            return TestService9;
-        if (serviceType == typeof(global::MyCode.ITestService10))
-            return TestService10;
-        if (serviceType == typeof(global::MyCode.ITestService11))
-            return TestService11;
-        if (serviceType == typeof(global::MyCode.ITestService12))
-            return TestService12;
-        return null;
+        switch (serviceType.Name) {
+            case "ITestProvider":
+                if (serviceType == typeof(global::MyCode.ITestProvider))
+                    return Self;
+                return null;
+            case "ITestService1":
+                if (serviceType == typeof(global::MyCode.ITestService1))
+                    return TestService1;
+                return null;
+            case "ITestService2":
+                if (serviceType == typeof(global::MyCode.ITestService2))
+                    return TestService2;
+                return null;
+            case "ITestService3":
+                if (serviceType == typeof(global::MyCode.ITestService3))
+                    return TestService3;
+                return null;
+            case "ITestService4":
+                if (serviceType == typeof(global::MyCode.ITestService4))
+                    return TestService4;
+                return null;
+            case "ITestService5":
+                if (serviceType == typeof(global::MyCode.ITestService5))
+                    return TestService5;
+                return null;
+            case "ITestService6":
+                if (serviceType == typeof(global::MyCode.ITestService6))
+                    return TestService6;
+                return null;
+            case "ITestService7":
+                if (serviceType == typeof(global::MyCode.ITestService7))
+                    return TestService7;
+                return null;
+            case "ITestService8":
+                if (serviceType == typeof(global::MyCode.ITestService8))
+                    return TestService8;
+                return null;
+            case "ITestService9":
+                if (serviceType == typeof(global::MyCode.ITestService9))
+                    return TestService9;
+                return null;
+            case "ITestService10":
+                if (serviceType == typeof(global::MyCode.ITestService10))
+                    return TestService10;
+                return null;
+            case "ITestService11":
+                if (serviceType == typeof(global::MyCode.ITestService11))
+                    return TestService11;
+                return null;
+            case "ITestService12":
+                if (serviceType == typeof(global::MyCode.ITestService12))
+                    return TestService12;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -455,35 +484,66 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
-            if (serviceType == typeof(global::MyCode.ITestService1))
-                return TestService1;
-            if (serviceType == typeof(global::MyCode.ITestService2))
-                return TestService2;
-            if (serviceType == typeof(global::MyCode.ITestService3))
-                return TestService3;
-            if (serviceType == typeof(global::MyCode.ITestService4))
-                return TestService4;
-            if (serviceType == typeof(global::MyCode.ITestService5))
-                return TestService5;
-            if (serviceType == typeof(global::MyCode.ITestService6))
-                return TestService6;
-            if (serviceType == typeof(global::MyCode.ITestService7))
-                return TestService7;
-            if (serviceType == typeof(global::MyCode.ITestService8))
-                return TestService8;
-            if (serviceType == typeof(global::MyCode.ITestService9))
-                return TestService9;
-            if (serviceType == typeof(global::MyCode.ITestService10))
-                return TestService10;
-            if (serviceType == typeof(global::MyCode.ITestService11))
-                return TestService11;
-            if (serviceType == typeof(global::MyCode.ITestService12))
-                return TestService12;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "ITestProvider":
+                    if (serviceType == typeof(global::MyCode.ITestProvider))
+                        return Self;
+                    return null;
+                case "ITestService1":
+                    if (serviceType == typeof(global::MyCode.ITestService1))
+                        return TestService1;
+                    return null;
+                case "ITestService2":
+                    if (serviceType == typeof(global::MyCode.ITestService2))
+                        return TestService2;
+                    return null;
+                case "ITestService3":
+                    if (serviceType == typeof(global::MyCode.ITestService3))
+                        return TestService3;
+                    return null;
+                case "ITestService4":
+                    if (serviceType == typeof(global::MyCode.ITestService4))
+                        return TestService4;
+                    return null;
+                case "ITestService5":
+                    if (serviceType == typeof(global::MyCode.ITestService5))
+                        return TestService5;
+                    return null;
+                case "ITestService6":
+                    if (serviceType == typeof(global::MyCode.ITestService6))
+                        return TestService6;
+                    return null;
+                case "ITestService7":
+                    if (serviceType == typeof(global::MyCode.ITestService7))
+                        return TestService7;
+                    return null;
+                case "ITestService8":
+                    if (serviceType == typeof(global::MyCode.ITestService8))
+                        return TestService8;
+                    return null;
+                case "ITestService9":
+                    if (serviceType == typeof(global::MyCode.ITestService9))
+                        return TestService9;
+                    return null;
+                case "ITestService10":
+                    if (serviceType == typeof(global::MyCode.ITestService10))
+                        return TestService10;
+                    return null;
+                case "ITestService11":
+                    if (serviceType == typeof(global::MyCode.ITestService11))
+                        return TestService11;
+                    return null;
+                case "ITestService12":
+                    if (serviceType == typeof(global::MyCode.ITestService12))
+                        return TestService12;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 

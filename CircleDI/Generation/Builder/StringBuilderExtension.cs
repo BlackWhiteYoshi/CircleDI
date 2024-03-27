@@ -586,43 +586,82 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
         builder.Append("/// </summary>\n");
         builder.Append(indent.Sp4);
         builder.Append("object? IServiceProvider.GetService(Type serviceType) {\n");
+        builder.Append(indent.Sp8);
+        builder.Append("switch (serviceType.Name) {\n");
 
         Service? service = GetNextService();
-        while (service is not null) {
-            builder.Append(indent.Sp8);
-            builder.Append("if (serviceType == typeof(global::");
-            service.ServiceType.AppendClosedFullyQualified(builder);
-            builder.Append("))\n");
-
+        if (service is not null) {
+            string currentserviceName = service.ServiceType.Name;
+            int currentTypeParameterCount = service.ServiceType.TypeArgumentList.Count;
             builder.Append(indent.Sp12);
-            builder.Append("return ");
-
-            Service? nextService = GetNextService();
-            if (service.ServiceType != nextService?.ServiceType) {
-                builder.AppendServiceGetter(service);
-                builder.Append(";\n");
+            builder.Append("case \"");
+            builder.Append(currentserviceName);
+            if (currentTypeParameterCount > 0) {
+                builder.Append('`');
+                builder.Append(currentTypeParameterCount);
             }
-            else {
-                builder.Append("(global::");
-                service.ServiceType.AppendClosedFullyQualified(builder);
-                builder.Append("[])[");
+            builder.Append("\":\n");
 
-                builder.AppendServiceGetter(service);
-                do {
-                    builder.Append(", ");
-                    builder.AppendServiceGetter(nextService!);
-                    nextService = GetNextService();
+            do {
+                if (service.ServiceType.Name != currentserviceName || service.ServiceType.TypeArgumentList.Count != currentTypeParameterCount) {
+                    currentserviceName = service.ServiceType.Name;
+                    currentTypeParameterCount = service.ServiceType.TypeArgumentList.Count;
+
+                    builder.Append(indent.Sp16);
+                    builder.Append("return null;\n");
+                    builder.Append(indent.Sp12);
+                    builder.Append("case \"");
+                    builder.Append(currentserviceName);
+                    if (currentTypeParameterCount > 0) {
+                        builder.Append('`');
+                        builder.Append(currentTypeParameterCount);
+                    }
+                    builder.Append("\":\n");
                 }
-                while (service.ServiceType == nextService?.ServiceType);
 
-                builder.Append("];\n");
-            }
+                builder.Append(indent.Sp16);
+                builder.Append("if (serviceType == typeof(global::");
+                service.ServiceType.AppendClosedFullyQualified(builder);
+                builder.Append("))\n");
 
-            service = nextService;
+                builder.Append(indent.Sp20);
+                builder.Append("return ");
+
+                Service? nextService = GetNextService();
+                if (service.ServiceType != nextService?.ServiceType) {
+                    builder.AppendServiceGetter(service);
+                    builder.Append(";\n");
+                }
+                else {
+                    builder.Append("(global::");
+                    service.ServiceType.AppendClosedFullyQualified(builder);
+                    builder.Append("[])[");
+
+                    builder.AppendServiceGetter(service);
+                    do {
+                        builder.Append(", ");
+                        builder.AppendServiceGetter(nextService!);
+                        nextService = GetNextService();
+                    }
+                    while (service.ServiceType == nextService?.ServiceType);
+
+                    builder.Append("];\n");
+                }
+
+                service = nextService;
+            } while (service is not null);
+
+            builder.Append(indent.Sp16);
+            builder.Append("return null;\n");
         }
 
-        builder.Append(indent.Sp8);
+        builder.Append(indent.Sp12);
+        builder.Append("default:\n");
+        builder.Append(indent.Sp16);
         builder.Append("return null;\n");
+
+        builder.Append(indent.Sp8);
+        builder.Append("}\n");
 
         builder.Append(indent.Sp4);
         builder.Append("}\n\n\n");

@@ -80,15 +80,26 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::System.Int32))
-            return Int32;
-        if (serviceType == typeof(global::MyCode.TestClass))
-            return TestClass;
-        if (serviceType == typeof(global::MyCode.ITestStruct))
-            return TestStruct;
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "Int32":
+                if (serviceType == typeof(global::System.Int32))
+                    return Int32;
+                return null;
+            case "TestClass":
+                if (serviceType == typeof(global::MyCode.TestClass))
+                    return TestClass;
+                return null;
+            case "ITestStruct":
+                if (serviceType == typeof(global::MyCode.ITestStruct))
+                    return TestStruct;
+                return null;
+            case "ITestProvider":
+                if (serviceType == typeof(global::MyCode.ITestProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -179,17 +190,30 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::System.Int32))
-                return Int32;
-            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::MyCode.TestClass))
-                return TestClass;
-            if (serviceType == typeof(global::MyCode.ITestStruct))
-                return TestStruct;
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "Int32":
+                    if (serviceType == typeof(global::System.Int32))
+                        return Int32;
+                    return null;
+                case "IScope":
+                    if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "TestClass":
+                    if (serviceType == typeof(global::MyCode.TestClass))
+                        return TestClass;
+                    return null;
+                case "ITestStruct":
+                    if (serviceType == typeof(global::MyCode.ITestStruct))
+                        return TestStruct;
+                    return null;
+                case "ITestProvider":
+                    if (serviceType == typeof(global::MyCode.ITestProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 

@@ -124,17 +124,30 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
-        if (serviceType == typeof(global::Microsoft.Extensions.Configuration.IConfiguration))
-            return Configuration;
-        if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILoggerFactory))
-            return LoggerFactory;
-        if (serviceType == typeof(global::Microsoft.AspNetCore.Components.WebAssembly.Services.LazyAssemblyLoader))
-            return LazyAssemblyLoader;
-        if (serviceType == typeof(global::Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment))
-            return WebAssemblyHostEnvironment;
-        return null;
+        switch (serviceType.Name) {
+            case "ITestProvider":
+                if (serviceType == typeof(global::MyCode.ITestProvider))
+                    return Self;
+                return null;
+            case "IConfiguration":
+                if (serviceType == typeof(global::Microsoft.Extensions.Configuration.IConfiguration))
+                    return Configuration;
+                return null;
+            case "ILoggerFactory":
+                if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILoggerFactory))
+                    return LoggerFactory;
+                return null;
+            case "LazyAssemblyLoader":
+                if (serviceType == typeof(global::Microsoft.AspNetCore.Components.WebAssembly.Services.LazyAssemblyLoader))
+                    return LazyAssemblyLoader;
+                return null;
+            case "IWebAssemblyHostEnvironment":
+                if (serviceType == typeof(global::Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment))
+                    return WebAssemblyHostEnvironment;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -378,35 +391,66 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::Microsoft.JSInterop.IJSRuntime))
-                return JSRuntime;
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
-            if (serviceType == typeof(global::Microsoft.Extensions.Configuration.IConfiguration))
-                return Configuration;
-            if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILoggerFactory))
-                return LoggerFactory;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.NavigationManager))
-                return NavigationManager;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.WebAssembly.Services.LazyAssemblyLoader))
-                return LazyAssemblyLoader;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger))
-                return ErrorBoundaryLogger;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash))
-                return ScrollToLocationHash;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Routing.INavigationInterception))
-                return NavigationInterception;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider))
-                return AntiforgeryStateProvider;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.PersistentComponentState))
-                return PersistentComponentState;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment))
-                return WebAssemblyHostEnvironment;
-            if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager))
-                return ComponentStatePersistenceManager;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "IJSRuntime":
+                    if (serviceType == typeof(global::Microsoft.JSInterop.IJSRuntime))
+                        return JSRuntime;
+                    return null;
+                case "ITestProvider":
+                    if (serviceType == typeof(global::MyCode.ITestProvider))
+                        return Self;
+                    return null;
+                case "IConfiguration":
+                    if (serviceType == typeof(global::Microsoft.Extensions.Configuration.IConfiguration))
+                        return Configuration;
+                    return null;
+                case "ILoggerFactory":
+                    if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILoggerFactory))
+                        return LoggerFactory;
+                    return null;
+                case "NavigationManager":
+                    if (serviceType == typeof(global::Microsoft.AspNetCore.Components.NavigationManager))
+                        return NavigationManager;
+                    return null;
+                case "LazyAssemblyLoader":
+                    if (serviceType == typeof(global::Microsoft.AspNetCore.Components.WebAssembly.Services.LazyAssemblyLoader))
+                        return LazyAssemblyLoader;
+                    return null;
+                case "IErrorBoundaryLogger":
+                    if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger))
+                        return ErrorBoundaryLogger;
+                    return null;
+                case "IScrollToLocationHash":
+                    if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash))
+                        return ScrollToLocationHash;
+                    return null;
+                case "INavigationInterception":
+                    if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Routing.INavigationInterception))
+                        return NavigationInterception;
+                    return null;
+                case "AntiforgeryStateProvider":
+                    if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider))
+                        return AntiforgeryStateProvider;
+                    return null;
+                case "PersistentComponentState":
+                    if (serviceType == typeof(global::Microsoft.AspNetCore.Components.PersistentComponentState))
+                        return PersistentComponentState;
+                    return null;
+                case "IWebAssemblyHostEnvironment":
+                    if (serviceType == typeof(global::Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment))
+                        return WebAssemblyHostEnvironment;
+                    return null;
+                case "ComponentStatePersistenceManager":
+                    if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager))
+                        return ComponentStatePersistenceManager;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 

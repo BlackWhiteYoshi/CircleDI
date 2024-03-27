@@ -68,13 +68,22 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::MyCode.ITestService))
-            return TestService;
-        if (serviceType == typeof(global::MyCode.ITestProvider))
-            return Self;
-        if (serviceType == typeof(global::MyCode.ITestDisposable))
-            return TestDisposable;
-        return null;
+        switch (serviceType.Name) {
+            case "ITestService":
+                if (serviceType == typeof(global::MyCode.ITestService))
+                    return TestService;
+                return null;
+            case "ITestProvider":
+                if (serviceType == typeof(global::MyCode.ITestProvider))
+                    return Self;
+                return null;
+            case "ITestDisposable":
+                if (serviceType == typeof(global::MyCode.ITestDisposable))
+                    return TestDisposable;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -159,15 +168,26 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::MyCode.ITestService))
-                return TestService;
-            if (serviceType == typeof(global::MyCode.ITestProvider))
-                return Self;
-            if (serviceType == typeof(global::MyCode.ITestDisposable))
-                return TestDisposable;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "ITestService":
+                    if (serviceType == typeof(global::MyCode.ITestService))
+                        return TestService;
+                    return null;
+                case "ITestProvider":
+                    if (serviceType == typeof(global::MyCode.ITestProvider))
+                        return Self;
+                    return null;
+                case "ITestDisposable":
+                    if (serviceType == typeof(global::MyCode.ITestDisposable))
+                        return TestDisposable;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
