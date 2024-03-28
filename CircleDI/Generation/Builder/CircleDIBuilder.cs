@@ -66,7 +66,7 @@ public static class CircleDIBuilder {
             builder.Append("partial ");
             builder.Append(serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
-            serviceProvider.Identifier.ContainingTypeList[i].AppendOpenContainingType(builder);
+            builder.AppendOpenContainingType(serviceProvider.Identifier.ContainingTypeList[i]);
             builder.Append(" {\n");
             builderExtension.indent.IncreaseLevel();
         }
@@ -82,11 +82,11 @@ public static class CircleDIBuilder {
         builder.Append(serviceProvider.Keyword.AsString());
         builder.Append(' ');
         builder.Append(serviceProvider.Identifier.Name);
-        serviceProvider.Identifier.AppendOpenGenerics(builder);
+        builder.AppendOpenGenerics(serviceProvider.Identifier);
         builder.Append(" : ");
         if (serviceProvider.HasInterface) {
             builder.Append("global::");
-            serviceProvider.InterfaceIdentifier.AppendOpenFullyQualified(builder);
+            builder.AppendOpenFullyQualified(serviceProvider.InterfaceIdentifier);
             builder.Append(", ");
         }
         builder.Append("IServiceProvider {\n");
@@ -100,14 +100,14 @@ public static class CircleDIBuilder {
             builder.Append(builderExtension.indent.Sp4);
             builder.Append("public global::");
             if (serviceProvider.HasInterface)
-                serviceProvider.InterfaceIdentifierScope.AppendOpenFullyQualified(builder);
+                builder.AppendOpenFullyQualified(serviceProvider.InterfaceIdentifierScope);
             else
-                serviceProvider.IdentifierScope.AppendOpenFullyQualified(builder);
+                builder.AppendOpenFullyQualified(serviceProvider.IdentifierScope);
             builder.Append(" CreateScope");
-            serviceProvider.IdentifierScope.AppendOpenGenerics(builder);
+            builder.AppendOpenGenerics(serviceProvider.IdentifierScope);
             builderExtension.AppendParameterDependencyList(serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList));
             builder.Append(" => new global::");
-            serviceProvider.IdentifierScope.AppendOpenFullyQualified(builder);
+            builder.AppendOpenFullyQualified(serviceProvider.IdentifierScope);
             // AppendConstructorDependencyList of serviceProvider.CreateScope
             {
                 builder.Append('(');
@@ -183,11 +183,11 @@ public static class CircleDIBuilder {
             builder.Append("partial ");
             builder.Append(serviceProvider.KeywordScope.AsString());
             builder.Append(" Scope");
-            serviceProvider.IdentifierScope.AppendOpenGenerics(builder);
+            builder.AppendOpenGenerics(serviceProvider.IdentifierScope);
             builder.Append(" : ");
             if (serviceProvider.HasInterface) {
                 builder.Append("global::");
-                serviceProvider.InterfaceIdentifierScope.AppendOpenFullyQualified(builder);
+                builder.AppendOpenFullyQualified(serviceProvider.InterfaceIdentifierScope);
                 builder.Append(", ");
             }
             builder.Append("IServiceProvider {\n");
@@ -211,7 +211,7 @@ public static class CircleDIBuilder {
                 builder.Append("public ");
                 builder.Append(refOrEmpty);
                 builder.Append("global::");
-                service.ServiceType.AppendClosedFullyQualified(builder);
+                builder.AppendClosedFullyQualified(service.ServiceType);
                 builder.Append(' ');
                 builder.AppendServiceGetter(service);
                 builder.Append(" => ");
@@ -259,7 +259,7 @@ public static class CircleDIBuilder {
         }
 
         string source = builder.ToString();
-        string hintName = serviceProvider.Identifier.CreateHintName(builder, ".g.cs");
+        string hintName = builder.CreateHintName(serviceProvider.Identifier, ".g.cs");
         context.AddSource(hintName, source);
 
         stringBuilderPool.Return(builder);
@@ -290,7 +290,7 @@ public static class CircleDIBuilder {
             builder.Append("partial ");
             builder.Append(serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
-            serviceProvider.InterfaceIdentifier.ContainingTypeList[i].AppendOpenContainingType(builder);
+            builder.AppendOpenContainingType(serviceProvider.InterfaceIdentifier.ContainingTypeList[i]);
             builder.Append(" {\n");
             builderExtension.indent.IncreaseLevel();
         }
@@ -301,7 +301,7 @@ public static class CircleDIBuilder {
         builder.Append(serviceProvider.InterfaceAccessibility.AsString());
         builder.Append("partial interface ");
         builder.Append(serviceProvider.InterfaceIdentifier.Name);
-        serviceProvider.InterfaceIdentifier.AppendOpenGenerics(builder);
+        builder.AppendOpenGenerics(serviceProvider.InterfaceIdentifier);
         builder.Append(serviceProvider.GenerateDisposeMethods switch {
             DisposeGeneration.NoDisposing => string.Empty,
             DisposeGeneration.Dispose => " : IDisposable",
@@ -316,15 +316,15 @@ public static class CircleDIBuilder {
             builderExtension.AppendCreateScopeSummary();
             builder.Append(builderExtension.indent.Sp4);
             builder.Append("global::");
-            serviceProvider.InterfaceIdentifierScope.AppendOpenFullyQualified(builder);
+            builder.AppendOpenFullyQualified(serviceProvider.InterfaceIdentifierScope);
             builder.Append(" CreateScope");
-            serviceProvider.IdentifierScope.AppendOpenGenerics(builder);
+            builder.AppendOpenGenerics(serviceProvider.IdentifierScope);
             builder.Append('(');
             foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
                 if (!dependency.HasAttribute) {
                     // if no attribute => dependency.ServiceType has value
                     builder.Append("global::");
-                    dependency.ServiceType!.AppendClosedFullyQualified(builder);
+                    builder.AppendClosedFullyQualified(dependency.ServiceType!);
                     builder.Append(' ');
                     builder.Append(dependency.Name);
                     builder.Append(", ");
@@ -348,7 +348,7 @@ public static class CircleDIBuilder {
                 builder.Append("ref ");
 
             builder.Append("global::");
-            service.ServiceType.AppendClosedFullyQualified(builder);
+            builder.AppendClosedFullyQualified(service.ServiceType);
             builder.Append(' ');
             if (service.GetAccessor == GetAccess.Property) {
                 builder.Append(service.Name);
@@ -372,7 +372,7 @@ public static class CircleDIBuilder {
             builder.Append(builderExtension.indent.Sp0);
             builder.Append(serviceProvider.InterfaceAccessibilityScope.AsString());
             builder.Append("partial interface IScope");
-            serviceProvider.InterfaceIdentifierScope.AppendOpenGenerics(builder);
+            builder.AppendOpenGenerics(serviceProvider.InterfaceIdentifierScope);
             builder.Append(serviceProvider.GenerateDisposeMethodsScope switch {
                 DisposeGeneration.NoDisposing => string.Empty,
                 DisposeGeneration.Dispose => " : IDisposable",
@@ -392,7 +392,7 @@ public static class CircleDIBuilder {
                     builder.Append("ref ");
 
                 builder.Append("global::");
-                service.ServiceType.AppendClosedFullyQualified(builder);
+                builder.AppendClosedFullyQualified(service.ServiceType);
                 builder.Append(' ');
                 if (service.GetAccessor == GetAccess.Property) {
                     builder.Append(service.Name);
@@ -426,7 +426,7 @@ public static class CircleDIBuilder {
         }
 
         string source = builder.ToString();
-        string hintName = serviceProvider.InterfaceIdentifier.CreateHintName(builder, ".g.cs");
+        string hintName = builder.CreateHintName(serviceProvider.InterfaceIdentifier, ".g.cs");
         context.AddSource(hintName, source);
 
         stringBuilderPool.Return(builder);

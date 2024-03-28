@@ -217,7 +217,7 @@ file static class CircleDIGeneratorExtensions {
             builder.Append("partial ");
             builder.Append(serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
-            serviceProvider.Identifier.ContainingTypeList[i].AppendOpenContainingType(builder);
+            builder.AppendOpenContainingType(serviceProvider.Identifier.ContainingTypeList[i]);
             builder.Append(" {\n");
             indent.IncreaseLevel();
         }
@@ -283,7 +283,7 @@ file static class CircleDIGeneratorExtensions {
 
 
         string source = builder.ToString();
-        string hintName = serviceProvider.Identifier.CreateHintName(builder, ".DefaultServiceMethods.g.cs");
+        string hintName = builder.CreateHintName(serviceProvider.Identifier, ".DefaultServiceMethods.g.cs");
         context.AddSource(hintName, source);
 
         stringBuilderPool.Return(builder);

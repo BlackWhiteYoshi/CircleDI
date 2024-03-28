@@ -73,4 +73,154 @@ public static class StringBuilderExtensions {
             builder.Append(";\n\n");
         }
     }
+
+
+    #region TypeName
+
+    /// <summary>
+    /// Appends fully qualified type:<br />
+    /// "{namespace1}.{namespaceN}.{containingType1}.{containingTypeN}.{name}&lt;{T1}.{TN}&gt;"
+    /// </summary>
+    /// <param name="builder"></param>
+    public static void AppendClosedFullyQualified(this StringBuilder builder, TypeName typeName) {
+        builder.AppendNamespaceList(typeName);
+        builder.AppendClosedContainingTypeList(typeName);
+        builder.Append(typeName.Name);
+        builder.AppendClosedGenerics(typeName);
+    }
+
+    /// <summary>
+    /// Appends fully qualified type:<br />
+    /// "{namespace1}.{namespaceN}.{containingType1}.{containingTypeN}.{name}&lt;{T1}.{TN}&gt;"
+    /// </summary>
+    /// <param name="builder"></param>
+    public static void AppendOpenFullyQualified(this StringBuilder builder, TypeName typeName) {
+        builder.AppendNamespaceList(typeName);
+        builder.AppendOpenContainingTypeList(typeName);
+        builder.Append(typeName.Name);
+        builder.AppendOpenGenerics(typeName);
+    }
+
+    /// <summary>
+    /// Creates the fully qualified name, but '&lt;', '&gt;' and ':' are replaced with '{', '}' and ':' and the given extension is appended.
+    /// </summary>
+    /// <param name="builder">buffer to create the string, the content is cleared.</param>
+    /// <param name="extension">ending of the hintName, typically it is ".g.cs"</param>
+    /// <returns></returns>
+    public static string CreateHintName(this StringBuilder builder, TypeName typeName, string extension) {
+        builder.Clear();
+
+        builder.AppendClosedFullyQualified(typeName);
+        builder.Replace('<', '{');
+        builder.Replace('>', '}');
+        builder.Replace(':', '.');
+        builder.Append(extension);
+
+        return builder.ToString();
+    }
+
+
+
+    /// <summary>
+    /// Appends namespace with trailing dot
+    /// </summary>
+    /// <param name="builder"></param>
+    public static void AppendNamespaceList(this StringBuilder builder, TypeName typeName) {
+        for (int i = typeName.NameSpaceList.Count - 1; i >= 0; i--) {
+            builder.Append(typeName.NameSpaceList[i]);
+            builder.Append('.');
+        }
+    }
+
+
+    /// <summary>
+    /// Appends containing types with trailing dot
+    /// </summary>
+    /// <param name="builder"></param>
+    public static void AppendClosedContainingTypeList(this StringBuilder builder, TypeName typeName) {
+        for (int i = typeName.ContainingTypeList.Count - 1; i >= 0; i--) {
+            builder.AppendClosedContainingType(typeName.ContainingTypeList[i]);
+            builder.Append('.');
+        }
+    }
+
+    /// <summary>
+    /// Appends containing types with trailing dot
+    /// </summary>
+    /// <param name="builder"></param>
+    public static void AppendOpenContainingTypeList(this StringBuilder builder, TypeName typeName) {
+        for (int i = typeName.ContainingTypeList.Count - 1; i >= 0; i--) {
+            builder.AppendOpenContainingType(typeName.ContainingTypeList[i]);
+            builder.Append('.');
+        }
+    }
+
+
+    /// <summary>
+    /// Appends "{Name}<{T1}, {T2}, {TN}>"
+    /// </summary>
+    /// <param name="builder"></param>
+    public static void AppendClosedContainingType(this StringBuilder builder, TypeName typeName) {
+        builder.Append(typeName.Name);
+        builder.AppendClosedGenerics(typeName);
+    }
+
+    /// <summary>
+    /// Appends "{Name}<{T1}, {T2}, {TN}>"
+    /// </summary>
+    /// <param name="builder"></param>
+    public static void AppendOpenContainingType(this StringBuilder builder, TypeName typeName) {
+        builder.Append(typeName.Name);
+        builder.AppendOpenGenerics(typeName);
+    }
+
+
+    /// <summary>
+    /// Appends: "&lt;{T1}, {T2}, {TN}&gt;"<br />
+    /// If <see cref="TypeArgumentList"/> empty, nothing is appended.
+    /// </summary>
+    /// <param name="builder"></param>
+    public static void AppendClosedGenerics(this StringBuilder builder, TypeName typeName) {
+        if (typeName.TypeArgumentList.Count == 0)
+            return;
+
+        builder.Append('<');
+
+        for (int i = 0; i < typeName.TypeArgumentList.Count; i++) {
+            if (typeName.TypeParameterList[i] == typeName.TypeArgumentList[i])
+                // is open generic
+                builder.Append(typeName.TypeParameterList[i].Name);
+            else {
+                // is closed generic
+                builder.Append("global::");
+                builder.AppendClosedFullyQualified(typeName.TypeArgumentList[i]);
+            }
+            builder.Append(", ");
+        }
+        builder.Length -= 2;
+
+        builder.Append('>');
+    }
+
+    /// <summary>
+    /// Appends: "&lt;{T1}, {T2}, {TN}&gt;"<br />
+    /// If <see cref="TypeArgumentList"/> empty, nothing is appended.
+    /// </summary>
+    /// <param name="builder"></param>
+    public static void AppendOpenGenerics(this StringBuilder builder, TypeName typeName) {
+        if (typeName.TypeParameterList.Count == 0)
+            return;
+
+        builder.Append('<');
+
+        for (int i = 0; i < typeName.TypeParameterList.Count; i++) {
+            builder.Append(typeName.TypeParameterList[i].Name);
+            builder.Append(", ");
+        }
+        builder.Length -= 2;
+
+        builder.Append('>');
+    }
+
+    #endregion
 }

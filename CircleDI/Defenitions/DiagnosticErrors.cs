@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CircleDI.Extensions;
+using Microsoft.CodeAnalysis;
 using System.Text;
 
 namespace CircleDI.Defenitions;
@@ -447,7 +448,7 @@ public static class DiagnosticErrors {
 
     private static string CreateFullyQualifiedName(this TypeName typeName) {
         StringBuilder builder = new();
-        typeName.AppendClosedFullyQualified(builder);
+        builder.AppendClosedFullyQualified(typeName);
         return builder.ToString();
     }
 }
