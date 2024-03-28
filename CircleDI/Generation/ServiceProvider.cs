@@ -78,12 +78,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
 
     /// <summary>
-    /// Parameters of the constructor or InitServices() in ServiceProvider.
+    /// <para>Parameters of the constructor or InitServices() in ServiceProvider.</para>
+    /// <para><see cref="Dependency.Service"/> reference is null, <see cref="Dependency.ServiceName"/> is empty, <see cref="Dependency.ServiceType"/> is alwalys set.</para>
     /// </summary>
     public List<ConstructorDependency> ConstructorParameterList { get; init; } = [];
 
     /// <summary>
-    /// Parameters of the constructor or InitServices() in ScopeProvider.
+    /// <para>Parameters of the constructor or InitServices() in ScopeProvider.</para>
+    /// <para><see cref="Dependency.Service"/> reference is null, <see cref="Dependency.ServiceName"/> is empty, <see cref="Dependency.ServiceType"/> is alwalys set.</para>
     /// </summary>
     public List<ConstructorDependency> ConstructorParameterListScope { get; init; } = [];
 
@@ -636,11 +638,15 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         DependencyTreeInitializer initializer = new(this);
 
-        if (CreateScope is not null)
+        if (CreateScope is not null) {
             initializer.InitNode(CreateScope);
+            Debug.Assert(ErrorList.Count > 0 || CreateScope.Dependencies.All((Dependency dependency) => dependency.Service is not null));
+        }
 
-        foreach (Service service in SortedServiceList)
+        foreach (Service service in SortedServiceList) {
             initializer.InitNode(service);
+            Debug.Assert(ErrorList.Count > 0 || service.Dependencies.All((Dependency dependency) => dependency.Service is not null));
+        }
     }
 
     private readonly struct DependencyTreeInitializer(ServiceProvider serviceProvider) {
@@ -652,11 +658,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             service.TreeState |= DependencyTreeFlags.Traversed;
 
             foreach (Dependency dependency in service.Dependencies) {
+                Debug.Assert((dependency.ServiceName == string.Empty && dependency.ServiceType is not null) || (dependency.ServiceName != string.Empty && dependency.ServiceType is null));
                 path.Add((service, dependency));
 
                 try {
                     Service? dependencyService;
-                    if (dependency.ServiceName != string.Empty) {
+                    if (dependency.ServiceType is null) {
                         foreach (Service providerService in serviceProvider.SortedServiceList)
                             if (providerService.Name == dependency.ServiceName) {
                                 dependencyService = providerService;
@@ -763,21 +770,21 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     switch (service.Lifetime) {
                         case ServiceLifetime.Singleton:
                             if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateDependencyLifetimeScopeError(service.Name, dependency.ServiceType));
+                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateDependencyLifetimeScopeError(service.Name, dependency.Service.ServiceType));
                                 return;
                             }
                             if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateDependencyLifetimeTransientError(service.Name, dependency.ServiceType));
+                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateDependencyLifetimeTransientError(service.Name, dependency.Service.ServiceType));
                                 return;
                             }
                             break;
                         case ServiceLifetime.TransientSingleton:
                             if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateScopedProviderLifetimeScopeError(serviceProvider.Identifier, dependency.ServiceType));
+                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateScopedProviderLifetimeScopeError(serviceProvider.Identifier, dependency.Service.ServiceType));
                                 return;
                             }
                             if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateScopedProviderLifetimeTransientError(serviceProvider.Identifier, dependency.ServiceType));
+                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateScopedProviderLifetimeTransientError(serviceProvider.Identifier, dependency.Service.ServiceType));
                                 return;
                             }
                             break;

@@ -1,4 +1,5 @@
 ﻿using CircleDI.Generation;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CircleDI.Defenitions;
 
@@ -25,9 +26,9 @@ public abstract class Dependency {
 
     /// <summary>
     /// The type of the service.<br />
-    /// Should only be used when <see cref="ServiceName"/> is empty.
+    /// When ServiceName is empty, this is not null.
     /// </summary>
-    public required TypeName ServiceType { get; init; }
+    public required TypeName? ServiceType { get; init; }
 
     /// <summary>
     /// Indicates if a [Dependency]-attribute is present.
@@ -53,7 +54,7 @@ public abstract class Dependency {
     public override int GetHashCode() {
         int hashCode = Name.GetHashCode();
         hashCode = Combine(hashCode, ServiceName.GetHashCode());
-        hashCode = Combine(hashCode, ServiceType.GetHashCode());
+        hashCode = Combine(hashCode, ServiceType?.GetHashCode() ?? 0);
         hashCode = Combine(hashCode, HasAttribute.GetHashCode());
         return hashCode;
 

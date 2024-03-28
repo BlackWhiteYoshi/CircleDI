@@ -11,7 +11,7 @@ public static class FindServiceTests {
         List<Service> serviceList = serviceTypeList.Select((string serviceType) => new Service() {
             ServiceType = new TypeName(serviceType),
             Name = string.Empty,
-            ImplementationType = default,
+            ImplementationType = null!,
             Lifetime = ServiceLifetime.Singleton,
             ConstructorDependencyList = [],
             PropertyDependencyList = [],

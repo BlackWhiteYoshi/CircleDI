@@ -45,7 +45,8 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
             foreach (ConstructorDependency dependency in serviceProvider.ConstructorParameterListScope) {
                 builder.Append(indent.Sp4);
                 builder.Append("private global::");
-                dependency.ServiceType.AppendClosedFullyQualified(builder);
+                // ConstructorParameterList items have always serviceType set
+                dependency.ServiceType!.AppendClosedFullyQualified(builder);
                 builder.Append(" _");
                 builder.AppendFirstLower(dependency.Name);
                 builder.Append(";\n");
@@ -1068,6 +1069,7 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
 
     /// <summary>
     /// <para>Appends "(service1Type service1Name, service2Type service2Name, ..., serviceNType serviceNName)"</para>
+    /// <para>Appends only dependencies without attributes.</para>
     /// <para>If dependencyList is empty, only "()" is appended.</para>
     /// </summary>
     /// <param name="dependencyList"></param>
@@ -1076,8 +1078,9 @@ public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serv
 
         foreach (Dependency dependency in dependencyList)
             if (!dependency.HasAttribute) {
+                // if no attribute => dependency.ServiceType has value
                 builder.Append("global::");
-                dependency.ServiceType.AppendClosedFullyQualified(builder);
+                dependency.ServiceType!.AppendClosedFullyQualified(builder);
                 builder.Append(' ');
                 builder.AppendFirstLower(dependency.Name);
                 builder.Append(", ");

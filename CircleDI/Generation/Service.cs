@@ -377,20 +377,21 @@ public sealed class Service : IEquatable<Service> {
                     continue;
 
                 string serviceName;
-                TypeName serviceType;
+                TypeName? serviceType;
                 bool hasAttribute;
                 if (property.GetAttribute("DependencyAttribute") is AttributeData propertyAttribute) {
-                    if (property.Type is not INamedTypeSymbol namedType)
-                        continue;
                     if (property.SetMethod is null)
                         return ([], attributeData.CreateMissingSetAccessorError(property, baseType, property.ToDisplayString()));
 
                     if (propertyAttribute.NamedArguments.GetArgument<string>("Name") is string dependencyName) {
                         serviceName = dependencyName;
-                        serviceType = default;
+                        serviceType = null;
                         hasAttribute = true;
                     }
                     else {
+                        if (property.Type is not INamedTypeSymbol namedType)
+                            continue;
+
                         serviceName = string.Empty;
                         serviceType = new TypeName(namedType);
                         hasAttribute = true;
@@ -491,7 +492,7 @@ public sealed class Service : IEquatable<Service> {
                     result.Add(new ConstructorDependency() {
                         Name = parameter.Name,
                         ServiceName = dependencyName,
-                        ServiceType = default,
+                        ServiceType = null,
                         HasAttribute = true,
                         ByRef = parameter.RefKind
                     });

@@ -322,8 +322,9 @@ public static class CircleDIBuilder {
             builder.Append('(');
             foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
                 if (!dependency.HasAttribute) {
+                    // if no attribute => dependency.ServiceType has value
                     builder.Append("global::");
-                    dependency.ServiceType.AppendClosedFullyQualified(builder);
+                    dependency.ServiceType!.AppendClosedFullyQualified(builder);
                     builder.Append(' ');
                     builder.Append(dependency.Name);
                     builder.Append(", ");

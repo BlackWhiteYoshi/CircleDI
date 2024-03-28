@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CircleDI.Generation;
+using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -13,7 +14,7 @@ namespace CircleDI.Defenitions;
 /// - list of type parameters
 /// </para>
 /// </summary>
-public readonly struct TypeName : IEquatable<TypeName>, IComparable<TypeName> {
+public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
     /// <summary>
     /// The name/identifier of this type
     /// </summary>
@@ -270,17 +271,23 @@ public readonly struct TypeName : IEquatable<TypeName>, IComparable<TypeName> {
 
     #region Equals
 
-    public static bool operator ==(TypeName left, TypeName right) => left.Equals(right);
+    public static bool operator ==(TypeName? left, TypeName? right)
+         => (left, right) switch {
+             (null, null) => true,
+             (null, not null) => false,
+             (not null, _) => left.Equals(right)
+         };
 
-    public static bool operator !=(TypeName left, TypeName right) => !(left == right);
+    public static bool operator !=(TypeName? left, TypeName? right) => !(left == right);
 
-    public override bool Equals(object? obj)
-        => obj switch {
-            TypeName typeName => Equals(typeName),
-            _ => false
-        };
+    public override bool Equals(object? obj) => Equals(obj as TypeName);
 
-    public bool Equals(TypeName other) {
+    public bool Equals(TypeName? other) {
+        if (other is null)
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
+
         if (Name != other.Name)
             return false;
 
