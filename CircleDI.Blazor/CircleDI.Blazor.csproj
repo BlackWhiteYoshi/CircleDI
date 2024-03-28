@@ -18,7 +18,7 @@
     <RepositoryUrl>https://github.com/BlackWhiteYoshi/CircleDI.git</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
-    <PackageIconUrl>https://raw.githubusercontent.com/BlackWhiteYoshi/CircleDI/main/ICON.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/BlackWhiteYoshi/CircleDI/main/CircleDI.Blazor/ICON.png</PackageIconUrl>
     <PackageIcon>ICON.png</PackageIcon>
 
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
