@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CircleDI.Generation;
 
-public struct StringBuilderExtension(StringBuilder builder, ServiceProvider serviceProvider) {
+public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider serviceProvider) {
     private bool isScopeProvider = false;
     private List<Service> serviceList = serviceProvider.SingletonList;
     private List<ConstructorDependency> constructorParameterList = serviceProvider.ConstructorParameterList;
