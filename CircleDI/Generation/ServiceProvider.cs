@@ -246,7 +246,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// </summary>
     public List<Diagnostic> ErrorList { get; private set; } = [];
 
-
     /// <summary>
     /// The <i>[ServiceProvider]</i>-attribute above the class.
     /// </summary>
@@ -277,7 +276,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         INamedTypeSymbol serviceProvider = (INamedTypeSymbol)syntaxContext.TargetSymbol;
 
         INamedTypeSymbol? serviceProviderScope = null;
-        if (serviceProvider.GetMembers("Scope") is [INamedTypeSymbol scope, ..])
+        if (serviceProvider.GetMembers("Scope") is [INamedTypeSymbol scope])
             serviceProviderScope = scope;
 
         Debug.Assert(syntaxContext.Attributes.Length > 0);
@@ -615,42 +614,51 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     #region Dependency Tree
 
     /// <summary>
-    /// <para>Creates <see cref="SortedServiceList"/>.</para>
-    /// <para>Creates and validates the dependency tree.</para>
+    /// Fills <see cref="SortedServiceList"/> with <see cref="SingletonList"/>, <see cref="ScopedList"/>, <see cref="TransientList"/>, <see cref="DelegateList"/> and sorts by <see cref="Service.ServiceType"/>.
+    /// </summary>
+    public void CreateSortedList() {
+        SortedServiceList = [.. SingletonList, .. ScopedList, .. TransientList, .. DelegateList];
+        SortedServiceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
+    }
+
+    /// <summary>
+    /// <para>Creates and validates the dependency tree of <see cref="SortedServiceList"/> + <see cref="CreateScope"/>.</para>
     /// <para>
     /// The tree itself are <see cref="Service"/> nodes and the edges are <see cref="Dependency">Dependencies</see>.<br />
     /// The dependencies of a service can be found at <see cref="Service.Dependencies"/>.<br />
     /// A child of a node can be accessed with the reference <see cref="Dependency.Service"/>.<br />
     /// The number of children of a node is: <see cref="Service.ConstructorDependencyList"/>.Count + <see cref="Service.PropertyDependencyList"/>.Count
     /// </para>
-    /// <para>
-    /// The nodes are also listet in the 4 lists of <see cref="ServiceProvider"/>:<br />
-    /// - <see cref="ServiceProvider.SingletonList"/><br />
-    /// - <see cref="ServiceProvider.ScopedList"/><br />
-    /// - <see cref="ServiceProvider.TransientList"/><br />
-    /// - <see cref="ServiceProvider.DelegateList"/><br />
-    /// </para>
     /// </summary>
     /// <remarks>In some circumstances circle dependencies are also allowed, so strictly spoken it's not a tree. Furthermore there is no one root node, there can be many root nodes and independent trees.</remarks>
     public void CreateDependencyTree() {
-        SortedServiceList = [.. SingletonList, .. ScopedList, .. TransientList, .. DelegateList];
-        SortedServiceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
-
         DependencyTreeInitializer initializer = new(this);
 
-        if (CreateScope is not null) {
+        if (CreateScope is not null)
             initializer.InitNode(CreateScope);
-            Debug.Assert(ErrorList.Count > 0 || CreateScope.Dependencies.All((Dependency dependency) => dependency.Service is not null));
-        }
 
-        foreach (Service service in SortedServiceList) {
+        foreach (Service service in SortedServiceList)
             initializer.InitNode(service);
-            Debug.Assert(ErrorList.Count > 0 || service.Dependencies.All((Dependency dependency) => dependency.Service is not null));
-        }
     }
 
+    /// <summary>
+    /// Creates and validates the dependency tree of a collecion of services.
+    /// </summary>
+    /// <param name="services"></param>
+    public void InitServiceDependencyTree(IEnumerable<Service> services) {
+        DependencyTreeInitializer initializer = new(this);
+        foreach (Service service in services)
+            initializer.InitNode(service);
+    }
+
+    /// <summary>
+    /// Creates and validates the dependency tree of a single service.
+    /// </summary>
+    /// <param name="service"></param>
+    public void InitServiceDependencyTree(Service service) => new DependencyTreeInitializer(this).InitNode(service);
+
     private readonly struct DependencyTreeInitializer(ServiceProvider serviceProvider) {
-        public readonly List<(Service node, Dependency edge)> path = [];
+        private readonly List<(Service node, Dependency edge)> path = [];
 
         public void InitNode(Service service) {
             if (service.TreeState.HasFlag(DependencyTreeFlags.Traversed))
@@ -658,7 +666,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             service.TreeState |= DependencyTreeFlags.Traversed;
 
             foreach (Dependency dependency in service.Dependencies) {
-                Debug.Assert((dependency.ServiceName == string.Empty && dependency.ServiceType is not null) || (dependency.ServiceName != string.Empty && dependency.ServiceType is null));
+                Debug.Assert(dependency.ServiceName != string.Empty || dependency.ServiceType is not null);
                 path.Add((service, dependency));
 
                 try {
@@ -796,6 +804,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 }
                 finally {
                     path.RemoveAt(path.Count - 1);
+                    Debug.Assert(serviceProvider.ErrorList.Count > 0 || dependency.Service is not null);
                 }
             }
         }

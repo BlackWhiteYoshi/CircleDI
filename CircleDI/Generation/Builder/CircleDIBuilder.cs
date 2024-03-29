@@ -6,11 +6,27 @@ using System.Text;
 
 namespace CircleDI.Generation;
 
+/// <summary>
+/// Contains the build functionality to build the ServiceProvider/ScopeProvider class and interface.
+/// </summary>
 public static class CircleDIBuilder {
+    /// <summary>
+    /// Gives a preconfigured <see cref="ObjectPool<StringBuilder>"/> for building class or interface.
+    /// </summary>
+    /// <returns></returns>
     public static ObjectPool<StringBuilder> CreateStringBuilderPool() => new DefaultObjectPoolProvider().CreateStringBuilderPool(initialCapacity: 8192, maximumRetainedCapacity: 1024 * 1024);
 
 
-    public static void GenerateClass(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
+    /// <summary>
+    /// First checks on errors.<br />
+    /// If no errors, creates dependency tree.<br />
+    /// Checks dependency tree errors.<br />
+    /// If no errors, builds the ServiceProvider class with ScopeProvider class.
+    /// </summary>
+    /// <param name="stringBuilderPool"></param>
+    /// <param name="context"></param>
+    /// <param name="serviceProvider"></param>
+    public static void CreateDependencyTreeAndGenerateClass(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
         // check ErrorLists
         {
             bool errorReported = false;
@@ -33,15 +49,28 @@ public static class CircleDIBuilder {
                 return;
         }
 
+        // create list index
+        serviceProvider.CreateSortedList();
+
         // create dependency tree
         serviceProvider.CreateDependencyTree();
+        // check dependency tree errors
         if (serviceProvider.ErrorList.Count > 0) {
             foreach (Diagnostic error in serviceProvider.ErrorList)
                 context.ReportDiagnostic(error);
             return;
         }
 
+        GenerateClass(stringBuilderPool, context, serviceProvider);
+    }
 
+    /// <summary>
+    /// Builds the ServiceProvider class with ScopeProvider class.
+    /// </summary>
+    /// <param name="stringBuilderPool"></param>
+    /// <param name="context"></param>
+    /// <param name="serviceProvider"></param>
+    public static void GenerateClass(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
         StringBuilder builder = stringBuilderPool.Get();
         CircleDIBuilderCore core = new(builder, serviceProvider);
 
@@ -265,6 +294,13 @@ public static class CircleDIBuilder {
         stringBuilderPool.Return(builder);
     }
 
+    /// <summary>
+    /// Builds the ServiceProvider interface with ScopeProvider interface.
+    /// </summary>
+    /// <param name="stringBuilderPool"></param>
+    /// <param name="context"></param>
+    /// <param name="serviceProvider"></param>
+    /// <exception cref="Exception"></exception>
     public static void GenerateInterface(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
         if (!serviceProvider.HasInterface)
             return;

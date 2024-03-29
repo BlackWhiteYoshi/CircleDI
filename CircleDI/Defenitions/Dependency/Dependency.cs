@@ -1,5 +1,4 @@
 ﻿using CircleDI.Generation;
-using System.Diagnostics.CodeAnalysis;
 
 namespace CircleDI.Defenitions;
 
@@ -19,14 +18,20 @@ public abstract class Dependency {
     public required string Name { get; init; }
 
     /// <summary>
+    /// <para>
     /// If the service is mapped by name this contains the name.<br />
     /// If the service is mapped by type this is an empty string.
+    /// </para>
+    /// <para>If <see cref="ServiceType"/> is not null, it is mapped by service type, otherwise it is a named service.</para>
     /// </summary>
     public required string ServiceName { get; init; }
 
     /// <summary>
+    /// <para>
     /// The type of the service.<br />
     /// When ServiceName is empty, this is not null.
+    /// </para>
+    /// <para>If <see cref="ServiceType"/> is not null, it is mapped by service type, otherwise it is a named service.</para>
     /// </summary>
     public required TypeName? ServiceType { get; init; }
 

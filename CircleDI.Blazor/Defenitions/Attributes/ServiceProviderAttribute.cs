@@ -1,4 +1,4 @@
-﻿namespace CircleDI.Blazor;
+﻿namespace CircleDI.Blazor.Defenitions;
 
 public static partial class Attributes {
     public const string ServiceProviderAttribute = $$"""
@@ -13,7 +13,7 @@ public static partial class Attributes {
     
         namespace CircleDIAttributes;
         
-        {{Defenitions.Attributes.ServiceProviderAttributeSummary}}
+        {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeSummary}}
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ServiceProviderAttribute : Attribute {
@@ -23,14 +23,14 @@ public static partial class Attributes {
             /// </summary>
             public string InterfaceName { get; init; }
 
-            {{Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
+            {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
 
             {{ServiceProviderAttributePropertyDefaultServiceGeneration}}
 
             {{ServiceProviderAttributePropertyAddRazorComponents}}
         }
 
-        {{Defenitions.Attributes.ServiceProviderAttributeSummary}}
+        {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeSummary}}
         /// <typeparam name="TInterface">
         /// An explicit declared interface the generated interface will be based on: The name, access modifier, namespace and containing types will be inferred.<br />
         /// That interface must be partial.<br />
@@ -39,7 +39,7 @@ public static partial class Attributes {
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ServiceProviderAttribute<TInterface> : Attribute {
-            {{Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
+            {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
 
             {{ServiceProviderAttributePropertyDefaultServiceGeneration}}
 
@@ -49,6 +49,7 @@ public static partial class Attributes {
         #endif
 
         """;
+
 
     private const string ServiceProviderAttributePropertyDefaultServiceGeneration = """
         /// <summary>

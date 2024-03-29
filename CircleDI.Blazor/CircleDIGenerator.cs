@@ -1,4 +1,5 @@
-﻿using CircleDI.Defenitions;
+﻿using CircleDI.Blazor.Defenitions;
+using CircleDI.Defenitions;
 using CircleDI.Extensions;
 using CircleDI.Generation;
 using Microsoft.CodeAnalysis;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.ObjectPool;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
-using ServiceProviderWithExtra = (CircleDI.Generation.ServiceProvider serviceProvider, CircleDI.Blazor.BlazorServiceGeneration defaultServiceGeneration, bool AddRazorComponents);
+using ServiceProviderWithExtra = (CircleDI.Generation.ServiceProvider serviceProvider, CircleDI.Blazor.Defenitions.BlazorServiceGeneration defaultServiceGeneration, bool AddRazorComponents);
 
 namespace CircleDI.Blazor;
 
@@ -16,23 +17,23 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
     public void Initialize(IncrementalGeneratorInitializationContext context) {
         context.RegisterPostInitializationOutput(static (IncrementalGeneratorPostInitializationContext context) => {
             // attributes
-            context.AddSource("ServiceProviderAttribute.g.cs", Blazor.Attributes.ServiceProviderAttribute);
-            context.AddSource("ScopedProviderAttribute.g.cs", Defenitions.Attributes.ScopedProviderAttribute);
-            context.AddSource("SingletonAttribute.g.cs", Defenitions.Attributes.SingletonAttribute);
-            context.AddSource("ScopedAttribute.g.cs", Defenitions.Attributes.ScopedAttribute);
-            context.AddSource("TransientAttribute.g.cs", Defenitions.Attributes.TransientAttribute);
-            context.AddSource("DelegateAttribute.g.cs", Defenitions.Attributes.DelegateAttribute);
-            context.AddSource("DependencyAttribute.g.cs", Defenitions.Attributes.DependencyAttribute);
-            context.AddSource("ConstructorAttribute.g.cs", Defenitions.Attributes.ConstructorAttribute);
+            context.AddSource("ServiceProviderAttribute.g.cs", CircleDI.Blazor.Defenitions.Attributes.ServiceProviderAttribute);
+            context.AddSource("ScopedProviderAttribute.g.cs", CircleDI.Defenitions.Attributes.ScopedProviderAttribute);
+            context.AddSource("SingletonAttribute.g.cs", CircleDI.Defenitions.Attributes.SingletonAttribute);
+            context.AddSource("ScopedAttribute.g.cs", CircleDI.Defenitions.Attributes.ScopedAttribute);
+            context.AddSource("TransientAttribute.g.cs", CircleDI.Defenitions.Attributes.TransientAttribute);
+            context.AddSource("DelegateAttribute.g.cs", CircleDI.Defenitions.Attributes.DelegateAttribute);
+            context.AddSource("DependencyAttribute.g.cs", CircleDI.Defenitions.Attributes.DependencyAttribute);
+            context.AddSource("ConstructorAttribute.g.cs", CircleDI.Defenitions.Attributes.ConstructorAttribute);
 
             // enums
-            context.AddSource("CreationTiming.g.cs", Defenitions.Attributes.CreationTimingEnum);
-            context.AddSource("GetAccess.g.cs", Defenitions.Attributes.GetAccessEnum);
-            context.AddSource("DisposeGeneration.g.cs", Defenitions.Attributes.DisposeGenerationEnum);
-            context.AddSource("BlazorServiceGeneration.g.cs", Blazor.Attributes.BlazorServiceGenerationEnum);
+            context.AddSource("CreationTiming.g.cs", CircleDI.Defenitions.Attributes.CreationTimingEnum);
+            context.AddSource("GetAccess.g.cs", CircleDI.Defenitions.Attributes.GetAccessEnum);
+            context.AddSource("DisposeGeneration.g.cs", CircleDI.Defenitions.Attributes.DisposeGenerationEnum);
+            context.AddSource("BlazorServiceGeneration.g.cs", CircleDI.Blazor.Defenitions.Attributes.BlazorServiceGenerationEnum);
 
             // class
-            context.AddSource("CircleDIComponentActivator.g.cs", Blazor.Attributes.CircleDIComponentActivator);
+            context.AddSource("CircleDIComponentActivator.g.cs", CircleDI.Blazor.Defenitions.Attributes.CircleDIComponentActivator);
         });
 
         ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
@@ -65,7 +66,7 @@ file static class CircleDIGeneratorExtensions {
         IncrementalValuesProvider<ServiceProvider> serviceProviderList = serviceProviderWithExtraList.Combine(componentList).Select(ServiceProviderWithComponents);
 
 
-        context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateClass);
+        context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.CreateDependencyTreeAndGenerateClass);
         context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateInterface);
     }
 

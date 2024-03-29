@@ -4,6 +4,11 @@ using System.Text;
 
 namespace CircleDI.Generation;
 
+/// <summary>
+/// Contains the build functionalities to build class and interface that have ServiceProvider and ScopeProvider in common.
+/// </summary>
+/// <param name="builder"></param>
+/// <param name="serviceProvider"></param>
 public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider serviceProvider) {
     private bool isScopeProvider = false;
     private List<Service> serviceList = serviceProvider.SingletonList;
@@ -16,6 +21,9 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
     private bool threadSafe = serviceProvider.ThreadSafe;
     public Indent indent = new();
 
+    /// <summary>
+    /// Sets all related ServiceProvider fields to ScopeProvider equivalents and increases indentation level by 1.
+    /// </summary>
     public void SetToScope() {
         isScopeProvider = true;
         serviceList = serviceProvider.ScopedList;

@@ -1,5 +1,4 @@
-﻿using CircleDI.Defenitions;
-using CircleDI.Generation;
+﻿using CircleDI.Generation;
 using System.Reflection;
 
 namespace CircleDI.Tests;
@@ -12,7 +11,7 @@ public sealed class AssemblyNameAndVersionTest {
         string assemblyName = typeof(CircleDIGenerator).Assembly.GetName().Name!;
         string assemblyVersion = typeof(CircleDIGenerator).Assembly.GetName().Version!.ToString()[..^2];
 
-        FieldInfo[] fields = typeof(Attributes).GetFields(BindingFlags.NonPublic | BindingFlags.Static);
+        FieldInfo[] fields = typeof(Defenitions.Attributes).GetFields(BindingFlags.NonPublic | BindingFlags.Static);
         string name = (string)fields[0].GetValue(null)!;
         string version = (string)fields[1].GetValue(null)!;
 
@@ -26,7 +25,7 @@ public sealed class AssemblyNameAndVersionTest {
         string assemblyNameBlazor = typeof(Blazor.CircleDIGenerator).Assembly.GetName().Name!;
         string assemblyVersionBlazor = typeof(Blazor.CircleDIGenerator).Assembly.GetName().Version!.ToString()[..^2];
 
-        FieldInfo[] fieldsBlazor = typeof(Blazor.Attributes).GetFields(BindingFlags.NonPublic | BindingFlags.Static);
+        FieldInfo[] fieldsBlazor = typeof(Blazor.Defenitions.Attributes).GetFields(BindingFlags.NonPublic | BindingFlags.Static);
         string nameBlazor = (string)fieldsBlazor[0].GetValue(null)!;
         string versionBlazor = (string)fieldsBlazor[1].GetValue(null)!;
 

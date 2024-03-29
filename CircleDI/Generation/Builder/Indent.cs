@@ -1,5 +1,8 @@
 ﻿namespace CircleDI.Generation;
 
+/// <summary>
+/// An object to handle indentation.
+/// </summary>
 public struct Indent {
     public const string SP0 = "";
     public const string SP4 = "    ";

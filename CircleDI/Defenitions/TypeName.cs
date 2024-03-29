@@ -1,17 +1,17 @@
-﻿using CircleDI.Generation;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace CircleDI.Defenitions;
 
 /// <summary>
-/// <para>Datastructure holding all necessary information to construct the fully qualified name of a type:</para>
+/// <para>Datastructure holding all necessary information to construct the fully qualified name of a type or type declaration:</para>
 /// <para>
+/// - identifier/name<br />
+/// - type keyword<br />
 /// - list of namespaces<br />
 /// - list of containing types<br />
-/// - identifier/name<br />
-/// - list of type parameters
+/// - list of type parameters<br />
+/// - list of type arguments
 /// </para>
 /// </summary>
 public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {

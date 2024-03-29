@@ -37,9 +37,10 @@ file static class CircleDIGeneratorRegisterExtension {
         IncrementalValuesProvider<ServiceProvider> serviceProviderList = context.SyntaxProvider.ForAttributeWithMetadataName(
             serviceProviderAttributeName,
             static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
-            static (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new ServiceProvider(generatorAttributeSyntaxContext));
+            static (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new ServiceProvider(generatorAttributeSyntaxContext)
+        );
 
-        context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateClass);
+        context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.CreateDependencyTreeAndGenerateClass);
         context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateInterface);
     }
 }

@@ -4,6 +4,9 @@ using System.Text;
 
 namespace CircleDI.Defenitions;
 
+/// <summary>
+/// Collection of global <see cref="DiagnosticDescriptor"/> objects and methods to create <see cref="Diagnostic"/> objects from them.
+/// </summary>
 public static class DiagnosticErrors {
     #region ServiceProvider Errors
 

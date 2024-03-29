@@ -31,6 +31,7 @@ public static class DependencyTreeTests {
             if (service.Lifetime == ServiceLifetime.Delegate)
                 serviceProvider.SingletonList.Add(service);
 
+        serviceProvider.CreateSortedList();
         return serviceProvider;
     }
 
