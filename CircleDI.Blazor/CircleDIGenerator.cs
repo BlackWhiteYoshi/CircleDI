@@ -36,9 +36,48 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             context.AddSource("CircleDIComponentActivator.g.cs", CircleDI.Blazor.Defenitions.Attributes.CircleDIComponentActivator);
         });
 
+
+        // find all components
+        IncrementalValueProvider<ImmutableArray<INamedTypeSymbol?>> componentList = context.SyntaxProvider.CreateSyntaxProvider(
+            static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax { BaseList: not null },
+            FilterComponents
+        ).Collect();
+
+
         ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
-        context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute", stringBuilderPool);
-        context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute`1", stringBuilderPool);
+        context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute", componentList, stringBuilderPool);
+        context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute`1", componentList, stringBuilderPool);
+    }
+
+
+    /// <summary>
+    /// If the targetNode is derived from Microsoft.AspNetCore.Components.ComponentBase, it is returned as INamedTypeSymbol, otherwise null.
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="_">CancellationToken is not used</param>
+    /// <returns></returns>
+    private static INamedTypeSymbol? FilterComponents(GeneratorSyntaxContext context, CancellationToken _) {
+        if (context.SemanticModel.GetDeclaredSymbol(context.Node) is not INamedTypeSymbol component || component.IsAbstract)
+            return null;
+
+        // Microsoft.AspNetCore.Components.ComponentBase
+        for (INamedTypeSymbol? baseType = component.BaseType; baseType is not null; baseType = baseType.BaseType)
+            if (baseType is INamedTypeSymbol {
+                Name: "ComponentBase",
+                ContainingNamespace: INamespaceSymbol {
+                    Name: "Components",
+                    ContainingNamespace: INamespaceSymbol {
+                        Name: "AspNetCore",
+                        ContainingNamespace: INamespaceSymbol {
+                            Name: "Microsoft",
+                            ContainingNamespace: INamespaceSymbol { Name: "" }
+                        }
+                    }
+                }
+            })
+                return component;
+
+        return null;
     }
 }
 
@@ -56,15 +95,8 @@ file static class RegisterServiceProviderAttributeExtension {
         context.RegisterSourceOutput(serviceProviderWithExtraList, stringBuilderPool.GenerateDefaultServiceMethods);
 
 
-        // find all components
-        IncrementalValueProvider<ImmutableArray<INamedTypeSymbol?>> componentList = context.SyntaxProvider.CreateSyntaxProvider(
-            static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax { BaseList: not null },
-            FilterComponents
-        ).Collect();
-
         // add components
         IncrementalValuesProvider<ServiceProvider> serviceProviderList = serviceProviderWithExtraList.Combine(componentList).Select(ServiceProviderWithComponents);
-
 
         context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.CreateDependencyTreeAndGenerateClass);
         context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateInterface);
@@ -302,27 +334,6 @@ file static class RegisterServiceProviderAttributeExtension {
             builder.Append(type);
             builder.Append("));\n");
         }
-    }
-
-    /// <summary>
-    /// If the targetNode is derived from Microsoft.AspNetCore.Components.ComponentBase, it is returned as INamedTypeSymbol, otherwise null.
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="_">CancellationToken is not used</param>
-    /// <returns></returns>
-    private static INamedTypeSymbol? FilterComponents(GeneratorSyntaxContext context, CancellationToken _) {
-        if (context.SemanticModel.GetDeclaredSymbol(context.Node) is not INamedTypeSymbol component || component.IsAbstract)
-            return null;
-
-        // Microsoft.AspNetCore.Components.ComponentBase
-        for (INamedTypeSymbol? baseType = component.BaseType; baseType is not null; baseType = baseType.BaseType)
-            if (baseType.Name == "ComponentBase"
-            && baseType.ContainingNamespace is INamespaceSymbol { Name: "Components" } namespace3
-            && namespace3.ContainingNamespace is INamespaceSymbol { Name: "AspNetCore" } namespace2
-            && namespace2.ContainingNamespace is INamespaceSymbol { Name: "Microsoft" })
-                return component;
-
-        return null;
     }
 
     /// <summary>
