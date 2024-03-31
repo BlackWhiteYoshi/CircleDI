@@ -42,8 +42,8 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
     }
 }
 
-file static class CircleDIGeneratorExtensions {
-    public static void RegisterServiceProviderAttribute(this IncrementalGeneratorInitializationContext context, string serviceProviderAttributeName, ObjectPool<StringBuilder> stringBuilderPool) {
+file static class RegisterServiceProviderAttributeExtension {
+    public static void RegisterServiceProviderAttribute(this IncrementalGeneratorInitializationContext context, string serviceProviderAttributeName, IncrementalValueProvider<ImmutableArray<INamedTypeSymbol?>> componentList, ObjectPool<StringBuilder> stringBuilderPool) {
         // all service providers
         IncrementalValuesProvider<ServiceProviderWithExtra> serviceProviderWithExtraList = context.SyntaxProvider.ForAttributeWithMetadataName(
             serviceProviderAttributeName,

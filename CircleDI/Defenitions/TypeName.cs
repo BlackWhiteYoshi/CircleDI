@@ -47,14 +47,14 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
     /// <para>A list of all generic typeParameters (open generic) this type has.</para>
     /// <para>If the list itself is empty, this type is not generic.</para>
     /// </summary>
-    public required List<TypeName> TypeParameterList { get; init; }
+    public required List<string> TypeParameterList { get; init; }
 
     /// <summary>
     /// <para>A list of all generic arguments (closed generic) this type has.</para>
     /// <para>If the type is the same as the type at <see cref="TypeParameterList"/> with same index, the type is a open generic.</para>
     /// <para>If the list itself is empty, this type is not generic.</para>
     /// </summary>
-    public required List<TypeName> TypeArgumentList { get; init; }
+    public required List<TypeName?> TypeArgumentList { get; init; }
 
 
     public TypeName() { }
@@ -70,7 +70,7 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
     }
 
     [SetsRequiredMembers]
-    public TypeName(string name, TypeKeyword keyWord, List<string> nameSpaceList, List<TypeName> containingTypeList, List<TypeName> typeParameterList, List<TypeName> typeArgumentList) {
+    public TypeName(string name, TypeKeyword keyWord, List<string> nameSpaceList, List<TypeName> containingTypeList, List<string> typeParameterList, List<TypeName?> typeArgumentList) {
         Name = name;
         Keyword = keyWord;
         NameSpaceList = nameSpaceList;
@@ -106,19 +106,16 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
             containingtypeSymbol = containingtypeSymbol.ContainingType;
         }
 
-        TypeParameterList = new List<TypeName>(typeSymbol.TypeParameters.Length);
+        TypeParameterList = new List<string>(typeSymbol.TypeParameters.Length);
         foreach (ITypeParameterSymbol typeParameter in typeSymbol.TypeParameters)
-            if (typeParameter is INamedTypeSymbol namedTypeArgument)
-                TypeParameterList.Add(new TypeName(namedTypeArgument));
-            else
-                TypeParameterList.Add(new TypeName(typeParameter.Name));
+            TypeParameterList.Add(typeParameter.Name);
 
-        TypeArgumentList = new List<TypeName>(typeSymbol.TypeArguments.Length);
+        TypeArgumentList = new List<TypeName?>(typeSymbol.TypeArguments.Length);
         foreach (ITypeSymbol typeArgument in typeSymbol.TypeArguments)
             if (typeArgument is INamedTypeSymbol namedTypeArgument)
                 TypeArgumentList.Add(new TypeName(namedTypeArgument));
             else
-                TypeArgumentList.Add(new TypeName(typeArgument.Name));
+                TypeArgumentList.Add(null);
     }
 
 
@@ -165,10 +162,14 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
     public override int GetHashCode() {
         int hashCode = Name.GetHashCode();
         hashCode = Combine(hashCode, Keyword.GetHashCode());
+
         hashCode = CombineList(hashCode, NameSpaceList);
         hashCode = CombineList(hashCode, ContainingTypeList);
         hashCode = CombineList(hashCode, TypeParameterList);
-        hashCode = CombineList(hashCode, TypeArgumentList);
+
+        foreach (TypeName? typeName in TypeArgumentList)
+            hashCode = Combine(hashCode, typeName?.GetHashCode() ?? 0);
+        
         return hashCode;
 
 
@@ -237,9 +238,19 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
             return typeArgumentListDiff;
 
         for (int i = 1; i < TypeArgumentList.Count; i++) {
-            int typeNameDiff = TypeArgumentList[i].CompareTo(other.TypeArgumentList[i]);
-            if (typeNameDiff != 0)
-                return typeNameDiff;
+            switch ((TypeArgumentList[i], other.TypeArgumentList[i])) {
+                case (null, null):
+                    break;
+                case (not null, null):
+                    return 1;
+                case (null, not null):
+                    return -1;
+                case (not null, not null):
+                    int typeNameDiff = TypeArgumentList[i]!.CompareTo(other.TypeArgumentList[i]!);
+                    if (typeNameDiff != 0)
+                        return typeNameDiff;
+                    break;
+            }
         }
 
 

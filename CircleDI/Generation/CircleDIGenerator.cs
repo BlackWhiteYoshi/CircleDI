@@ -32,7 +32,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
     }
 }
 
-file static class CircleDIGeneratorRegisterExtension {
+file static class RegisterServiceProviderAttributeExtension {
     public static void RegisterServiceProviderAttribute(this IncrementalGeneratorInitializationContext context, string serviceProviderAttributeName, ObjectPool<StringBuilder> stringBuilderPool) {
         IncrementalValuesProvider<ServiceProvider> serviceProviderList = context.SyntaxProvider.ForAttributeWithMetadataName(
             serviceProviderAttributeName,

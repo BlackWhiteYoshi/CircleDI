@@ -187,13 +187,13 @@ public static class StringBuilderExtensions {
         builder.Append('<');
 
         for (int i = 0; i < typeName.TypeArgumentList.Count; i++) {
-            if (typeName.TypeParameterList[i] == typeName.TypeArgumentList[i])
+            if (typeName.TypeArgumentList[i] is null)
                 // is open generic
-                builder.Append(typeName.TypeParameterList[i].Name);
+                builder.Append(typeName.TypeParameterList[i]);
             else {
                 // is closed generic
                 builder.Append("global::");
-                builder.AppendClosedFullyQualified(typeName.TypeArgumentList[i]);
+                builder.AppendClosedFullyQualified(typeName.TypeArgumentList[i]!);
             }
             builder.Append(", ");
         }
@@ -214,7 +214,7 @@ public static class StringBuilderExtensions {
         builder.Append('<');
 
         for (int i = 0; i < typeName.TypeParameterList.Count; i++) {
-            builder.Append(typeName.TypeParameterList[i].Name);
+            builder.Append(typeName.TypeParameterList[i]);
             builder.Append(", ");
         }
         builder.Length -= 2;
