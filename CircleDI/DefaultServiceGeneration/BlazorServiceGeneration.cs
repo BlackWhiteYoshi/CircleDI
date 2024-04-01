@@ -1,4 +1,4 @@
-﻿namespace CircleDI.MinimalAPI.Defenitions;
+﻿namespace CircleDI.DefaultServiceGeneration;
 
 /// <summary>
 /// <para>Configuration for generating getter methods for the default services from the built-in service provider.</para>

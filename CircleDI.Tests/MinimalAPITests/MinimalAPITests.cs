@@ -419,7 +419,7 @@ public static class MinimalAPITests {
             
             namespace MyCode;
 
-            [ServiceProvider(DefaultServiceGeneration = BlazorServiceGeneration.None)]
+            [ServiceProvider(GenerateDefaultServices = false)]
             public sealed partial class TestProvider;
 
             """;
@@ -441,115 +441,13 @@ public static class MinimalAPITests {
     }
 
     [Fact]
-    public static Task GeneratesServerDefaultServices() {
+    public static Task GeneratesDefaultServices() {
         const string input = """
             using CircleDIAttributes;
             
             namespace MyCode;
 
-            [ServiceProvider(DefaultServiceGeneration = BlazorServiceGeneration.Server)]
-            public sealed partial class TestProvider;
-
-            """;
-
-        string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
-        string defaultServicesPartial = sourceTexts.Single((string sourceText) => sourceText.Contains("private global::Microsoft.JSInterop.IJSRuntime GetJSRuntime()"));
-        string sourceTextClass = sourceTexts[^2];
-        string sourceTextInterface = sourceTexts[^1];
-
-        return Verify($"""
-            {defaultServicesPartial}
-
-            -----
-            Class
-            -----
-
-            {sourceTextClass}
-
-            ---------
-            Interface
-            ---------
-
-            {sourceTextInterface}
-            """);
-    }
-
-    [Fact]
-    public static Task GeneratesWebassemblyDefaultServices() {
-        const string input = """
-            using CircleDIAttributes;
-            
-            namespace MyCode;
-
-            [ServiceProvider(DefaultServiceGeneration = BlazorServiceGeneration.Webassembly)]
-            public sealed partial class TestProvider;
-
-            """;
-
-        string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
-        string defaultServicesPartial = sourceTexts.Single((string sourceText) => sourceText.Contains("private global::Microsoft.JSInterop.IJSRuntime GetJSRuntime()"));
-        string sourceTextClass = sourceTexts[^2];
-        string sourceTextInterface = sourceTexts[^1];
-
-        return Verify($"""
-            {defaultServicesPartial}
-
-            -----
-            Class
-            -----
-
-            {sourceTextClass}
-
-            ---------
-            Interface
-            ---------
-
-            {sourceTextInterface}
-            """);
-    }
-
-    [Fact]
-    public static Task GeneratesHybridServices() {
-        const string input = """
-            using CircleDIAttributes;
-            
-            namespace MyCode;
-
-            [ServiceProvider(DefaultServiceGeneration = BlazorServiceGeneration.Hybrid)]
-            public sealed partial class TestProvider;
-
-            """;
-
-        string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
-        string defaultServicesPartial = sourceTexts.Single((string sourceText) => sourceText.Contains("private global::Microsoft.JSInterop.IJSRuntime GetJSRuntime()"));
-        string sourceTextClass = sourceTexts[^2];
-        string sourceTextInterface = sourceTexts[^1];
-
-        return Verify($"""
-            {defaultServicesPartial}
-
-            -----
-            Class
-            -----
-
-            {sourceTextClass}
-
-            ---------
-            Interface
-            ---------
-
-            {sourceTextInterface}
-            """);
-    }
-
-    [Fact]
-    public static Task GeneratesServerAndWebassemblyDefaultServices() {
-        const string input = """
-            using CircleDIAttributes;
-            
-            namespace MyCode;
-
-            [ServiceProvider(DefaultServiceGeneration = BlazorServiceGeneration.ServerAndWebassembly)]
+            [ServiceProvider(GenerateDefaultServices = true)]
             public sealed partial class TestProvider;
 
             """;

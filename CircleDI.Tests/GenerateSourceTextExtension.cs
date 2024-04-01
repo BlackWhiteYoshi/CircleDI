@@ -26,7 +26,7 @@ public static class GenerateSourceTextExtension {
     /// <param name="diagnostics"></param>
     /// <returns></returns>
     public static string[] GenerateSourceTextBlazor(this string input, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics)
-        => GenerateSourceText<Blazor.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
+        => GenerateSourceText<Blazor.Generation.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
 
     /// <summary>
     /// <para>Takes source code as input and outputs the generated source code based on the given input with <see cref="MinimalAPI.CircleDIGenerator"/>.</para>

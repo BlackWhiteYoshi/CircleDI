@@ -22,8 +22,8 @@ public sealed class AssemblyNameAndVersionTest {
 
         #region CircleDI.Blazor
 
-        string assemblyNameBlazor = typeof(Blazor.CircleDIGenerator).Assembly.GetName().Name!;
-        string assemblyVersionBlazor = typeof(Blazor.CircleDIGenerator).Assembly.GetName().Version!.ToString()[..^2];
+        string assemblyNameBlazor = typeof(Blazor.Generation.CircleDIGenerator).Assembly.GetName().Name!;
+        string assemblyVersionBlazor = typeof(Blazor.Generation.CircleDIGenerator).Assembly.GetName().Version!.ToString()[..^2];
 
         FieldInfo[] fieldsBlazor = typeof(Blazor.Defenitions.Attributes).GetFields(BindingFlags.NonPublic | BindingFlags.Static);
         string nameBlazor = (string)fieldsBlazor[0].GetValue(null)!;

@@ -6,21 +6,22 @@ using System.Diagnostics.CodeAnalysis;
 namespace CircleDI.MinimalAPI.Generation;
 
 /// <summary>
-/// TODO
+/// Represents an attribute of a parameter in an endpoint.<br />
+/// It contains its name, parameters and properties.
 /// </summary>
 public readonly struct ParameterAttribute : IEquatable<ParameterAttribute> {
     /// <summary>
-    /// TODO
+    /// The name/identifier of this Attribute.
     /// </summary>
     public required TypeName Name { get; init; }
 
     /// <summary>
-    /// TODO
+    /// The constructor parameters.
     /// </summary>
     public string[] ParameterList { get; init; }
 
     /// <summary>
-    /// TODO
+    /// The properties with name and value.
     /// </summary>
     public (string name, string value)[] PropertyList { get; init; }
 

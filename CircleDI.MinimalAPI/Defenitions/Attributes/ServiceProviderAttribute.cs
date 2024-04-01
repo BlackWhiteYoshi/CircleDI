@@ -25,7 +25,7 @@ public static partial class Attributes {
 
             {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
 
-            {{ServiceProviderAttributePropertyDefaultServiceGeneration}}
+            {{ServiceProviderAttributePropertyGenerateDefaultServices}}
 
             {{ServiceProviderAttributePropertyGenerateEndpointExtension}}
         }
@@ -41,7 +41,7 @@ public static partial class Attributes {
         internal sealed class ServiceProviderAttribute<TInterface> : Attribute {
             {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
 
-            {{ServiceProviderAttributePropertyDefaultServiceGeneration}}
+            {{ServiceProviderAttributePropertyGenerateDefaultServices}}
 
             {{ServiceProviderAttributePropertyGenerateEndpointExtension}}
         }
@@ -50,7 +50,7 @@ public static partial class Attributes {
 
         """;
 
-    private const string ServiceProviderAttributePropertyDefaultServiceGeneration = """
+    private const string ServiceProviderAttributePropertyGenerateDefaultServices = """
         /// <summary>
             /// <para>
             /// Toggles the generation of default services from the built-in service provider.<br />
@@ -59,7 +59,7 @@ public static partial class Attributes {
             /// </para>
             /// <para>Default is <see cref="BlazorServiceGeneration.ServerAndWebassembly"/>.</para>
             /// </summary>
-            public BlazorServiceGeneration DefaultServiceGeneration { get; init; }
+            public bool GenerateDefaultServices { get; init; }
         """;
 
     private const string ServiceProviderAttributePropertyGenerateEndpointExtension = """
