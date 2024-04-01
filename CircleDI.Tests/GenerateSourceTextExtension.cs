@@ -28,6 +28,17 @@ public static class GenerateSourceTextExtension {
     public static string[] GenerateSourceTextBlazor(this string input, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics)
         => GenerateSourceText<Blazor.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
 
+    /// <summary>
+    /// <para>Takes source code as input and outputs the generated source code based on the given input with <see cref="MinimalAPI.CircleDIGenerator"/>.</para>
+    /// <para>The generated source code contains post-initialization-output code as well as source output code.</para>
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="outputCompilation"></param>
+    /// <param name="diagnostics"></param>
+    /// <returns></returns>
+    public static string[] GenerateSourceTextMinimalAPI(this string input, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics)
+        => GenerateSourceText<MinimalAPI.Generation.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
+
 
     /// <summary>
     /// <para>Takes source code as input and outputs the generated source code based on the given input.</para>

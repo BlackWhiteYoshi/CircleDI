@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -8 16 16">
+    <g transform="rotate(45) scale(-1 1)">
+        <defs>
+            <g id="peak">
+                <path d="M3.534 -1h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41" />
+            </g>
+            
+            <g id="line">
+                <path d="M0 -5c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 5.917 -1H4.9A5 5 0 0 0 0 -5" />
+            </g>
+        </defs>
+        
+        <use href="#peak" fill="rgb(78, 201, 176)" />
+        <use href="#line" fill="rgb(78, 201, 176)" />
+        
+        <use href="#peak" fill="rgb(184, 215, 163)" transform="rotate(180)" />
+        <use href="#line" fill="rgb(184, 215, 163)" transform="rotate(180)" />
+    </g>
+    
+    <text x="-7.5" y="-2" fill="rgb(184, 215, 163)" stroke="rgb(78, 201, 176)" stroke-width="0.2" font-family="Carlito" font-size="4.47">Minimal</text>
+    <text x="-6.6" y="5.2" fill="rgb(78, 201, 176)" stroke="rgb(184, 215, 163)" stroke-width="0.2" font-family="Carlito" font-size="10">API</text>
+</svg>
