@@ -161,7 +161,7 @@ public sealed class Endpoint : IEquatable<Endpoint> {
         }
 
         AsService = new Service() {
-            Name = MethodHandler.Name,
+            Name = $"Endooint: {MethodHandler.Name}",
             Lifetime = ServiceLifetime.Scoped,
             ServiceType = null!,
             ImplementationType = null!,
@@ -222,6 +222,9 @@ public sealed class Endpoint : IEquatable<Endpoint> {
                     break;
             }
 
+        if (!ErrorList.SequenceEqual(other.ErrorList))
+            return false;
+
         return true;
     }
 
@@ -236,13 +239,20 @@ public sealed class Endpoint : IEquatable<Endpoint> {
 
         foreach (ParameterAttribute[]? attributeList in ParameterAttributesList)
             if (attributeList != null)
-                foreach (ParameterAttribute attribute in attributeList)
-                    hashCode = Combine(hashCode, attribute.GetHashCode());
+                hashCode = CombineList(hashCode, attributeList);
             else
                 hashCode = Combine(hashCode, 0);
 
+        hashCode = CombineList(hashCode, ErrorList);
+
         return hashCode;
 
+
+        static int CombineList<T>(int hashCode, IEnumerable<T> list) where T : notnull {
+            foreach (T item in list)
+                hashCode = Combine(hashCode, item.GetHashCode());
+            return hashCode;
+        }
 
         static int Combine(int h1, int h2) {
             uint rol5 = ((uint)h1 << 5) | ((uint)h1 >> 27);

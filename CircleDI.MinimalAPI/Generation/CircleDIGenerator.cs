@@ -1,4 +1,5 @@
-﻿using CircleDI.Defenitions;
+﻿using CircleDI.DefaultServiceGeneration;
+using CircleDI.Defenitions;
 using CircleDI.Extensions;
 using CircleDI.Generation;
 using CircleDI.MinimalAPI.Defenitions;
@@ -8,9 +9,8 @@ using Microsoft.Extensions.ObjectPool;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
-using ServiceProviderWithExtra = (CircleDI.Generation.ServiceProvider serviceProvider, CircleDI.DefaultServiceGeneration.BlazorServiceGeneration defaultServiceGeneration, bool generateEndpointExtension);
 using ServiceProviderWithErrorFlag = (CircleDI.Generation.ServiceProvider serviceProvider, bool generateEndpointExtension, bool hasErrors);
-using CircleDI.DefaultServiceGeneration;
+using ServiceProviderWithExtra = (CircleDI.Generation.ServiceProvider serviceProvider, CircleDI.DefaultServiceGeneration.BlazorServiceGeneration defaultServiceGeneration, bool generateEndpointExtension);
 
 namespace CircleDI.MinimalAPI.Generation;
 
@@ -201,6 +201,12 @@ file static class RegisterServiceProviderAttributeExtension {
 
 
         serviceProvider.InitServiceDependencyTree(endpointList.Select((Endpoint endpoint) => endpoint.AsService));
+
+        if (serviceProvider.ErrorList.Count > 0) {
+            foreach (Diagnostic error in serviceProvider.ErrorList)
+                context.ReportDiagnostic(error);
+            return;
+        }
 
 
         StringBuilder builder = stringBuilderPool.Get();
