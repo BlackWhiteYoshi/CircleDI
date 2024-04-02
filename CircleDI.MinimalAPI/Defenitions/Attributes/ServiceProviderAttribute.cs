@@ -25,8 +25,6 @@ public static partial class Attributes {
 
             {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
 
-            {{ServiceProviderAttributePropertyGenerateDefaultServices}}
-
             {{ServiceProviderAttributePropertyGenerateEndpointExtension}}
         }
 
@@ -41,25 +39,11 @@ public static partial class Attributes {
         internal sealed class ServiceProviderAttribute<TInterface> : Attribute {
             {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
 
-            {{ServiceProviderAttributePropertyGenerateDefaultServices}}
-
             {{ServiceProviderAttributePropertyGenerateEndpointExtension}}
         }
 
         #endif
 
-        """;
-
-    private const string ServiceProviderAttributePropertyGenerateDefaultServices = """
-        /// <summary>
-            /// <para>
-            /// Toggles the generation of default services from the built-in service provider.<br />
-            /// It can be configured to have only services that are available in all environments, all services for a specific environment or disable generating any default services.<br />
-            /// If enabled, it also adds a <see cref="System.IServiceProvider"/> parameter to the constructor parameters.
-            /// </para>
-            /// <para>Default is <see cref="BlazorServiceGeneration.ServerAndWebassembly"/>.</para>
-            /// </summary>
-            public bool GenerateDefaultServices { get; init; }
         """;
 
     private const string ServiceProviderAttributePropertyGenerateEndpointExtension = """

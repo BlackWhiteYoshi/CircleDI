@@ -17,7 +17,6 @@ The world only full-power circular Service Provider wired up with ASP.NET Core m
 Extra Blazor features are
 
 - EndpointAttribute to register methods as minimal API endpoint.
-- Default services of *Microsoft.Extensions.DependencyInjection* provider get added.
 
 This package is not compatible with [CircleDI](https://www.nuget.org/packages/CircleDI).
 

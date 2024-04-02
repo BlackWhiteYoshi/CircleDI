@@ -1,5 +1,4 @@
-﻿using CircleDI.DefaultServiceGeneration;
-using CircleDI.Defenitions;
+﻿using CircleDI.Defenitions;
 using CircleDI.Extensions;
 using CircleDI.Generation;
 using CircleDI.MinimalAPI.Defenitions;
@@ -9,7 +8,7 @@ using Microsoft.Extensions.ObjectPool;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
-using ServiceProviderWithExtra = (CircleDI.Generation.ServiceProvider serviceProvider, CircleDI.DefaultServiceGeneration.BlazorServiceGeneration defaultServiceGeneration, bool generateEndpointExtension);
+using ServiceProviderWithEndpointFlag = (CircleDI.Generation.ServiceProvider serviceProvider, bool generateEndpointExtension);
 
 namespace CircleDI.MinimalAPI.Generation;
 
@@ -82,25 +81,22 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 file static class RegisterServiceProviderAttributeExtension {
     public static void RegisterServiceProviderAttribute(this IncrementalGeneratorInitializationContext context, string serviceProviderAttributeName, IncrementalValueProvider<ImmutableArray<Endpoint>> endpointList, ObjectPool<StringBuilder> stringBuilderPool) {
         // all service providers
-        IncrementalValuesProvider<ServiceProviderWithExtra> serviceProviderWithExtraList = context.SyntaxProvider.ForAttributeWithMetadataName(
+        IncrementalValuesProvider<ServiceProviderWithEndpointFlag> serviceProviderWithEndpointFlag = context.SyntaxProvider.ForAttributeWithMetadataName(
             serviceProviderAttributeName,
             static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
-            CreateServiceProviderWithExtra
+            CreateServiceProviderWithEndpointFlag
         );
 
         // init dependency tree
-        IncrementalValuesProvider<ServiceProviderWithExtra> serviceProviderTreeInit = serviceProviderWithExtraList.WithComparer(NoComparison<ServiceProviderWithExtra>.Instance)
-            .Select((ServiceProviderWithExtra serviceProvider, CancellationToken _) => (serviceProvider.serviceProvider.InitDependencyTree(), serviceProvider.defaultServiceGeneration, serviceProvider.generateEndpointExtension));
+        IncrementalValuesProvider<ServiceProviderWithEndpointFlag> serviceProviderTreeInit = serviceProviderWithEndpointFlag.WithComparer(NoComparison<ServiceProviderWithEndpointFlag>.Instance)
+            .Select((ServiceProviderWithEndpointFlag providerAndFlag, CancellationToken _) => (providerAndFlag.serviceProvider.InitDependencyTree(), providerAndFlag.generateEndpointExtension));
 
-
-        // generate default service get-methods
-        context.RegisterSourceOutput(serviceProviderWithExtraList, (SourceProductionContext context, ServiceProviderWithExtra serviceProviderWithExtra) => context.GenerateDefaultServiceMethods(stringBuilderPool, serviceProviderWithExtra.serviceProvider, serviceProviderWithExtra.defaultServiceGeneration));
 
         // generate endpoint extension method
-        context.RegisterSourceOutput(serviceProviderTreeInit.WithComparer(NoComparison<ServiceProviderWithExtra>.Instance).Combine(endpointList), stringBuilderPool.GenerateEndpointMethod);
+        context.RegisterSourceOutput(serviceProviderTreeInit.WithComparer(NoComparison<ServiceProviderWithEndpointFlag>.Instance).Combine(endpointList), stringBuilderPool.GenerateEndpointMethod);
 
-        context.RegisterSourceOutput(serviceProviderTreeInit, (SourceProductionContext context, ServiceProviderWithExtra value) => stringBuilderPool.GenerateClass(context, value.serviceProvider));
-        context.RegisterSourceOutput(serviceProviderTreeInit, (SourceProductionContext context, ServiceProviderWithExtra value) => stringBuilderPool.GenerateInterface(context, value.serviceProvider));
+        context.RegisterSourceOutput(serviceProviderTreeInit, (SourceProductionContext context, ServiceProviderWithEndpointFlag value) => stringBuilderPool.GenerateClass(context, value.serviceProvider));
+        context.RegisterSourceOutput(serviceProviderTreeInit, (SourceProductionContext context, ServiceProviderWithEndpointFlag value) => stringBuilderPool.GenerateInterface(context, value.serviceProvider));
     }
 
 
@@ -113,22 +109,13 @@ file static class RegisterServiceProviderAttributeExtension {
     /// <param name="context"></param>
     /// <param name="_">CancellationToken is not used</param>
     /// <returns></returns>
-    private static ServiceProviderWithExtra CreateServiceProviderWithExtra(GeneratorAttributeSyntaxContext context, CancellationToken _) {
+    private static ServiceProviderWithEndpointFlag CreateServiceProviderWithEndpointFlag(GeneratorAttributeSyntaxContext context, CancellationToken _) {
         ServiceProvider serviceProvider = new(context);
 
         Debug.Assert(context.Attributes.Length > 0);
-        BlazorServiceGeneration defaultServiceGeneration = BlazorServiceGeneration.Server;
-        bool generateEndpointExtension = true;
-        if (context.Attributes[0].NamedArguments.Length > 0) {
-            if (context.Attributes[0].NamedArguments.GetArgument<bool?>("GenerateDefaultServices") == false)
-                defaultServiceGeneration = BlazorServiceGeneration.None;
-            if (context.Attributes[0].NamedArguments.GetArgument<bool?>("GenerateEndpointExtension") == false)
-                generateEndpointExtension = false;
-        }
+        bool generateEndpointExtension = context.Attributes[0].NamedArguments.GetArgument<bool?>("GenerateEndpointExtension") != false;
 
-        serviceProvider.AddDefaultServices(defaultServiceGeneration);
-        
-        return (serviceProvider, defaultServiceGeneration, generateEndpointExtension);
+        return (serviceProvider, generateEndpointExtension);
     }
 
 
@@ -138,7 +125,7 @@ file static class RegisterServiceProviderAttributeExtension {
     /// <param name="stringBuilderPool"></param>
     /// <param name="context"></param>
     /// <param name="value"></param>
-    private static void GenerateEndpointMethod(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, (ServiceProviderWithExtra serviceProviderTreeInit, ImmutableArray<Endpoint> endpointList) value) {
+    private static void GenerateEndpointMethod(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, (ServiceProviderWithEndpointFlag serviceProviderTreeInit, ImmutableArray<Endpoint> endpointList) value) {
         ServiceProvider serviceProvider = value.serviceProviderTreeInit.serviceProvider;
         ImmutableArray<Endpoint> endpointList = value.endpointList;
         bool generateEndpointExtension = value.serviceProviderTreeInit.generateEndpointExtension;
