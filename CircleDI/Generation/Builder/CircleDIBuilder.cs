@@ -18,59 +18,24 @@ public static class CircleDIBuilder {
 
 
     /// <summary>
-    /// First checks on errors.<br />
-    /// If no errors, creates dependency tree.<br />
-    /// Checks dependency tree errors.<br />
-    /// If no errors, builds the ServiceProvider class with ScopeProvider class.
-    /// </summary>
-    /// <param name="stringBuilderPool"></param>
-    /// <param name="context"></param>
-    /// <param name="serviceProvider"></param>
-    public static void CreateDependencyTreeAndGenerateClass(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
-        // check ErrorLists
-        {
-            bool errorReported = false;
-
-            if (serviceProvider.ErrorList.Count > 0) {
-                foreach (Diagnostic error in serviceProvider.ErrorList)
-                    context.ReportDiagnostic(error);
-                errorReported = true;
-            }
-
-            // serviceProvider.SortedServiceList is still empty at this point
-            foreach (Service service in serviceProvider.SingletonList.Concat(serviceProvider.ScopedList).Concat(serviceProvider.TransientList).Concat(serviceProvider.DelegateList))
-                if (service.ErrorList.Count > 0) {
-                    foreach (Diagnostic error in service.ErrorList)
-                        context.ReportDiagnostic(error);
-                    errorReported = true;
-                }
-
-            if (errorReported)
-                return;
-        }
-
-        // create list index
-        serviceProvider.CreateSortedList();
-
-        // create dependency tree
-        serviceProvider.CreateDependencyTree();
-        // check dependency tree errors
-        if (serviceProvider.ErrorList.Count > 0) {
-            foreach (Diagnostic error in serviceProvider.ErrorList)
-                context.ReportDiagnostic(error);
-            return;
-        }
-
-        GenerateClass(stringBuilderPool, context, serviceProvider);
-    }
-
-    /// <summary>
     /// Builds the ServiceProvider class with ScopeProvider class.
     /// </summary>
     /// <param name="stringBuilderPool"></param>
     /// <param name="context"></param>
     /// <param name="serviceProvider"></param>
     public static void GenerateClass(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
+        if (serviceProvider.HasError) {
+            foreach (Diagnostic error in serviceProvider.ErrorList)
+                context.ReportDiagnostic(error);
+
+            // serviceProvider.SortedServiceList could be empty at this point
+            foreach (Service service in serviceProvider.SingletonList.Concat(serviceProvider.ScopedList).Concat(serviceProvider.TransientList).Concat(serviceProvider.DelegateList))
+                foreach (Diagnostic error in service.ErrorList)
+                    context.ReportDiagnostic(error);
+
+            return;
+        }
+
         StringBuilder builder = stringBuilderPool.Get();
         CircleDIBuilderCore core = new(builder, serviceProvider);
 
@@ -302,7 +267,7 @@ public static class CircleDIBuilder {
     /// <param name="serviceProvider"></param>
     /// <exception cref="Exception"></exception>
     public static void GenerateInterface(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
-        if (!serviceProvider.HasInterface)
+        if (!serviceProvider.HasInterface || serviceProvider.HasError)
             return;
 
         StringBuilder builder = stringBuilderPool.Get();

@@ -90,15 +90,16 @@ file static class RegisterServiceProviderAttributeExtension {
             CreateServiceProviderWithExtra
         );
 
+        // add components and init dependency tree
+        IncrementalValuesProvider<ServiceProvider> serviceProviderList = serviceProviderWithExtraList.WithComparer(NoComparison<ServiceProviderWithExtra>.Instance)
+            .Combine(componentList).WithComparer(NoComparison<(ServiceProviderWithExtra, ImmutableArray<INamedTypeSymbol?>)>.Instance)
+            .Select(ServiceProviderWithComponents);
+
 
         // generate default service get-methods
-        context.RegisterSourceOutput(serviceProviderWithExtraList, (SourceProductionContext context, ServiceProviderWithExtra serviceProviderWithExtra) => context.GenerateDefaultServiceMethods(stringBuilderPool, serviceProviderWithExtra.serviceProvider, serviceProviderWithExtra.defaultServiceGeneration));
+        context.RegisterSourceOutput(serviceProviderWithExtraList, (SourceProductionContext context, ServiceProviderWithExtra serviceProviderWithExtra)=> context.GenerateDefaultServiceMethods(stringBuilderPool, serviceProviderWithExtra.serviceProvider, serviceProviderWithExtra.defaultServiceGeneration));
 
-
-        // add components
-        IncrementalValuesProvider<ServiceProvider> serviceProviderList = serviceProviderWithExtraList.Combine(componentList).Select(ServiceProviderWithComponents);
-
-        context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.CreateDependencyTreeAndGenerateClass);
+        context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateClass);
         context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateInterface);
     }
 
@@ -129,10 +130,13 @@ file static class RegisterServiceProviderAttributeExtension {
 
         return (serviceProvider, blazorServiceGeneration, addRazorComponents);
     }
-    
+
     /// <summary>
+    /// <para>
     /// Adds the components from the given componentList to the given serviceProvider and then returns the provider.<br />
     /// The component is not added when already registered.
+    /// </para>
+    /// <para>It also inits dependency tree.</para>
     /// </summary>
     /// <param name="pair">serviiceProvider and componentList</param>
     /// <param name="_">CancellationToken is not used</param>
@@ -140,7 +144,7 @@ file static class RegisterServiceProviderAttributeExtension {
     private static ServiceProvider ServiceProviderWithComponents((ServiceProviderWithExtra serviceProviderWithExtra, ImmutableArray<INamedTypeSymbol?> componentList) pair, CancellationToken _) {
         ServiceProvider serviceProvider = pair.serviceProviderWithExtra.serviceProvider;
         if (!pair.serviceProviderWithExtra.AddRazorComponents)
-            return serviceProvider;
+            return serviceProvider.InitDependencyTree();
 
         foreach (INamedTypeSymbol? component in pair.componentList) {
             if (component is null)
@@ -176,6 +180,6 @@ file static class RegisterServiceProviderAttributeExtension {
             });
         }
 
-        return serviceProvider;
+        return serviceProvider.InitDependencyTree();
     }
 }

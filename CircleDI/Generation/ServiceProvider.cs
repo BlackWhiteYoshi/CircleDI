@@ -247,6 +247,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public List<Diagnostic> ErrorList { get; private set; } = [];
 
     /// <summary>
+    /// Inidicates <see cref="ErrorList"/> or any <see cref="Service.ErrorList"/> is not empty.
+    /// </summary>
+    public bool HasError { get; set; } = false;
+
+    /// <summary>
     /// The <i>[ServiceProvider]</i>-attribute above the class.
     /// </summary>
     public AttributeData Attribute { get; private set; }
@@ -614,6 +619,56 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     #region Dependency Tree
 
     /// <summary>
+    /// First checks on errors.<br />
+    /// If no errors, creates SortedList and dependency tree.<br />
+    /// Checks dependency tree errors.
+    /// </summary>
+    public ServiceProvider InitDependencyTree() {
+        // check ErrorLists
+        {
+            if (ErrorList.Count > 0) {
+                HasError = true;
+                return this;
+            }
+
+            // serviceProvider.SortedServiceList is still empty at this point
+            foreach (Service service in SingletonList.Concat(ScopedList).Concat(TransientList).Concat(DelegateList))
+                if (service.ErrorList.Count > 0) {
+                    HasError = true;
+                    return this;
+                }
+        }
+
+        // create list index
+        CreateSortedList();
+
+        // create dependency tree
+        CreateDependencyTree();
+
+        // check dependency tree errors
+        HasError = ErrorList.Count > 0;
+
+        return this;
+    }
+
+    /// <summary>
+    /// Creates and validates the dependency tree of a collecion of services.
+    /// </summary>
+    /// <param name="services"></param>
+    public void InitServiceDependencyTree(IEnumerable<Service> services) {
+        DependencyTreeInitializer initializer = new(this);
+        foreach (Service service in services)
+            initializer.InitNode(service);
+    }
+
+    /// <summary>
+    /// Creates and validates the dependency tree of a single service.
+    /// </summary>
+    /// <param name="service"></param>
+    public void InitServiceDependencyTree(Service service) => new DependencyTreeInitializer(this).InitNode(service);
+
+
+    /// <summary>
     /// Fills <see cref="SortedServiceList"/> with <see cref="SingletonList"/>, <see cref="ScopedList"/>, <see cref="TransientList"/>, <see cref="DelegateList"/> and sorts by <see cref="Service.ServiceType"/>.
     /// </summary>
     public void CreateSortedList() {
@@ -640,22 +695,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         foreach (Service service in SortedServiceList)
             initializer.InitNode(service);
     }
-
-    /// <summary>
-    /// Creates and validates the dependency tree of a collecion of services.
-    /// </summary>
-    /// <param name="services"></param>
-    public void InitServiceDependencyTree(IEnumerable<Service> services) {
-        DependencyTreeInitializer initializer = new(this);
-        foreach (Service service in services)
-            initializer.InitNode(service);
-    }
-
-    /// <summary>
-    /// Creates and validates the dependency tree of a single service.
-    /// </summary>
-    /// <param name="service"></param>
-    public void InitServiceDependencyTree(Service service) => new DependencyTreeInitializer(this).InitNode(service);
 
     private readonly struct DependencyTreeInitializer(ServiceProvider serviceProvider) {
         private readonly List<(Service node, Dependency edge)> path = [];

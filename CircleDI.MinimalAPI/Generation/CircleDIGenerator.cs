@@ -9,7 +9,6 @@ using Microsoft.Extensions.ObjectPool;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
-using ServiceProviderWithErrorFlag = (CircleDI.Generation.ServiceProvider serviceProvider, bool generateEndpointExtension, bool hasErrors);
 using ServiceProviderWithExtra = (CircleDI.Generation.ServiceProvider serviceProvider, CircleDI.DefaultServiceGeneration.BlazorServiceGeneration defaultServiceGeneration, bool generateEndpointExtension);
 
 namespace CircleDI.MinimalAPI.Generation;
@@ -42,7 +41,8 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             "CircleDIAttributes.EndpointAttribute",
             static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is MethodDeclarationSyntax,
             static (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new Endpoint(generatorAttributeSyntaxContext)
-        ).Collect()
+        ).WithComparer(NoComparison<Endpoint>.Instance)
+        .Collect().WithComparer(NoComparison<ImmutableArray<Endpoint>>.Instance)
         .Select(CheckRouteConflicts);
 
 
@@ -89,30 +89,18 @@ file static class RegisterServiceProviderAttributeExtension {
         );
 
         // init dependency tree
-        IncrementalValuesProvider<ServiceProviderWithErrorFlag> serviceProviderTreeInit = serviceProviderWithExtraList.Select(CreateDependencyTree);
+        IncrementalValuesProvider<ServiceProviderWithExtra> serviceProviderTreeInit = serviceProviderWithExtraList.WithComparer(NoComparison<ServiceProviderWithExtra>.Instance)
+            .Select((ServiceProviderWithExtra serviceProvider, CancellationToken _) => (serviceProvider.serviceProvider.InitDependencyTree(), serviceProvider.defaultServiceGeneration, serviceProvider.generateEndpointExtension));
 
 
         // generate default service get-methods
         context.RegisterSourceOutput(serviceProviderWithExtraList, (SourceProductionContext context, ServiceProviderWithExtra serviceProviderWithExtra) => context.GenerateDefaultServiceMethods(stringBuilderPool, serviceProviderWithExtra.serviceProvider, serviceProviderWithExtra.defaultServiceGeneration));
 
         // generate endpoint extension method
-        context.RegisterSourceOutput(serviceProviderTreeInit.Combine(endpointList), stringBuilderPool.GenerateEndpointMethod);
+        context.RegisterSourceOutput(serviceProviderTreeInit.WithComparer(NoComparison<ServiceProviderWithExtra>.Instance).Combine(endpointList), stringBuilderPool.GenerateEndpointMethod);
 
-        // generate serviceProvider class
-        context.RegisterSourceOutput(serviceProviderTreeInit, (SourceProductionContext context, ServiceProviderWithErrorFlag value) => {
-            if (!value.hasErrors)
-                stringBuilderPool.GenerateClass(context, value.serviceProvider);
-            else
-                OutputServiceProviderErrors(context, value.serviceProvider);
-        });
-
-        // generate serviceProvider interface
-        context.RegisterSourceOutput(serviceProviderTreeInit, (SourceProductionContext context, ServiceProviderWithErrorFlag value) => {
-            if (!value.hasErrors)
-                stringBuilderPool.GenerateInterface(context, value.serviceProvider);
-            else
-                OutputServiceProviderErrors(context, value.serviceProvider);
-        });
+        context.RegisterSourceOutput(serviceProviderTreeInit, (SourceProductionContext context, ServiceProviderWithExtra value) => stringBuilderPool.GenerateClass(context, value.serviceProvider));
+        context.RegisterSourceOutput(serviceProviderTreeInit, (SourceProductionContext context, ServiceProviderWithExtra value) => stringBuilderPool.GenerateInterface(context, value.serviceProvider));
     }
 
 
@@ -143,40 +131,6 @@ file static class RegisterServiceProviderAttributeExtension {
         return (serviceProvider, defaultServiceGeneration, generateEndpointExtension);
     }
 
-    /// <summary>
-    /// Checks errors, if any returns with errorflag true.<br />
-    /// Create SortedList and DependecyTree<br />
-    /// Checks DependecyTree errors, if any returns with errorflag true.
-    /// </summary>
-    /// <param name="serviceProviderWithExtra"></param>
-    /// <param name="_"></param>
-    /// <returns></returns>
-    private static ServiceProviderWithErrorFlag CreateDependencyTree(ServiceProviderWithExtra serviceProviderWithExtra, CancellationToken _) {
-        ServiceProvider serviceProvider = serviceProviderWithExtra.serviceProvider;
-
-        // check ErrorLists
-        {
-            if (serviceProvider.ErrorList.Count > 0)
-                return (serviceProvider, serviceProviderWithExtra.generateEndpointExtension, true);
-
-            // serviceProvider.SortedServiceList is still empty at this point
-            foreach (Service service in serviceProvider.SingletonList.Concat(serviceProvider.ScopedList).Concat(serviceProvider.TransientList).Concat(serviceProvider.DelegateList))
-                if (service.ErrorList.Count > 0)
-                    return (serviceProvider, serviceProviderWithExtra.generateEndpointExtension, true);
-        }
-
-        // create list index
-        serviceProvider.CreateSortedList();
-
-        // create dependency tree
-        serviceProvider.CreateDependencyTree();
-        // check dependency tree errors
-        if (serviceProvider.ErrorList.Count > 0)
-            return (serviceProvider, serviceProviderWithExtra.generateEndpointExtension, true);
-
-        return (serviceProvider, serviceProviderWithExtra.generateEndpointExtension, false);
-    }
-
 
     /// <summary>
     /// Init the endpoint methods and generates an endpoint extension method (for each ServiceProvider)
@@ -184,9 +138,10 @@ file static class RegisterServiceProviderAttributeExtension {
     /// <param name="stringBuilderPool"></param>
     /// <param name="context"></param>
     /// <param name="value"></param>
-    private static void GenerateEndpointMethod(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, (ServiceProviderWithErrorFlag serviceProviderTreeInit, ImmutableArray<Endpoint> endpointList) value) {
+    private static void GenerateEndpointMethod(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, (ServiceProviderWithExtra serviceProviderTreeInit, ImmutableArray<Endpoint> endpointList) value) {
         ServiceProvider serviceProvider = value.serviceProviderTreeInit.serviceProvider;
         ImmutableArray<Endpoint> endpointList = value.endpointList;
+        bool generateEndpointExtension = value.serviceProviderTreeInit.generateEndpointExtension;
 
         bool errorReported = false;
         foreach (Endpoint endpoint in endpointList)
@@ -196,7 +151,7 @@ file static class RegisterServiceProviderAttributeExtension {
                 errorReported = true;
             }
 
-        if (errorReported || value.serviceProviderTreeInit.hasErrors || !value.serviceProviderTreeInit.generateEndpointExtension)
+        if (errorReported || serviceProvider.HasError || !generateEndpointExtension)
             return;
 
 
@@ -357,21 +312,5 @@ file static class RegisterServiceProviderAttributeExtension {
         context.AddSource(hintName, source);
 
         stringBuilderPool.Return(builder);
-    }
-
-
-    /// <summary>
-    /// Iterates <see cref="ServiceProvider.ErrorList"/> and every <see cref="Service.ErrorList"/> and reports these Diagnostics.
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="serviceProvider"></param>
-    private static void OutputServiceProviderErrors(SourceProductionContext context, ServiceProvider serviceProvider) {
-        foreach (Diagnostic error in serviceProvider.ErrorList)
-            context.ReportDiagnostic(error);
-
-        // serviceProvider.SortedServiceList can be still empty at this point
-        foreach (Service service in serviceProvider.SingletonList.Concat(serviceProvider.ScopedList).Concat(serviceProvider.TransientList).Concat(serviceProvider.DelegateList))
-            foreach (Diagnostic error in service.ErrorList)
-                context.ReportDiagnostic(error);
     }
 }
