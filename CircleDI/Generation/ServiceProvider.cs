@@ -215,7 +215,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         int upperBound = SortedServiceList.Count;
         while (lowerBound < upperBound) {
             int index = (lowerBound + upperBound) / 2;
-            
+
             switch (SortedServiceList[index].ServiceType.CompareTo(serviceType)) {
                 case -1:
                     lowerBound = index + 1;
@@ -227,7 +227,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     int start = index;
                     while (start > 0 && SortedServiceList[start - 1].ServiceType == serviceType)
                         start--;
-                    
+
                     int end = index + 1;
                     while (end < SortedServiceList.Count && SortedServiceList[end].ServiceType == serviceType)
                         end++;
@@ -481,6 +481,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 switch (attribute.Name) {
                     case "SingletonAttribute": {
                         Service service = new(serviceProvider, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider);
+                        HasError |= service.ErrorList.Count > 0;
                         hasServiceSelf |= service.ServiceType == serviceType;
                         SingletonList.Add(service);
 
@@ -494,6 +495,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             continue;
 
                         Service service = new(serviceProvider, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider);
+                        HasError |= service.ErrorList.Count > 0;
                         hasServiceSelfScope |= service.ServiceType == serviceTypeScope;
                         ScopedList.Add(service);
 
@@ -504,6 +506,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     }
                     case "TransientAttribute": {
                         Service service = new(serviceProvider, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider);
+                        HasError |= service.ErrorList.Count > 0;
                         TransientList.Add(service);
                         break;
                     }
@@ -512,6 +515,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             continue;
 
                         Service service = new(serviceProvider, attributeData, getAccessorScopeProvider);
+                        HasError |= service.ErrorList.Count > 0;
                         DelegateList.Add(service);
                         break;
                     }
@@ -613,6 +617,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 };
             }
         }
+
+        HasError |= ErrorList.Count > 0;
     }
 
 
@@ -624,29 +630,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// Checks dependency tree errors.
     /// </summary>
     public ServiceProvider InitDependencyTree() {
-        // check ErrorLists
-        {
-            if (ErrorList.Count > 0) {
-                HasError = true;
-                return this;
-            }
-
-            // serviceProvider.SortedServiceList is still empty at this point
-            foreach (Service service in SingletonList.Concat(ScopedList).Concat(TransientList).Concat(DelegateList))
-                if (service.ErrorList.Count > 0) {
-                    HasError = true;
-                    return this;
-                }
+        if (!HasError) {
+            CreateSortedList();
+            CreateDependencyTree();
+            HasError = ErrorList.Count > 0;
         }
-
-        // create list index
-        CreateSortedList();
-
-        // create dependency tree
-        CreateDependencyTree();
-
-        // check dependency tree errors
-        HasError = ErrorList.Count > 0;
 
         return this;
     }
@@ -765,9 +753,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                         serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, servicesWithSameType));
                                         return;
                                     }
-                                    
+
                                     dependencyService = serviceProvider.SortedServiceList[serviceIndex];
-                                    break;    
+                                    break;
                                 }
                                 error:
                                 {
@@ -990,7 +978,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 hashCode = Combine(hashCode, item.GetHashCode());
             return hashCode;
         }
-        
+
         static int Combine(int h1, int h2) {
             uint rol5 = ((uint)h1 << 5) | ((uint)h1 >> 27);
             return ((int)rol5 + h1) ^ h2;

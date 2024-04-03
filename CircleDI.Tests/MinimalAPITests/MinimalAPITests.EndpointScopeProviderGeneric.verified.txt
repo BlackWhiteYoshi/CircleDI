@@ -3,10 +3,10 @@
 #nullable enable annotations
 
 
-namespace MyCode;
+namespace CircleDIAttributes;
 
 public static partial class EndpointExtension {
-    public static void MapEndpointsWithTestProvider<T>(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
+    public static void MapCircleDIEndpoints<T>(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
         app.MapGet("Hello", (global::MyCode.ITestProvider.IScope<T> testProvider) => global::MyCode.Endpoints.MyHandler(testProvider.Self));
     }
 }

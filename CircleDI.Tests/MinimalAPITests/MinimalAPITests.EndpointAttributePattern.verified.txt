@@ -3,10 +3,10 @@
 #nullable enable annotations
 
 
-namespace MyCode;
+namespace CircleDIAttributes;
 
 public static partial class EndpointExtension {
-    public static void MapEndpointsWithTestProvider(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
+    public static void MapCircleDIEndpoints(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
         app.MapGet("/users/{userId}/books/{bookId}", () => global::MyCode.Endpoints.MyHandler());
     }
 }

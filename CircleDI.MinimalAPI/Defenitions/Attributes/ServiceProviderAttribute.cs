@@ -25,7 +25,7 @@ public static partial class Attributes {
 
             {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
 
-            {{ServiceProviderAttributePropertyGenerateEndpointExtension}}
+            {{ServiceProviderAttributePropertyEndpointProvider}}
         }
 
         {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeSummary}}
@@ -39,20 +39,20 @@ public static partial class Attributes {
         internal sealed class ServiceProviderAttribute<TInterface> : Attribute {
             {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
 
-            {{ServiceProviderAttributePropertyGenerateEndpointExtension}}
+            {{ServiceProviderAttributePropertyEndpointProvider}}
         }
 
         #endif
 
         """;
 
-    private const string ServiceProviderAttributePropertyGenerateEndpointExtension = """
+    private const string ServiceProviderAttributePropertyEndpointProvider = """
         /// <summary>
             /// <para>
-            /// Toggles the generation of an endpoint extension method for this provider.
+            /// Indicates that this provider is taken for resolving [Dependency]-parameters in [Endpoint]-methods.
             /// </para>
             /// <para>Default is true.</para>
             /// </summary>
-            public bool GenerateEndpointExtension { get; init; }
+            public bool EndpointProvider { get; init; }
         """;
 }

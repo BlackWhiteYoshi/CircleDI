@@ -352,6 +352,26 @@ public static class MinimalAPITests {
 
 
     [Fact]
+    public static Task EndpointWithoutProvider() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            public static class Endpoints {
+                [Endpoint("Hello", Http.Get)]
+                public static void MyHandler() { }
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
+        string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
+
+        return Verify(endpointExtensionSourceText);
+    }
+
+    [Fact]
     public static Task EndpointScopeProviderGeneric() {
         const string input = """
             using CircleDIAttributes;
@@ -603,6 +623,49 @@ public static class MinimalAPITests {
         Assert.Single(diagnostics);
         Assert.Equal("CDIM07", diagnostics[0].Id);
         Assert.Equal("The endpoint \"Hello\" with HTTP method 'Get' has multiple registrations", diagnostics[0].GetMessage());
+    }
+
+    [Fact]
+    public static void ErrorMultipleEndpointServiceProvider() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            public sealed partial class TestProvider;
+
+            [ServiceProvider]
+            public sealed partial class TestProvider2;
+
+            """;
+
+        _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDIM08", diagnostics[0].Id);
+        Assert.Equal("Multiple Endpoint ServiceProviders, at most one is allowed. Change the property \"EndpointProvider\" to false to change the ServiceProvider to a normal provider.", diagnostics[0].GetMessage());
+    }
+
+    [Fact]
+    public static void ErrorEndpointDependencyWithoutServiceProvider() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            public static class Endpoints {
+                [Endpoint("Hello", Http.Get)]
+                public static void MyHandler([Dependency] int number) { }
+            }
+
+            """;
+
+        _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDIM09", diagnostics[0].Id);
+        Assert.Equal("Endpoint has dependency without ServiceProvider. Either remove the [Dependency]-attribute or create a ServiceProvider with \"EndpointProvider\" set to default or true.", diagnostics[0].GetMessage());
     }
 
     #endregion

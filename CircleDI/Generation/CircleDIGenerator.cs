@@ -37,8 +37,8 @@ file static class RegisterServiceProviderAttributeExtension {
         IncrementalValuesProvider<ServiceProvider> serviceProviderList = context.SyntaxProvider.ForAttributeWithMetadataName(
             serviceProviderAttributeName,
             static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
-            static (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new ServiceProvider(generatorAttributeSyntaxContext).InitDependencyTree()
-        );
+            static (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new ServiceProvider(generatorAttributeSyntaxContext)
+        ).Select((ServiceProvider serviceProvider, CancellationToken _) => serviceProvider.InitDependencyTree()).WithComparer(NoComparison<ServiceProvider>.Instance);
 
         context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateClass);
         context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateInterface);

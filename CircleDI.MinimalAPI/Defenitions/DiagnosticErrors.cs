@@ -93,6 +93,30 @@ public static class DiagnosticErrors {
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
+
+    public static Diagnostic CreateMultipleEndpointServiceProviderError(this AttributeData serviceProviderAttribute, AttributeData otherServiceProviderAttribute)
+        => Diagnostic.Create(MultipleEndpointServiceProvider, serviceProviderAttribute.ToLocation(), additionalLocations: otherServiceProviderAttribute.ToLocationList());
+
+    private static DiagnosticDescriptor MultipleEndpointServiceProvider { get; } = new(
+        id: "CDIM08",
+        title: "Multiple Endpoint ServiceProviders",
+        messageFormat: "Multiple Endpoint ServiceProviders, at most one is allowed. Change the property \"EndpointProvider\" to false to change the ServiceProvider to a normal provider.",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
+    public static Diagnostic CreateEndpointDependencyWithoutServiceProviderError(this AttributeData endpointAttribute)
+        => Diagnostic.Create(EndpointDependencyWithoutServiceProvider, endpointAttribute.ToLocation());
+
+    private static DiagnosticDescriptor EndpointDependencyWithoutServiceProvider { get; } = new(
+        id: "CDIM09",
+        title: "Endpoint has Dependency without ServiceProvider",
+        messageFormat: "Endpoint has dependency without ServiceProvider. Either remove the [Dependency]-attribute or create a ServiceProvider with \"EndpointProvider\" set to default or true.",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
     #endregion
 
 
@@ -101,6 +125,12 @@ public static class DiagnosticErrors {
         => attributeData.ApplicationSyntaxReference switch {
             SyntaxReference reference => Location.Create(reference.SyntaxTree, reference.Span),
             _ => null
+        };
+
+    private static Location[] ToLocationList(this AttributeData attributeData)
+        => attributeData.ApplicationSyntaxReference switch {
+            SyntaxReference reference => [Location.Create(reference.SyntaxTree, reference.Span)],
+            _ => []
         };
 
     private static string CreateFullyQualifiedName(this MethodName methodName) {

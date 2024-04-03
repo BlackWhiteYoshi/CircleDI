@@ -91,9 +91,9 @@ file static class RegisterServiceProviderAttributeExtension {
         );
 
         // add components and init dependency tree
-        IncrementalValuesProvider<ServiceProvider> serviceProviderList = serviceProviderWithExtraList.WithComparer(NoComparison<ServiceProviderWithExtra>.Instance)
-            .Combine(componentList).WithComparer(NoComparison<(ServiceProviderWithExtra, ImmutableArray<INamedTypeSymbol?>)>.Instance)
-            .Select(ServiceProviderWithComponents);
+        IncrementalValuesProvider<ServiceProvider> serviceProviderList = serviceProviderWithExtraList.Combine(componentList)
+            .Select(ServiceProviderWithComponents)
+            .Select((ServiceProvider serviceProvider, CancellationToken _) => serviceProvider.InitDependencyTree()).WithComparer(NoComparison<ServiceProvider>.Instance);
 
 
         // generate default service get-methods
@@ -233,7 +233,7 @@ file static class RegisterServiceProviderAttributeExtension {
     private static ServiceProvider ServiceProviderWithComponents((ServiceProviderWithExtra serviceProviderWithExtra, ImmutableArray<INamedTypeSymbol?> componentList) pair, CancellationToken _) {
         ServiceProvider serviceProvider = pair.serviceProviderWithExtra.serviceProvider;
         if (!pair.serviceProviderWithExtra.AddRazorComponents)
-            return serviceProvider.InitDependencyTree();
+            return serviceProvider;
 
         foreach (INamedTypeSymbol? component in pair.componentList) {
             if (component is null)
@@ -269,7 +269,7 @@ file static class RegisterServiceProviderAttributeExtension {
             });
         }
 
-        return serviceProvider.InitDependencyTree();
+        return serviceProvider;
     }
 
 

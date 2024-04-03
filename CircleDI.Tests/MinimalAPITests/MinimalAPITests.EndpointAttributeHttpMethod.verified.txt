@@ -9,10 +9,10 @@ HTTP method: Any
 #nullable enable annotations
 
 
-namespace MyCode;
+namespace CircleDIAttributes;
 
 public static partial class EndpointExtension {
-    public static void MapEndpointsWithTestProvider(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
+    public static void MapCircleDIEndpoints(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
         app.Map("Hello", () => global::MyCode.Endpoints.MyHandler());
     }
 }
@@ -27,10 +27,10 @@ HTTP method: Get
 #nullable enable annotations
 
 
-namespace MyCode;
+namespace CircleDIAttributes;
 
 public static partial class EndpointExtension {
-    public static void MapEndpointsWithTestProvider(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
+    public static void MapCircleDIEndpoints(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
         app.MapGet("Hello", () => global::MyCode.Endpoints.MyHandler());
     }
 }
@@ -45,10 +45,10 @@ HTTP method: Post
 #nullable enable annotations
 
 
-namespace MyCode;
+namespace CircleDIAttributes;
 
 public static partial class EndpointExtension {
-    public static void MapEndpointsWithTestProvider(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
+    public static void MapCircleDIEndpoints(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
         app.MapPost("Hello", () => global::MyCode.Endpoints.MyHandler());
     }
 }
@@ -63,10 +63,10 @@ HTTP method: Put
 #nullable enable annotations
 
 
-namespace MyCode;
+namespace CircleDIAttributes;
 
 public static partial class EndpointExtension {
-    public static void MapEndpointsWithTestProvider(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
+    public static void MapCircleDIEndpoints(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
         app.MapPut("Hello", () => global::MyCode.Endpoints.MyHandler());
     }
 }
@@ -81,10 +81,10 @@ HTTP method: Patch
 #nullable enable annotations
 
 
-namespace MyCode;
+namespace CircleDIAttributes;
 
 public static partial class EndpointExtension {
-    public static void MapEndpointsWithTestProvider(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
+    public static void MapCircleDIEndpoints(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
         app.MapPatch("Hello", () => global::MyCode.Endpoints.MyHandler());
     }
 }
@@ -99,10 +99,10 @@ HTTP method: Delete
 #nullable enable annotations
 
 
-namespace MyCode;
+namespace CircleDIAttributes;
 
 public static partial class EndpointExtension {
-    public static void MapEndpointsWithTestProvider(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
+    public static void MapCircleDIEndpoints(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
         app.MapDelete("Hello", () => global::MyCode.Endpoints.MyHandler());
     }
 }
@@ -117,10 +117,10 @@ HTTP method: 6
 #nullable enable annotations
 
 
-namespace MyCode;
+namespace CircleDIAttributes;
 
 public static partial class EndpointExtension {
-    public static void MapEndpointsWithTestProvider(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
+    public static void MapCircleDIEndpoints(this global::Microsoft.AspNetCore.Builder.WebApplication app) {
         app.Map("", () => global::MyCode.Endpoints.MyHandler());
     }
 }
