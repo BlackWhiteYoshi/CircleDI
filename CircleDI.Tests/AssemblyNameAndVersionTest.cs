@@ -1,41 +1,21 @@
-﻿using CircleDI.Generation;
-using System.Reflection;
-
-namespace CircleDI.Tests;
+﻿namespace CircleDI.Tests;
 
 public sealed class AssemblyNameAndVersionTest {
     [Fact]
     public void AssemblyNameAndVersionMatch() {
-        #region CircleDI
+        const string NAME = Defenitions.Attributes.NAME;
+        const string VERSION = Defenitions.Attributes.VERSION;
 
-        string assemblyName = typeof(CircleDIGenerator).Assembly.GetName().Name!;
-        string assemblyVersion = typeof(CircleDIGenerator).Assembly.GetName().Version!.ToString()[..^2];
-
-        FieldInfo[] fields = typeof(Defenitions.Attributes).GetFields(BindingFlags.NonPublic | BindingFlags.Static);
-        string name = (string)fields[0].GetValue(null)!;
-        string version = (string)fields[1].GetValue(null)!;
-
-        Assert.Equal(name, assemblyName);
-
-        #endregion
-
-
-        #region CircleDI.Blazor
-
-        string assemblyNameBlazor = typeof(Blazor.Generation.CircleDIGenerator).Assembly.GetName().Name!;
+        string assemblyName = typeof(Generation.CircleDIGenerator).Assembly.GetName().Name!;
+        Assert.Equal(NAME, assemblyName);
+        
+        string assemblyVersion = typeof(Generation.CircleDIGenerator).Assembly.GetName().Version!.ToString()[..^2];
+        Assert.Equal(VERSION, assemblyVersion);
+        
         string assemblyVersionBlazor = typeof(Blazor.Generation.CircleDIGenerator).Assembly.GetName().Version!.ToString()[..^2];
+        Assert.Equal(VERSION, assemblyVersionBlazor);
 
-        FieldInfo[] fieldsBlazor = typeof(Blazor.Defenitions.Attributes).GetFields(BindingFlags.NonPublic | BindingFlags.Static);
-        string nameBlazor = (string)fieldsBlazor[0].GetValue(null)!;
-        string versionBlazor = (string)fieldsBlazor[1].GetValue(null)!;
-
-        Assert.Equal(nameBlazor, assemblyNameBlazor);
-
-        #endregion
-
-
-        Assert.Equal(version, assemblyVersion);
-        Assert.Equal(version, versionBlazor);
-        Assert.Equal(version, assemblyVersionBlazor);
+        string assemblyVersionMinimalAPI = typeof(MinimalAPI.Generation.CircleDIGenerator).Assembly.GetName().Version!.ToString()[..^2];
+        Assert.Equal(VERSION, assemblyVersionMinimalAPI);
     }
 }

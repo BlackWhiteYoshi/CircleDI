@@ -1,6 +1,6 @@
 ﻿namespace CircleDI.MinimalAPI.Defenitions;
 
 public static partial class Attributes {
-    private const string NAME = "CircleDI.Blazor";
-    private const string VERSION = "0.5.0";
+    private const string NAME = CircleDI.Defenitions.Attributes.NAME;
+    private const string VERSION = CircleDI.Defenitions.Attributes.VERSION;
 }

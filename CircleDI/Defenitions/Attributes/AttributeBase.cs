@@ -1,8 +1,8 @@
 ﻿namespace CircleDI.Defenitions;
 
 public static partial class Attributes {
-    private const string NAME = "CircleDI";
-    private const string VERSION = "0.5.0";
+    public const string NAME = "CircleDI";
+    public const string VERSION = "0.6.0";
 
     private const string CREATION_TIME_PROPERTY = """
         /// <summary>
