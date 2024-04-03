@@ -38,7 +38,7 @@ file static class RegisterServiceProviderAttributeExtension {
             serviceProviderAttributeName,
             static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
             static (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new ServiceProvider(generatorAttributeSyntaxContext)
-        ).Select((ServiceProvider serviceProvider, CancellationToken _) => serviceProvider.InitDependencyTree()).WithComparer(NoComparison<ServiceProvider>.Instance);
+        ).Select((ServiceProvider serviceProvider, CancellationToken _) => serviceProvider.CreateDependencyTree()).WithComparer(NoComparison<ServiceProvider>.Instance);
 
         context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateClass);
         context.RegisterSourceOutput(serviceProviderList, stringBuilderPool.GenerateInterface);

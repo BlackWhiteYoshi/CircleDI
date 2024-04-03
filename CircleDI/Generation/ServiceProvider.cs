@@ -625,16 +625,36 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     #region Dependency Tree
 
     /// <summary>
-    /// First checks on errors.<br />
-    /// If no errors, creates SortedList and dependency tree.<br />
-    /// Checks dependency tree errors.
+    /// <para>Fills <see cref="SortedServiceList"/> with <see cref="SingletonList"/>, <see cref="ScopedList"/>, <see cref="TransientList"/>, <see cref="DelegateList"/> and sorts by <see cref="Service.ServiceType"/>.</para>
+    /// <para>Creates and validates the dependency tree of <see cref="SortedServiceList"/> + <see cref="CreateScope"/>.</para>
+    /// <para>
+    /// The tree itself are <see cref="Service"/> nodes and the edges are <see cref="Dependency">Dependencies</see>.<br />
+    /// The dependencies of a service can be found at <see cref="Service.Dependencies"/>.<br />
+    /// A child of a node can be accessed with the reference <see cref="Dependency.Service"/>.<br />
+    /// The number of children of a node is: <see cref="Service.ConstructorDependencyList"/>.Count + <see cref="Service.PropertyDependencyList"/>.Count
+    /// </para>
+    /// <para>If the ServiceProvider has any errors, this method does nothing.</para>
     /// </summary>
-    public ServiceProvider InitDependencyTree() {
-        if (!HasError) {
-            CreateSortedList();
-            CreateDependencyTree();
-            HasError = ErrorList.Count > 0;
+    /// <remarks>In some circumstances circle dependencies are also allowed, so strictly spoken it's not a tree. Furthermore there is no one root node, there can be many root nodes and independent trees.</remarks>
+    public ServiceProvider CreateDependencyTree() {
+        if (HasError)
+            return this;
+        
+        SortedServiceList = [.. SingletonList, .. ScopedList, .. TransientList, .. DelegateList];
+        SortedServiceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
+
+        // init dependency tree
+        {
+            DependencyTreeInitializer initializer = new(this);
+
+            if (CreateScope is not null)
+                initializer.InitNode(CreateScope);
+
+            foreach (Service service in SortedServiceList)
+                initializer.InitNode(service);
         }
+
+        HasError = ErrorList.Count > 0;
 
         return this;
     }
@@ -643,49 +663,19 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// Creates and validates the dependency tree of a collecion of services.
     /// </summary>
     /// <param name="services"></param>
-    public void InitServiceDependencyTree(IEnumerable<Service> services) {
+    public void CreateDependencyTree(IEnumerable<(Service service, AttributeData attribute)> services) {
         DependencyTreeInitializer initializer = new(this);
-        foreach (Service service in services)
+        foreach ((Service service, AttributeData attribute) in services) {
+            initializer.attribute = attribute;
             initializer.InitNode(service);
+        }
     }
 
-    /// <summary>
-    /// Creates and validates the dependency tree of a single service.
-    /// </summary>
-    /// <param name="service"></param>
-    public void InitServiceDependencyTree(Service service) => new DependencyTreeInitializer(this).InitNode(service);
-
-
-    /// <summary>
-    /// Fills <see cref="SortedServiceList"/> with <see cref="SingletonList"/>, <see cref="ScopedList"/>, <see cref="TransientList"/>, <see cref="DelegateList"/> and sorts by <see cref="Service.ServiceType"/>.
-    /// </summary>
-    public void CreateSortedList() {
-        SortedServiceList = [.. SingletonList, .. ScopedList, .. TransientList, .. DelegateList];
-        SortedServiceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
-    }
-
-    /// <summary>
-    /// <para>Creates and validates the dependency tree of <see cref="SortedServiceList"/> + <see cref="CreateScope"/>.</para>
-    /// <para>
-    /// The tree itself are <see cref="Service"/> nodes and the edges are <see cref="Dependency">Dependencies</see>.<br />
-    /// The dependencies of a service can be found at <see cref="Service.Dependencies"/>.<br />
-    /// A child of a node can be accessed with the reference <see cref="Dependency.Service"/>.<br />
-    /// The number of children of a node is: <see cref="Service.ConstructorDependencyList"/>.Count + <see cref="Service.PropertyDependencyList"/>.Count
-    /// </para>
-    /// </summary>
-    /// <remarks>In some circumstances circle dependencies are also allowed, so strictly spoken it's not a tree. Furthermore there is no one root node, there can be many root nodes and independent trees.</remarks>
-    public void CreateDependencyTree() {
-        DependencyTreeInitializer initializer = new(this);
-
-        if (CreateScope is not null)
-            initializer.InitNode(CreateScope);
-
-        foreach (Service service in SortedServiceList)
-            initializer.InitNode(service);
-    }
-
-    private readonly struct DependencyTreeInitializer(ServiceProvider serviceProvider) {
+    private struct DependencyTreeInitializer(ServiceProvider serviceProvider, AttributeData attribute) {
+        public AttributeData attribute = attribute;
         private readonly List<(Service node, Dependency edge)> path = [];
+
+        public DependencyTreeInitializer(ServiceProvider serviceProvider) : this(serviceProvider, serviceProvider.Attribute) { }
 
         public void InitNode(Service service) {
             if (service.TreeState.HasFlag(DependencyTreeFlags.Traversed))
@@ -707,8 +697,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         // else
                         {
                             Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                true => serviceProvider.Attribute.CreateScopedProviderNamedUnregisteredError(serviceProvider.Identifier, dependency.ServiceName),
-                                false => serviceProvider.Attribute.CreateDependencyNamedUnregisteredError(service.Name, dependency.ServiceName)
+                                true => attribute.CreateScopedProviderNamedUnregisteredError(serviceProvider.Identifier, dependency.ServiceName),
+                                false => attribute.CreateDependencyNamedUnregisteredError(service.Name, dependency.ServiceName)
                             };
                             serviceProvider.ErrorList.Add(error);
                             return;
@@ -720,14 +710,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         switch (count) {
                             case 0: {
                                 Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                    true => serviceProvider.Attribute.CreateScopedProviderUnregisteredError(serviceProvider.Identifier, dependency.ServiceType),
-                                    false => serviceProvider.Attribute.CreateDependencyUnregisteredError(service.Name, dependency.ServiceType)
+                                    true => attribute.CreateScopedProviderUnregisteredError(serviceProvider.Identifier, dependency.ServiceType),
+                                    false => attribute.CreateDependencyUnregisteredError(service.Name, dependency.ServiceType)
                                 };
                                 serviceProvider.ErrorList.Add(error);
 
                                 if (serviceProvider.HasInterface)
                                     if (dependency.ServiceType.Name == serviceProvider.InterfaceIdentifier.Name || dependency.ServiceType.Name == $"{serviceProvider.InterfaceIdentifier.Name}.IScope") {
-                                        Diagnostic hintError = serviceProvider.Attribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceType, string.Join(".", serviceProvider.Identifier.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceIdentifier.Name);
+                                        Diagnostic hintError = attribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceType, string.Join(".", serviceProvider.Identifier.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceIdentifier.Name);
                                         serviceProvider.ErrorList.Add(hintError);
                                     }
 
@@ -750,7 +740,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                                     if (serviceIndex == -1) {
                                         IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
-                                        serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, servicesWithSameType));
+                                        serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, servicesWithSameType));
                                         return;
                                     }
 
@@ -763,8 +753,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                     bool isParameter = dependency is ConstructorDependency;
 
                                     Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                        true => serviceProvider.Attribute.CreateScopedProviderAmbiguousError(serviceProvider.Identifier, dependency.ServiceType, servicesWithSameType, isParameter),
-                                        false => serviceProvider.Attribute.CreateDependencyAmbiguousError(service.Name, dependency.ServiceType, servicesWithSameType, isParameter)
+                                        true => attribute.CreateScopedProviderAmbiguousError(serviceProvider.Identifier, dependency.ServiceType, servicesWithSameType, isParameter),
+                                        false => attribute.CreateDependencyAmbiguousError(service.Name, dependency.ServiceType, servicesWithSameType, isParameter)
                                     };
                                     serviceProvider.ErrorList.Add(error);
                                     return;
@@ -792,7 +782,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 // append first item again as last item to illustrate the circle
                                 servicesInCircle = servicesInCircle.Concat(servicesInCircle.Take(1));
 
-                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateDependencyCircleError(servicesInCircle));
+                                serviceProvider.ErrorList.Add(attribute.CreateDependencyCircleError(servicesInCircle));
                                 return;
                             }
                         }
@@ -805,21 +795,21 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     switch (service.Lifetime) {
                         case ServiceLifetime.Singleton:
                             if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateDependencyLifetimeScopeError(service.Name, dependency.Service.ServiceType));
+                                serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeScopeError(service.Name, dependency.Service.ServiceType));
                                 return;
                             }
                             if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateDependencyLifetimeTransientError(service.Name, dependency.Service.ServiceType));
+                                serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeTransientError(service.Name, dependency.Service.ServiceType));
                                 return;
                             }
                             break;
                         case ServiceLifetime.TransientSingleton:
                             if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateScopedProviderLifetimeScopeError(serviceProvider.Identifier, dependency.Service.ServiceType));
+                                serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeScopeError(serviceProvider.Identifier, dependency.Service.ServiceType));
                                 return;
                             }
                             if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateScopedProviderLifetimeTransientError(serviceProvider.Identifier, dependency.Service.ServiceType));
+                                serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeTransientError(serviceProvider.Identifier, dependency.Service.ServiceType));
                                 return;
                             }
                             break;

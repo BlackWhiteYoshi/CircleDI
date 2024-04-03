@@ -93,7 +93,7 @@ file static class RegisterServiceProviderAttributeExtension {
         // add components and init dependency tree
         IncrementalValuesProvider<ServiceProvider> serviceProviderList = serviceProviderWithExtraList.Combine(componentList)
             .Select(ServiceProviderWithComponents)
-            .Select((ServiceProvider serviceProvider, CancellationToken _) => serviceProvider.InitDependencyTree()).WithComparer(NoComparison<ServiceProvider>.Instance);
+            .Select((ServiceProvider serviceProvider, CancellationToken _) => serviceProvider.CreateDependencyTree()).WithComparer(NoComparison<ServiceProvider>.Instance);
 
 
         // generate default service get-methods
