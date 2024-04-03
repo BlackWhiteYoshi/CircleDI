@@ -157,6 +157,8 @@ public class MyService : IMyService {
 <br></br>
 ## [Get Started - Blazor](Readme_md/Blazor.md#GetStarted)
 
+## [Get Started - MinimalAPI](Readme_md/MinimalAPI.md#GetStarted)
+
 
 <br></br>
 ## Examples
