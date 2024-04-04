@@ -1,4 +1,4 @@
-﻿# CircleDI.Blazor
+﻿# CircleDI.MinimalAPI
 
 The world only full-power circular Service Provider wired up with ASP.NET Core minimal API.
 
@@ -14,7 +14,7 @@ The world only full-power circular Service Provider wired up with ASP.NET Core m
 - Customizable
 - Easy to Use
 
-Extra Blazor features are
+Extra MinimalAPI features are
 
 - EndpointAttribute to register methods as minimal API endpoint.
 
