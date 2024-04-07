@@ -574,7 +574,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 List<PropertyDependency> propertyDependencyList;
                 if (serviceProviderScope is not null) {
                     if (HasConstructorScope) {
-                        (constructorDependencyList, Diagnostic? constructorListError) = Service.CreateConstructorDependencyList(serviceProviderScope!, Attribute);
+                        (constructorDependencyList, Diagnostic? constructorListError) = serviceProviderScope.CreateConstructorDependencyList(Attribute);
                         if (constructorListError is not null)
                             ErrorList.Add(constructorListError);
                     }
@@ -588,7 +588,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             ByRef = RefKind.None
                         }];
 
-                    (propertyDependencyList, Diagnostic? propertyListError) = Service.CreatePropertyDependencyList(serviceProviderScope!, Attribute);
+                    (propertyDependencyList, Diagnostic? propertyListError) = serviceProviderScope.CreatePropertyDependencyList(Attribute);
                     if (propertyListError is not null)
                         ErrorList.Add(propertyListError);
                 }

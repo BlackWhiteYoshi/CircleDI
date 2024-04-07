@@ -145,7 +145,7 @@ public sealed class Endpoint : IEquatable<Endpoint> {
         }
 
 
-        List<ConstructorDependency> constructorDependencyList = Service.CreateConstructorDependencyList(method);
+        List<ConstructorDependency> constructorDependencyList = method.CreateConstructorDependencyList();
 
         MethodDeclarationSyntax methodNode = (MethodDeclarationSyntax)syntaxContext.TargetNode;
         ParameterAttributesList = new ParameterAttribute[constructorDependencyList.Count][];

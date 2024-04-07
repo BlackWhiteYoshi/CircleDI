@@ -244,11 +244,11 @@ file static class RegisterServiceProviderAttributeExtension {
                 continue;
 
 
-            (List<ConstructorDependency> constructorDependencyList, Diagnostic? constructorListError) = Service.CreateConstructorDependencyList(component, serviceProvider.Attribute);
+            (List<ConstructorDependency> constructorDependencyList, Diagnostic? constructorListError) = component.CreateConstructorDependencyList(serviceProvider.Attribute);
             if (constructorListError is not null)
                 serviceProvider.ErrorList.Add(constructorListError);
 
-            (List<PropertyDependency> propertyDependencyList, Diagnostic? propertyListError) = Service.CreatePropertyDependencyList(component, serviceProvider.Attribute);
+            (List<PropertyDependency> propertyDependencyList, Diagnostic? propertyListError) = component.CreatePropertyDependencyList(serviceProvider.Attribute);
             if (propertyListError is not null)
                 serviceProvider.ErrorList.Add(propertyListError);
 
