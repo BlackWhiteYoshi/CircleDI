@@ -761,7 +761,9 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<TestProvider.Scope>(Implementation = "this")]
-            public sealed partial class TestProvider;
+            public sealed partial class TestProvider {
+                public sealed partial class Scope;
+            }
 
             """;
 
@@ -2299,6 +2301,26 @@ public static class RegisterServicesTests {
 
 
     [Fact]
+    public static void InvalidServiceRegistration() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestProvider.Scope>]
+            public sealed partial class TestProvider;
+
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI037", diagnostics[0].Id);
+        Assert.Equal("Invalid type at service registration. If you are using a generated type like 'MyCode.TestProvider.Scope', 'MyCode.ITestProvider' or 'MyCode.ITestProvider.IScope', declare that type again, so it is available before generation.", diagnostics[0].GetMessage());
+    }
+
+    [Fact]
     public static void RegisterServiceThatDoesNotExistsFails() {
         const string input = """
             using CircleDIAttributes;
@@ -2309,13 +2331,16 @@ public static class RegisterServicesTests {
             [Singleton<ITestService, TestService>]
             public sealed partial class TestProvider;
 
+            public interface ITestService;
+            public interface TestService : ITestService;
+
             """;
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
         Assert.Equal("CDI017", diagnostics[0].Id);
-        Assert.Equal("ServiceImplementation 'TestService' does not exist or has no accessible constructor", diagnostics[0].GetMessage());
+        Assert.Equal("ServiceImplementation 'MyCode.TestService' does not exist or has no accessible constructor", diagnostics[0].GetMessage());
     }
 
     [Fact]
@@ -2421,7 +2446,9 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestProvider.IScope, TestProvider.Scope>(Name = "Me", Implementation = "this")]
-            public sealed partial class TestProvider;
+            public sealed partial class TestProvider {
+                public sealed partial class Scope;
+            }
 
             public partial interface ITestProvider {
                 public partial interface IScope;
@@ -2457,7 +2484,9 @@ public static class RegisterServicesTests {
                 public sealed partial class Scope;
             }
 
-            public partial interface ITestProvider.IScope;
+            public partial interface ITestProvider {
+                public partial interface IScope;
+            }
 
             """;
 
@@ -2482,13 +2511,16 @@ public static class RegisterServicesTests {
                 private ITestService _singleton = null!;
             }
 
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
             """;
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
         Assert.Equal("CDI009", diagnostics[0].Id);
-        Assert.Equal("Wrong type of field '_singleton': 'ITestService' <-> 'TestService' expected", diagnostics[0].GetMessage());
+        Assert.Equal("Wrong type of field '_singleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected", diagnostics[0].GetMessage());
     }
 
     [Fact]
@@ -2504,13 +2536,16 @@ public static class RegisterServicesTests {
                 private ITestService Singleton => null!;
             }
 
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
             """;
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
         Assert.Equal("CDI010", diagnostics[0].Id);
-        Assert.Equal("Wrong type of property 'Singleton': 'ITestService' <-> 'TestService' expected", diagnostics[0].GetMessage());
+        Assert.Equal("Wrong type of property 'Singleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected", diagnostics[0].GetMessage());
     }
 
     [Fact]
@@ -2526,12 +2561,15 @@ public static class RegisterServicesTests {
                 private ITestService CreateSingleton() => null!;
             }
 
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
             """;
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
         Assert.Equal("CDI011", diagnostics[0].Id);
-        Assert.Equal("Wrong return type of method 'CreateSingleton': 'ITestService' <-> 'TestService' expected", diagnostics[0].GetMessage());
+        Assert.Equal("Wrong return type of method 'CreateSingleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected", diagnostics[0].GetMessage());
     }
 }

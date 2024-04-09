@@ -482,8 +482,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 if (attribute is not { ContainingNamespace: { Name: "CircleDIAttributes", ContainingNamespace.Name: "" }, ContainingType: null })
                     continue;
 
-                if (attribute.TypeArguments.Length == 0)
+                if (attribute.TypeArguments.Any((ITypeSymbol typeSymbol) => typeSymbol.TypeKind == TypeKind.Error)) {
+                    ErrorList.Add(attributeData.CreateInvalidServiceRegistrationError(Identifier, InterfaceIdentifier));
                     continue;
+                }
 
                 switch (attribute.Name) {
                     case "SingletonAttribute": {
@@ -810,8 +812,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     if (attribute is not { ContainingNamespace: { Name: "CircleDIAttributes", ContainingNamespace.Name: "" }, ContainingType: null })
                         continue;
 
-                    if (attribute.TypeArguments.Length == 0)
+                    if (attribute.TypeArguments.Any((ITypeSymbol typeSymbol) => typeSymbol.TypeKind == TypeKind.Error)) {
+                        serviceProvider.ErrorList.Add(attributeData.CreateInvalidServiceRegistrationError(serviceProvider.Identifier, serviceProvider.InterfaceIdentifier));
                         continue;
+                    }
 
                     switch (attribute.Name) {
                         case "SingletonAttribute": {

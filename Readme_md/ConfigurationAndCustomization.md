@@ -361,7 +361,9 @@ namespace MySpace;
 [Singleton<IMyProvider, MyProvider>(Name = "Me", Implementation = "this")]
 // overrides default scoped service => default is identifier "SelfScope", now it is identifier "MeScope"
 [Scoped<IMyProvider.IScope, MyProvider.Scope>(Name = "MeScope", Implementation = "this")]
-public sealed partial class MyProvider;
+public sealed partial class MyProvider {
+    public sealed partial class Scope;
+}
 
 // declaring the interface type in the same namespace
 public partial interface IMyProvider {

@@ -97,6 +97,18 @@ public static class DiagnosticErrors {
 
     #region Service Errors
 
+    public static Diagnostic CreateInvalidServiceRegistrationError(this AttributeData serviceAttribute, TypeName serviceProviderIdentifier, TypeName interfaceIdentifier)
+        => Diagnostic.Create(InvalidServiceRegistration, serviceAttribute.ToLocation(), [serviceProviderIdentifier.CreateFullyQualifiedName(), interfaceIdentifier.CreateFullyQualifiedName()]);
+
+    private static DiagnosticDescriptor InvalidServiceRegistration { get; } = new(
+        id: "CDI037",
+        title: "Invalid service registration",
+        messageFormat: "Invalid type at service registration. If you are using a generated type like '{0}.Scope', '{1}' or '{1}.IScope', declare that type again, so it is available before generation.",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
     public static Diagnostic CreateTransientImplementationFieldError(this AttributeData serviceAttribute)
         => Diagnostic.Create(TransientImplementationField, serviceAttribute.ToLocation());
 
@@ -107,6 +119,7 @@ public static class DiagnosticErrors {
         category: "CircleDI",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
 
     public static Diagnostic CreateTransientImplementationThisError(this AttributeData serviceAttribute)
         => Diagnostic.Create(TransientImplementationThis, serviceAttribute.ToLocation());

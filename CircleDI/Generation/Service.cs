@@ -165,7 +165,7 @@ public sealed class Service : IEquatable<Service> {
     /// <param name="getAccessorProvider"></param>
     [SetsRequiredMembers]
     public Service(INamedTypeSymbol module, AttributeData attributeData, ServiceLifetime lifetime, CreationTiming creationTimeProvider, GetAccess getAccessorProvider) {
-        Debug.Assert(attributeData.AttributeClass?.TypeArguments.Length > 0);
+        Debug.Assert(attributeData.AttributeClass?.TypeArguments.All((ITypeSymbol typeSymbol) => typeSymbol.TypeKind != TypeKind.Error) == true);
 
         INamedTypeSymbol attributeType = attributeData.AttributeClass!;
         INamedTypeSymbol serviceType = (INamedTypeSymbol)attributeType.TypeArguments[0];
@@ -309,7 +309,7 @@ public sealed class Service : IEquatable<Service> {
     /// <param name="getAccessorProvider"></param>
     [SetsRequiredMembers]
     public Service(INamedTypeSymbol module, AttributeData attributeData, GetAccess getAccessorProvider) {
-        Debug.Assert(attributeData.AttributeClass?.TypeArguments.Length > 0);
+        Debug.Assert(attributeData.AttributeClass?.TypeArguments.All((ITypeSymbol typeSymbol) => typeSymbol.TypeKind != TypeKind.Error) == true);
 
         INamedTypeSymbol attribute = attributeData.AttributeClass!;
         INamedTypeSymbol serviceType = (INamedTypeSymbol)attribute.TypeArguments[0];
