@@ -157,7 +157,7 @@ file static class RegisterServiceProviderAttributeExtension {
         TypeName? serviceTypeScopeProvider = null;
         if (serviceProvider is not null) {
             // 1 ServiceProvider -> normal case
-            if (serviceProvider.HasError)
+            if (serviceProvider.ErrorList.Count > 0)
                 return;
 
             serviceTypeScopeProvider = serviceProvider.HasInterface ? serviceProvider.InterfaceIdentifierScope : serviceProvider.IdentifierScope;

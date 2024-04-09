@@ -129,12 +129,6 @@ public sealed class Service : IEquatable<Service> {
 
 
     /// <summary>
-    /// Diagnostics with Severity error that are related to this Service.
-    /// </summary>
-    public List<Diagnostic> ErrorList { get; private set; } = [];
-
-
-    /// <summary>
     /// <para>Iterator for all dependencies of this service.</para>
     /// <para>Normally it is just <see cref="ConstructorDependencyList"/> concatenated with <see cref="PropertyDependencyList"/>.</para>
     /// <para>The exception is the "special" service <see cref="ServiceProvider.CreateScope"/>, it needs an iterator with filter.</para>
@@ -164,7 +158,7 @@ public sealed class Service : IEquatable<Service> {
     /// <param name="creationTimeProvider"></param>
     /// <param name="getAccessorProvider"></param>
     [SetsRequiredMembers]
-    public Service(INamedTypeSymbol module, AttributeData attributeData, ServiceLifetime lifetime, CreationTiming creationTimeProvider, GetAccess getAccessorProvider) {
+    public Service(INamedTypeSymbol module, AttributeData attributeData, ServiceLifetime lifetime, CreationTiming creationTimeProvider, GetAccess getAccessorProvider, List<Diagnostic> errorList) {
         Debug.Assert(attributeData.AttributeClass?.TypeArguments.All((ITypeSymbol typeSymbol) => typeSymbol.TypeKind != TypeKind.Error) == true);
 
         INamedTypeSymbol attributeType = attributeData.AttributeClass!;
@@ -202,11 +196,11 @@ public sealed class Service : IEquatable<Service> {
             
             (ConstructorDependencyList, Diagnostic? constructorListError) = implementationType.CreateConstructorDependencyList(attributeData);            
             if (constructorListError is not null)
-                ErrorList.Add(constructorListError);
+                errorList.Add(constructorListError);
 
             (PropertyDependencyList, Diagnostic? propertyListError) = implementationType.CreatePropertyDependencyList(attributeData);
             if (propertyListError is not null)
-                ErrorList.Add(propertyListError);
+                errorList.Add(propertyListError);
         }
         else {
             if (implementationName == "this") {
@@ -217,14 +211,14 @@ public sealed class Service : IEquatable<Service> {
                 switch (Lifetime) {
                     case ServiceLifetime.Singleton:
                         if (!SymbolEqualityComparer.Default.Equals(module, implementationType))
-                            ErrorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, module.ToDisplayString(), ImplementationType));
+                            errorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, module.ToDisplayString(), ImplementationType));
                         break;
                     case ServiceLifetime.Scoped:
                         if ($"{module.ToDisplayString()}.Scope" != implementationType.ToDisplayString())
-                            ErrorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, $"{module.ToDisplayString()}.Scope", ImplementationType));
+                            errorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, $"{module.ToDisplayString()}.Scope", ImplementationType));
                         break;
                     case ServiceLifetime.Transient:
-                        ErrorList.Add(attributeData.CreateTransientImplementationThisError());
+                        errorList.Add(attributeData.CreateTransientImplementationThisError());
                         break;
                 }
             }
@@ -255,7 +249,7 @@ public sealed class Service : IEquatable<Service> {
                         }
 
                         if (Implementation.Type == MemberType.Field)
-                            ErrorList.Add(attributeData.CreateTransientImplementationFieldError());
+                            errorList.Add(attributeData.CreateTransientImplementationFieldError());
                         break;
                     }
                     default: {
@@ -274,19 +268,19 @@ public sealed class Service : IEquatable<Service> {
                 // check implementation
                 switch (implementationSymbol) {
                     case null:
-                        ErrorList.Add(attributeData.CreateMissingImplementationMemberError(module.ToDisplayString(), implementationName));
+                        errorList.Add(attributeData.CreateMissingImplementationMemberError(module.ToDisplayString(), implementationName));
                         break;
                     case IFieldSymbol field:
                         if (!SymbolEqualityComparer.Default.Equals(field.Type, implementationType))
-                            ErrorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, field.Type.ToDisplayString(), ImplementationType));
+                            errorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, field.Type.ToDisplayString(), ImplementationType));
                         break;
                     case IPropertySymbol property:
                         if (!SymbolEqualityComparer.Default.Equals(property.Type, implementationType))
-                            ErrorList.Add(attributeData.CreateWrongPropertyImplementationTypeError(implementationName, property.Type.ToDisplayString(), ImplementationType));
+                            errorList.Add(attributeData.CreateWrongPropertyImplementationTypeError(implementationName, property.Type.ToDisplayString(), ImplementationType));
                         break;
                     case IMethodSymbol method: {
                         if (!SymbolEqualityComparer.Default.Equals(method.ReturnType, implementationType))
-                            ErrorList.Add(attributeData.CreateWrongMethodImplementationTypeError(implementationName, method.ReturnType.ToDisplayString(), ImplementationType));
+                            errorList.Add(attributeData.CreateWrongMethodImplementationTypeError(implementationName, method.ReturnType.ToDisplayString(), ImplementationType));
                         break;
                     }
                 }
@@ -308,7 +302,7 @@ public sealed class Service : IEquatable<Service> {
     /// <param name="attributeData"></param>
     /// <param name="getAccessorProvider"></param>
     [SetsRequiredMembers]
-    public Service(INamedTypeSymbol module, AttributeData attributeData, GetAccess getAccessorProvider) {
+    public Service(INamedTypeSymbol module, AttributeData attributeData, GetAccess getAccessorProvider, List<Diagnostic> errorList) {
         Debug.Assert(attributeData.AttributeClass?.TypeArguments.All((ITypeSymbol typeSymbol) => typeSymbol.TypeKind != TypeKind.Error) == true);
 
         INamedTypeSymbol attribute = attributeData.AttributeClass!;
@@ -332,7 +326,7 @@ public sealed class Service : IEquatable<Service> {
 
         // check serviceType is delegate
         if (serviceType.DelegateInvokeMethod is null) {
-            ErrorList.Add(attributeData.CreateDelegateServiceIsNotDelegateError(ServiceType));
+            errorList.Add(attributeData.CreateDelegateServiceIsNotDelegateError(ServiceType));
             return;
         }
 
@@ -349,19 +343,19 @@ public sealed class Service : IEquatable<Service> {
                 Implementation = new ImplementationMember(MemberType.Method, methodName, scopeMethod.IsStatic, IsScoped: true);
             }
             else {
-                ErrorList.Add(attributeData.CreateMissingDelegateImplementationError(module.ToDisplayString(), methodName));
+                errorList.Add(attributeData.CreateMissingDelegateImplementationError(module.ToDisplayString(), methodName));
                 return;
             }
 
             if (implementation.Parameters.Length != serviceType.DelegateInvokeMethod.Parameters.Length)
-                ErrorList.Add(attributeData.CreateDelegateWrongParameterCountError(methodName, implementation.Parameters.Length, serviceType.DelegateInvokeMethod.Parameters.Length));
+                errorList.Add(attributeData.CreateDelegateWrongParameterCountError(methodName, implementation.Parameters.Length, serviceType.DelegateInvokeMethod.Parameters.Length));
             else
                 for (int i = 0; i < implementation.Parameters.Length; i++)
                     if (!SymbolEqualityComparer.Default.Equals(implementation.Parameters[i].Type, serviceType.DelegateInvokeMethod.Parameters[i].Type))
-                        ErrorList.Add(attributeData.CreateDelegateWrongParameterTypeError(methodName, implementation.Parameters[i].Type.ToDisplayString(), serviceType.DelegateInvokeMethod.Parameters[i].Type.ToDisplayString(), i + 1));
+                        errorList.Add(attributeData.CreateDelegateWrongParameterTypeError(methodName, implementation.Parameters[i].Type.ToDisplayString(), serviceType.DelegateInvokeMethod.Parameters[i].Type.ToDisplayString(), i + 1));
 
             if (!SymbolEqualityComparer.Default.Equals(implementation.ReturnType, serviceType.DelegateInvokeMethod?.ReturnType))
-                ErrorList.Add(attributeData.CreateDelegateWrongReturnTypeError(methodName, implementation.ReturnType.ToDisplayString(), serviceType.DelegateInvokeMethod!.ReturnType.ToDisplayString()));
+                errorList.Add(attributeData.CreateDelegateWrongReturnTypeError(methodName, implementation.ReturnType.ToDisplayString(), serviceType.DelegateInvokeMethod!.ReturnType.ToDisplayString()));
         }
     }
 
@@ -421,9 +415,6 @@ public sealed class Service : IEquatable<Service> {
         if (IsAsyncDisposable != other.IsAsyncDisposable)
             return false;
 
-        if (!ErrorList.SequenceEqual(other.ErrorList))
-            return false;
-
         return true;
     }
 
@@ -450,8 +441,6 @@ public sealed class Service : IEquatable<Service> {
 
         hashCode = Combine(hashCode, IsDisposable.GetHashCode());
         hashCode = Combine(hashCode, IsAsyncDisposable.GetHashCode());
-
-        hashCode = CombineList(hashCode, ErrorList);
 
         return hashCode;
 

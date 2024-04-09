@@ -247,11 +247,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public List<Diagnostic> ErrorList { get; private set; } = [];
 
     /// <summary>
-    /// Inidicates <see cref="ErrorList"/> or any <see cref="Service.ErrorList"/> is not empty.
-    /// </summary>
-    public bool HasError { get; set; } = false;
-
-    /// <summary>
     /// The <i>[ServiceProvider]</i>-attribute above the class.
     /// </summary>
     public AttributeData Attribute { get; private set; }
@@ -489,8 +484,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                 switch (attribute.Name) {
                     case "SingletonAttribute": {
-                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider);
-                        HasError |= service.ErrorList.Count > 0;
+                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, ErrorList);
                         hasServiceSelf |= service.ServiceType == serviceType;
                         SingletonList.Add(service);
 
@@ -503,8 +497,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         if (!generateScope)
                             break;
 
-                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider);
-                        HasError |= service.ErrorList.Count > 0;
+                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, ErrorList);
                         hasServiceSelfScope |= service.ServiceType == serviceTypeScope;
                         ScopedList.Add(service);
 
@@ -514,8 +507,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         break;
                     }
                     case "TransientAttribute": {
-                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider);
-                        HasError |= service.ErrorList.Count > 0;
+                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, ErrorList);
                         TransientList.Add(service);
                         break;
                     }
@@ -523,8 +515,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         if (attributeData.ConstructorArguments.Length == 0)
                             break;
 
-                        Service service = new(serviceProvider, attributeData, getAccessorScopeProvider);
-                        HasError |= service.ErrorList.Count > 0;
+                        Service service = new(serviceProvider, attributeData, getAccessorScopeProvider, ErrorList);
                         DelegateList.Add(service);
                         break;
                     }
@@ -618,8 +609,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 };
             }
         }
-
-        HasError |= ErrorList.Count > 0;
     }
 
 
@@ -819,11 +808,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                     switch (attribute.Name) {
                         case "SingletonAttribute": {
-                            Service service = new(module, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider) {
+                            Service service = new(module, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, serviceProvider.ErrorList) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
-                            serviceProvider.HasError |= service.ErrorList.Count > 0;
                             serviceProvider.SingletonList.Add(service);
                             break;
                         }
@@ -831,20 +819,18 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             if (!generateScope)
                                 break;
 
-                            Service service = new(module, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider) {
+                            Service service = new(module, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, serviceProvider.ErrorList) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
-                            serviceProvider.HasError |= service.ErrorList.Count > 0;
                             serviceProvider.ScopedList.Add(service);
                             break;
                         }
                         case "TransientAttribute": {
-                            Service service = new(module, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider) {
+                            Service service = new(module, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, serviceProvider.ErrorList) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
-                            serviceProvider.HasError |= service.ErrorList.Count > 0;
                             serviceProvider.TransientList.Add(service);
                             break;
                         }
@@ -852,11 +838,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             if (attributeData.ConstructorArguments.Length == 0)
                                 break;
 
-                            Service service = new(module, attributeData, getAccessorScopeProvider) {
+                            Service service = new(module, attributeData, getAccessorScopeProvider, serviceProvider.ErrorList) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
-                            serviceProvider.HasError |= service.ErrorList.Count > 0;
                             serviceProvider.DelegateList.Add(service);
                             break;
                         }
@@ -891,7 +876,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// </summary>
     /// <remarks>In some circumstances circle dependencies are also allowed, so strictly spoken it's not a tree. Furthermore there is no one root node, there can be many root nodes and independent trees.</remarks>
     public ServiceProvider CreateDependencyTree() {
-        if (HasError)
+        if (ErrorList.Count > 0)
             return this;
         
         SortedServiceList = [.. SingletonList, .. ScopedList, .. TransientList, .. DelegateList];
@@ -907,8 +892,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             foreach (Service service in SortedServiceList)
                 initializer.InitNode(service);
         }
-
-        HasError = ErrorList.Count > 0;
 
         return this;
     }
