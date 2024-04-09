@@ -1,5 +1,6 @@
 ﻿using CircleDI.Defenitions;
 using CircleDI.Generation;
+using System.Diagnostics;
 using System.Text;
 
 namespace CircleDI.Extensions;
@@ -29,7 +30,7 @@ public static class StringBuilderExtensions {
     /// <param name="service"></param>
     public static void AppendServiceField(this StringBuilder builder, Service service) {
         if (service.Implementation.Type == MemberType.Field)
-            builder.Append(service.Implementation.Name);
+            builder.AppendImplementationName(service);
         else {
             builder.Append('_');
             builder.AppendFirstLower(service.Name);
@@ -50,6 +51,60 @@ public static class StringBuilderExtensions {
             builder.Append(service.Name);
             builder.Append("()");
         }
+    }
+
+    /// <summary>
+    /// <para>If the service is not declared at a module, it just appends <see cref="ImplementationMember.Name"/>.</para>
+    /// <para>
+    /// If the service is decalred at a module, the module identifier is appended before appending <see cref="ImplementationMember.Name"/>.<br />
+    /// Depending on the <see cref="Service.ImportMode"/>, the identifier is either<br />
+    /// - <see cref="ImportMode.Static"/> -> FullQualifiedName<br />
+    /// - <see cref="ImportMode.Service"/> -> ModuleName<br />
+    /// - <see cref="ImportMode.Parameter"/> -> _moduleName
+    /// </para>
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="service"></param>
+    public static void AppendImplementationName(this StringBuilder builder, Service service) {
+        switch (service.ImportMode) {
+            case ImportMode.Static: {
+                Debug.Assert(service.Module is not null);
+                builder.Append("global::");
+                builder.AppendOpenFullyQualified(service.Module!);
+                if (service.Implementation.IsScoped)
+                    builder.Append(".Scope");
+                builder.Append('.');
+                break;
+            }
+            case ImportMode.Service: {
+                if (service.Implementation.IsStatic)
+                    goto case ImportMode.Static;
+
+                Debug.Assert(service.Module is not null);
+                builder.Append(service.Module!.Name);
+                if (service.Implementation.IsScoped)
+                    builder.Append("Scope");
+                builder.Append('.');
+                break;
+            }
+            case ImportMode.Parameter: {
+                if (service.Implementation.IsStatic)
+                    goto case ImportMode.Static;
+
+                Debug.Assert(service.Module is not null);
+                builder.Append('_');
+                builder.AppendFirstLower(service.Module!.Name);
+                if (service.Implementation.IsScoped)
+                    builder.Append("Scope");
+                builder.Append('.');
+                break;
+            }
+            default:
+                Debug.Assert(service.Module is null);
+                break;
+        }
+
+        builder.Append(service.Implementation.Name);
     }
 
 

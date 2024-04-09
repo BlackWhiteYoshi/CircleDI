@@ -52,7 +52,6 @@ namespace MyCode;
 /// </para>
 /// </summary>
 public sealed partial class TestProvider : global::MyCode.ITestProvider, IServiceProvider {
-    private global::MyCode.ITestProvider _testProvider;
     private global::System.IServiceProvider _builtinServiceProvider;
 
     /// <summary>

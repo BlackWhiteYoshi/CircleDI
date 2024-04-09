@@ -58,6 +58,18 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
+    public static Diagnostic CreateModuleCircleError(this AttributeData serviceProviderAttribute, TypeName serviceProvider, IEnumerable<string> circleList)
+        => Diagnostic.Create(ModuleCircle, serviceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), string.Join("' -> '", circleList)]);
+
+    private static DiagnosticDescriptor ModuleCircle { get; } = new(
+        id: "CDI036",
+        title: "Module circle",
+        messageFormat: "Module cycle in ServiceProvider '{0}': ['{1}']",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
     public static Diagnostic CreateEndlessRecursiveConstructorCallError(this AttributeData serviceAttribute, string serviceName)
         => Diagnostic.Create(EndlessRecursiveConstructorCall, serviceAttribute.ToLocation(), [serviceName]);
 

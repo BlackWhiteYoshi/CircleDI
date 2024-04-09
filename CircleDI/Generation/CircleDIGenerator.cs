@@ -17,6 +17,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             context.AddSource("ScopedAttribute.g.cs", Attributes.ScopedAttribute);
             context.AddSource("TransientAttribute.g.cs", Attributes.TransientAttribute);
             context.AddSource("DelegateAttribute.g.cs", Attributes.DelegateAttribute);
+            context.AddSource("ImportAttribute.g.cs", Attributes.ImportAttribute);
             context.AddSource("DependencyAttribute.g.cs", Attributes.DependencyAttribute);
             context.AddSource("ConstructorAttribute.g.cs", Attributes.ConstructorAttribute);
 
@@ -24,6 +25,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             context.AddSource("CreationTiming.g.cs", Attributes.CreationTimingEnum);
             context.AddSource("GetAccess.g.cs", Attributes.GetAccessEnum);
             context.AddSource("DisposeGeneration.g.cs", Attributes.DisposeGenerationEnum);
+            context.AddSource("ImportMode.g.cs", Attributes.ImportModeEnum);
         });
 
         ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();

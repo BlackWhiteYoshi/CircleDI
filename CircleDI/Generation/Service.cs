@@ -17,6 +17,7 @@ public sealed class Service : IEquatable<Service> {
     /// </summary>
     public required ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Singleton;
 
+
     /// <summary>
     /// <para>The type of the service to interact with. Often it is an interface.</para>
     /// <para>If only 1 TypeArgument in the register attribute is present, then ServiceType and ImplementationType is the same.</para>
@@ -39,6 +40,26 @@ public sealed class Service : IEquatable<Service> {
     /// <para>Information about a custom implementation for retrieving an object for the Service.</para>
     /// </summary>
     public ImplementationMember Implementation { get; init; }
+
+
+    /// <summary>
+    /// <para>
+    /// The full qualified name of the module this service is declared at.<br />
+    /// It is null when the service is declared at the ServiceProvider.
+    /// </para>
+    /// <para>If this property is null, <see cref="ImportMode"/> should be <see cref="ImportMode.Auto"/>.</para>
+    /// </summary>
+    public TypeName? Module { get; init; }
+
+    /// <summary>
+    /// <para>
+    /// The import mode of the module this service is declared at.<br />
+    /// It is <see cref="ImportMode.Auto"/> when the service is declared at the ServiceProvider.
+    /// </para>
+    /// <para>If this property is <see cref="ImportMode.Auto"/>, <see cref="ImportMode"/> should be null.</para>
+    /// </summary>
+    public ImportMode ImportMode { get; init; } = ImportMode.Auto;
+
 
     /// <summary>
     /// <para>Identifier for the backing field and get property/method.</para>
@@ -67,6 +88,7 @@ public sealed class Service : IEquatable<Service> {
     /// <para>Default is <see cref="GetAccess.Property"/>.</para>
     /// </summary>
     public GetAccess GetAccessor { get; init; } = GetAccess.Property;
+
 
     /// <summary>
     /// <para>Dependencies that are listed as parameters in the constructor/function to cunstruct the object.<br />
@@ -136,13 +158,13 @@ public sealed class Service : IEquatable<Service> {
     /// <summary>
     /// Creates a data-object based on a service attribute (SingletonAttribute&lt;&gt;, ScopedAttribute&lt;&gt;, TransientAttribute&lt;&gt;, DelegateAttribute&lt;&gt;).
     /// </summary>
-    /// <param name="serviceProvider"></param>
+    /// <param name="module"></param>
     /// <param name="attributeData"></param>
     /// <param name="lifetime"></param>
     /// <param name="creationTimeProvider"></param>
     /// <param name="getAccessorProvider"></param>
     [SetsRequiredMembers]
-    public Service(INamedTypeSymbol serviceProvider, AttributeData attributeData, ServiceLifetime lifetime, CreationTiming creationTimeProvider, GetAccess getAccessorProvider) {
+    public Service(INamedTypeSymbol module, AttributeData attributeData, ServiceLifetime lifetime, CreationTiming creationTimeProvider, GetAccess getAccessorProvider) {
         Debug.Assert(attributeData.AttributeClass?.TypeArguments.Length > 0);
         
         INamedTypeSymbol attributeType = attributeData.AttributeClass!;
@@ -194,12 +216,12 @@ public sealed class Service : IEquatable<Service> {
                 // check implementation type
                 switch (Lifetime) {
                     case ServiceLifetime.Singleton:
-                        if (!SymbolEqualityComparer.Default.Equals(serviceProvider, implementationType))
-                            ErrorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, serviceProvider.ToDisplayString(), ImplementationType));
+                        if (!SymbolEqualityComparer.Default.Equals(module, implementationType))
+                            ErrorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, module.ToDisplayString(), ImplementationType));
                         break;
                     case ServiceLifetime.Scoped:
-                        if ($"{serviceProvider.ToDisplayString()}.Scope" != implementationType.ToDisplayString())
-                            ErrorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, $"{serviceProvider.ToDisplayString()}.Scope", ImplementationType));
+                        if ($"{module.ToDisplayString()}.Scope" != implementationType.ToDisplayString())
+                            ErrorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, $"{module.ToDisplayString()}.Scope", ImplementationType));
                         break;
                     case ServiceLifetime.Transient:
                         ErrorList.Add(attributeData.CreateTransientImplementationThisError());
@@ -210,25 +232,25 @@ public sealed class Service : IEquatable<Service> {
                 ISymbol? implementationSymbol;
                 switch (Lifetime) {
                     case ServiceLifetime.Singleton:
-                        (Implementation, implementationSymbol, ConstructorDependencyList) = GetImplementation(serviceProvider, implementationName, isScoped: false);
+                        (Implementation, implementationSymbol, ConstructorDependencyList) = GetImplementation(module, implementationName, isScoped: false);
                         break;
                     case ServiceLifetime.Scoped: {
-                        if (serviceProvider.GetMembers("Scope") is [INamedTypeSymbol scopeProvider, ..]) {
+                        if (module.GetMembers("Scope") is [INamedTypeSymbol scopeProvider, ..]) {
                             (Implementation, implementationSymbol, ConstructorDependencyList) = GetImplementation(scopeProvider, implementationName, isScoped: true);
 
                             if (Implementation.Type == MemberType.None)
-                                (Implementation, implementationSymbol, ConstructorDependencyList) = GetImplementation(serviceProvider, implementationName, isScoped: false);
+                                (Implementation, implementationSymbol, ConstructorDependencyList) = GetImplementation(module, implementationName, isScoped: false);
                         }
                         else
-                            (Implementation, implementationSymbol, ConstructorDependencyList) = GetImplementation(serviceProvider, implementationName, isScoped: false);
+                            (Implementation, implementationSymbol, ConstructorDependencyList) = GetImplementation(module, implementationName, isScoped: false);
                         break;
                     }
                     case ServiceLifetime.Transient: {
-                        (Implementation, implementationSymbol, ConstructorDependencyList) = GetImplementation(serviceProvider, implementationName, isScoped: false);
+                        (Implementation, implementationSymbol, ConstructorDependencyList) = GetImplementation(module, implementationName, isScoped: false);
 
                         if (Implementation.Type == MemberType.None) {
                             Lifetime = ServiceLifetime.TransientScoped;
-                            if (serviceProvider.GetMembers("Scope") is [INamedTypeSymbol scopeProvider, ..])
+                            if (module.GetMembers("Scope") is [INamedTypeSymbol scopeProvider, ..])
                                 (Implementation, implementationSymbol, ConstructorDependencyList) = GetImplementation(scopeProvider, implementationName, isScoped: true);
                         }
 
@@ -252,7 +274,7 @@ public sealed class Service : IEquatable<Service> {
                 // check implementation
                 switch (implementationSymbol) {
                     case null:
-                        ErrorList.Add(attributeData.CreateMissingImplementationMemberError(serviceProvider.ToDisplayString(), implementationName));
+                        ErrorList.Add(attributeData.CreateMissingImplementationMemberError(module.ToDisplayString(), implementationName));
                         break;
                     case IFieldSymbol field:
                         if (!SymbolEqualityComparer.Default.Equals(field.Type, implementationType))
@@ -282,11 +304,11 @@ public sealed class Service : IEquatable<Service> {
     /// <summary>
     /// Creates a data-object based on a delegate service attribute (DelegateAttribute&lt;&gt;).
     /// </summary>
-    /// <param name="serviceProvider"></param>
+    /// <param name="module"></param>
     /// <param name="attributeData"></param>
     /// <param name="getAccessorProvider"></param>
     [SetsRequiredMembers]
-    public Service(INamedTypeSymbol serviceProvider, AttributeData attributeData, GetAccess getAccessorProvider) {
+    public Service(INamedTypeSymbol module, AttributeData attributeData, GetAccess getAccessorProvider) {
         Debug.Assert(attributeData.AttributeClass?.TypeArguments.Length > 0);
         Debug.Assert(attributeData.ConstructorArguments.Length > 0);
 
@@ -317,18 +339,18 @@ public sealed class Service : IEquatable<Service> {
 
 
         // implementation method
-        if (attributeData.ConstructorArguments[0].Value is string methodName) {
+        if (attributeData.ConstructorArguments is [TypedConstant { Value: string methodName }]) {
             IMethodSymbol implementation;
-            if (serviceProvider.GetMembers(methodName) is [IMethodSymbol method, ..]) {
+            if (module.GetMembers(methodName) is [IMethodSymbol method, ..]) {
                 implementation = method;
                 Implementation = new ImplementationMember(MemberType.Method, methodName, method.IsStatic, IsScoped: false);
             }
-            else if (serviceProvider.GetMembers("Scope") is [INamedTypeSymbol scopeProvider, ..] && scopeProvider.GetMembers(methodName) is [IMethodSymbol scopeMethod, ..]) {
+            else if (module.GetMembers("Scope") is [INamedTypeSymbol scopeProvider, ..] && scopeProvider.GetMembers(methodName) is [IMethodSymbol scopeMethod, ..]) {
                 implementation = scopeMethod;
                 Implementation = new ImplementationMember(MemberType.Method, methodName, scopeMethod.IsStatic, IsScoped: true);
             }
             else {
-                ErrorList.Add(attributeData.CreateMissingDelegateImplementationError(serviceProvider.ToDisplayString(), methodName));
+                ErrorList.Add(attributeData.CreateMissingDelegateImplementationError(module.ToDisplayString(), methodName));
                 return;
             }
 
@@ -365,7 +387,7 @@ public sealed class Service : IEquatable<Service> {
             return true;
 
         if (Lifetime != other.Lifetime)
-            // treat Transient and TransientScope the same
+            // treat Transient, TransientSingleton and TransientScope the same
             if (!Lifetime.HasFlag(ServiceLifetime.Transient) || !other.Lifetime.HasFlag(ServiceLifetime.Transient))
                 return false;
 
@@ -376,6 +398,11 @@ public sealed class Service : IEquatable<Service> {
         if (ImplementationType != other.ImplementationType)
             return false;
         if (Implementation != other.Implementation)
+            return false;
+
+        if (Module != other.Module)
+            return false;
+        if (ImportMode != other.ImportMode)
             return false;
 
         if (Name != other.Name)
@@ -402,11 +429,18 @@ public sealed class Service : IEquatable<Service> {
     }
 
     public override int GetHashCode() {
-        int hashCode = Lifetime.GetHashCode();
+        int hashCode = Lifetime.HasFlag(ServiceLifetime.Transient) switch {
+            true => ServiceLifetime.Transient.GetHashCode(),
+            false => Lifetime.GetHashCode()
+        };
+
         hashCode = Combine(hashCode, ServiceType.GetHashCode());
         hashCode = Combine(hashCode, IsRefable.GetHashCode());
         hashCode = Combine(hashCode, ImplementationType.GetHashCode());
         hashCode = Combine(hashCode, Implementation.GetHashCode());
+
+        hashCode = Combine(hashCode, Module?.GetHashCode() ?? 0);
+        hashCode = Combine(hashCode, ImportMode.GetHashCode());
 
         hashCode = Combine(hashCode, Name.GetHashCode());
         hashCode = Combine(hashCode, CreationTime.GetHashCode());

@@ -141,8 +141,6 @@ file static class RegisterServiceProviderAttributeExtension {
             };
             serviceProvider.ConstructorParameterList.Add(constructorDependency);
             serviceProvider.ConstructorParameterListScope.Add(constructorDependency);
-            if (!serviceProvider.HasConstructorScope)
-                serviceProvider.CreateScope?.ConstructorDependencyList.Add(constructorDependency);
 
             // default services
             {

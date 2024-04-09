@@ -48,7 +48,7 @@ public static partial class Attributes {
         /// <para>A class decorated with this attribute becomes a service provider. That class must be partial.</para>
         /// <para>
         /// To add services to that class, add additional attributes to that class:<br />
-        /// <see cref="SingletonAttribute{TService, TImplementation}" />, <see cref="ScopedAttribute{TService, TImplementation}" />, <see cref="TransientAttribute{TService, TImplementation}" />, <see cref="DelegateAttribute{TService}" />.
+        /// <see cref="SingletonAttribute{TService, TImplementation}" />, <see cref="ScopedAttribute{TService, TImplementation}" />, <see cref="TransientAttribute{TService, TImplementation}" />, <see cref="DelegateAttribute{TService}" />, <see cref="ImportAttribute{TModule}" />.
         /// </para>
         /// <para>The source generator will generate a complete service provider, but you can add additional custom implementation to it.</para>
         /// </summary>

@@ -99,7 +99,7 @@ public static class CircleDIBuilder {
                 builder.AppendOpenFullyQualified(serviceProvider.IdentifierScope);
             builder.Append(" CreateScope");
             builder.AppendOpenGenerics(serviceProvider.IdentifierScope);
-            core.AppendParameterDependencyList(serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList));
+            core.AppendParameterDependencyList(serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList).Where((Dependency dependency) => !dependency.HasAttribute));
             builder.Append(" => new global::");
             builder.AppendOpenFullyQualified(serviceProvider.IdentifierScope);
             // AppendConstructorDependencyList of serviceProvider.CreateScope
@@ -108,7 +108,7 @@ public static class CircleDIBuilder {
                 if (serviceProvider.CreateScope.ConstructorDependencyList.Count > 0) {
                     foreach (ConstructorDependency dependency in serviceProvider.CreateScope.ConstructorDependencyList) {
                         if (!dependency.HasAttribute)
-                            builder.Append(dependency.Name);
+                            builder.AppendFirstLower(dependency.Name);
                         else {
                             if (dependency.Service!.IsRefable && !serviceProvider.Keyword.HasFlag(TypeKeyword.Struct))
                                 builder.Append(dependency.ByRef.AsString());

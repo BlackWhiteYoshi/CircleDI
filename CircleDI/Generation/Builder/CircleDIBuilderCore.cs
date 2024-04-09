@@ -50,7 +50,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
     public readonly void AppendConstructor() {
         // parameter fields
         if (constructorParameterList.Count > 0) {
-            foreach (ConstructorDependency dependency in serviceProvider.ConstructorParameterListScope) {
+            foreach (ConstructorDependency dependency in constructorParameterList) {
                 builder.Append(indent.Sp4);
                 builder.Append("private global::");
                 // ConstructorParameterList items have always serviceType set
@@ -224,13 +224,13 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             case MemberType.Method:
                 if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
                     AppendServiceProviderFieldWithCast();
-                builder.Append(service.Implementation.Name);
+                builder.AppendImplementationName(service);
                 AppendConstructorDependencyList(service);
                 break;
             case MemberType.Property:
                 if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
                     AppendServiceProviderFieldWithCast();
-                builder.Append(service.Implementation.Name);
+                builder.AppendImplementationName(service);
                 break;
         }
         builder.Append(";\n");
@@ -280,7 +280,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         builder.Append(refOrEmpty);
         if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
             AppendServiceProviderFieldWithCast();
-        builder.Append(service.Implementation.Name);
+        builder.AppendImplementationName(service);
         builder.Append(";\n");
     }
 
@@ -354,13 +354,13 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             case MemberType.Property:
                 if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
                     AppendServiceProviderFieldWithCast();
-                builder.Append(service.Implementation.Name);
+                builder.AppendImplementationName(service);
                 builder.Append(";\n");
                 break;
             case MemberType.Method:
                 if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
                     AppendServiceProviderFieldWithCast();
-                builder.Append(service.Implementation.Name);
+                builder.AppendImplementationName(service);
                 AppendConstructorDependencyList(service);
                 builder.Append(";\n");
                 break;
@@ -519,7 +519,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             AppendServiceProviderFieldWithCast();
         }
 
-        builder.Append(service.Implementation.Name);
+        builder.AppendImplementationName(service);
         if (service.Implementation.Type == MemberType.Method)
             AppendConstructorDependencyList(service);
         builder.Append(';');
@@ -549,7 +549,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             builder.Append(" => ");
             if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
                 AppendServiceProviderFieldWithCast();
-            builder.Append(service.Implementation.Name);
+            builder.AppendImplementationName(service);
             builder.Append(";\n\n");
         }
 
@@ -1077,22 +1077,19 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
 
     /// <summary>
     /// <para>Appends "(service1Type service1Name, service2Type service2Name, ..., serviceNType serviceNName)"</para>
-    /// <para>Appends only dependencies without attributes.</para>
     /// <para>If dependencyList is empty, only "()" is appended.</para>
     /// </summary>
     /// <param name="dependencyList"></param>
     public readonly void AppendParameterDependencyList(IEnumerable<Dependency> dependencyList) {
         builder.Append('(');
 
-        foreach (Dependency dependency in dependencyList)
-            if (!dependency.HasAttribute) {
-                // if no attribute => dependency.ServiceType has value
-                builder.Append("global::");
-                builder.AppendClosedFullyQualified(dependency.ServiceType!);
-                builder.Append(' ');
-                builder.AppendFirstLower(dependency.Name);
-                builder.Append(", ");
-            }
+        foreach (Dependency dependency in dependencyList) {
+            builder.Append("global::");
+            builder.AppendClosedFullyQualified(dependency.ServiceType ?? dependency.Service!.ServiceType);
+            builder.Append(' ');
+            builder.AppendFirstLower(dependency.Name);
+            builder.Append(", ");
+        }
         if (builder[^1] == ' ')
             builder.Length -= 2;
 

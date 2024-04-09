@@ -473,7 +473,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             bool hasServiceSelfScope = false;
 
             // register services [Singleton<>, Scoped<>, Transient<>, Delegate<> attributes]
-            foreach (AttributeData attributeData in serviceProvider.GetAttributes().Concat(serviceProviderScope?.GetAttributes() ?? Enumerable.Empty<AttributeData>())) {
+            IEnumerable<AttributeData> listedAttributes = serviceProviderScope switch {
+                null => serviceProvider.GetAttributes(),
+                _ => serviceProvider.GetAttributes().Concat(serviceProviderScope.GetAttributes())
+            };
+            foreach (AttributeData attributeData in listedAttributes) {
                 INamedTypeSymbol? attribute = attributeData.AttributeClass;
                 if (attribute is null || attribute.TypeArguments.Length == 0)
                     continue;
@@ -492,7 +496,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     }
                     case "ScopedAttribute": {
                         if (!generateScope)
-                            continue;
+                            break;
 
                         Service service = new(serviceProvider, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider);
                         HasError |= service.ErrorList.Count > 0;
@@ -512,11 +516,15 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     }
                     case "DelegateAttribute": {
                         if (attributeData.ConstructorArguments.Length == 0)
-                            continue;
+                            break;
 
                         Service service = new(serviceProvider, attributeData, getAccessorScopeProvider);
                         HasError |= service.ErrorList.Count > 0;
                         DelegateList.Add(service);
+                        break;
+                    }
+                    case "ImportAttribute": {
+                        ModuleRegistration.RegisterServices(attributeData, this, generateScope, creationTimeMainProvider, creationTimeScopeProvider, getAccessorMainProvider, getAccessorScopeProvider);
                         break;
                     }
                 }
@@ -541,12 +549,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 });
 
             if (generateScope) {
-                // add ServiceProvider as parameter to ConstructorParameterList
+                // add ServiceProvider as service parameter to ConstructorParameterList
                 ConstructorParameterListScope.Add(new ConstructorDependency() {
                     Name = Identifier.Name,
                     ServiceName = string.Empty,
                     ServiceType = serviceType,
-                    HasAttribute = false,
+                    HasAttribute = true,
                     ByRef = RefKind.None
                 });
 
@@ -580,13 +588,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     }
                     else
                         // default constructorDependency
-                        constructorDependencyList = [new ConstructorDependency() {
-                            Name = HasInterface ? InterfaceIdentifier.Name : Identifier.Name,
-                            ServiceName = string.Empty,
-                            ServiceType = serviceType,
-                            HasAttribute = true,
-                            ByRef = RefKind.None
-                        }];
+                        constructorDependencyList = ConstructorParameterListScope;
 
                     (propertyDependencyList, Diagnostic? propertyListError) = serviceProviderScope.CreatePropertyDependencyList(Attribute);
                     if (propertyListError is not null)
@@ -594,13 +596,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 }
                 else {
                     // default constructorDependency and no propertyDependencyList
-                    constructorDependencyList = [new ConstructorDependency() {
-                        Name = HasInterface ? InterfaceIdentifier.Name : Identifier.Name,
-                        ServiceName = string.Empty,
-                        ServiceType = serviceType,
-                        HasAttribute = true,
-                        ByRef = RefKind.None
-                    }];
+                    constructorDependencyList = ConstructorParameterListScope;
                     propertyDependencyList = [];
                 }
 
@@ -620,6 +616,253 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         HasError |= ErrorList.Count > 0;
     }
+
+
+    #region Register Services
+
+    /// <summary>
+    /// This type can add all services in a module.
+    /// </summary>
+    private readonly struct ModuleRegistration {
+        /// <summary>
+        /// Adds all services from the module to the service provider.
+        /// </summary>
+        /// <param name="importAttribute"></param>
+        /// <param name="serviceProvider"></param>
+        /// <param name="generateScope"></param>
+        /// <param name="creationTimeMainProvider"></param>
+        /// <param name="creationTimeScopeProvider"></param>
+        /// <param name="getAccessorMainProvider"></param>
+        /// <param name="getAccessorScopeProvider"></param>
+        public static void RegisterServices(AttributeData importAttribute, ServiceProvider serviceProvider, bool generateScope, CreationTiming creationTimeMainProvider, CreationTiming creationTimeScopeProvider, GetAccess getAccessorMainProvider, GetAccess getAccessorScopeProvider)
+            => new ModuleRegistration(serviceProvider, generateScope, creationTimeMainProvider, creationTimeScopeProvider, getAccessorMainProvider, getAccessorScopeProvider).RegisterServices(importAttribute);
+
+
+        private readonly ServiceProvider serviceProvider;
+        private readonly bool generateScope;
+        private readonly CreationTiming creationTimeMainProvider;
+        private readonly CreationTiming creationTimeScopeProvider;
+        private readonly GetAccess getAccessorMainProvider;
+        private readonly GetAccess getAccessorScopeProvider;
+        private readonly List<INamedTypeSymbol> path = [];
+
+        private ModuleRegistration(ServiceProvider serviceProvider, bool generateScope, CreationTiming creationTimeMainProvider, CreationTiming creationTimeScopeProvider, GetAccess getAccessorMainProvider, GetAccess getAccessorScopeProvider) {
+            this.serviceProvider = serviceProvider;
+            this.generateScope = generateScope;
+            this.creationTimeMainProvider = creationTimeMainProvider;
+            this.creationTimeScopeProvider = creationTimeScopeProvider;
+            this.getAccessorMainProvider = getAccessorMainProvider;
+            this.getAccessorScopeProvider = getAccessorScopeProvider;
+        }
+
+
+        private readonly void RegisterServices(AttributeData importAttribute) {
+            Debug.Assert(importAttribute.AttributeClass?.TypeArguments.Length > 0);
+            INamedTypeSymbol module = (INamedTypeSymbol)importAttribute.AttributeClass!.TypeArguments[0];
+            INamedTypeSymbol? moduleScope = module.GetMembers("Scope") switch {
+                [INamedTypeSymbol scope] => scope,
+                _ => null
+            };
+            TypeName moduleTypeName = new(module);
+
+
+            ImportMode importMode = importAttribute.ConstructorArguments switch {
+                [TypedConstant { Value: int importModeValue }] => (ImportMode)importModeValue,
+                _ => ImportMode.Auto
+            };
+            IMethodSymbol? serivceConstructor = null;
+            IMethodSymbol? serivceConstructorScope = null;
+            switch (importMode) {
+                case ImportMode.Auto: {
+                    if (module.TypeKind is TypeKind.Interface || module.IsStatic) {
+                        importMode = ImportMode.Static;
+                        goto case ImportMode.Static;
+                    }
+
+                    (serivceConstructor, _) = module.FindConstructor(importAttribute);
+                    if (serivceConstructor?.Parameters.Length > 0) {
+                        importMode = ImportMode.Parameter;
+                        goto case ImportMode.Parameter;
+                    }
+
+                    if (moduleScope != null) {
+                        (serivceConstructorScope, _) = moduleScope.FindConstructor(importAttribute);
+                        if (serivceConstructorScope?.Parameters.Length > 0) {
+                            importMode = ImportMode.Parameter;
+                            goto case ImportMode.Parameter;
+                        }
+                    }
+
+                    importMode = ImportMode.Service;
+                    goto case ImportMode.Service;
+                }
+                case ImportMode.Static: {
+                    break;
+                }
+                case ImportMode.Service: {
+                    {
+                        if (serivceConstructor is null) {
+                            (serivceConstructor, Diagnostic? constructorDependencyError) = module.FindConstructor(importAttribute);
+                            if (constructorDependencyError is not null) {
+                                serviceProvider.ErrorList.Add(constructorDependencyError);
+                                return;
+                            }
+                        }
+                        List<ConstructorDependency> constructorDependencyList = serivceConstructor!.CreateConstructorDependencyList();
+
+                        (List<PropertyDependency> propertyDependencyList, Diagnostic? propertyDependencyError) = module.CreatePropertyDependencyList(importAttribute);
+                        if (propertyDependencyError is not null) {
+                            serviceProvider.ErrorList.Add(propertyDependencyError);
+                            return;
+                        }
+
+                        serviceProvider.SingletonList.Add(new Service() {
+                            Lifetime = ServiceLifetime.Singleton,
+                            Name = module.Name,
+                            ServiceType = moduleTypeName,
+                            ImplementationType = moduleTypeName,
+                            CreationTime = CreationTiming.Constructor,
+                            GetAccessor = GetAccess.Property,
+                            ConstructorDependencyList = constructorDependencyList,
+                            PropertyDependencyList = propertyDependencyList,
+                            Dependencies = constructorDependencyList.Concat<Dependency>(propertyDependencyList)
+                        });
+                    }
+                    if (moduleScope is not null) {
+                        TypeName moduleTypeNameScope = new(moduleScope);
+
+                        if (serivceConstructorScope is null) {
+                            (serivceConstructorScope, Diagnostic? constructorDependencyError) = moduleScope.FindConstructor(importAttribute);
+                            if (constructorDependencyError is not null) {
+                                serviceProvider.ErrorList.Add(constructorDependencyError);
+                                return;
+                            }
+                        }
+                        List<ConstructorDependency> constructorDependencyList = serivceConstructorScope!.CreateConstructorDependencyList();
+
+                        (List<PropertyDependency> propertyDependencyList, Diagnostic? propertyDependencyError) = moduleScope.CreatePropertyDependencyList(importAttribute);
+                        if (propertyDependencyError is not null) {
+                            serviceProvider.ErrorList.Add(propertyDependencyError);
+                            return;
+                        }
+
+                        serviceProvider.ScopedList.Add(new Service() {
+                            Lifetime = ServiceLifetime.Scoped,
+                            Name = $"{module.Name}Scope",
+                            ServiceType = moduleTypeNameScope,
+                            ImplementationType = moduleTypeNameScope,
+                            CreationTime = CreationTiming.Constructor,
+                            GetAccessor = GetAccess.Property,
+                            ConstructorDependencyList = constructorDependencyList,
+                            PropertyDependencyList = propertyDependencyList,
+                            Dependencies = constructorDependencyList.Concat<Dependency>(propertyDependencyList)
+                        });
+                    }
+                    break;
+                }
+                case ImportMode.Parameter: {
+                    serviceProvider.ConstructorParameterList.Add(new ConstructorDependency() {
+                        Name = module.Name,
+                        ServiceName = string.Empty,
+                        ServiceType = new TypeName(module),
+                        HasAttribute = false,
+                        ByRef = RefKind.None
+                    });
+                    if (moduleScope is not null)
+                        serviceProvider.ConstructorParameterListScope.Add(new ConstructorDependency() {
+                            Name = $"{module.Name}Scope",
+                            ServiceName = string.Empty,
+                            ServiceType = new TypeName(moduleScope),
+                            HasAttribute = false,
+                            ByRef = RefKind.None
+                        });
+                    break;
+                }
+                default:
+                    // just ignore entire ImportAttribute when invalid enum input
+                    return;
+            }
+
+            // check circle
+            for (int index = 0; index < path.Count; index++)
+                if (SymbolEqualityComparer.Default.Equals(path[index], module)) {
+                    IEnumerable<string> modulesInCircle = path.Skip(index).Select((INamedTypeSymbol typeSymbol) => typeSymbol.ToDisplayString());
+                    // append first item again as last item to illustrate the circle
+                    modulesInCircle = modulesInCircle.Concat(modulesInCircle.Take(1));
+
+                    serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateModuleCircleError(serviceProvider.Identifier, modulesInCircle));
+                    return;
+                }
+            path.Add(module);
+
+            try {
+                IEnumerable<AttributeData> listedAttributes = moduleScope switch {
+                    null => module.GetAttributes(),
+                    _ => module.GetAttributes().Concat(moduleScope.GetAttributes())
+                };
+
+                foreach (AttributeData attributeData in listedAttributes) {
+                    INamedTypeSymbol? attribute = attributeData.AttributeClass;
+                    if (attribute is null || attribute.TypeArguments.Length == 0)
+                        continue;
+
+                    switch (attribute.Name) {
+                        case "SingletonAttribute": {
+                            Service service = new(module, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider) {
+                                Module = moduleTypeName,
+                                ImportMode = importMode
+                            };
+                            serviceProvider.HasError |= service.ErrorList.Count > 0;
+                            serviceProvider.SingletonList.Add(service);
+                            break;
+                        }
+                        case "ScopedAttribute": {
+                            if (!generateScope)
+                                break;
+
+                            Service service = new(module, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider) {
+                                Module = moduleTypeName,
+                                ImportMode = importMode
+                            };
+                            serviceProvider.HasError |= service.ErrorList.Count > 0;
+                            serviceProvider.ScopedList.Add(service);
+                            break;
+                        }
+                        case "TransientAttribute": {
+                            Service service = new(module, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider) {
+                                Module = moduleTypeName,
+                                ImportMode = importMode
+                            };
+                            serviceProvider.HasError |= service.ErrorList.Count > 0;
+                            serviceProvider.TransientList.Add(service);
+                            break;
+                        }
+                        case "DelegateAttribute": {
+                            if (attributeData.ConstructorArguments.Length == 0)
+                                break;
+
+                            Service service = new(module, attributeData, getAccessorScopeProvider) {
+                                Module = moduleTypeName,
+                                ImportMode = importMode
+                            };
+                            serviceProvider.HasError |= service.ErrorList.Count > 0;
+                            serviceProvider.DelegateList.Add(service);
+                            break;
+                        }
+                        case "ImportAttribute": {
+                            RegisterServices(attributeData);
+                            break;
+                        }
+                    }
+                }
+            }
+            finally {
+                path.RemoveAt(path.Count - 1);
+            }
+        }
+    }
+
+    #endregion
 
 
     #region Dependency Tree
@@ -677,7 +920,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         public DependencyTreeInitializer(ServiceProvider serviceProvider) : this(serviceProvider, serviceProvider.Attribute) { }
 
-        public void InitNode(Service service) {
+        public readonly void InitNode(Service service) {
             if (service.TreeState.HasFlag(DependencyTreeFlags.Traversed))
                 return;
             service.TreeState |= DependencyTreeFlags.Traversed;

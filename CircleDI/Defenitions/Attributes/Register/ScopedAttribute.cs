@@ -19,7 +19,7 @@ public static partial class Attributes {
         /// </summary>
         /// <typeparam name="TService">Type of the service.</typeparam>
         /// <typeparam name="TImplementation">Type of the implementation.</typeparam>
-        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal class ScopedAttribute<TService, TImplementation> : Attribute where TImplementation : TService {
             /// <summary>
@@ -41,7 +41,7 @@ public static partial class Attributes {
         /// Shorthand for <see cref="ScopedAttribute{TService, TImplementation}"/> where type of service and implementation is the same.
         /// </summary>
         /// <typeparam name="TService">Type of the service and implementation.</typeparam>
-        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ScopedAttribute<TService> : ScopedAttribute<TService, TService>;
 
