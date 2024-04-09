@@ -212,10 +212,17 @@ public static class BlazorTests {
             """;
 
         string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out _);
+        string componentAttributes = sourceTexts.First((string sourceText) => sourceText.Contains("global::CircleDIAttributes.Transient"));
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
         return Verify($"""
+            {componentAttributes}
+
+            ---------
+            Interface
+            ---------
+
             {sourceTextClass}
 
             ---------
