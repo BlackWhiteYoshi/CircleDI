@@ -2085,7 +2085,7 @@ public static class RegisterServicesTests {
 
             public interface ITestModule {
                 [Transient<ITestService, TestService>(Implementation = nameof(TestService))]
-                public static class Scope {
+                public interface Scope {
                     public static TestService TestService => new();
                 }
             }

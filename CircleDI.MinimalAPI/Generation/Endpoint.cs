@@ -119,17 +119,11 @@ public sealed class Endpoint : IEquatable<Endpoint> {
             if (routeBuilderMethod.Parameters is not [
                 IParameterSymbol {
                     Type: INamedTypeSymbol {
+                        ContainingNamespace.ContainingNamespace.ContainingNamespace.ContainingNamespace.Name: "",
+                        ContainingNamespace.ContainingNamespace.ContainingNamespace.Name: "Microsoft",
+                        ContainingNamespace.ContainingNamespace.Name: "AspNetCore",
+                        ContainingNamespace.Name: "Builder",
                         Name: "RouteHandlerBuilder",
-                        ContainingNamespace: INamespaceSymbol {
-                            Name: "Builder",
-                            ContainingNamespace: INamespaceSymbol {
-                                Name: "AspNetCore",
-                                ContainingNamespace: INamespaceSymbol {
-                                    Name: "Microsoft",
-                                    ContainingNamespace: INamespaceSymbol { Name: "" }
-                                }
-                            }
-                        },
                         ContainingType: null,
                         TypeParameters: [],
                     }

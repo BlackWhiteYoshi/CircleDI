@@ -63,17 +63,11 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         // Microsoft.AspNetCore.Components.ComponentBase
         for (INamedTypeSymbol? baseType = component.BaseType; baseType is not null; baseType = baseType.BaseType)
             if (baseType is INamedTypeSymbol {
-                Name: "ComponentBase",
-                ContainingNamespace: INamespaceSymbol {
-                    Name: "Components",
-                    ContainingNamespace: INamespaceSymbol {
-                        Name: "AspNetCore",
-                        ContainingNamespace: INamespaceSymbol {
-                            Name: "Microsoft",
-                            ContainingNamespace: INamespaceSymbol { Name: "" }
-                        }
-                    }
-                }
+                ContainingNamespace.ContainingNamespace.ContainingNamespace.ContainingNamespace.Name: "",
+                ContainingNamespace.ContainingNamespace.ContainingNamespace.Name: "Microsoft",
+                ContainingNamespace.ContainingNamespace.Name: "AspNetCore",
+                ContainingNamespace.Name: "Components",
+                Name: "ComponentBase"
             })
                 return component;
 

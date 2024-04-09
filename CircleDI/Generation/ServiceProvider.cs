@@ -479,7 +479,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             };
             foreach (AttributeData attributeData in listedAttributes) {
                 INamedTypeSymbol? attribute = attributeData.AttributeClass;
-                if (attribute is null || attribute.TypeArguments.Length == 0)
+                if (attribute is not { ContainingNamespace: { Name: "CircleDIAttributes", ContainingNamespace.Name: "" }, ContainingType: null })
+                    continue;
+
+                if (attribute.TypeArguments.Length == 0)
                     continue;
 
                 switch (attribute.Name) {
@@ -658,6 +661,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         private readonly void RegisterServices(AttributeData importAttribute) {
             Debug.Assert(importAttribute.AttributeClass?.TypeArguments.Length > 0);
+
             INamedTypeSymbol module = (INamedTypeSymbol)importAttribute.AttributeClass!.TypeArguments[0];
             INamedTypeSymbol? moduleScope = module.GetMembers("Scope") switch {
                 [INamedTypeSymbol scope] => scope,
@@ -803,14 +807,17 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                 foreach (AttributeData attributeData in listedAttributes) {
                     INamedTypeSymbol? attribute = attributeData.AttributeClass;
-                    if (attribute is null || attribute.TypeArguments.Length == 0)
+                    if (attribute is not { ContainingNamespace: { Name: "CircleDIAttributes", ContainingNamespace.Name: "" }, ContainingType: null })
+                        continue;
+
+                    if (attribute.TypeArguments.Length == 0)
                         continue;
 
                     switch (attribute.Name) {
                         case "SingletonAttribute": {
                             Service service = new(module, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider) {
-                                Module = moduleTypeName,
-                                ImportMode = importMode
+                                ImportMode = importMode,
+                                Module = moduleTypeName
                             };
                             serviceProvider.HasError |= service.ErrorList.Count > 0;
                             serviceProvider.SingletonList.Add(service);
@@ -821,8 +828,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 break;
 
                             Service service = new(module, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider) {
-                                Module = moduleTypeName,
-                                ImportMode = importMode
+                                ImportMode = importMode,
+                                Module = moduleTypeName
                             };
                             serviceProvider.HasError |= service.ErrorList.Count > 0;
                             serviceProvider.ScopedList.Add(service);
@@ -830,8 +837,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         }
                         case "TransientAttribute": {
                             Service service = new(module, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider) {
-                                Module = moduleTypeName,
-                                ImportMode = importMode
+                                ImportMode = importMode,
+                                Module = moduleTypeName
                             };
                             serviceProvider.HasError |= service.ErrorList.Count > 0;
                             serviceProvider.TransientList.Add(service);
@@ -842,8 +849,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 break;
 
                             Service service = new(module, attributeData, getAccessorScopeProvider) {
-                                Module = moduleTypeName,
-                                ImportMode = importMode
+                                ImportMode = importMode,
+                                Module = moduleTypeName
                             };
                             serviceProvider.HasError |= service.ErrorList.Count > 0;
                             serviceProvider.DelegateList.Add(service);

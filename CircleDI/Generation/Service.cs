@@ -44,21 +44,21 @@ public sealed class Service : IEquatable<Service> {
 
     /// <summary>
     /// <para>
-    /// The full qualified name of the module this service is declared at.<br />
-    /// It is null when the service is declared at the ServiceProvider.
-    /// </para>
-    /// <para>If this property is null, <see cref="ImportMode"/> should be <see cref="ImportMode.Auto"/>.</para>
-    /// </summary>
-    public TypeName? Module { get; init; }
-
-    /// <summary>
-    /// <para>
     /// The import mode of the module this service is declared at.<br />
     /// It is <see cref="ImportMode.Auto"/> when the service is declared at the ServiceProvider.
     /// </para>
     /// <para>If this property is <see cref="ImportMode.Auto"/>, <see cref="ImportMode"/> should be null.</para>
     /// </summary>
     public ImportMode ImportMode { get; init; } = ImportMode.Auto;
+
+    /// <summary>
+    /// <para>
+    /// The full qualified name of the module this service is declared at.<br />
+    /// It is null when the service is declared at the ServiceProvider.
+    /// </para>
+    /// <para>If this property is null, <see cref="ImportMode"/> should be <see cref="ImportMode.Auto"/>.</para>
+    /// </summary>
+    public TypeName? Module { get; init; }
 
 
     /// <summary>
@@ -166,7 +166,7 @@ public sealed class Service : IEquatable<Service> {
     [SetsRequiredMembers]
     public Service(INamedTypeSymbol module, AttributeData attributeData, ServiceLifetime lifetime, CreationTiming creationTimeProvider, GetAccess getAccessorProvider) {
         Debug.Assert(attributeData.AttributeClass?.TypeArguments.Length > 0);
-        
+
         INamedTypeSymbol attributeType = attributeData.AttributeClass!;
         INamedTypeSymbol serviceType = (INamedTypeSymbol)attributeType.TypeArguments[0];
         INamedTypeSymbol implementationType = attributeType.TypeArguments.Length switch {
@@ -310,7 +310,6 @@ public sealed class Service : IEquatable<Service> {
     [SetsRequiredMembers]
     public Service(INamedTypeSymbol module, AttributeData attributeData, GetAccess getAccessorProvider) {
         Debug.Assert(attributeData.AttributeClass?.TypeArguments.Length > 0);
-        Debug.Assert(attributeData.ConstructorArguments.Length > 0);
 
         INamedTypeSymbol attribute = attributeData.AttributeClass!;
         INamedTypeSymbol serviceType = (INamedTypeSymbol)attribute.TypeArguments[0];
@@ -400,9 +399,9 @@ public sealed class Service : IEquatable<Service> {
         if (Implementation != other.Implementation)
             return false;
 
-        if (Module != other.Module)
-            return false;
         if (ImportMode != other.ImportMode)
+            return false;
+        if (Module != other.Module)
             return false;
 
         if (Name != other.Name)
@@ -439,8 +438,8 @@ public sealed class Service : IEquatable<Service> {
         hashCode = Combine(hashCode, ImplementationType.GetHashCode());
         hashCode = Combine(hashCode, Implementation.GetHashCode());
 
-        hashCode = Combine(hashCode, Module?.GetHashCode() ?? 0);
         hashCode = Combine(hashCode, ImportMode.GetHashCode());
+        hashCode = Combine(hashCode, Module?.GetHashCode() ?? 0);
 
         hashCode = Combine(hashCode, Name.GetHashCode());
         hashCode = Combine(hashCode, CreationTime.GetHashCode());
