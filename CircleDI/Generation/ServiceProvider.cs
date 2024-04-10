@@ -343,7 +343,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             InterfaceIdentifier = new TypeName(interfaceSymbol);
             InterfaceAccessibility = interfaceSymbol.DeclaredAccessibility;
         }
-        else if (Attribute.NamedArguments.Length > 0 && Attribute.NamedArguments.GetArgument<string?>("InterfaceName") is string interfaceName)
+        else if (Attribute.NamedArguments.GetArgument<string?>("InterfaceName") is string interfaceName)
             InterfaceIdentifier = new TypeName(interfaceName, TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
         else
             InterfaceIdentifier = new TypeName(Identifier.Name != "ServiceProvider" ? $"I{Identifier.Name}" : "IServiceprovider", TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
@@ -467,7 +467,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             TypeName serviceTypeScope = HasInterface ? InterfaceIdentifierScope : implementationTypeScope;
             bool hasServiceSelfScope = false;
 
-            // register services [Singleton<>, Scoped<>, Transient<>, Delegate<> attributes]
+            // register services [Singleton<>, Scoped<>, Transient<>, Delegate<>, Import<> attributes]
             IEnumerable<AttributeData> listedAttributes = serviceProviderScope switch {
                 null => serviceProvider.GetAttributes(),
                 _ => serviceProvider.GetAttributes().Concat(serviceProviderScope.GetAttributes())

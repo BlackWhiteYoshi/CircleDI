@@ -21,8 +21,26 @@ public static partial class Attributes {
         /// <typeparam name="TImplementation">Type of the implementation.</typeparam>
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
-        internal class TransientAttribute<TService, TImplementation> : Attribute where TImplementation : TService {
-            /// <summary>
+        internal sealed class TransientAttribute<TService, TImplementation> : Attribute where TImplementation : TService {
+            {{TRANSIENT_ATTRIBUTE_CONTENT}}
+        }
+
+        /// <summary>
+        /// Shorthand for <see cref="TransientAttribute{TService, TImplementation}"/> where type of service and implementation is the same.
+        /// </summary>
+        /// <typeparam name="TService">Type of the service and implementation.</typeparam>
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
+        internal sealed class TransientAttribute<TService> : Attribute {
+            {{TRANSIENT_ATTRIBUTE_CONTENT}}
+        }
+
+        #endif
+
+        """;
+
+    private const string TRANSIENT_ATTRIBUTE_CONTENT = $$"""
+        /// <summary>
             /// <para>The name of a method or property that construct a implementation for the given service.</para>
             /// <para>The parameters of the method will be dependency injected.</para>
             /// </summary>
@@ -33,17 +51,5 @@ public static partial class Attributes {
             {{GET_ACCESSOR_PROPERTY}}
 
             {{SERVICE_NO_DISPOSE_PROPERTY}}
-        }
-
-        /// <summary>
-        /// Shorthand for <see cref="TransientAttribute{TService, TImplementation}"/> where type of service and implementation is the same.
-        /// </summary>
-        /// <typeparam name="TService">Type of the service and implementation.</typeparam>
-        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
-        internal sealed class TransientAttribute<TService> : TransientAttribute<TService, TService>;
-
-        #endif
-
         """;
 }

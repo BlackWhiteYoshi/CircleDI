@@ -21,8 +21,26 @@ public static partial class Attributes {
         /// <typeparam name="TImplementation">Type of the implementation.</typeparam>
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
-        internal class ScopedAttribute<TService, TImplementation> : Attribute where TImplementation : TService {
-            /// <summary>
+        internal sealed class ScopedAttribute<TService, TImplementation> : Attribute where TImplementation : TService {
+            {{SCOPED_ATTRIBUTE_CONTENT}}
+        }
+
+        /// <summary>
+        /// Shorthand for <see cref="ScopedAttribute{TService, TImplementation}"/> where type of service and implementation is the same.
+        /// </summary>
+        /// <typeparam name="TService">Type of the service and implementation.</typeparam>
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
+        internal sealed class ScopedAttribute<TService> : Attribute {
+            {{SCOPED_ATTRIBUTE_CONTENT}}
+        }
+
+        #endif
+
+        """;
+
+    private const string SCOPED_ATTRIBUTE_CONTENT = $$"""
+        /// <summary>
             /// <para>Fieldname, propertyname or methodname that will be the implementation supplier for the given service.</para>
             /// <para>The parameters of the method will be dependency injected.</para>
             /// </summary>
@@ -35,17 +53,5 @@ public static partial class Attributes {
             {{GET_ACCESSOR_PROPERTY}}
 
             {{SERVICE_NO_DISPOSE_PROPERTY}}
-        }
-
-        /// <summary>
-        /// Shorthand for <see cref="ScopedAttribute{TService, TImplementation}"/> where type of service and implementation is the same.
-        /// </summary>
-        /// <typeparam name="TService">Type of the service and implementation.</typeparam>
-        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
-        internal sealed class ScopedAttribute<TService> : ScopedAttribute<TService, TService>;
-
-        #endif
-
         """;
 }
