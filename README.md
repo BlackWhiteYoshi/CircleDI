@@ -358,3 +358,5 @@ And code conventions, structure, and quality is important to me. So there is a g
   Added Minimal.API.
   Added support for ServiceProvider being generic.
   Improved IServiceProvder.GetService(Type) method.
+- 0.7.0
+  Added ImportAttribute.
