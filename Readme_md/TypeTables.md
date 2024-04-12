@@ -175,6 +175,30 @@ If [ServiceProviderAttribute](#serviceproviderattribute) is used at the same cla
 
 
 <br></br>
+# ImportAttribute
+
+Registers all attributes of the specified class/struct/interface in *TModule*.
+
+There are several options to handle the instantiation of the module:
+- static (no instantiation)  
+- injected as service  
+- given as parameter
+
+## Type Parameters
+
+| **Name** | **Description**                                                      |
+| -------- | -------------------------------------------------------------------- |
+| TModule  | The class, struct or interface containing the attributes to include. |
+
+## Parameters
+
+| **Name** | **Type**                                         | **Description**                                                   |
+| -------- | ------------------------------------------------ | ----------------------------------------------------------------- |
+| mode     | [ImportMode = ImportMode.Auto](#importmode-enum) | Option for handling the instantiation of the module. It can be static (no instantiation), injected as service or given as parameter. Default is *ImportMode.Auto*. |
+
+
+
+<br></br>
 # DependencyAttribute
 
 This attribute is used to set a non-required property as dependency (required properties are always dependencies).
@@ -249,3 +273,19 @@ It can be toggled that both are generated, only one of them or the generation is
 | DisposeOnly      | Only the sync version of Dispose will be generated: public void Dispose();                                        |
 | DisposeAsyncOnly | Only the async version DisposeAsync will be generated: public ValueTask DisposeAsync();                           |
 | GenerateBoth     | Both versions Dispose and DisposeAsync will be generated. public void Dispose(); public ValueTask DisposeAsync(); |
+
+
+
+<br></br>
+# ImportMode (enum)
+
+Option for handling the instantiation of the module.
+
+## Members
+
+| **Name**  | **Description**                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Auto      | Chooses *Static* when type is interface, *Service* if constructed with parameterless constructor, *Parameter* otherwise. |
+| Static    | No instantiation needed, all members are static.                                                                         |
+| Service   | The module is registered as service.                                                                                     |
+| Parameter | An instance of the module is given as parameter.                                                                         |

@@ -27,7 +27,7 @@ public static partial class Attributes {
             Static,
 
             /// <summary>
-            /// An instance of the module is injected as service.
+            /// The module is registered as service.
             /// </summary>
             Service,
 

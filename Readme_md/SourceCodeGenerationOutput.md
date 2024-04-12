@@ -85,11 +85,18 @@ public sealed partial class MyProvider : global::IMyProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IService3))
-            return Service3;
-        if (serviceType == typeof(global::IMyProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "IService3":
+                if (serviceType == typeof(global::IService3))
+                    return Service3;
+                return null;
+            case "IMyProvider":
+                if (serviceType == typeof(global::IMyProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -184,17 +191,30 @@ public sealed partial class MyProvider : global::IMyProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::IMyProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::Service1))
-                return Service1;
-            if (serviceType == typeof(global::IService2))
-                return Service2;
-            if (serviceType == typeof(global::IService3))
-                return Service3;
-            if (serviceType == typeof(global::IMyProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::IMyProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "Service1":
+                    if (serviceType == typeof(global::Service1))
+                        return Service1;
+                    return null;
+                case "IService2":
+                    if (serviceType == typeof(global::IService2))
+                        return Service2;
+                    return null;
+                case "IService3":
+                    if (serviceType == typeof(global::IService3))
+                        return Service3;
+                    return null;
+                case "IMyProvider":
+                    if (serviceType == typeof(global::IMyProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -313,13 +333,22 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IMyService1))
-            return MyService1;
-        if (serviceType == typeof(global::IMyService2))
-            return MyService2;
-        if (serviceType == typeof(global::ICircleExampleProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "IMyService1":
+                if (serviceType == typeof(global::IMyService1))
+                    return MyService1;
+                return null;
+            case "IMyService2":
+                if (serviceType == typeof(global::IMyService2))
+                    return MyService2;
+                return null;
+            case "ICircleExampleProvider":
+                if (serviceType == typeof(global::ICircleExampleProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -403,15 +432,26 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::ICircleExampleProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::IMyService1))
-                return MyService1;
-            if (serviceType == typeof(global::IMyService2))
-                return MyService2;
-            if (serviceType == typeof(global::ICircleExampleProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::ICircleExampleProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "IMyService1":
+                    if (serviceType == typeof(global::IMyService1))
+                        return MyService1;
+                    return null;
+                case "IMyService2":
+                    if (serviceType == typeof(global::IMyService2))
+                        return MyService2;
+                    return null;
+                case "ICircleExampleProvider":
+                    if (serviceType == typeof(global::ICircleExampleProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -530,13 +570,22 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IMyService1))
-            return MyService1;
-        if (serviceType == typeof(global::IMyService2))
-            return MyService2;
-        if (serviceType == typeof(global::ICircleExampleProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "IMyService1":
+                if (serviceType == typeof(global::IMyService1))
+                    return MyService1;
+                return null;
+            case "IMyService2":
+                if (serviceType == typeof(global::IMyService2))
+                    return MyService2;
+                return null;
+            case "ICircleExampleProvider":
+                if (serviceType == typeof(global::ICircleExampleProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -624,15 +673,26 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::ICircleExampleProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::IMyService1))
-                return MyService1;
-            if (serviceType == typeof(global::IMyService2))
-                return MyService2;
-            if (serviceType == typeof(global::ICircleExampleProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::ICircleExampleProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "IMyService1":
+                    if (serviceType == typeof(global::IMyService1))
+                        return MyService1;
+                    return null;
+                case "IMyService2":
+                    if (serviceType == typeof(global::IMyService2))
+                        return MyService2;
+                    return null;
+                case "ICircleExampleProvider":
+                    if (serviceType == typeof(global::ICircleExampleProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -732,11 +792,18 @@ public partial class DelegateProvider : global::IDelegateProvider, IServiceProvi
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IntToString))
-            return IntToString;
-        if (serviceType == typeof(global::IDelegateProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "IntToString":
+                if (serviceType == typeof(global::IntToString))
+                    return IntToString;
+                return null;
+            case "IDelegateProvider":
+                if (serviceType == typeof(global::IDelegateProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -814,13 +881,233 @@ public partial class DelegateProvider : global::IDelegateProvider, IServiceProvi
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::IDelegateProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::IntToString))
-                return IntToString;
-            if (serviceType == typeof(global::IDelegateProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::IDelegateProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "IntToString":
+                    if (serviceType == typeof(global::IntToString))
+                        return IntToString;
+                    return null;
+                case "IDelegateProvider":
+                    if (serviceType == typeof(global::IDelegateProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
+        }
+
+
+        /// <summary>
+        /// Disposes all disposable services instantiated by this provider.
+        /// </summary>
+        public void Dispose() {
+        }
+
+        /// <summary>
+        /// Disposes all disposable services instantiated by this provider asynchronously.
+        /// </summary>
+        public ValueTask DisposeAsync() {
+            return default;
+        }
+    }
+}
+```
+
+
+
+<br></br>
+## Import Services
+
+```csharp
+using CircleDIAttributes;
+
+namespace MyCode;
+
+[ServiceProvider]
+[Import<ITestModule>]
+public sealed partial class TestProvider;
+
+[Transient<ITestService, TestService>(Implementation = nameof(CreateService))]
+public interface ITestModule {
+    public static TestService CreateService => new();
+}
+
+public interface ITestService;
+public sealed class TestService : ITestService;
+```
+
+```csharp
+// <auto-generated/>
+#pragma warning disable
+#nullable enable annotations
+
+
+using System;
+using System.Threading.Tasks;
+
+namespace MyCode;
+
+/// <summary>
+/// <para>
+/// Number of services registered: 3<br />
+/// - Singleton: 1<br />
+/// - Scoped: 1<br />
+/// - Transient: 1<br />
+/// - Delegate: 0
+/// </para>
+/// <para>
+/// This provider can create a scope,<br />
+/// implements both Dispose() and DisposeAsync() methods<br />
+/// and is thread safe.
+/// </para>
+/// </summary>
+public sealed partial class TestProvider : global::MyCode.ITestProvider, IServiceProvider {
+    /// <summary>
+    /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
+    /// </summary>
+    public TestProvider() {
+    }
+
+    /// <summary>
+    /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+    /// </summary>
+    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
+
+
+    /// <summary>
+    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+    /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestProvider"/>
+    /// </summary>
+    public global::MyCode.ITestProvider Self => this;
+
+
+    /// <summary>
+    /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
+    /// Service type: <see cref="global::MyCode.ITestService"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestService"/>
+    /// </summary>
+    public global::MyCode.ITestService TestService => global::MyCode.ITestModule.CreateService;
+
+
+    /// <summary>
+    /// <para>Finds all registered services of the given type.</para>
+    /// <para>
+    /// The method returns<br />
+    /// - null (when registered zero times)<br />
+    /// - given type (when registered ones)<br />
+    /// - Array of given type (when registered many times)
+    /// </para>
+    /// </summary>
+    object? IServiceProvider.GetService(Type serviceType) {
+        switch (serviceType.Name) {
+            case "ITestService":
+                if (serviceType == typeof(global::MyCode.ITestService))
+                    return TestService;
+                return null;
+            case "ITestProvider":
+                if (serviceType == typeof(global::MyCode.ITestProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
+    }
+
+
+    /// <summary>
+    /// Disposes all disposable services instantiated by this provider.
+    /// </summary>
+    public void Dispose() {
+    }
+
+    /// <summary>
+    /// Disposes all disposable services instantiated by this provider asynchronously.
+    /// </summary>
+    public ValueTask DisposeAsync() {
+        return default;
+    }
+
+
+
+    /// <summary>
+    /// <para>
+    /// Number of services registered: 3<br />
+    /// - Singleton: 1<br />
+    /// - Scoped: 1<br />
+    /// - Transient: 1<br />
+    /// - Delegate: 0
+    /// </para>
+    /// <para>
+    /// This provider can create a scope,<br />
+    /// implements both Dispose() and DisposeAsync() methods<br />
+    /// and is thread safe.
+    /// </para>
+    /// </summary>
+    public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
+        private global::MyCode.ITestProvider _testProvider;
+
+        /// <summary>
+        /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
+        /// </summary>
+        /// <param name="testProvider">An instance of the service provider this provider is the scope of.</param>
+        public Scope(global::MyCode.ITestProvider testProvider) {
+            _testProvider = testProvider;
+        }
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
+        /// Service type: <see cref="global::MyCode.ITestProvider.IScope"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestProvider.Scope"/>
+        /// </summary>
+        public global::MyCode.ITestProvider.IScope SelfScope => this;
+
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+        /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestProvider"/>
+        /// </summary>
+        public global::MyCode.ITestProvider Self => _testProvider.Self;
+
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
+        /// Service type: <see cref="global::MyCode.ITestService"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestService"/>
+        /// </summary>
+        public global::MyCode.ITestService TestService => global::MyCode.ITestModule.CreateService;
+
+
+        /// <summary>
+        /// <para>Finds all registered services of the given type.</para>
+        /// <para>
+        /// The method returns<br />
+        /// - null (when registered zero times)<br />
+        /// - given type (when registered ones)<br />
+        /// - Array of given type (when registered many times)
+        /// </para>
+        /// </summary>
+        object? IServiceProvider.GetService(Type serviceType) {
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "ITestService":
+                    if (serviceType == typeof(global::MyCode.ITestService))
+                        return TestService;
+                    return null;
+                case "ITestProvider":
+                    if (serviceType == typeof(global::MyCode.ITestProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -925,11 +1212,18 @@ public partial class FieldProvider : global::IFieldProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IMyService))
-            return MyService;
-        if (serviceType == typeof(global::IFieldProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "IMyService":
+                if (serviceType == typeof(global::IMyService))
+                    return MyService;
+                return null;
+            case "IFieldProvider":
+                if (serviceType == typeof(global::IFieldProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -1006,13 +1300,22 @@ public partial class FieldProvider : global::IFieldProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::IFieldProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::IMyService))
-                return MyService;
-            if (serviceType == typeof(global::IFieldProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::IFieldProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "IMyService":
+                    if (serviceType == typeof(global::IMyService))
+                        return MyService;
+                    return null;
+                case "IFieldProvider":
+                    if (serviceType == typeof(global::IFieldProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -1114,11 +1417,18 @@ public partial class PropertyProvider : global::IPropertyProvider, IServiceProvi
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IMyService))
-            return MyService;
-        if (serviceType == typeof(global::IPropertyProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "IMyService":
+                if (serviceType == typeof(global::IMyService))
+                    return MyService;
+                return null;
+            case "IPropertyProvider":
+                if (serviceType == typeof(global::IPropertyProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -1195,13 +1505,22 @@ public partial class PropertyProvider : global::IPropertyProvider, IServiceProvi
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::IPropertyProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::IMyService))
-                return MyService;
-            if (serviceType == typeof(global::IPropertyProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::IPropertyProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "IMyService":
+                    if (serviceType == typeof(global::IMyService))
+                        return MyService;
+                    return null;
+                case "IPropertyProvider":
+                    if (serviceType == typeof(global::IPropertyProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -1316,13 +1635,22 @@ public partial class MethodProvider : global::IMethodProvider, IServiceProvider 
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IMyService1))
-            return MyService1;
-        if (serviceType == typeof(global::IMyService2))
-            return MyService2;
-        if (serviceType == typeof(global::IMethodProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "IMyService1":
+                if (serviceType == typeof(global::IMyService1))
+                    return MyService1;
+                return null;
+            case "IMyService2":
+                if (serviceType == typeof(global::IMyService2))
+                    return MyService2;
+                return null;
+            case "IMethodProvider":
+                if (serviceType == typeof(global::IMethodProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -1406,15 +1734,26 @@ public partial class MethodProvider : global::IMethodProvider, IServiceProvider 
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::IMethodProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::IMyService1))
-                return MyService1;
-            if (serviceType == typeof(global::IMyService2))
-                return MyService2;
-            if (serviceType == typeof(global::IMethodProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::IMethodProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "IMyService1":
+                    if (serviceType == typeof(global::IMyService1))
+                        return MyService1;
+                    return null;
+                case "IMyService2":
+                    if (serviceType == typeof(global::IMyService2))
+                        return MyService2;
+                    return null;
+                case "IMethodProvider":
+                    if (serviceType == typeof(global::IMethodProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -1574,17 +1913,30 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IMyService1))
-            return MyService1;
-        if (serviceType == typeof(global::IMyService2))
-            return MyService2;
-        if (serviceType == typeof(global::IMyService3))
-            return MyService3;
-        if (serviceType == typeof(global::IMyService4))
-            return MyService4;
-        if (serviceType == typeof(global::IDisposingProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "IMyService1":
+                if (serviceType == typeof(global::IMyService1))
+                    return MyService1;
+                return null;
+            case "IMyService2":
+                if (serviceType == typeof(global::IMyService2))
+                    return MyService2;
+                return null;
+            case "IMyService3":
+                if (serviceType == typeof(global::IMyService3))
+                    return MyService3;
+                return null;
+            case "IMyService4":
+                if (serviceType == typeof(global::IMyService4))
+                    return MyService4;
+                return null;
+            case "IDisposingProvider":
+                if (serviceType == typeof(global::IDisposingProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -1729,19 +2081,34 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::IDisposingProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::IMyService1))
-                return MyService1;
-            if (serviceType == typeof(global::IMyService2))
-                return MyService2;
-            if (serviceType == typeof(global::IMyService3))
-                return MyService3;
-            if (serviceType == typeof(global::IMyService4))
-                return MyService4;
-            if (serviceType == typeof(global::IDisposingProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::IDisposingProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "IMyService1":
+                    if (serviceType == typeof(global::IMyService1))
+                        return MyService1;
+                    return null;
+                case "IMyService2":
+                    if (serviceType == typeof(global::IMyService2))
+                        return MyService2;
+                    return null;
+                case "IMyService3":
+                    if (serviceType == typeof(global::IMyService3))
+                        return MyService3;
+                    return null;
+                case "IMyService4":
+                    if (serviceType == typeof(global::IMyService4))
+                        return MyService4;
+                    return null;
+                case "IDisposingProvider":
+                    if (serviceType == typeof(global::IDisposingProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -1875,11 +2242,18 @@ public partial class LazyProvider : global::ILazyProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IMyService))
-            return MyService;
-        if (serviceType == typeof(global::ILazyProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "IMyService":
+                if (serviceType == typeof(global::IMyService))
+                    return MyService;
+                return null;
+            case "ILazyProvider":
+                if (serviceType == typeof(global::ILazyProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -1956,13 +2330,22 @@ public partial class LazyProvider : global::ILazyProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::ILazyProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::IMyService))
-                return MyService;
-            if (serviceType == typeof(global::ILazyProvider))
-                return Self;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::ILazyProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "IMyService":
+                    if (serviceType == typeof(global::IMyService))
+                        return MyService;
+                    return null;
+                case "ILazyProvider":
+                    if (serviceType == typeof(global::ILazyProvider))
+                        return Self;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -2062,11 +2445,18 @@ public partial class MethodProvider : global::IMethodProvider, IServiceProvider 
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IMyService))
-            return GetMyService();
-        if (serviceType == typeof(global::IMethodProvider))
-            return GetSelf();
-        return null;
+        switch (serviceType.Name) {
+            case "IMyService":
+                if (serviceType == typeof(global::IMyService))
+                    return GetMyService();
+                return null;
+            case "IMethodProvider":
+                if (serviceType == typeof(global::IMethodProvider))
+                    return GetSelf();
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -2143,13 +2533,22 @@ public partial class MethodProvider : global::IMethodProvider, IServiceProvider 
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::IMethodProvider.IScope))
-                return GetSelfScope();
-            if (serviceType == typeof(global::IMyService))
-                return GetMyService();
-            if (serviceType == typeof(global::IMethodProvider))
-                return GetSelf();
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::IMethodProvider.IScope))
+                        return GetSelfScope();
+                    return null;
+                case "IMyService":
+                    if (serviceType == typeof(global::IMyService))
+                        return GetMyService();
+                    return null;
+                case "IMethodProvider":
+                    if (serviceType == typeof(global::IMethodProvider))
+                        return GetSelf();
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -2243,11 +2642,18 @@ public partial class SkipGenerationProvider : global::ISkipGenerationProvider, I
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IMyService))
-            return MyService;
-        if (serviceType == typeof(global::ISkipGenerationProvider))
-            return Self;
-        return null;
+        switch (serviceType.Name) {
+            case "IMyService":
+                if (serviceType == typeof(global::IMyService))
+                    return MyService;
+                return null;
+            case "ISkipGenerationProvider":
+                if (serviceType == typeof(global::ISkipGenerationProvider))
+                    return Self;
+                return null;
+            default:
+                return null;
+        }
     }
 }
 ```
@@ -2360,13 +2766,22 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IMyService))
-            return MyService;
-        if (serviceType == typeof(global::IFastProvider))
-            return Self;
-        if (serviceType == typeof(global::IDisposableService))
-            return DisposableService;
-        return null;
+        switch (serviceType.Name) {
+            case "IMyService":
+                if (serviceType == typeof(global::IMyService))
+                    return MyService;
+                return null;
+            case "IFastProvider":
+                if (serviceType == typeof(global::IFastProvider))
+                    return Self;
+                return null;
+            case "IDisposableService":
+                if (serviceType == typeof(global::IDisposableService))
+                    return DisposableService;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -2464,15 +2879,26 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::IFastProvider.IScope))
-                return SelfScope;
-            if (serviceType == typeof(global::IMyService))
-                return MyService;
-            if (serviceType == typeof(global::IFastProvider))
-                return Self;
-            if (serviceType == typeof(global::IDisposableService))
-                return DisposableService;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::IFastProvider.IScope))
+                        return SelfScope;
+                    return null;
+                case "IMyService":
+                    if (serviceType == typeof(global::IMyService))
+                        return MyService;
+                    return null;
+                case "IFastProvider":
+                    if (serviceType == typeof(global::IFastProvider))
+                        return Self;
+                    return null;
+                case "IDisposableService":
+                    if (serviceType == typeof(global::IDisposableService))
+                        return DisposableService;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 
@@ -2598,9 +3024,14 @@ public partial class OverwritingProvider : global::IOverwritingProvider, IServic
     /// </para>
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
-        if (serviceType == typeof(global::IOverwritingProvider))
-            return Me;
-        return null;
+        switch (serviceType.Name) {
+            case "IOverwritingProvider":
+                if (serviceType == typeof(global::IOverwritingProvider))
+                    return Me;
+                return null;
+            default:
+                return null;
+        }
     }
 
 
@@ -2674,11 +3105,18 @@ public partial class OverwritingProvider : global::IOverwritingProvider, IServic
         /// </para>
         /// </summary>
         object? IServiceProvider.GetService(Type serviceType) {
-            if (serviceType == typeof(global::IOverwritingProvider.IScope))
-                return MeScope;
-            if (serviceType == typeof(global::IOverwritingProvider))
-                return Me;
-            return null;
+            switch (serviceType.Name) {
+                case "IScope":
+                    if (serviceType == typeof(global::IOverwritingProvider.IScope))
+                        return MeScope;
+                    return null;
+                case "IOverwritingProvider":
+                    if (serviceType == typeof(global::IOverwritingProvider))
+                        return Me;
+                    return null;
+                default:
+                    return null;
+            }
         }
 
 

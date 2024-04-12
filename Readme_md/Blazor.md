@@ -106,9 +106,33 @@ All components are registered with lifetime Transient and disposing ignored, the
 
 When a component is registered manually, the component will not be added again.
 
-The automatic detection of components is limited to the same project and only classes that explicitly inherit from [ComponentBase](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.componentbase) (or derived of ComponentBase) will be detected, *.razor*-files are ignored.
-This is because at the point of generation the Blazor compiler has not generated the classes from the *.razor*-files yet.  
-However, you can always register components by yourself.
+Only classes that explicitly inherit from [ComponentBase](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.componentbase) (or derived of ComponentBase) will be detected, *.razor*-files are ignored.
+This is because at the point of generation the Blazor compiler has not generated the classes from the *.razor*-files yet.
+
+Furthermore, the automatic detection of components is limited to the same project, but there is support for automatic cross assembly component including.
+You can just [import](ConfigurationAndCustomization.md#importattribute) an ServiceProvider from the other project that includes all the components.  
+For example, if you have a server project *Blazor* and a client project *Blazor.Client* with *Blazor* reference on *Blazor.Client*
+and you want a ServiceProvider in the server project that includes all components from both projects,
+create a ServiceProvider in the client project and a ServiceProvider in the server project that imports the client ServiceProvider.
+
+```csharp
+// client project (Blazor.Client.csproj)
+
+using CircleDIAttributes;
+
+[ServiceProvider]
+public sealed partial class BlazorClientComponentProvider;
+```
+
+```csharp
+// server project (Blazor.csproj)
+
+using CircleDIAttributes;
+
+[ServiceProvider]
+[Import<Blazor.Client.BlazorClientComponentProvider>(ImportMode.Static)]
+public sealed partial class MyServiceProvider;
+```
 
 
 <br></br>

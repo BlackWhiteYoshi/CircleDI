@@ -15,7 +15,7 @@ public enum ImportMode {
     Static,
 
     /// <summary>
-    /// An instance of the module is injected as service.
+    /// The module is registered as service.
     /// </summary>
     Service,
 

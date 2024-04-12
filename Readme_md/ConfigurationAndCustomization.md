@@ -27,7 +27,7 @@
 <br></br>
 ## Attributes and Attribute Properties
 
-There are 6 attributes that are used at your ServiceProvider class and 2 other attributes that are used at service classes:
+There are 7 attributes that are used at your ServiceProvider class and 2 other attributes that are used at service classes:
 
 - [ServiceProviderAttribute](#attributes-and-their-properties-on-service-provider)
 - [ScopedProviderAttribute](#attributes-and-their-properties-on-service-provider)
@@ -35,6 +35,7 @@ There are 6 attributes that are used at your ServiceProvider class and 2 other a
   - [ScopedAttribute](#attributes-and-their-properties-on-service-provider)
   - [TransientAttribute](#attributes-and-their-properties-on-service-provider)
   - [DelegateAttribute](#attributes-and-their-properties-on-service-provider)
+  - [ImportAttribute](#importattribute)
 <br></br>
 - [DependencyAttribute](#dependencyattribute)
 - [ConstructorAttribute](#constructorattribute)
@@ -45,7 +46,7 @@ There are 6 attributes that are used at your ServiceProvider class and 2 other a
 
 The main usage of the [ServiceProviderAttribute](TypeTables.md#serviceproviderattribute) is to indicate that the class is a ServiceProvider, so the generator will generate code for that class.  
 The [ScopedProviderAttribute](TypeTables.md#scopedproviderattribute) without setting any properties does nothing.  
-The other 4 attributes are for registering services.  
+The other 5 attributes are for registering services.  
 There are several properties that can be configured to change the generated code:
 
 - *InterfaceName*:
@@ -153,7 +154,135 @@ public sealed class MyServiceImplementation(string name, int age) {
 <br></br>
 ### ImportAttribute
 
-Not implemented yet
+This attribute registers all services listed on the specified type.
+The specified type (also referred as *module*) can be a class, struct or interface.
+
+```csharp
+using CircleDIAttributes;
+
+[ServiceProvider]
+[Import<IMyModule>] // includes services "IService" and "Service"
+public sealed partial class MyProvider;
+
+[Singleton<IService, Service>(Name = "IService")]
+[Singleton<Service>]
+public interface IMyModule;
+
+public interface IService;
+public sealed class Service : IService;
+```
+
+You can also include the services listed on another ServiceProvider.
+
+```csharp
+using CircleDIAttributes;
+
+[ServiceProvider]
+[Import<MyTopLevelProvider>] // includes services "IService" and "Service"
+public sealed partial class MyProvider;
+
+[ServiceProvider]
+[Singleton<IService, Service>(Name = "IService")]
+[Singleton<Service>]
+public partial class MyTopLevelProvider;
+
+public interface IService;
+public sealed class Service : IService;
+```
+
+There are 4 different [ImportModes](TypeTables.md#importmode-enum) to handle the implementation members of a module:
+  
+- **Static**
+
+If the *module* has only static members or no members at all, it can be imported with [ImportMode.Static](TypeTables.md#importmode-enum).
+This means, no instance of the module is created and service instantiation can be done by constructors and static members.
+
+```csharp
+using CircleDIAttributes;
+
+[ServiceProvider]
+[Import<MyModule>(ImportMode.Static)] // includes services "IService" and "Service" without instantiating "MyModule"
+public sealed partial class MyProvider;
+
+[Singleton<IService, Service>(Name = "IService")]
+[Singleton<Service>]
+public class MyModule;
+
+public interface IService;
+public sealed class Service : IService;
+```
+
+- **Service**
+
+The *module* is registered as singleton service and the instance of that service is used to construct services that need object members for creation.
+
+```csharp
+using CircleDIAttributes;
+
+[ServiceProvider]
+[Import<MyModule>(ImportMode.Service)] // includes services "IService" and "Service" and registers "MyModule" as singleton
+public sealed partial class MyProvider;
+
+[Singleton<IService, Service>(Name = "IService")]
+[Singleton<Service>]
+public class MyModule;
+
+public interface IService;
+public sealed class Service : IService;
+```
+
+- **Parameter**
+
+An instance of the *module* is given by constructor parameter to construct services that need object members for creation.
+
+```csharp
+using CircleDIAttributes;
+
+[ServiceProvider]
+[Import<MyModule>(ImportMode.Parameter)] // includes services "IService" and "Service" and adds "MyModule" as constructor parameter
+public sealed partial class MyProvider;
+
+[Singleton<IService, Service>(Name = "IService")]
+[Singleton<Service>]
+public class MyModule;
+
+public interface IService;
+public sealed class Service : IService;
+```
+
+- **Auto**
+
+This mode is the default and it chooses automatically one of these three modes:  
+**Static** -> If the given type is an interface
+**Service** -> If the given type is constructed with a parameterless constructor
+**Parameter** -> otherwise
+
+```csharp
+using CircleDIAttributes;
+
+[ServiceProvider]
+[Import<MyModule1>] // defaults to ImportMode.Static -> does not instantiate "MyModule1"
+[Import<MyModule2>] // defaults to ImportMode.Service -> registers "MyModule2" as singleton
+[Import<MyModule3>] // defaults to ImportMode.Parameter -> adds "MyModule3" as constructor parameter
+public sealed partial class MyProvider;
+
+public interface MyModule1;
+public class MyModule2;
+public class MyModule3(string connectionString);
+
+public interface IService;
+public sealed class Service : IService;
+```
+
+<br></br>
+If possible, a module should be declared as interface, so it will be automatically imported with [ImportMode.Static](TypeTables.md#importmode-enum).
+A static class also defaults to [ImportMode.Static](TypeTables.md#importmode-enum), but should not be used because it cannot be used as generic parameter.
+
+When imported with [ImportMode.Service](TypeTables.md#importmode-enum) or [ImportMode.Parameter](TypeTables.md#importmode-enum), the serviceName/parameterName will always be the name of the module type.
+In case of a naming conflicts, you have to rename a module or import a module with [ImportMode.Static](TypeTables.md#importmode-enum).  
+Consequently, the diamond problem also leads to a naming conflict.
+
+[ImportMode](TypeTables.md#importmode-enum) applies always to both ServiceProvider and ScopedProvider, different [ImportModes](TypeTables.md#importmode-enum) for ServiceProvider and ScopedProvider is not supported.
 
 
 <br></br>

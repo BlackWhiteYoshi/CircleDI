@@ -114,6 +114,25 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
+        builder.AppendSection("Import Services", """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import<ITestModule>]
+            public sealed partial class TestProvider;
+
+            [Transient<ITestService, TestService>(Implementation = nameof(CreateService))]
+            public interface ITestModule {
+                public static TestService CreateService => new();
+            }
+            
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
+            """);
+
         builder.AppendSection("Implementation Field", """
             using CircleDIAttributes;
 

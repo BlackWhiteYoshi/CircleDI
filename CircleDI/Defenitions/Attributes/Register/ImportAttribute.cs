@@ -14,7 +14,7 @@ public static partial class Attributes {
         namespace CircleDIAttributes;
 
         /// <summary>
-        /// <para>Registers all attributes of the specified class/struct in <i>TModule</i>.</para>
+        /// <para>Registers all attributes of the specified class/struct/interface in <i>TModule</i>.</para>
         /// <para>
         /// There are several options to handle the instantiation of the module:<br />
         /// - static (no instantiation)<br />
@@ -22,7 +22,7 @@ public static partial class Attributes {
         /// - given as parameter
         /// </para>
         /// </summary>
-        /// <typeparam name="TModule">The class or struct containing the attributes to include.</typeparam>
+        /// <typeparam name="TModule">The class, struct or interface containing the attributes to include.</typeparam>
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ImportAttribute<TModule> : Attribute {
@@ -39,7 +39,7 @@ public static partial class Attributes {
             /// Option for handling the instantiation of the module.<br />
             /// It can be static (no instantiation), injected as service or given as parameter.
             /// </para>
-            /// <para>Default is <see cref="ImportMode.Auto"/></para>
+            /// <para>Default is <see cref="ImportMode.Auto"/>.</para>
             /// </param>
             public ImportAttribute(ImportMode mode) { }
         }
