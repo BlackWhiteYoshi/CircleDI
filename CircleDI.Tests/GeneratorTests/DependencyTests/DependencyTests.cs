@@ -720,4 +720,148 @@ public static class DependencyTests {
 
         return Verify(sourceTextClass);
     }
+
+
+    [Fact]
+    public static Task FullTangle3() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<Service1>]
+            [Singleton<Service2>]
+            [Singleton<Service3>]
+            public sealed partial class TestProvider;
+
+
+            public sealed partial class Service1 {
+                public required Service2 Service2 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+            }
+
+            public sealed partial class Service2 {
+                public required Service1 Service1 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+            }
+
+            public sealed partial class Service3 {
+                public required Service1 Service1 { private get; init; }
+                public required Service2 Service2 { private get; init; }
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+    [Fact]
+    public static Task FullTangle4() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<Service1>]
+            [Singleton<Service2>]
+            [Singleton<Service3>]
+            [Singleton<Service4>]
+            public sealed partial class TestProvider;
+
+
+            public sealed partial class Service1 {
+                public required Service2 Service2 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+                public required Service4 Service4 { private get; init; }
+            }
+
+            public sealed partial class Service2 {
+                public required Service1 Service1 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+                public required Service4 Service4 { private get; init; }
+            }
+
+            public sealed partial class Service3 {
+                public required Service1 Service1 { private get; init; }
+                public required Service2 Service2 { private get; init; }
+                public required Service4 Service4 { private get; init; }
+            }
+
+            public sealed partial class Service4 {
+                public required Service1 Service1 { private get; init; }
+                public required Service2 Service2 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+    [Fact]
+    public static Task FullTangle5() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<Service1>]
+            [Singleton<Service2>]
+            [Singleton<Service3>]
+            [Singleton<Service4>]
+            [Singleton<Service5>]
+            public sealed partial class TestProvider;
+
+
+            public sealed partial class Service1 {
+                public required Service2 Service2 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+                public required Service4 Service4 { private get; init; }
+                public required Service5 Service5 { private get; init; }
+            }
+
+            public sealed partial class Service2 {
+                public required Service1 Service1 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+                public required Service4 Service4 { private get; init; }
+                public required Service5 Service5 { private get; init; }
+            }
+
+            public sealed partial class Service3 {
+                public required Service1 Service1 { private get; init; }
+                public required Service2 Service2 { private get; init; }
+                public required Service4 Service4 { private get; init; }
+                public required Service5 Service5 { private get; init; }
+            }
+
+            public sealed partial class Service4 {
+                public required Service1 Service1 { private get; init; }
+                public required Service2 Service2 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+                public required Service5 Service5 { private get; init; }
+            }
+
+            public sealed partial class Service5 {
+                public required Service1 Service1 { private get; init; }
+                public required Service2 Service2 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+                public required Service4 Service4 { private get; init; }
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
 }

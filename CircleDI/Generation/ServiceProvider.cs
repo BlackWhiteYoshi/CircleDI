@@ -1008,7 +1008,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     // check circle
                     for (int index = 0; index < path.Count; index++)
                         if (ReferenceEquals(path[index].node, dependencyService)) {
-                            for (int circleIndex = index; circleIndex < path.Count; circleIndex++)
+                            for (int circleIndex = path.Count - 1; circleIndex >= index; circleIndex--)
                                 if (path[circleIndex].edge is PropertyDependency propertyDependency && !dependencyService.Lifetime.HasFlag(ServiceLifetime.Transient)) {
                                     propertyDependency.IsCircular = true;
                                     goto circleCheckOK;
