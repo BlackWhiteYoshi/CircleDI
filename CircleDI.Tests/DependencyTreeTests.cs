@@ -163,7 +163,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 }
             ],
             Dependencies = null!
@@ -184,7 +185,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 }
             ],
             Dependencies = null!
@@ -231,7 +233,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 },
                 new PropertyDependency() {
                     Name = "Service3",
@@ -239,7 +242,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 }
             ],
             Dependencies = null!
@@ -287,7 +291,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 },
                 new PropertyDependency() {
                     Name = "Service7",
@@ -295,7 +300,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 }
             ],
             Dependencies = null!
@@ -936,7 +942,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 }
             ],
             Dependencies = null!
@@ -988,7 +995,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 }
             ],
             Dependencies = null!
@@ -1009,7 +1017,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 }
             ],
             Dependencies = null!
@@ -1043,7 +1052,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 }
             ],
             Dependencies = null!
@@ -1096,7 +1106,8 @@ public static class DependencyTreeTests {
                     IsRequired = true,
                     IsInit = true,
                     ServiceName = string.Empty,
-                    HasAttribute = false
+                    HasAttribute = false,
+                    ImplementationBaseName = null!
                 }
             ],
             Dependencies = null!

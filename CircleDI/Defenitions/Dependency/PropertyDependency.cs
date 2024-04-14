@@ -19,6 +19,13 @@ public sealed class PropertyDependency : Dependency, IEquatable<PropertyDependen
     public required bool IsRequired { get; init; }
 
     /// <summary>
+    /// <para>The Implementation class or a base class of implementation where this property is declared.</para>
+    /// <para>It is needed for the UnsafeAccessor instance variable, you must provide the right type/basetype in order to work.</para>
+    /// </summary>
+    public required TypeName ImplementationBaseName { get; set; }
+
+
+    /// <summary>
     /// If true, this is a valid circular dependency.
     /// </summary>
     public bool IsCircular { get; set; } = false;
@@ -47,13 +54,19 @@ public sealed class PropertyDependency : Dependency, IEquatable<PropertyDependen
             return false;
         if (IsRequired != other.IsRequired)
             return false;
+        if (ImplementationBaseName != other.ImplementationBaseName)
+            return false;
 
         return base.Equals(other);
     }
 
     public override int GetHashCode() {
-        int hashCode = Combine(IsInit.GetHashCode(), IsRequired.GetHashCode());
-        return Combine(hashCode, base.GetHashCode());
+        int hashCode = IsInit.GetHashCode();
+        hashCode = Combine(hashCode, IsRequired.GetHashCode());
+        hashCode = Combine(hashCode, ImplementationBaseName.GetHashCode());
+
+        hashCode = Combine(hashCode, base.GetHashCode());
+        return hashCode;
 
 
         static int Combine(int h1, int h2) {

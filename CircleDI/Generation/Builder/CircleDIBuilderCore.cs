@@ -1062,7 +1062,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                     builder.Append('_');
                     builder.Append(dependency.Name);
                     builder.Append("(global::");
-                    builder.AppendClosedFullyQualified(service.ImplementationType);
+                    builder.AppendClosedFullyQualified(dependency.ImplementationBaseName);
                     builder.Append(" instance, global::");
                     builder.AppendClosedFullyQualified(dependency.Service!.ServiceType);
                     builder.Append(" value);\n\n");

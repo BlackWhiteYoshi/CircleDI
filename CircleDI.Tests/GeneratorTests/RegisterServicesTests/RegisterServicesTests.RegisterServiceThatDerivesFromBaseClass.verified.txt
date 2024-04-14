@@ -103,10 +103,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     private extern static void Set_DerivedClass_Derived(global::MyCode.DerivedClass instance, global::MyCode.DerivedClass value);
 
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_DerivedBase")]
-    private extern static void Set_DerivedClass_DerivedBase(global::MyCode.DerivedClass instance, global::MyCode.DerivedClass value);
+    private extern static void Set_DerivedClass_DerivedBase(global::MyCode.BaseClass instance, global::MyCode.DerivedClass value);
 
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_DerivedBaseBase")]
-    private extern static void Set_DerivedClass_DerivedBaseBase(global::MyCode.DerivedClass instance, global::MyCode.DerivedClass value);
+    private extern static void Set_DerivedClass_DerivedBaseBase(global::MyCode.BaseBaseClass instance, global::MyCode.DerivedClass value);
 
 
 

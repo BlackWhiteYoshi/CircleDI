@@ -185,7 +185,8 @@ public static class SyntaxNodeExtensions {
     public static (List<PropertyDependency> propertyDependencyList, Diagnostic? error) CreatePropertyDependencyList(this INamedTypeSymbol implementation, AttributeData attributeData) {
         List<PropertyDependency> propertyDependencyList = [];
 
-        for (INamedTypeSymbol? baseType = implementation; baseType is not null; baseType = baseType.BaseType)
+        for (INamedTypeSymbol? baseType = implementation; baseType is not null; baseType = baseType.BaseType) {
+            TypeName implementationBaseName = new(baseType);
             foreach (ISymbol member in baseType.GetMembers()) {
                 if (member is not IPropertySymbol { Name.Length: > 0 } property)
                     continue;
@@ -230,9 +231,11 @@ public static class SyntaxNodeExtensions {
                     ServiceType = serviceType,
                     HasAttribute = hasAttribute,
                     IsInit = property.SetMethod.IsInitOnly,
+                    ImplementationBaseName = implementationBaseName,
                     IsRequired = property.IsRequired,
                 });
             }
+        }
 
         return (propertyDependencyList, null);
     }

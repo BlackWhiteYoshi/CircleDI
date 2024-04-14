@@ -736,17 +736,17 @@ public static class DependencyTests {
             public sealed partial class TestProvider;
 
 
-            public sealed partial class Service1 {
+            public sealed class Service1 {
                 public required Service2 Service2 { private get; init; }
                 public required Service3 Service3 { private get; init; }
             }
 
-            public sealed partial class Service2 {
+            public sealed class Service2 {
                 public required Service1 Service1 { private get; init; }
                 public required Service3 Service3 { private get; init; }
             }
 
-            public sealed partial class Service3 {
+            public sealed class Service3 {
                 public required Service1 Service1 { private get; init; }
                 public required Service2 Service2 { private get; init; }
             }
@@ -774,25 +774,25 @@ public static class DependencyTests {
             public sealed partial class TestProvider;
 
 
-            public sealed partial class Service1 {
+            public sealed class Service1 {
                 public required Service2 Service2 { private get; init; }
                 public required Service3 Service3 { private get; init; }
                 public required Service4 Service4 { private get; init; }
             }
 
-            public sealed partial class Service2 {
+            public sealed class Service2 {
                 public required Service1 Service1 { private get; init; }
                 public required Service3 Service3 { private get; init; }
                 public required Service4 Service4 { private get; init; }
             }
 
-            public sealed partial class Service3 {
+            public sealed class Service3 {
                 public required Service1 Service1 { private get; init; }
                 public required Service2 Service2 { private get; init; }
                 public required Service4 Service4 { private get; init; }
             }
 
-            public sealed partial class Service4 {
+            public sealed class Service4 {
                 public required Service1 Service1 { private get; init; }
                 public required Service2 Service2 { private get; init; }
                 public required Service3 Service3 { private get; init; }
@@ -822,35 +822,35 @@ public static class DependencyTests {
             public sealed partial class TestProvider;
 
 
-            public sealed partial class Service1 {
+            public sealed class Service1 {
                 public required Service2 Service2 { private get; init; }
                 public required Service3 Service3 { private get; init; }
                 public required Service4 Service4 { private get; init; }
                 public required Service5 Service5 { private get; init; }
             }
 
-            public sealed partial class Service2 {
+            public sealed class Service2 {
                 public required Service1 Service1 { private get; init; }
                 public required Service3 Service3 { private get; init; }
                 public required Service4 Service4 { private get; init; }
                 public required Service5 Service5 { private get; init; }
             }
 
-            public sealed partial class Service3 {
+            public sealed class Service3 {
                 public required Service1 Service1 { private get; init; }
                 public required Service2 Service2 { private get; init; }
                 public required Service4 Service4 { private get; init; }
                 public required Service5 Service5 { private get; init; }
             }
 
-            public sealed partial class Service4 {
+            public sealed class Service4 {
                 public required Service1 Service1 { private get; init; }
                 public required Service2 Service2 { private get; init; }
                 public required Service3 Service3 { private get; init; }
                 public required Service5 Service5 { private get; init; }
             }
 
-            public sealed partial class Service5 {
+            public sealed class Service5 {
                 public required Service1 Service1 { private get; init; }
                 public required Service2 Service2 { private get; init; }
                 public required Service3 Service3 { private get; init; }
