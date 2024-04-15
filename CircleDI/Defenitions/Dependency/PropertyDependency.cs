@@ -26,7 +26,7 @@ public sealed class PropertyDependency : Dependency, IEquatable<PropertyDependen
 
 
     /// <summary>
-    /// If true, this is a valid circular dependency.
+    /// If true, this is a weak dependency that will be set afterwards.
     /// </summary>
     public bool IsCircular { get; set; } = false;
 

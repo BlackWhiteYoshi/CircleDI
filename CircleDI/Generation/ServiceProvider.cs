@@ -909,157 +909,250 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     }
 
     private struct DependencyTreeInitializer(ServiceProvider serviceProvider, AttributeData attribute) {
+        public DependencyTreeInitializer(ServiceProvider serviceProvider) : this(serviceProvider, serviceProvider.Attribute) { }
+
+
+        /// <summary>
+        /// <para>Holds information to track shortcircuits.</para>
+        /// <para>
+        /// It contains at which node it starts,
+        /// when it can be removed
+        /// as well as the shortcircuitNodeList, the list of edges that are building the cycle.
+        /// </para>
+        /// </summary>
+        /// <param name="cycleEnd"></param>
+        /// <param name="cycleStart"></param>
+        /// <param name="shortcircuitNodeList"></param>
+        private readonly struct Cycle(int cycleEnd, int cycleStart, Dependency[] shortcircuitNodeList) {
+            /// <summary>
+            /// index of <see cref="path">path</see> node where the cycle starts.<br />
+            /// If after that point, it should be removed.
+            /// </summary>
+            public readonly int cycleEnd = cycleEnd;
+
+            /// <summary>
+            /// index of <see cref="path">path</see> node with the weak edge.<br />
+            /// If at or after that point, shortcircuitNodeList must be checked and therefore this cycle is active.<br />
+            /// If -1, it is already active.
+            /// </summary>
+            public readonly int cycleStart = cycleStart;
+
+            /// <summary>
+            /// First dependency is the weak dependency and last dependency points to the last node. Dependency pointing to a path node is omitted.
+            /// </summary>
+            public readonly Dependency[] shortcircuitList = shortcircuitNodeList;
+        }
+
         public AttributeData attribute = attribute;
         private readonly List<(Service node, Dependency edge)> path = [];
+        private readonly List<Cycle> cycleList = [];
 
-        public DependencyTreeInitializer(ServiceProvider serviceProvider) : this(serviceProvider, serviceProvider.Attribute) { }
 
         public readonly void InitNode(Service service) {
             if (service.TreeState.HasFlag(DependencyTreeFlags.Traversed))
                 return;
             service.TreeState |= DependencyTreeFlags.Traversed;
 
-            foreach (Dependency dependency in service.Dependencies) {
-                Debug.Assert(dependency.ServiceName != string.Empty || dependency.ServiceType is not null);
-                path.Add((service, dependency));
+            try {
+                foreach (Dependency dependency in service.Dependencies) {
+                    Debug.Assert(dependency.ServiceName != string.Empty || dependency.ServiceType is not null);
+                    path.Add((service, dependency));
 
-                try {
-                    Service? dependencyService;
-                    if (dependency.ServiceType is null) {
-                        foreach (Service providerService in serviceProvider.SortedServiceList)
-                            if (providerService.Name == dependency.ServiceName) {
-                                dependencyService = providerService;
-                                goto dependencyServiceInitialized;
-                            }
-                        // else
-                        {
-                            Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                true => attribute.CreateScopedProviderNamedUnregisteredError(serviceProvider.Identifier, dependency.ServiceName),
-                                false => attribute.CreateDependencyNamedUnregisteredError(service.Name, dependency.ServiceName)
-                            };
-                            serviceProvider.ErrorList.Add(error);
-                            return;
-                        }
-                        dependencyServiceInitialized:;
-                    }
-                    else {
-                        (int index, int count) = serviceProvider.FindService(dependency.ServiceType);
-                        switch (count) {
-                            case 0: {
-                                Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                    true => attribute.CreateScopedProviderUnregisteredError(serviceProvider.Identifier, dependency.ServiceType),
-                                    false => attribute.CreateDependencyUnregisteredError(service.Name, dependency.ServiceType)
-                                };
-                                serviceProvider.ErrorList.Add(error);
-
-                                if (serviceProvider.HasInterface)
-                                    if (dependency.ServiceType.Name == serviceProvider.InterfaceIdentifier.Name || dependency.ServiceType.Name == $"{serviceProvider.InterfaceIdentifier.Name}.IScope") {
-                                        Diagnostic hintError = attribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceType, string.Join(".", serviceProvider.Identifier.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceIdentifier.Name);
-                                        serviceProvider.ErrorList.Add(hintError);
-                                    }
-
-                                return;
-                            }
-                            case 1: {
-                                dependencyService = serviceProvider.SortedServiceList[index];
-                                break;
-                            }
-                            default: {
-                                // filter all invalid services and if only
-                                if (service.Lifetime.HasFlag(ServiceLifetime.Singleton)) {
-                                    int serviceIndex = -1;
-                                    for (int i = index; i < index + count; i++)
-                                        if (!serviceProvider.SortedServiceList[i].Lifetime.HasFlag(ServiceLifetime.Scoped))
-                                            if (serviceIndex == -1)
-                                                serviceIndex = i;
-                                            else
-                                                goto error;
-
-                                    if (serviceIndex == -1) {
-                                        IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
-                                        serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, servicesWithSameType));
-                                        return;
-                                    }
-
-                                    dependencyService = serviceProvider.SortedServiceList[serviceIndex];
-                                    break;
-                                }
-                                error:
-                                {
-                                    IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
-                                    bool isParameter = dependency is ConstructorDependency;
-
-                                    Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                        true => attribute.CreateScopedProviderAmbiguousError(serviceProvider.Identifier, dependency.ServiceType, servicesWithSameType, isParameter),
-                                        false => attribute.CreateDependencyAmbiguousError(service.Name, dependency.ServiceType, servicesWithSameType, isParameter)
-                                    };
-                                    serviceProvider.ErrorList.Add(error);
-                                    return;
-                                }
-                            }
-                        }
-                    }
-
-                    // check CreationTiming
-                    if (service.CreationTimeTransitive == CreationTiming.Constructor && dependencyService.CreationTimeTransitive == CreationTiming.Lazy)
-                        if (!service.Lifetime.HasFlag(ServiceLifetime.Transient) && !dependencyService.Lifetime.HasFlag(ServiceLifetime.Transient))
-                            dependencyService.CreationTimeTransitive = CreationTiming.Constructor;
-
-                    // check circle
-                    for (int index = 0; index < path.Count; index++)
-                        if (ReferenceEquals(path[index].node, dependencyService)) {
-                            for (int circleIndex = path.Count - 1; circleIndex >= index; circleIndex--)
-                                if (path[circleIndex].edge is PropertyDependency propertyDependency && !dependencyService.Lifetime.HasFlag(ServiceLifetime.Transient)) {
-                                    propertyDependency.IsCircular = true;
-                                    goto circleCheckOK;
+                    try {
+                        if (dependency.ServiceType is null) {
+                            foreach (Service providerService in serviceProvider.SortedServiceList)
+                                if (providerService.Name == dependency.ServiceName) {
+                                    dependency.Service = providerService;
+                                    goto dependencyServiceInitialized;
                                 }
                             // else
                             {
-                                IEnumerable<string> servicesInCircle = path.Skip(index).Select(((Service node, Dependency edge) pair) => pair.node.Name);
-                                // append first item again as last item to illustrate the circle
-                                servicesInCircle = servicesInCircle.Concat(servicesInCircle.Take(1));
-
-                                serviceProvider.ErrorList.Add(attribute.CreateDependencyCircleError(servicesInCircle));
+                                Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
+                                    true => attribute.CreateScopedProviderNamedUnregisteredError(serviceProvider.Identifier, dependency.ServiceName),
+                                    false => attribute.CreateDependencyNamedUnregisteredError(service.Name, dependency.ServiceName)
+                                };
+                                serviceProvider.ErrorList.Add(error);
                                 return;
+                            }
+                            dependencyServiceInitialized:;
+                        }
+                        else {
+                            (int index, int count) = serviceProvider.FindService(dependency.ServiceType);
+                            switch (count) {
+                                case 0: {
+                                    Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
+                                        true => attribute.CreateScopedProviderUnregisteredError(serviceProvider.Identifier, dependency.ServiceType),
+                                        false => attribute.CreateDependencyUnregisteredError(service.Name, dependency.ServiceType)
+                                    };
+                                    serviceProvider.ErrorList.Add(error);
+
+                                    if (serviceProvider.HasInterface)
+                                        if (dependency.ServiceType.Name == serviceProvider.InterfaceIdentifier.Name || dependency.ServiceType.Name == $"{serviceProvider.InterfaceIdentifier.Name}.IScope") {
+                                            Diagnostic hintError = attribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceType, string.Join(".", serviceProvider.Identifier.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceIdentifier.Name);
+                                            serviceProvider.ErrorList.Add(hintError);
+                                        }
+
+                                    return;
+                                }
+                                case 1: {
+                                    dependency.Service = serviceProvider.SortedServiceList[index];
+                                    break;
+                                }
+                                default: {
+                                    // filter all invalid services and if only
+                                    if (service.Lifetime.HasFlag(ServiceLifetime.Singleton)) {
+                                        int serviceIndex = -1;
+                                        for (int i = index; i < index + count; i++)
+                                            if (!serviceProvider.SortedServiceList[i].Lifetime.HasFlag(ServiceLifetime.Scoped))
+                                                if (serviceIndex == -1)
+                                                    serviceIndex = i;
+                                                else
+                                                    goto error;
+
+                                        if (serviceIndex == -1) {
+                                            IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
+                                            serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, servicesWithSameType));
+                                            return;
+                                        }
+
+                                        dependency.Service = serviceProvider.SortedServiceList[serviceIndex];
+                                        break;
+                                    }
+                                    error:
+                                    {
+                                        IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
+                                        bool isParameter = dependency is ConstructorDependency;
+
+                                        Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
+                                            true => attribute.CreateScopedProviderAmbiguousError(serviceProvider.Identifier, dependency.ServiceType, servicesWithSameType, isParameter),
+                                            false => attribute.CreateDependencyAmbiguousError(service.Name, dependency.ServiceType, servicesWithSameType, isParameter)
+                                        };
+                                        serviceProvider.ErrorList.Add(error);
+                                        return;
+                                    }
+                                }
                             }
                         }
-                    circleCheckOK:
 
-                    InitNode(dependencyService);
-                    dependency.Service = dependencyService;
+                        // check CreationTiming
+                        if (service.CreationTimeTransitive == CreationTiming.Constructor && dependency.Service.CreationTimeTransitive == CreationTiming.Lazy)
+                            if (!service.Lifetime.HasFlag(ServiceLifetime.Transient) && !dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient))
+                                dependency.Service.CreationTimeTransitive = CreationTiming.Constructor;
 
-                    // check Lifetime
-                    switch (service.Lifetime) {
-                        case ServiceLifetime.Singleton:
-                            if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeScopeError(service.Name, dependency.Service.ServiceType));
-                                return;
+                        // set cycleLists active
+                        for (int i = 0; i < cycleList.Count; i++)
+                            if (cycleList[i].cycleStart == path.Count - 1)
+                                cycleList[i] = new Cycle(cycleList[i].cycleEnd, -1, cycleList[i].shortcircuitList);
+                        // check for short circuits
+                        for (int cycleIndex = 0; cycleIndex < cycleList.Count; cycleIndex++)
+                            if (cycleList[cycleIndex].cycleStart == -1)
+                                for (int shortcircuitIndex = 0; shortcircuitIndex < cycleList[cycleIndex].shortcircuitList.Length; shortcircuitIndex++)
+                                    if (ReferenceEquals(cycleList[cycleIndex].shortcircuitList[shortcircuitIndex].Service, dependency.Service)) {
+                                        // cycleList[cycleIndex].cycleEnd is start of circle
+                                        for (int circleIndex = path.Count - 1; circleIndex >= cycleList[cycleIndex].cycleEnd; circleIndex--)
+                                            if (path[circleIndex].edge is PropertyDependency propertyDependency && !dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient)) {
+                                                // path[circleIndex] is weak dependency
+                                                if (!propertyDependency.IsCircular) {
+                                                    propertyDependency.IsCircular = true;
+
+                                                    if (circleIndex < path.Count - 1) {
+                                                        // crate nodeCycle starting with weak dependency and ending with last node, depdency pointing to path node is omitted.
+                                                        Dependency[] nodeCycle = new Dependency[path.Count - 1 - circleIndex];
+                                                        for (int i = 0; i < nodeCycle.Length; i++)
+                                                            nodeCycle[i] = path[circleIndex + i].edge;
+
+                                                        cycleList.Add(new Cycle(cycleList[cycleIndex].cycleEnd, circleIndex, nodeCycle));
+                                                    }
+                                                }
+
+                                                goto circleCheckOK;
+                                            }
+                                        // else
+                                        {
+                                            IEnumerable<string> servicesInCircle = path.Skip(cycleList[cycleIndex].cycleEnd).Select(((Service node, Dependency edge) point) => point.node.Name)
+                                                .Concat(cycleList[cycleIndex].shortcircuitList.Skip(shortcircuitIndex).Select((Dependency d) => d.Service!.Name));
+                                            // append first item again as last item to illustrate the circle
+                                            servicesInCircle = servicesInCircle.Concat(servicesInCircle.Take(1));
+
+                                            serviceProvider.ErrorList.Add(attribute.CreateDependencyCircleError(servicesInCircle));
+                                            return;
+                                        }
+                                    }
+
+                        // check circle
+                        for (int index = 0; index < path.Count; index++)
+                            if (ReferenceEquals(path[index].node, dependency.Service)) {
+                                // path[index] is start of circle
+                                for (int circleIndex = path.Count - 1; circleIndex >= index; circleIndex--)
+                                    if (path[circleIndex].edge is PropertyDependency propertyDependency && !propertyDependency.Service!.Lifetime.HasFlag(ServiceLifetime.Transient)) {
+                                        // path[circleIndex] is weak dependency
+                                        if (!propertyDependency.IsCircular) {
+                                            propertyDependency.IsCircular = true;
+
+                                            if (circleIndex < path.Count - 1) {
+                                                // crate nodeCycle starting with weak dependency and ending with last node, depdency pointing to path node is omitted.
+                                                Dependency[] nodeCycle = new Dependency[path.Count - 1 - circleIndex];
+                                                for (int i = 0; i < nodeCycle.Length; i++)
+                                                    nodeCycle[i] = path[circleIndex + i].edge;
+
+                                                cycleList.Add(new Cycle(index, circleIndex, nodeCycle));
+                                            }
+                                        }
+
+                                        goto circleCheckOK;
+                                    }
+                                // else
+                                {
+                                    IEnumerable<string> servicesInCircle = path.Skip(index).Select(((Service node, Dependency edge) point) => point.node.Name);
+                                    // append first item again as last item to illustrate the circle
+                                    servicesInCircle = servicesInCircle.Concat(servicesInCircle.Take(1));
+
+                                    serviceProvider.ErrorList.Add(attribute.CreateDependencyCircleError(servicesInCircle));
+                                    return;
+                                }
                             }
-                            if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeTransientError(service.Name, dependency.Service.ServiceType));
-                                return;
-                            }
-                            break;
-                        case ServiceLifetime.TransientSingleton:
-                            if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeScopeError(serviceProvider.Identifier, dependency.Service.ServiceType));
-                                return;
-                            }
-                            if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeTransientError(serviceProvider.Identifier, dependency.Service.ServiceType));
-                                return;
-                            }
-                            break;
-                        case ServiceLifetime.Transient:
-                            if (dependency.Service.Lifetime.HasFlag(ServiceLifetime.Scoped))
-                                service.Lifetime = ServiceLifetime.TransientScoped;
-                            break;
+                        circleCheckOK:
+
+                        InitNode(dependency.Service);
+
+                        // check Lifetime
+                        switch (service.Lifetime) {
+                            case ServiceLifetime.Singleton:
+                                if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
+                                    serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeScopeError(service.Name, dependency.Service.ServiceType));
+                                    return;
+                                }
+                                if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
+                                    serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeTransientError(service.Name, dependency.Service.ServiceType));
+                                    return;
+                                }
+                                break;
+                            case ServiceLifetime.TransientSingleton:
+                                if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
+                                    serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeScopeError(serviceProvider.Identifier, dependency.Service.ServiceType));
+                                    return;
+                                }
+                                if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
+                                    serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeTransientError(serviceProvider.Identifier, dependency.Service.ServiceType));
+                                    return;
+                                }
+                                break;
+                            case ServiceLifetime.Transient:
+                                if (dependency.Service.Lifetime.HasFlag(ServiceLifetime.Scoped))
+                                    service.Lifetime = ServiceLifetime.TransientScoped;
+                                break;
+                        }
+                    }
+                    finally {
+                        path.RemoveAt(path.Count - 1);
+                        Debug.Assert(serviceProvider.ErrorList.Count > 0 || dependency.Service is not null);
                     }
                 }
-                finally {
-                    path.RemoveAt(path.Count - 1);
-                    Debug.Assert(serviceProvider.ErrorList.Count > 0 || dependency.Service is not null);
-                }
+            }
+            finally {
+                for (int i = 0; i < cycleList.Count; i++)
+                    if (cycleList[i].cycleEnd == path.Count)
+                        cycleList.RemoveAt(i--);
             }
         }
     }

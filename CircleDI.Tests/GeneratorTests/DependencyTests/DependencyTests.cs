@@ -864,4 +864,96 @@ public static class DependencyTests {
 
         return Verify(sourceTextClass);
     }
+
+
+    [Fact]
+    public static Task CircularDependencyShortCircuit2() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<Service1>]
+            [Singleton<Service2>]
+            public sealed partial class TestProvider;
+
+
+            public sealed class Service1 {
+                public required Service2 Service2_1 { private get; init; }
+                public required Service2 Service2_2 { private get; init; }
+            }
+
+            public sealed class Service2(Service1 Service1);
+            
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+    [Fact]
+    public static Task CircularDependencyShortCircuit3() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<Service1>]
+            [Singleton<Service2>]
+            [Singleton<Service3>]
+            public sealed partial class TestProvider;
+
+
+            public sealed class Service1 {
+                public required Service2 Service2 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+            }
+
+            public sealed class Service2(Service3 Service3);
+            
+            public sealed class Service3(Service1 Service1);
+            
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+    [Fact]
+    public static void CircularDependencyShortCircuitError() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<Service1>]
+            [Singleton<Service2>]
+            [Transient<Service3>]
+            public sealed partial class TestProvider;
+
+
+            public sealed class Service1 {
+                public required Service2 Service2 { private get; init; }
+                public required Service3 Service3 { private get; init; }
+            }
+
+            public sealed class Service2(Service3 Service3);
+            
+            public sealed class Service3(Service1 Service1);
+            
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI025", diagnostics[0].Id);
+        Assert.Equal("Circular dependency unresolvable: ['Service1' -> 'Service3' -> 'Service1']. Only singleton and scoped dependencies injected as properties can be resolved circular", diagnostics[0].GetMessage());
+    }
 }

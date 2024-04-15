@@ -208,8 +208,11 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             return;
 
 
-        foreach (Dependency dependency in service.Dependencies)
+        foreach (ConstructorDependency dependency in service.ConstructorDependencyList)
             AppendConstructorService(dependency.Service!, circularDependencies);
+        foreach (PropertyDependency dependency in service.PropertyDependencyList)
+            if (!dependency.IsCircular)
+                AppendConstructorService(dependency.Service!, circularDependencies);
 
         builder.Append(indent.Sp8);
         builder.AppendServiceField(service);

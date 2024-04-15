@@ -131,7 +131,11 @@ public sealed class Service : IEquatable<Service> {
     /// <summary>
     /// <para>Iterator for all dependencies of this service.</para>
     /// <para>Normally it is just <see cref="ConstructorDependencyList"/> concatenated with <see cref="PropertyDependencyList"/>.</para>
-    /// <para>The exception is the "special" service <see cref="ServiceProvider.CreateScope"/>, it needs an iterator with filter.</para>
+    /// <para>
+    /// The exceptions are:<br />
+    /// - "special" service <see cref="ServiceProvider.CreateScope"/>, it needs an iterator with filter by <see cref="Dependency.HasAttribute"/>.
+    /// - "endpoint" services (see Blazor.MinimalAPI), it needs an iterator with filter by <see cref="Dependency.HasAttribute"/>.
+    /// </para>
     /// </summary>
     public required IEnumerable<Dependency> Dependencies { get; init; }
     private IEnumerable<Dependency> DependenciesDefaultIterator => ConstructorDependencyList.Concat<Dependency>(PropertyDependencyList);
