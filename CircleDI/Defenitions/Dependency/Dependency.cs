@@ -5,6 +5,7 @@ namespace CircleDI.Defenitions;
 /// <summary>
 /// Base type for <see cref="ConstructorDependency"/> and <see cref="PropertyDependency"/>.
 /// </summary>
+[System.Diagnostics.DebuggerDisplay("{Service?.Name ?? ServiceType?.Name ?? ServiceName}")]
 public abstract class Dependency {
     /// <summary>
     /// The Service that will be used to satisfy the dependency.

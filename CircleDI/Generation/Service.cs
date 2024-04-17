@@ -10,6 +10,7 @@ namespace CircleDI.Generation;
 /// Contains all necessary information to source generate a service.<br />
 /// It includes the information about the attribute (lifetime, type parameters and arguments) as well as the necessary information about the implementation class.
 /// </summary>
+[DebuggerDisplay("{Name}")]
 public sealed class Service : IEquatable<Service> {
     /// <summary>
     /// Lifetime type of the service.<br />
