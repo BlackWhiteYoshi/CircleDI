@@ -388,13 +388,25 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
+    public static Diagnostic CreateDependencyLifetimeDelegateError(this AttributeData serviceProviderAttribute, string serviceName, TypeName dependencyServiceIdentifier)
+        => Diagnostic.Create(DependencyLifetimeDelegate, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName()]);
+
+    private static DiagnosticDescriptor DependencyLifetimeDelegate { get; } = new(
+        id: "CDI038",
+        title: "Dependency Lifetime: Singleton on Delegate-Scoped",
+        messageFormat: "Lifetime Violation: Singleton Service '{0}' has Delegate-Scoped dependency '{1}'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
     public static Diagnostic CreateDependencyLifetimeAllServicesError(this AttributeData serviceProviderAttribute, string serviceName, TypeName dependencyServiceIdentifier, IEnumerable<string> servicesWithSameType)
         => Diagnostic.Create(DependencyLifetimeAllServices, serviceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName(), string.Join("\", \"", servicesWithSameType)]);
 
     private static DiagnosticDescriptor DependencyLifetimeAllServices { get; } = new(
         id: "CDI028",
         title: "Dependency Lifetime: Multiple servcies, but all invalid",
-        messageFormat: "Lifetime Violation: Singleton Service '{0}' has dependency with type '{1}' and there are multiple services of that type, but they are all Scoped or Transient-Scoped: [\"{2}\"]",
+        messageFormat: "Lifetime Violation: Singleton Service '{0}' has dependency with type '{1}' and there are multiple services of that type, but they are all invalid (Scoped or Transient-Scoped): [\"{2}\"]",
         category: "CircleDI",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
@@ -455,6 +467,18 @@ public static class DiagnosticErrors {
         id: "CDI034",
         title: "Dependency Lifetime: ScopedProvider on Transient-Scoped",
         messageFormat: "Lifetime Violation: ScopedProvider '{0}.Scope' has Transient-Scoped dependency '{1}'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
+    public static Diagnostic CreateScopedProviderLifetimeDelegateError(this AttributeData serviceProviderAttribute, TypeName serviceProvider, TypeName dependencyServiceIdentifier)
+        => Diagnostic.Create(ScopedProviderLifetimeDelegate, serviceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName()]);
+
+    private static DiagnosticDescriptor ScopedProviderLifetimeDelegate { get; } = new(
+        id: "CDI039",
+        title: "Dependency Lifetime: ScopedProvider on Delegate-Scoped",
+        messageFormat: "Lifetime Violation: ScopedProvider '{0}.Scope' has Delegate-Scoped dependency '{1}'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.",
         category: "CircleDI",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);

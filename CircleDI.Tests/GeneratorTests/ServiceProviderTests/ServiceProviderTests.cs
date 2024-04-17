@@ -918,6 +918,32 @@ public static class ServiceProviderTests {
         Assert.Equal("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Transient-Scoped dependency 'MyCode.ITestService1'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped", diagnostics[0].GetMessage());
     }
 
+    [Fact]
+    public static void ScopedProviderDependencyInjectionDelegateScopedFails() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+            
+            [ServiceProvider]
+            [Delegate<System.Action>(nameof(ScopedMethod))]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope {
+                    public Scope([Dependency] System.Action scopedMethod) { }
+
+                    private static void ScopedMethod() { }
+                }
+            }
+
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI039", diagnostics[0].Id);
+        Assert.Equal("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Delegate-Scoped dependency 'System.Action'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.", diagnostics[0].GetMessage());
+    }
+
 
     [Fact]
     public static Task AttributeServiceProviderWithDifferentInterfaceName() {

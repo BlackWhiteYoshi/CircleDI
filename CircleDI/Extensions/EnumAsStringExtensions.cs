@@ -17,7 +17,7 @@ public static class EnumAsStringExtension {
            ServiceLifetime.Singleton => nameof(ServiceLifetime.Singleton),
            ServiceLifetime.Scoped => nameof(ServiceLifetime.Scoped),
            ServiceLifetime.Transient or ServiceLifetime.TransientSingleton or ServiceLifetime.TransientScoped => nameof(ServiceLifetime.Transient),
-           ServiceLifetime.Delegate => nameof(ServiceLifetime.Delegate),
+           ServiceLifetime.Delegate or ServiceLifetime.DelegateScoped => nameof(ServiceLifetime.Delegate),
            _ => ((int)value).ToString()
        };
 

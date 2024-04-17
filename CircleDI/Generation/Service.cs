@@ -316,7 +316,6 @@ public sealed class Service : IEquatable<Service> {
         ImplementationType = ServiceType;
 
         Name = attributeData.NamedArguments.GetArgument<string>("Name") ?? serviceType.Name.Replace(".", "");
-        Lifetime = ServiceLifetime.Delegate;
         CreationTime = CreationTiming.Constructor;
         CreationTimeTransitive = CreationTiming.Constructor;
         GetAccessor = (GetAccess?)attributeData.NamedArguments.GetArgument<int?>("GetAccessor") ?? getAccessorProvider;
@@ -336,31 +335,38 @@ public sealed class Service : IEquatable<Service> {
 
 
         // implementation method
-        if (attributeData.ConstructorArguments is [TypedConstant { Value: string methodName }]) {
-            IMethodSymbol implementation;
-            if (module.GetMembers(methodName) is [IMethodSymbol method, ..]) {
-                implementation = method;
-                Implementation = new ImplementationMember(MemberType.Method, methodName, method.IsStatic, IsScoped: false);
-            }
-            else if (module.GetMembers("Scope") is [INamedTypeSymbol scopeProvider, ..] && scopeProvider.GetMembers(methodName) is [IMethodSymbol scopeMethod, ..]) {
-                implementation = scopeMethod;
-                Implementation = new ImplementationMember(MemberType.Method, methodName, scopeMethod.IsStatic, IsScoped: true);
-            }
-            else {
-                errorList.Add(attributeData.CreateMissingDelegateImplementationError(module.ToDisplayString(), methodName));
-                return;
-            }
-
-            if (implementation.Parameters.Length != serviceType.DelegateInvokeMethod.Parameters.Length)
-                errorList.Add(attributeData.CreateDelegateWrongParameterCountError(methodName, implementation.Parameters.Length, serviceType.DelegateInvokeMethod.Parameters.Length));
-            else
-                for (int i = 0; i < implementation.Parameters.Length; i++)
-                    if (!SymbolEqualityComparer.Default.Equals(implementation.Parameters[i].Type, serviceType.DelegateInvokeMethod.Parameters[i].Type))
-                        errorList.Add(attributeData.CreateDelegateWrongParameterTypeError(methodName, implementation.Parameters[i].Type.ToDisplayString(), serviceType.DelegateInvokeMethod.Parameters[i].Type.ToDisplayString(), i + 1));
-
-            if (!SymbolEqualityComparer.Default.Equals(implementation.ReturnType, serviceType.DelegateInvokeMethod?.ReturnType))
-                errorList.Add(attributeData.CreateDelegateWrongReturnTypeError(methodName, implementation.ReturnType.ToDisplayString(), serviceType.DelegateInvokeMethod!.ReturnType.ToDisplayString()));
+        if (attributeData.ConstructorArguments is not [TypedConstant { Value: string methodName }]) {
+            Implementation = new ImplementationMember(MemberType.Method, string.Empty, IsStatic: false, IsScoped: false);
+            errorList.Add(attributeData.CreateMissingDelegateImplementationError(module.ToDisplayString(), string.Empty));
+            return;
         }
+
+        IMethodSymbol implementation;
+        if (module.GetMembers(methodName) is [IMethodSymbol method, ..]) {
+            implementation = method;
+            Implementation = new ImplementationMember(MemberType.Method, methodName, method.IsStatic, IsScoped: false);
+            Lifetime = ServiceLifetime.Delegate;
+        }
+        else if (module.GetMembers("Scope") is [INamedTypeSymbol scopeProvider, ..] && scopeProvider.GetMembers(methodName) is [IMethodSymbol scopeMethod, ..]) {
+            implementation = scopeMethod;
+            Implementation = new ImplementationMember(MemberType.Method, methodName, scopeMethod.IsStatic, IsScoped: true);
+            Lifetime = ServiceLifetime.DelegateScoped;
+        }
+        else {
+            Implementation = new ImplementationMember(MemberType.Method, string.Empty, IsStatic: false, IsScoped: false);
+            errorList.Add(attributeData.CreateMissingDelegateImplementationError(module.ToDisplayString(), methodName));
+            return;
+        }
+
+        if (implementation.Parameters.Length != serviceType.DelegateInvokeMethod.Parameters.Length)
+            errorList.Add(attributeData.CreateDelegateWrongParameterCountError(methodName, implementation.Parameters.Length, serviceType.DelegateInvokeMethod.Parameters.Length));
+        else
+            for (int i = 0; i < implementation.Parameters.Length; i++)
+                if (!SymbolEqualityComparer.Default.Equals(implementation.Parameters[i].Type, serviceType.DelegateInvokeMethod.Parameters[i].Type))
+                    errorList.Add(attributeData.CreateDelegateWrongParameterTypeError(methodName, implementation.Parameters[i].Type.ToDisplayString(), serviceType.DelegateInvokeMethod.Parameters[i].Type.ToDisplayString(), i + 1));
+
+        if (!SymbolEqualityComparer.Default.Equals(implementation.ReturnType, serviceType.DelegateInvokeMethod?.ReturnType))
+            errorList.Add(attributeData.CreateDelegateWrongReturnTypeError(methodName, implementation.ReturnType.ToDisplayString(), serviceType.DelegateInvokeMethod!.ReturnType.ToDisplayString()));
     }
 
 

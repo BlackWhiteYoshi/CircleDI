@@ -19,16 +19,16 @@ public static class DependencyTreeTests {
         };
 
         foreach (Service service in serviceList)
-            if (service.Lifetime == ServiceLifetime.Singleton)
+            if (service.Lifetime is ServiceLifetime.Singleton)
                 serviceProvider.SingletonList.Add(service);
         foreach (Service service in serviceList)
-            if (service.Lifetime == ServiceLifetime.Scoped)
+            if (service.Lifetime is ServiceLifetime.Scoped)
                 serviceProvider.SingletonList.Add(service);
         foreach (Service service in serviceList)
-            if (service.Lifetime == ServiceLifetime.Transient)
+            if (service.Lifetime is ServiceLifetime.Transient or ServiceLifetime.TransientScoped or ServiceLifetime.TransientSingleton)
                 serviceProvider.SingletonList.Add(service);
         foreach (Service service in serviceList)
-            if (service.Lifetime == ServiceLifetime.Delegate)
+            if (service.Lifetime is ServiceLifetime.Delegate or ServiceLifetime.DelegateScoped)
                 serviceProvider.SingletonList.Add(service);
 
         return serviceProvider;
@@ -1153,6 +1153,30 @@ public static class DependencyTreeTests {
     #region Lifetime
 
     [Fact]
+    public static void Lifetime_SingletonToScoped() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService1>]
+            [Scoped<TestService2>]
+            public sealed partial class TestProvider;
+            
+            public sealed class TestService1(TestService2 testService2);
+            public sealed class TestService2;
+
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI026", diagnostics[0].Id);
+        Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Scoped dependency 'MyCode.TestService2'", diagnostics[0].GetMessage());
+    }
+
+    [Fact]
     public static void Lifetime_SingletonToTransient() {
         Service service1 = new() {
             Name = "service1",
@@ -1195,6 +1219,132 @@ public static class DependencyTreeTests {
         Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
         Assert.Equal(ServiceLifetime.Transient, service2.Lifetime);
     }
+
+    [Fact]
+    public static void Lifetime_SingletonToTransientScoped() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService1>]
+            [Transient<TestService2>]
+            [Scoped<TestService3>]
+            public sealed partial class TestProvider;
+            
+            public sealed class TestService1(TestService2 testService2);
+            public sealed class TestService2(TestService3 testService3);
+            public sealed class TestService3;
+
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI027", diagnostics[0].Id);
+        Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Transient-Scoped dependency 'MyCode.TestService2'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped", diagnostics[0].GetMessage());
+    }
+
+    [Fact]
+    public static void Lifetime_SingletonToDelegate() {
+        Service service1 = new() {
+            Name = "service1",
+            Lifetime = ServiceLifetime.Singleton,
+            ServiceType = new TypeName("Service1"),
+            ImplementationType = null!,
+
+            ConstructorDependencyList = [
+                new ConstructorDependency() {
+                    Name = string.Empty,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
+                    HasAttribute = false,
+                    ByRef = RefKind.None
+                }
+            ],
+            PropertyDependencyList = [],
+            Dependencies = null!
+        };
+        SetDefaultDependenciesIterator(service1);
+
+        Service service2 = new() {
+            Name = "service2",
+            Lifetime = ServiceLifetime.Delegate,
+            ServiceType = new TypeName("Service2"),
+            ImplementationType = null!,
+
+            ConstructorDependencyList = [],
+            PropertyDependencyList = [],
+            Dependencies = null!
+        };
+        SetDefaultDependenciesIterator(service2);
+
+        ServiceProvider serviceProvider = CreateProvider([service1, service2]);
+
+
+        serviceProvider.CreateDependencyTree();
+
+
+        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+    }
+
+    [Fact]
+    public static void Lifetime_SingletonToDelegateScoped() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService1>]
+            public sealed partial class TestProvider {
+                
+                [Delegate<System.Action>(nameof(ScopedMethod))]
+                public sealed partial class Scope {
+                    private static void ScopedMethod() { }
+                }
+            }
+            
+            public sealed class TestService1(System.Action scopedMethod);
+
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI038", diagnostics[0].Id);
+        Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Delegate-Scoped dependency 'System.Action'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.", diagnostics[0].GetMessage());
+    }
+
+    [Fact]
+    public static void Lifetime_SingletonToMutlipleScoped() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>]
+            [Scoped<ITestDependency, TestDependency1>]
+            [Scoped<ITestDependency, TestDependency2>]
+            public sealed partial class TestProvider;
+            
+            public sealed class TestService(ITestDependency testDependency);
+
+            public interface ITestDependency;
+            public sealed class TestDependency1 : ITestDependency;
+            public sealed class TestDependency2 : ITestDependency;
+
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI028", diagnostics[0].Id);
+        Assert.Equal("Lifetime Violation: Singleton Service 'TestService' has dependency with type 'MyCode.ITestDependency' and there are multiple services of that type, but they are all invalid (Scoped or Transient-Scoped): [\"TestDependency1\", \"TestDependency2\"]", diagnostics[0].GetMessage());
+    }
+
 
     [Fact]
     public static void Lifetime_ScopedToSingleton() {
@@ -1282,6 +1432,50 @@ public static class DependencyTreeTests {
         Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
         Assert.Equal(ServiceLifetime.Transient, service2.Lifetime);
     }
+
+    [Fact]
+    public static void Lifetime_ScopedToDelegate() {
+        Service service1 = new() {
+            Name = "service1",
+            Lifetime = ServiceLifetime.Scoped,
+            ServiceType = new TypeName("Service1"),
+            ImplementationType = null!,
+
+            ConstructorDependencyList = [
+                new ConstructorDependency() {
+                    Name = string.Empty,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
+                    HasAttribute = false,
+                    ByRef = RefKind.None
+                }
+            ],
+            PropertyDependencyList = [],
+            Dependencies = null!
+        };
+        SetDefaultDependenciesIterator(service1);
+
+        Service service2 = new() {
+            Name = "service2",
+            Lifetime = ServiceLifetime.Delegate,
+            ServiceType = new TypeName("Service2"),
+            ImplementationType = null!,
+
+            ConstructorDependencyList = [],
+            PropertyDependencyList = [],
+            Dependencies = null!
+        };
+        SetDefaultDependenciesIterator(service2);
+
+        ServiceProvider serviceProvider = CreateProvider([service1, service2]);
+
+
+        serviceProvider.CreateDependencyTree();
+
+
+        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+    }
+
 
     [Fact]
     public static void Lifetime_TransientToSingleton() {
@@ -1372,81 +1566,90 @@ public static class DependencyTreeTests {
     }
 
     [Fact]
-    public static void Lifetime_SingletonToScoped() {
-        const string input = """
-            using CircleDIAttributes;
-            
-            namespace MyCode;
+    public static void Lifetime_TransientToDelegate() {
+        Service service1 = new() {
+            Name = "service1",
+            Lifetime = ServiceLifetime.Transient,
+            ServiceType = new TypeName("Service1"),
+            ImplementationType = null!,
 
-            [ServiceProvider]
-            [Singleton<TestService1>]
-            [Scoped<TestService2>]
-            public sealed partial class TestProvider;
-            
-            public sealed class TestService1(TestService2 testService2);
-            public sealed class TestService2;
+            ConstructorDependencyList = [
+                new ConstructorDependency() {
+                    Name = string.Empty,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
+                    HasAttribute = false,
+                    ByRef = RefKind.None
+                }
+            ],
+            PropertyDependencyList = [],
+            Dependencies = null!
+        };
+        SetDefaultDependenciesIterator(service1);
 
-            """;
+        Service service2 = new() {
+            Name = "service2",
+            Lifetime = ServiceLifetime.Delegate,
+            ServiceType = new TypeName("Service2"),
+            ImplementationType = null!,
 
-        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+            ConstructorDependencyList = [],
+            PropertyDependencyList = [],
+            Dependencies = null!
+        };
+        SetDefaultDependenciesIterator(service2);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI026", diagnostics[0].Id);
-        Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Scoped dependency 'MyCode.TestService2'", diagnostics[0].GetMessage());
+        ServiceProvider serviceProvider = CreateProvider([service1, service2]);
+
+
+        serviceProvider.CreateDependencyTree();
+
+
+        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
     }
 
     [Fact]
-    public static void Lifetime_SingletonToTransientScoped() {
-        const string input = """
-            using CircleDIAttributes;
-            
-            namespace MyCode;
+    public static void Lifetime_TransientToDelegateScoped() {
+        Service service1 = new() {
+            Name = "service1",
+            Lifetime = ServiceLifetime.Transient,
+            ServiceType = new TypeName("Service1"),
+            ImplementationType = null!,
 
-            [ServiceProvider]
-            [Singleton<TestService1>]
-            [Transient<TestService2>]
-            [Scoped<TestService3>]
-            public sealed partial class TestProvider;
-            
-            public sealed class TestService1(TestService2 testService2);
-            public sealed class TestService2(TestService3 testService3);
-            public sealed class TestService3;
+            ConstructorDependencyList = [
+                new ConstructorDependency() {
+                    Name = string.Empty,
+                    ServiceType = new TypeName("Service2"),
+                    ServiceName = string.Empty,
+                    HasAttribute = false,
+                    ByRef = RefKind.None
+                }
+            ],
+            PropertyDependencyList = [],
+            Dependencies = null!
+        };
+        SetDefaultDependenciesIterator(service1);
 
-            """;
+        Service service2 = new() {
+            Name = "service2",
+            Lifetime = ServiceLifetime.DelegateScoped,
+            ServiceType = new TypeName("Service2"),
+            ImplementationType = null!,
 
-        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+            ConstructorDependencyList = [],
+            PropertyDependencyList = [],
+            Dependencies = null!
+        };
+        SetDefaultDependenciesIterator(service2);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI027", diagnostics[0].Id);
-        Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Transient-Scoped dependency 'MyCode.TestService2'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped", diagnostics[0].GetMessage());
-    }
+        ServiceProvider serviceProvider = CreateProvider([service1, service2]);
 
-    [Fact]
-    public static void Lifetime_SingletonToMutlipleScoped() {
-        const string input = """
-            using CircleDIAttributes;
-            
-            namespace MyCode;
 
-            [ServiceProvider]
-            [Singleton<TestService>]
-            [Scoped<ITestDependency, TestDependency1>]
-            [Scoped<ITestDependency, TestDependency2>]
-            public sealed partial class TestProvider;
-            
-            public sealed class TestService(ITestDependency testDependency);
+        serviceProvider.CreateDependencyTree();
 
-            public interface ITestDependency;
-            public sealed class TestDependency1 : ITestDependency;
-            public sealed class TestDependency2 : ITestDependency;
 
-            """;
-
-        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
-
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI028", diagnostics[0].Id);
-        Assert.Equal("Lifetime Violation: Singleton Service 'TestService' has dependency with type 'MyCode.ITestDependency' and there are multiple services of that type, but they are all Scoped or Transient-Scoped: [\"TestDependency1\", \"TestDependency2\"]", diagnostics[0].GetMessage());
+        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+        Assert.Equal(ServiceLifetime.TransientScoped, service1.Lifetime);
     }
 
     #endregion

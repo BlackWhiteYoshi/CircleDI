@@ -1123,24 +1123,36 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         // check Lifetime
                         switch (service.Lifetime) {
                             case ServiceLifetime.Singleton:
-                                if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                    serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeScopeError(service.Name, dependency.Service.ServiceType));
-                                    return;
-                                }
-                                if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                    serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeTransientError(service.Name, dependency.Service.ServiceType));
-                                    return;
-                                }
+                                if (dependency.Service.Lifetime.HasFlag(ServiceLifetime.Scoped))
+                                    switch (dependency.Service.Lifetime) {
+                                        case ServiceLifetime.Scoped:
+                                            serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeScopeError(service.Name, dependency.Service.ServiceType));
+                                            return;
+                                        case ServiceLifetime.TransientScoped:
+                                            serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeTransientError(service.Name, dependency.Service.ServiceType));
+                                            return;
+                                        case ServiceLifetime.DelegateScoped:
+                                            serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeDelegateError(service.Name, dependency.Service.ServiceType));
+                                            return;
+                                        default:
+                                            throw new Exception($"Not Reachable: Singleton service has scoped dependency, but this specific scoped lifetime is not handled: {dependency.Service.Lifetime}");
+                                    }
                                 break;
                             case ServiceLifetime.TransientSingleton:
-                                if (dependency.Service.Lifetime is ServiceLifetime.Scoped) {
-                                    serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeScopeError(serviceProvider.Identifier, dependency.Service.ServiceType));
-                                    return;
-                                }
-                                if (dependency.Service.Lifetime is ServiceLifetime.TransientScoped) {
-                                    serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeTransientError(serviceProvider.Identifier, dependency.Service.ServiceType));
-                                    return;
-                                }
+                                if (dependency.Service.Lifetime.HasFlag(ServiceLifetime.Scoped))
+                                    switch (dependency.Service.Lifetime) {
+                                        case ServiceLifetime.Scoped:
+                                            serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeScopeError(serviceProvider.Identifier, dependency.Service.ServiceType));
+                                            return;
+                                        case ServiceLifetime.TransientScoped:
+                                            serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeTransientError(serviceProvider.Identifier, dependency.Service.ServiceType));
+                                            return;
+                                        case ServiceLifetime.DelegateScoped:
+                                            serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeDelegateError(serviceProvider.Identifier, dependency.Service.ServiceType));
+                                            return;
+                                        default:
+                                            throw new Exception($"Not Reachable: TransientSingleton service has scoped dependency, but this specific scoped lifetime is not handled: {dependency.Service.Lifetime}");
+                                    }
                                 break;
                             case ServiceLifetime.Transient:
                                 if (dependency.Service.Lifetime.HasFlag(ServiceLifetime.Scoped))

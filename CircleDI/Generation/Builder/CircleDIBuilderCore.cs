@@ -198,13 +198,11 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             return;
         service.TreeState |= DependencyTreeFlags.Generated;
 
-        if (service.CreationTimeTransitive == CreationTiming.Lazy)
+        if (!(service.Lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped))
             return;
-        if (service.Implementation.Type == MemberType.Field)
+        if (service.CreationTimeTransitive is CreationTiming.Lazy)
             return;
-        if (service.Lifetime.HasFlag(ServiceLifetime.Transient))
-            return;
-        if (service.Lifetime == ServiceLifetime.Delegate)
+        if (service.Implementation.Type is MemberType.Field)
             return;
 
 
