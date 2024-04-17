@@ -53,7 +53,7 @@ public static class CircleDIBuilder {
         for (int i = serviceProvider.Identifier.ContainingTypeList.Count - 1; i >= 0; i--) {
             builder.Append(core.indent.Sp0);
             builder.Append("partial ");
-            builder.Append(serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString());
+            builder.Append(serviceProvider.Identifier.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
             builder.AppendOpenContainingType(serviceProvider.Identifier.ContainingTypeList[i]);
             builder.Append(" {\n");

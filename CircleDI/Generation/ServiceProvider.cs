@@ -903,15 +903,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public void CreateDependencyTree(IEnumerable<(Service service, AttributeData attribute)> services) {
         DependencyTreeInitializer initializer = new(this);
         foreach ((Service service, AttributeData attribute) in services) {
-            initializer.attribute = attribute;
-            initializer.InitNode(service);
+            initializer.InitNode(service, attribute);
         }
     }
 
-    private struct DependencyTreeInitializer(ServiceProvider serviceProvider, AttributeData attribute) {
-        public DependencyTreeInitializer(ServiceProvider serviceProvider) : this(serviceProvider, serviceProvider.Attribute) { }
-
-
+    private struct DependencyTreeInitializer(ServiceProvider serviceProvider) {
         /// <summary>
         /// <para>Holds information to track shortcircuits.</para>
         /// <para>
@@ -943,12 +939,23 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             public readonly Dependency[] shortcircuitList = shortcircuitNodeList;
         }
 
-        public AttributeData attribute = attribute;
-        private readonly List<(Service node, Dependency edge)> path = [];
+        private AttributeData attribute = serviceProvider.Attribute;
+        private readonly List<Dependency> path = [new ConstructorDependency() { Name = null!, ServiceType = null!, ServiceName = null!, HasAttribute = false, ByRef = default }];
         private readonly List<Cycle> cycleList = [];
 
 
         public readonly void InitNode(Service service) {
+            path[0].Service = service;
+            InitNodeRecursion(service);
+        }
+
+        public void InitNode(Service service, AttributeData attribute) {
+            path[0].Service = service;
+            this.attribute = attribute;
+            InitNodeRecursion(service);
+        }
+
+        private readonly void InitNodeRecursion(Service service) {
             if (service.TreeState.HasFlag(DependencyTreeFlags.Traversed))
                 return;
             service.TreeState |= DependencyTreeFlags.Traversed;
@@ -956,7 +963,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             try {
                 foreach (Dependency dependency in service.Dependencies) {
                     Debug.Assert(dependency.ServiceName != string.Empty || dependency.ServiceType is not null);
-                    path.Add((service, dependency));
+                    path.Add(dependency);
 
                     try {
                         if (dependency.ServiceType is null) {
@@ -1050,7 +1057,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                     if (ReferenceEquals(cycleList[cycleIndex].shortcircuitList[shortcircuitIndex].Service, dependency.Service)) {
                                         // cycleList[cycleIndex].cycleEnd is start of circle
                                         for (int circleIndex = path.Count - 1; circleIndex >= cycleList[cycleIndex].cycleEnd; circleIndex--)
-                                            if (path[circleIndex].edge is PropertyDependency propertyDependency && !dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient)) {
+                                            if (path[circleIndex] is PropertyDependency propertyDependency && !dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient)) {
                                                 // path[circleIndex] is weak dependency
                                                 if (!propertyDependency.IsCircular) {
                                                     propertyDependency.IsCircular = true;
@@ -1059,7 +1066,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                                         // crate nodeCycle starting with weak dependency and ending with last node, depdency pointing to path node is omitted.
                                                         Dependency[] nodeCycle = new Dependency[path.Count - 1 - circleIndex];
                                                         for (int i = 0; i < nodeCycle.Length; i++)
-                                                            nodeCycle[i] = path[circleIndex + i].edge;
+                                                            nodeCycle[i] = path[circleIndex + i];
 
                                                         cycleList.Add(new Cycle(cycleList[cycleIndex].cycleEnd, circleIndex, nodeCycle));
                                                     }
@@ -1069,8 +1076,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                             }
                                         // else
                                         {
-                                            IEnumerable<string> servicesInCircle = path.Skip(cycleList[cycleIndex].cycleEnd).Select(((Service node, Dependency edge) point) => point.node.Name)
-                                                .Concat(cycleList[cycleIndex].shortcircuitList.Skip(shortcircuitIndex).Select((Dependency d) => d.Service!.Name));
+                                            IEnumerable<string> servicesInCircle = path.Skip(cycleList[cycleIndex].cycleEnd - 1)
+                                                .Concat(cycleList[cycleIndex].shortcircuitList.Skip(shortcircuitIndex + 1)).Select((Dependency edge) => edge.Service!.Name);
                                             // append first item again as last item to illustrate the circle
                                             servicesInCircle = servicesInCircle.Concat(servicesInCircle.Take(1));
 
@@ -1080,11 +1087,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                     }
 
                         // check circle
-                        for (int index = 0; index < path.Count; index++)
-                            if (ReferenceEquals(path[index].node, dependency.Service)) {
+                        for (int index = 0; index < path.Count - 1; index++)
+                            if (ReferenceEquals(path[index].Service, dependency.Service)) {
+                                index++;
                                 // path[index] is start of circle
                                 for (int circleIndex = path.Count - 1; circleIndex >= index; circleIndex--)
-                                    if (path[circleIndex].edge is PropertyDependency propertyDependency && !propertyDependency.Service!.Lifetime.HasFlag(ServiceLifetime.Transient)) {
+                                    if (path[circleIndex] is PropertyDependency propertyDependency && !propertyDependency.Service!.Lifetime.HasFlag(ServiceLifetime.Transient)) {
                                         // path[circleIndex] is weak dependency
                                         if (!propertyDependency.IsCircular) {
                                             propertyDependency.IsCircular = true;
@@ -1093,7 +1101,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                                 // crate nodeCycle starting with weak dependency and ending with last node, depdency pointing to path node is omitted.
                                                 Dependency[] nodeCycle = new Dependency[path.Count - 1 - circleIndex];
                                                 for (int i = 0; i < nodeCycle.Length; i++)
-                                                    nodeCycle[i] = path[circleIndex + i].edge;
+                                                    nodeCycle[i] = path[circleIndex + i];
 
                                                 cycleList.Add(new Cycle(index, circleIndex, nodeCycle));
                                             }
@@ -1103,17 +1111,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                     }
                                 // else
                                 {
-                                    IEnumerable<string> servicesInCircle = path.Skip(index).Select(((Service node, Dependency edge) point) => point.node.Name);
-                                    // append first item again as last item to illustrate the circle
-                                    servicesInCircle = servicesInCircle.Concat(servicesInCircle.Take(1));
-
+                                    IEnumerable<string> servicesInCircle = path.Skip(index - 1).Select((Dependency edge) => edge.Service!.Name);
                                     serviceProvider.ErrorList.Add(attribute.CreateDependencyCircleError(servicesInCircle));
                                     return;
                                 }
                             }
                         circleCheckOK:
 
-                        InitNode(dependency.Service);
+                        InitNodeRecursion(dependency.Service);
 
                         // check Lifetime
                         switch (service.Lifetime) {
