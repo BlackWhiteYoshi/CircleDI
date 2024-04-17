@@ -109,19 +109,29 @@ When a component is registered manually, the component will not be added again.
 Only classes that explicitly inherit from [ComponentBase](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.componentbase) (or derived of ComponentBase) will be detected, *.razor*-files are ignored.
 This is because at the point of generation the Blazor compiler has not generated the classes from the *.razor*-files yet.
 
-Furthermore, the automatic detection of components is limited to the same project, but there is support for automatic cross assembly component including.
-You can just [import](ConfigurationAndCustomization.md#importattribute) an ServiceProvider from the other project that includes all the components.  
-For example, if you have a server project *Blazor* and a client project *Blazor.Client* with *Blazor* reference on *Blazor.Client*
+Furthermore, the automatic detection of components is limited to the same project, for automatic cross project component importing use the [ComponentModuleAttribute](#componentmodule-attribute).
+
+
+<br></br>
+## ComponentModule attribute
+
+This attribute is for cross project razor components importing.
+
+A module or ServiceProvider decorated with this attribute gets an [TransientAttribute&lt;TService&gt;](TypeTables.md#transientattribute) for each razor component (class that inherits from [ComponentBase](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.componentbase)).
+Each attribute has also the *NoDispose*-property set to true, because they get disposed by the framework.  
+Another project referencing this project can have a ServiceProvider or module with an [ImportAttribute](TypeTables.md#importattribute) importing the module or ServiceProvider with the generated [TransientAttribute&lt;TService&gt;](TypeTables.md#transientattribute).
+
+For example, if you have a server project *Blazor* and a client project *Blazor.Client* with server project reference on client project
 and you want a ServiceProvider in the server project that includes all components from both projects,
-create a ServiceProvider in the client project and a ServiceProvider in the server project that imports the client ServiceProvider.
+create a module decorated with [\[ComponentModule\]](#componentmoduleattribute) in the client project and a ServiceProvider in the server project that imports the module.
 
 ```csharp
 // client project (Blazor.Client.csproj)
 
 using CircleDIAttributes;
 
-[ServiceProvider]
-public sealed partial class BlazorClientComponentProvider;
+[ComponentModule]
+public partial interface ClientComponentsModule;
 ```
 
 ```csharp
@@ -130,7 +140,7 @@ public sealed partial class BlazorClientComponentProvider;
 using CircleDIAttributes;
 
 [ServiceProvider]
-[Import<Blazor.Client.BlazorClientComponentProvider>(ImportMode.Static)]
+[Import<Blazor.Client.ClientComponentsModule>]
 public sealed partial class MyServiceProvider;
 ```
 
@@ -275,7 +285,7 @@ public class MyScopedComponent : ServiceComponentBase {
 | **Name**                 | **Type**                                            | **Description**                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------ | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | DefaultServiceGeneration | [BlazorServiceGeneration](#blazorservicegeneration) | Toggles the generation of default services from the built-in service provider. It can be configured to have only services that are available in all environments, all services for a specific environment or disable generating any default services. If enabled, it also adds a [System.IServiceProvider](https://learn.microsoft.com/en-us/dotnet/api/system.iserviceprovider) parameter to the constructor parameters. Default is BlazorServiceGeneration.ServerAndWebassembly. |
-| AddRazorComponents       | bool                                                | Decides whether classes derived from <see cref="Microsoft.AspNetCore.Components.ComponentBase"/> are automatically registered or not. Default is true.                                                                                                                                                                                                                                                                                                                             |
+| AddRazorComponents       | bool                                                | Decides whether classes derived from [ComponentBase](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.componentbase) are automatically registered or not. Default is true.                                                                                                                                                                                                                                                                                                                             |
 
 
 <br></br>
@@ -300,6 +310,15 @@ After this instantiation the framework performs it's dependency injection *[Inje
 | **Name**       | **Parameters**     | **ReturnType** | **Description**                                                                                                                                                                                                                                                                                                  |
 | -------------- | ------------------ | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | CreateInstance | Type componentType | IComponent     | It will retrieve the component from the specified service provider if registered. If the type is not registered, the component will be instantiated with the parameterless constructor (or fails in an Exception). If the type is registered multiple times, it also fails in an Exception because of ambiguity. |
+
+
+<br></br>
+### ComponentModuleAttribute
+
+This attribute is for cross project razor components importing.  
+A module decorated with this attribute gets an [TransientAttribute&lt;TService&gt;](TypeTables.md#transientattribute) for each class derived from [ComponentBase](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.componentbase).
+
+The module must be partial.
 
 
 <br></br>

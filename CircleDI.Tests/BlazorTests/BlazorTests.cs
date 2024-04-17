@@ -21,6 +21,65 @@ public static class BlazorTests {
     }
 
 
+    #region ComponentModuleAttribute
+
+    [Fact]
+    public static Task ComponentsGetGenerated() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode {
+                [ComponentModule]
+                public partial interface TestModule;
+
+                public sealed class MyComponent : Microsoft.AspNetCore.Components.ComponentBase;
+                public sealed class MyComponent2 : Microsoft.AspNetCore.Components.ComponentBase, IDisposable;
+            }
+
+            namespace Microsoft.AspNetCore.Components {
+                public abstract class ComponentBase;
+            }
+            
+            """;
+
+        string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out _);
+        string componentModuleAttributes = sourceTexts.First((string sourceText) => sourceText.Contains("[global::CircleDIAttributes.TransientAttribute<"));
+
+        return Verify(componentModuleAttributes);
+    }
+
+    [Fact]
+    public static Task ComponentModuleWithHardTypeName() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            public sealed partial class OuterWrapper<T> {
+                public partial interface InnerWarpper {
+                    [ComponentModule]
+                    public partial record NestedModule<U>;
+                }
+            }
+
+            namespace MyCode {
+                public sealed class MyComponent : Microsoft.AspNetCore.Components.ComponentBase;
+                public sealed class MyComponent2 : Microsoft.AspNetCore.Components.ComponentBase, IDisposable;
+            }
+
+            namespace Microsoft.AspNetCore.Components {
+                public abstract class ComponentBase;
+            }
+            
+            """;
+
+        string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out _);
+        string componentModuleAttributes = sourceTexts.First((string sourceText) => sourceText.Contains("[global::CircleDIAttributes.TransientAttribute<"));
+
+        return Verify(componentModuleAttributes);
+    }
+
+    #endregion
+
+
     #region DefaultServiceGeneration
 
     [Fact]
@@ -191,47 +250,6 @@ public static class BlazorTests {
 
 
     #region AddRazorComponents
-
-    [Fact]
-    public static Task ComponentsGetIncluded() {
-        const string input = """
-            using CircleDIAttributes;
-            
-            namespace MyCode {
-                [ServiceProvider]
-                public sealed partial class TestProvider;
-
-                public sealed class MyComponent : Microsoft.AspNetCore.Components.ComponentBase;
-                public sealed class MyComponent2 : Microsoft.AspNetCore.Components.ComponentBase, IDisposable;
-            }
-
-            namespace Microsoft.AspNetCore.Components {
-                public abstract class ComponentBase;
-            }
-            
-            """;
-
-        string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out _);
-        string componentAttributes = sourceTexts.First((string sourceText) => sourceText.Contains("global::CircleDIAttributes.Transient"));
-        string sourceTextClass = sourceTexts[^2];
-        string sourceTextInterface = sourceTexts[^1];
-
-        return Verify($"""
-            {componentAttributes}
-
-            ---------
-            Interface
-            ---------
-
-            {sourceTextClass}
-
-            ---------
-            Interface
-            ---------
-
-            {sourceTextInterface}
-            """);
-    }
 
     [Fact]
     public static Task NoComponentGetsIncluded() {

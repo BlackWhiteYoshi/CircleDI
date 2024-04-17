@@ -88,7 +88,7 @@ If the service does not implement [IDisposable](https://learn.microsoft.com/en-u
 
 - *Generate* (ScopeProvider):
 Toggles the generation off the Scope Class inside the ServiceProvider.
-If turned off, no Scope is generated and therefore <see cref="ScopedAttribute"/> has no effect.
+If turned off, no Scope is generated and therefore [ScopedAttribute](TypeTables.md#scopedattribute) has no effect.
 
 - *ThreadSafe*:
 Toggle for generating lock()-statements to make the ServiceProvider thread safe or omitting those for better performance.
