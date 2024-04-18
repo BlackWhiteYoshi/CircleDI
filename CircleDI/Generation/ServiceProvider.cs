@@ -1043,7 +1043,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                         // check CreationTiming
                         if (service.CreationTimeTransitive == CreationTiming.Constructor && dependency.Service.CreationTimeTransitive == CreationTiming.Lazy)
-                            if (!service.Lifetime.HasFlag(ServiceLifetime.Transient) && !dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient))
+                            if (!dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient))
                                 dependency.Service.CreationTimeTransitive = CreationTiming.Constructor;
 
                         // set cycleLists active

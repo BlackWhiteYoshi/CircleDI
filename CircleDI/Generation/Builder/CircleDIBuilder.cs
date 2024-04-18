@@ -153,9 +153,6 @@ public static class CircleDIBuilder {
         // Dispose
         core.AppendDisposeMethods(hasDisposeList, hasAsyncDisposeList);
 
-        // UnsafeAccessor methods
-        core.AppendUnsafeAccessorMethods();
-
 
         // Scope
         if (serviceProvider.GenerateScope) {
@@ -225,9 +222,7 @@ public static class CircleDIBuilder {
             // Dispose
             core.AppendDisposeMethods(hasDisposeListScope, hasAsyncDisposeListScope);
 
-            // UnsafeAccessor methods
-            core.AppendUnsafeAccessorMethods();
-
+            // ScopedProvider closing
             builder.Length -= 2;
             builder.Append(core.indent.Sp0);
             builder.Append("}\n");
@@ -237,6 +232,38 @@ public static class CircleDIBuilder {
         else
             builder.Length -= 2;
 
+        
+        // UnsafeAccessor methods to access init-only circle dependencies
+        builder.Append("\n\n\n");
+        int currentPosition = builder.Length;
+
+        foreach (Service service in serviceProvider.SortedServiceList)
+            foreach (PropertyDependency dependency in service.PropertyDependencyList)
+                if (dependency.IsCircular && dependency.IsInit) {
+                    builder.Append(core.indent.Sp4);
+                    builder.Append("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = \"set_");
+                    builder.Append(dependency.Name);
+                    builder.Append("\")]\n");
+
+                    builder.Append(core.indent.Sp4);
+                    builder.Append("private extern static void Set_");
+                    builder.Append(service.Name);
+                    builder.Append('_');
+                    builder.Append(dependency.Name);
+                    builder.Append("(global::");
+                    builder.AppendClosedFullyQualified(dependency.ImplementationBaseName);
+                    builder.Append(" instance, global::");
+                    builder.AppendClosedFullyQualified(dependency.Service!.ServiceType);
+                    builder.Append(" value);\n\n");
+                }
+
+        if (builder.Length == currentPosition)
+            builder.Length -= 3;
+        else
+            builder.Length--;
+
+
+        // ServiceProvider closing
         builder.Append(core.indent.Sp0);
         builder.Append("}\n");
 

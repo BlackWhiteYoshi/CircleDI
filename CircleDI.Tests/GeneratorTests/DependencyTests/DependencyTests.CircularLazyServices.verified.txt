@@ -126,10 +126,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     }
 
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_TestService1")]
-    private extern static void Set_TestService2_TestService1(global::MyCode.TestService2 instance, global::MyCode.ITestService1 value);
-
-
 
     /// <summary>
     /// <para>
@@ -232,4 +228,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             return default;
         }
     }
+
+
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_TestService1")]
+    private extern static void Set_TestService2_TestService1(global::MyCode.TestService2 instance, global::MyCode.ITestService1 value);
 }

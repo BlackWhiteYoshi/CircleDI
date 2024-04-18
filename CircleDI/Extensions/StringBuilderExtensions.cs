@@ -29,12 +29,14 @@ public static class StringBuilderExtensions {
     /// <param name="builder"></param>
     /// <param name="service"></param>
     public static void AppendServiceField(this StringBuilder builder, Service service) {
-        if (service.Implementation.Type == MemberType.Field)
+        if (service.Implementation.Type == MemberType.Field) {
             builder.AppendImplementationName(service);
-        else {
-            builder.Append('_');
-            builder.AppendFirstLower(service.Name);
+            return;
         }
+        
+        if (!service.Lifetime.HasFlag(ServiceLifetime.Transient))
+            builder.Append('_');
+        builder.AppendFirstLower(service.Name);
     }
 
     /// <summary>

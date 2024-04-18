@@ -70,14 +70,26 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Service type: <see cref="global::MyCode.MyComponent3"/><br />
     /// Implementation type: <see cref="global::MyCode.MyComponent3"/>
     /// </summary>
-    public global::MyCode.MyComponent3 MyComponent3 => new global::MyCode.MyComponent3();
+    public global::MyCode.MyComponent3 MyComponent3 {
+        get {
+            global::MyCode.MyComponent3 myComponent3 = new global::MyCode.MyComponent3();
+
+            return myComponent3;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.MyComponent4"/><br />
     /// Implementation type: <see cref="global::MyCode.MyComponent4"/>
     /// </summary>
-    public global::MyCode.MyComponent4 MyComponent4 => new global::MyCode.MyComponent4();
+    public global::MyCode.MyComponent4 MyComponent4 {
+        get {
+            global::MyCode.MyComponent4 myComponent4 = new global::MyCode.MyComponent4();
+
+            return myComponent4;
+        }
+    }
 
 
     /// <summary>
@@ -357,14 +369,26 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.MyComponent3"/><br />
         /// Implementation type: <see cref="global::MyCode.MyComponent3"/>
         /// </summary>
-        public global::MyCode.MyComponent3 MyComponent3 => new global::MyCode.MyComponent3();
+        public global::MyCode.MyComponent3 MyComponent3 {
+            get {
+                global::MyCode.MyComponent3 myComponent3 = new global::MyCode.MyComponent3();
+
+                return myComponent3;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.MyComponent4"/><br />
         /// Implementation type: <see cref="global::MyCode.MyComponent4"/>
         /// </summary>
-        public global::MyCode.MyComponent4 MyComponent4 => new global::MyCode.MyComponent4();
+        public global::MyCode.MyComponent4 MyComponent4 {
+            get {
+                global::MyCode.MyComponent4 myComponent4 = new global::MyCode.MyComponent4();
+
+                return myComponent4;
+            }
+        }
 
 
         /// <summary>

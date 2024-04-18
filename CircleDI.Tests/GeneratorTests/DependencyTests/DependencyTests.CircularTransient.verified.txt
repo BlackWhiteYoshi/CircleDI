@@ -11,15 +11,15 @@ namespace MyCode;
 /// <summary>
 /// <para>
 /// Number of services registered: 4<br />
-/// - Singleton: 1<br />
+/// - Singleton: 2<br />
 /// - Scoped: 1<br />
-/// - Transient: 2<br />
+/// - Transient: 1<br />
 /// - Delegate: 0
 /// </para>
 /// <para>
 /// This provider can create a scope,<br />
 /// implements both Dispose() and DisposeAsync() methods<br />
-/// and is not thread safe.
+/// and is thread safe.
 /// </para>
 /// </summary>
 public sealed partial class TestProvider : global::MyCode.ITestProvider, IServiceProvider {
@@ -27,6 +27,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public TestProvider() {
+        _testService2 = new global::MyCode.TestService2(TestService1);
     }
 
     /// <summary>
@@ -34,6 +35,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
 
+
+    /// <summary>
+    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+    /// Service type: <see cref="global::MyCode.ITestService2"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestService2"/>
+    /// </summary>
+    public global::MyCode.ITestService2 TestService2 => _testService2;
+    private global::MyCode.TestService2 _testService2;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -45,27 +54,18 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-    /// Service type: <see cref="global::MyCode.ITestService"/><br />
-    /// Implementation type: <see cref="global::MyCode.TestService"/>
+    /// Service type: <see cref="global::MyCode.ITestService1"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestService1"/>
     /// </summary>
-    public global::MyCode.ITestService TestService {
+    public global::MyCode.ITestService1 TestService1 {
         get {
-            global::MyCode.TestService testService = new global::MyCode.TestService();
-            disposeList.Add(testService);
-            return testService;
-        }
-    }
+            global::MyCode.TestService1 testService1 = new global::MyCode.TestService1() {
+                TestService2 = default!
+            };
 
-    /// <summary>
-    /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-    /// Service type: <see cref="global::MyCode.ITestService2"/><br />
-    /// Implementation type: <see cref="global::MyCode.TestService2"/>
-    /// </summary>
-    public global::MyCode.ITestService2 TestService2 {
-        get {
-            global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
-            asyncDisposeList.Add(testService2);
-            return testService2;
+            Set_TestService1_TestService2(testService1, TestService2);
+
+            return testService1;
         }
     }
 
@@ -81,13 +81,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
         switch (serviceType.Name) {
-            case "ITestService":
-                if (serviceType == typeof(global::MyCode.ITestService))
-                    return TestService;
-                return null;
             case "ITestProvider":
                 if (serviceType == typeof(global::MyCode.ITestProvider))
                     return Self;
+                return null;
+            case "ITestService1":
+                if (serviceType == typeof(global::MyCode.ITestService1))
+                    return TestService1;
                 return null;
             case "ITestService2":
                 if (serviceType == typeof(global::MyCode.ITestService2))
@@ -99,38 +99,17 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     }
 
 
-    private global::System.Collections.Generic.List<IDisposable> disposeList = [];
-
-    private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];
-
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
     /// </summary>
     public void Dispose() {
-        foreach (IDisposable disposable in disposeList)
-            disposable.Dispose();
-
-        foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
-            if (asyncDisposable is IDisposable disposable)
-                disposable.Dispose();
-            else
-                _ = asyncDisposable.DisposeAsync().Preserve();
     }
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider asynchronously.
     /// </summary>
     public ValueTask DisposeAsync() {
-        foreach (IDisposable disposable in disposeList)
-            disposable.Dispose();
-
-        Task[] disposeTasks = new Task[asyncDisposeList.Count];
-
-        int index = 0;
-        foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
-            disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
-
-        return new ValueTask(Task.WhenAll(disposeTasks));
+        return default;
     }
 
 
@@ -138,15 +117,15 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// <summary>
     /// <para>
     /// Number of services registered: 4<br />
-    /// - Singleton: 1<br />
+    /// - Singleton: 2<br />
     /// - Scoped: 1<br />
-    /// - Transient: 2<br />
+    /// - Transient: 1<br />
     /// - Delegate: 0
     /// </para>
     /// <para>
     /// This provider can create a scope,<br />
     /// implements both Dispose() and DisposeAsync() methods<br />
-    /// and is not thread safe.
+    /// and is thread safe.
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
@@ -170,6 +149,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+        /// Service type: <see cref="global::MyCode.ITestService2"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestService2"/>
+        /// </summary>
+        public global::MyCode.ITestService2 TestService2 => _testProvider.TestService2;
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
         /// Implementation type: <see cref="global::MyCode.TestProvider"/>
         /// </summary>
@@ -178,27 +164,18 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-        /// Service type: <see cref="global::MyCode.ITestService"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestService"/>
+        /// Service type: <see cref="global::MyCode.ITestService1"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestService1"/>
         /// </summary>
-        public global::MyCode.ITestService TestService {
+        public global::MyCode.ITestService1 TestService1 {
             get {
-                global::MyCode.TestService testService = new global::MyCode.TestService();
-                disposeList.Add(testService);
-                return testService;
-            }
-        }
+                global::MyCode.TestService1 testService1 = new global::MyCode.TestService1() {
+                    TestService2 = default!
+                };
 
-        /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-        /// Service type: <see cref="global::MyCode.ITestService2"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestService2"/>
-        /// </summary>
-        public global::MyCode.ITestService2 TestService2 {
-            get {
-                global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
-                asyncDisposeList.Add(testService2);
-                return testService2;
+                Set_TestService1_TestService2(testService1, TestService2);
+
+                return testService1;
             }
         }
 
@@ -218,13 +195,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                     if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                         return SelfScope;
                     return null;
-                case "ITestService":
-                    if (serviceType == typeof(global::MyCode.ITestService))
-                        return TestService;
-                    return null;
                 case "ITestProvider":
                     if (serviceType == typeof(global::MyCode.ITestProvider))
                         return Self;
+                    return null;
+                case "ITestService1":
+                    if (serviceType == typeof(global::MyCode.ITestService1))
+                        return TestService1;
                     return null;
                 case "ITestService2":
                     if (serviceType == typeof(global::MyCode.ITestService2))
@@ -236,38 +213,22 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         }
 
 
-        private global::System.Collections.Generic.List<IDisposable> disposeList = [];
-
-        private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];
-
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
         /// </summary>
         public void Dispose() {
-            foreach (IDisposable disposable in disposeList)
-                disposable.Dispose();
-
-            foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
-                if (asyncDisposable is IDisposable disposable)
-                    disposable.Dispose();
-                else
-                    _ = asyncDisposable.DisposeAsync().Preserve();
         }
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider asynchronously.
         /// </summary>
         public ValueTask DisposeAsync() {
-            foreach (IDisposable disposable in disposeList)
-                disposable.Dispose();
-
-            Task[] disposeTasks = new Task[asyncDisposeList.Count];
-
-            int index = 0;
-            foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
-                disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
-
-            return new ValueTask(Task.WhenAll(disposeTasks));
+            return default;
         }
     }
+
+
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_TestService2")]
+    private extern static void Set_TestService1_TestService2(global::MyCode.TestService1 instance, global::MyCode.ITestService2 value);
 }

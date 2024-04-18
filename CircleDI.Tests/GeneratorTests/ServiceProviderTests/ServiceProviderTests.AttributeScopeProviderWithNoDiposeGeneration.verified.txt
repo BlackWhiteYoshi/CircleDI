@@ -51,8 +51,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.IServiceDispose ServiceDispose {
         get {
             global::MyCode.ServiceDispose serviceDispose = new global::MyCode.ServiceDispose();
+
             lock (disposeList)
                 disposeList.Add(serviceDispose);
+
             return serviceDispose;
         }
     }
@@ -65,8 +67,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync {
         get {
             global::MyCode.ServiceDisposeAsync serviceDisposeAsync = new global::MyCode.ServiceDisposeAsync();
+
             lock (asyncDisposeList)
                 asyncDisposeList.Add(serviceDisposeAsync);
+
             return serviceDisposeAsync;
         }
     }
@@ -187,14 +191,26 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.IServiceDispose"/><br />
         /// Implementation type: <see cref="global::MyCode.ServiceDispose"/>
         /// </summary>
-        public global::MyCode.IServiceDispose ServiceDispose => new global::MyCode.ServiceDispose();
+        public global::MyCode.IServiceDispose ServiceDispose {
+            get {
+                global::MyCode.ServiceDispose serviceDispose = new global::MyCode.ServiceDispose();
+
+                return serviceDispose;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.IServiceDisposeAsync"/><br />
         /// Implementation type: <see cref="global::MyCode.ServiceDisposeAsync"/>
         /// </summary>
-        public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync => new global::MyCode.ServiceDisposeAsync();
+        public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync {
+            get {
+                global::MyCode.ServiceDisposeAsync serviceDisposeAsync = new global::MyCode.ServiceDisposeAsync();
+
+                return serviceDisposeAsync;
+            }
+        }
 
 
         /// <summary>

@@ -48,7 +48,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Service type: <see cref="global::MyCode.ITestService"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService"/>
     /// </summary>
-    public global::MyCode.ITestService GetTestService() => new global::MyCode.TestService();
+    public global::MyCode.ITestService GetTestService() {
+        global::MyCode.TestService testService = new global::MyCode.TestService();
+
+        return testService;
+    }
 
 
     /// <summary>
@@ -137,7 +141,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.ITestService"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService"/>
         /// </summary>
-        public global::MyCode.ITestService GetTestService() => new global::MyCode.TestService();
+        public global::MyCode.ITestService GetTestService() {
+            global::MyCode.TestService testService = new global::MyCode.TestService();
+
+            return testService;
+        }
 
 
         /// <summary>

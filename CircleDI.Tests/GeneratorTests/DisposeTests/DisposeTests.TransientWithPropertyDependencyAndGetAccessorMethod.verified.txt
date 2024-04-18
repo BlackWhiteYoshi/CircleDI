@@ -52,8 +52,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         global::MyCode.TestService1 testService1 = new global::MyCode.TestService1() {
             TestService2 = TestService2
         };
+
         lock (disposeList)
             disposeList.Add(testService1);
+
         return testService1;
     }
 
@@ -65,8 +67,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService2 TestService2 {
         get {
             global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
+
             lock (disposeList)
                 disposeList.Add(testService2);
+
             return testService2;
         }
     }
@@ -175,8 +179,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             global::MyCode.TestService1 testService1 = new global::MyCode.TestService1() {
                 TestService2 = TestService2
             };
+
             lock (disposeList)
                 disposeList.Add(testService1);
+
             return testService1;
         }
 
@@ -188,8 +194,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestService2 TestService2 {
             get {
                 global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
+
                 lock (disposeList)
                     disposeList.Add(testService2);
+
                 return testService2;
             }
         }

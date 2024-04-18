@@ -61,35 +61,65 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Service type: <see cref="global::MyCode.ITestService1"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService1"/>
     /// </summary>
-    public global::MyCode.ITestService1 TestService1 => global::MyCode.ITestModuleStatic.CreateService;
+    public global::MyCode.ITestService1 TestService1 {
+        get {
+            global::MyCode.TestService1 testService1 = global::MyCode.ITestModuleStatic.CreateService;
+
+            return testService1;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITestService2"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService2"/>
     /// </summary>
-    public global::MyCode.ITestService2 TestService2 => TestModuleService.CreateService;
+    public global::MyCode.ITestService2 TestService2 {
+        get {
+            global::MyCode.TestService2 testService2 = TestModuleService.CreateService;
+
+            return testService2;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITestService3"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService3"/>
     /// </summary>
-    public global::MyCode.ITestService3 TestService3 => global::MyCode.TestModuleService.CreateServiceStatic;
+    public global::MyCode.ITestService3 TestService3 {
+        get {
+            global::MyCode.TestService3 testService3 = global::MyCode.TestModuleService.CreateServiceStatic;
+
+            return testService3;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITestService4"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService4"/>
     /// </summary>
-    public global::MyCode.ITestService4 TestService4 => _testModuleParameter.CreateService;
+    public global::MyCode.ITestService4 TestService4 {
+        get {
+            global::MyCode.TestService4 testService4 = _testModuleParameter.CreateService;
+
+            return testService4;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITestService5"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService5"/>
     /// </summary>
-    public global::MyCode.ITestService5 TestService5 => global::MyCode.TestModuleParameter.CreateServiceStatic;
+    public global::MyCode.ITestService5 TestService5 {
+        get {
+            global::MyCode.TestService5 testService5 = global::MyCode.TestModuleParameter.CreateServiceStatic;
+
+            return testService5;
+        }
+    }
 
 
     /// <summary>
@@ -205,35 +235,65 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.ITestService1"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService1"/>
         /// </summary>
-        public global::MyCode.ITestService1 TestService1 => global::MyCode.ITestModuleStatic.CreateService;
+        public global::MyCode.ITestService1 TestService1 {
+            get {
+                global::MyCode.TestService1 testService1 = global::MyCode.ITestModuleStatic.CreateService;
+
+                return testService1;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITestService2"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService2"/>
         /// </summary>
-        public global::MyCode.ITestService2 TestService2 => _testProvider.TestService2;
+        public global::MyCode.ITestService2 TestService2 {
+            get {
+                global::MyCode.TestService2 testService2 = _testProvider.TestService2;
+
+                return testService2;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITestService3"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService3"/>
         /// </summary>
-        public global::MyCode.ITestService3 TestService3 => global::MyCode.TestModuleService.CreateServiceStatic;
+        public global::MyCode.ITestService3 TestService3 {
+            get {
+                global::MyCode.TestService3 testService3 = global::MyCode.TestModuleService.CreateServiceStatic;
+
+                return testService3;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITestService4"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService4"/>
         /// </summary>
-        public global::MyCode.ITestService4 TestService4 => _testProvider.TestService4;
+        public global::MyCode.ITestService4 TestService4 {
+            get {
+                global::MyCode.TestService4 testService4 = _testProvider.TestService4;
+
+                return testService4;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITestService5"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService5"/>
         /// </summary>
-        public global::MyCode.ITestService5 TestService5 => global::MyCode.TestModuleParameter.CreateServiceStatic;
+        public global::MyCode.ITestService5 TestService5 {
+            get {
+                global::MyCode.TestService5 testService5 = global::MyCode.TestModuleParameter.CreateServiceStatic;
+
+                return testService5;
+            }
+        }
 
 
         /// <summary>

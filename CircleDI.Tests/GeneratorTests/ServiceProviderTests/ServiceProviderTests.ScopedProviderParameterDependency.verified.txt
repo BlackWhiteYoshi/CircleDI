@@ -48,7 +48,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Service type: <see cref="global::MyCode.IScoped"/><br />
     /// Implementation type: <see cref="global::MyCode.Scoped"/>
     /// </summary>
-    public global::MyCode.IScoped Scoped => new global::MyCode.Scoped();
+    public global::MyCode.IScoped Scoped {
+        get {
+            global::MyCode.Scoped scoped = new global::MyCode.Scoped();
+
+            return scoped;
+        }
+    }
 
 
     /// <summary>
@@ -141,7 +147,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.IScoped"/><br />
         /// Implementation type: <see cref="global::MyCode.Scoped"/>
         /// </summary>
-        public global::MyCode.IScoped Scoped => new global::MyCode.Scoped();
+        public global::MyCode.IScoped Scoped {
+            get {
+                global::MyCode.Scoped scoped = new global::MyCode.Scoped();
+
+                return scoped;
+            }
+        }
 
 
         /// <summary>

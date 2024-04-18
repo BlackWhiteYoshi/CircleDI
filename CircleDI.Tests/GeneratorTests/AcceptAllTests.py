@@ -21,3 +21,4 @@ def accept_folder(directory: str):
 
 accept_folder(os.path.dirname(__file__));
 accept_folder(os.path.join(os.path.dirname(__file__), "..", "BlazorTests"));
+accept_folder(os.path.join(os.path.dirname(__file__), "..", "MinimalAPITests"));

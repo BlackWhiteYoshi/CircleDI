@@ -138,7 +138,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestService TestService {
             get {
                 global::MyCode.TestService testService = new global::MyCode.TestService(TestService2);
+
                 disposeList.Add(testService);
+
                 return testService;
             }
         }

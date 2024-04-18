@@ -514,7 +514,7 @@ public static class DisposeTests {
 
 
     [Fact]
-    public static Task SyncAndAsyncNotTreadSafeHasList() {
+    public static Task SyncAndAsyncNotThreadSafeHasList() {
         const string input = """
             using CircleDIAttributes;
             

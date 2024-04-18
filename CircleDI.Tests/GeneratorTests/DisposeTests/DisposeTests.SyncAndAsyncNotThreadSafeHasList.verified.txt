@@ -19,7 +19,7 @@ namespace MyCode;
 /// <para>
 /// This provider can create a scope,<br />
 /// implements both Dispose() and DisposeAsync() methods<br />
-/// and is thread safe.
+/// and is not thread safe.
 /// </para>
 /// </summary>
 public sealed partial class TestProvider : global::MyCode.ITestProvider, IServiceProvider {
@@ -50,7 +50,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
-            global::MyCode.TestService testService = new global::MyCode.TestService(TestDependency);
+            global::MyCode.TestService testService = new global::MyCode.TestService();
+
+            disposeList.Add(testService);
 
             return testService;
         }
@@ -58,14 +60,16 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-    /// Service type: <see cref="global::MyCode.ITestDependency"/><br />
-    /// Implementation type: <see cref="global::MyCode.TestDependency"/>
+    /// Service type: <see cref="global::MyCode.ITestService2"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestService2"/>
     /// </summary>
-    public global::MyCode.ITestDependency TestDependency {
+    public global::MyCode.ITestService2 TestService2 {
         get {
-            global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
+            global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
 
-            return testDependency;
+            asyncDisposeList.Add(testService2);
+
+            return testService2;
         }
     }
 
@@ -89,9 +93,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                 if (serviceType == typeof(global::MyCode.ITestProvider))
                     return Self;
                 return null;
-            case "ITestDependency":
-                if (serviceType == typeof(global::MyCode.ITestDependency))
-                    return TestDependency;
+            case "ITestService2":
+                if (serviceType == typeof(global::MyCode.ITestService2))
+                    return TestService2;
                 return null;
             default:
                 return null;
@@ -99,17 +103,38 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     }
 
 
+    private global::System.Collections.Generic.List<IDisposable> disposeList = [];
+
+    private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];
+
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
     /// </summary>
     public void Dispose() {
+        foreach (IDisposable disposable in disposeList)
+            disposable.Dispose();
+
+        foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+            if (asyncDisposable is IDisposable disposable)
+                disposable.Dispose();
+            else
+                _ = asyncDisposable.DisposeAsync().Preserve();
     }
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider asynchronously.
     /// </summary>
     public ValueTask DisposeAsync() {
-        return default;
+        foreach (IDisposable disposable in disposeList)
+            disposable.Dispose();
+
+        Task[] disposeTasks = new Task[asyncDisposeList.Count];
+
+        int index = 0;
+        foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+            disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
+
+        return new ValueTask(Task.WhenAll(disposeTasks));
     }
 
 
@@ -125,7 +150,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// <para>
     /// This provider can create a scope,<br />
     /// implements both Dispose() and DisposeAsync() methods<br />
-    /// and is thread safe.
+    /// and is not thread safe.
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
@@ -162,7 +187,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestService testService = new global::MyCode.TestService(TestDependency);
+                global::MyCode.TestService testService = new global::MyCode.TestService();
+
+                disposeList.Add(testService);
 
                 return testService;
             }
@@ -170,14 +197,16 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
-        /// Service type: <see cref="global::MyCode.ITestDependency"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestDependency"/>
+        /// Service type: <see cref="global::MyCode.ITestService2"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestService2"/>
         /// </summary>
-        public global::MyCode.ITestDependency TestDependency {
+        public global::MyCode.ITestService2 TestService2 {
             get {
-                global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
+                global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
 
-                return testDependency;
+                asyncDisposeList.Add(testService2);
+
+                return testService2;
             }
         }
 
@@ -205,9 +234,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                     if (serviceType == typeof(global::MyCode.ITestProvider))
                         return Self;
                     return null;
-                case "ITestDependency":
-                    if (serviceType == typeof(global::MyCode.ITestDependency))
-                        return TestDependency;
+                case "ITestService2":
+                    if (serviceType == typeof(global::MyCode.ITestService2))
+                        return TestService2;
                     return null;
                 default:
                     return null;
@@ -215,17 +244,38 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         }
 
 
+        private global::System.Collections.Generic.List<IDisposable> disposeList = [];
+
+        private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];
+
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
         /// </summary>
         public void Dispose() {
+            foreach (IDisposable disposable in disposeList)
+                disposable.Dispose();
+
+            foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+                if (asyncDisposable is IDisposable disposable)
+                    disposable.Dispose();
+                else
+                    _ = asyncDisposable.DisposeAsync().Preserve();
         }
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider asynchronously.
         /// </summary>
         public ValueTask DisposeAsync() {
-            return default;
+            foreach (IDisposable disposable in disposeList)
+                disposable.Dispose();
+
+            Task[] disposeTasks = new Task[asyncDisposeList.Count];
+
+            int index = 0;
+            foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+                disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
+
+            return new ValueTask(Task.WhenAll(disposeTasks));
         }
     }
 }

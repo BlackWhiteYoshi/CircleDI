@@ -51,14 +51,26 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Service type: <see cref="global::MyCode.ITestService"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService"/>
     /// </summary>
-    public global::MyCode.ITestService TestService => _testModule.TestService;
+    public global::MyCode.ITestService TestService {
+        get {
+            global::MyCode.TestService testService = _testModule.TestService;
+
+            return testService;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITestService2"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService2"/>
     /// </summary>
-    public global::MyCode.ITestService2 TestService2 => global::MyCode.TestModule.TestService2;
+    public global::MyCode.ITestService2 TestService2 {
+        get {
+            global::MyCode.TestService2 testService2 = global::MyCode.TestModule.TestService2;
+
+            return testService2;
+        }
+    }
 
 
     /// <summary>
@@ -151,14 +163,26 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.ITestService"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService"/>
         /// </summary>
-        public global::MyCode.ITestService TestService => _testProvider.TestService;
+        public global::MyCode.ITestService TestService {
+            get {
+                global::MyCode.TestService testService = _testProvider.TestService;
+
+                return testService;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITestService2"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService2"/>
         /// </summary>
-        public global::MyCode.ITestService2 TestService2 => global::MyCode.TestModule.TestService2;
+        public global::MyCode.ITestService2 TestService2 {
+            get {
+                global::MyCode.TestService2 testService2 = global::MyCode.TestModule.TestService2;
+
+                return testService2;
+            }
+        }
 
 
         /// <summary>

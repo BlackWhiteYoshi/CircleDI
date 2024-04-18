@@ -51,8 +51,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService TestService {
         get {
             global::MyCode.TestService testService = new global::MyCode.TestService();
+
             lock (disposeList)
                 disposeList.Add(testService);
+
             return testService;
         }
     }
@@ -156,8 +158,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestService TestService {
             get {
                 global::MyCode.TestService testService = new global::MyCode.TestService();
+
                 lock (disposeList)
                     disposeList.Add(testService);
+
                 return testService;
             }
         }

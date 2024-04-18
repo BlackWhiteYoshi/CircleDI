@@ -153,25 +153,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     }
 
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service1")]
-    private extern static void Set_Service2_Service1(global::MyCode.Service2 instance, global::MyCode.Service1 value);
-
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service1")]
-    private extern static void Set_Service3_Service1(global::MyCode.Service3 instance, global::MyCode.Service1 value);
-
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service2")]
-    private extern static void Set_Service3_Service2(global::MyCode.Service3 instance, global::MyCode.Service2 value);
-
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service1")]
-    private extern static void Set_Service4_Service1(global::MyCode.Service4 instance, global::MyCode.Service1 value);
-
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service2")]
-    private extern static void Set_Service4_Service2(global::MyCode.Service4 instance, global::MyCode.Service2 value);
-
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service3")]
-    private extern static void Set_Service4_Service3(global::MyCode.Service4 instance, global::MyCode.Service3 value);
-
-
 
     /// <summary>
     /// <para>
@@ -296,4 +277,24 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             return default;
         }
     }
+
+
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service1")]
+    private extern static void Set_Service2_Service1(global::MyCode.Service2 instance, global::MyCode.Service1 value);
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service1")]
+    private extern static void Set_Service3_Service1(global::MyCode.Service3 instance, global::MyCode.Service1 value);
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service2")]
+    private extern static void Set_Service3_Service2(global::MyCode.Service3 instance, global::MyCode.Service2 value);
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service1")]
+    private extern static void Set_Service4_Service1(global::MyCode.Service4 instance, global::MyCode.Service1 value);
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service2")]
+    private extern static void Set_Service4_Service2(global::MyCode.Service4 instance, global::MyCode.Service2 value);
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Service3")]
+    private extern static void Set_Service4_Service3(global::MyCode.Service4 instance, global::MyCode.Service3 value);
 }

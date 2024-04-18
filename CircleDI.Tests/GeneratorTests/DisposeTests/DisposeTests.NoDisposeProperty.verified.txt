@@ -48,14 +48,26 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Service type: <see cref="global::MyCode.ITestService"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService"/>
     /// </summary>
-    public global::MyCode.ITestService TestService => new global::MyCode.TestService();
+    public global::MyCode.ITestService TestService {
+        get {
+            global::MyCode.TestService testService = new global::MyCode.TestService();
+
+            return testService;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITestDisposable"/><br />
     /// Implementation type: <see cref="global::MyCode.TestDisposable"/>
     /// </summary>
-    public global::MyCode.ITestDisposable TestDisposable => new global::MyCode.TestDisposable();
+    public global::MyCode.ITestDisposable TestDisposable {
+        get {
+            global::MyCode.TestDisposable testDisposable = new global::MyCode.TestDisposable();
+
+            return testDisposable;
+        }
+    }
 
 
     /// <summary>
@@ -148,14 +160,26 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.ITestService"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService"/>
         /// </summary>
-        public global::MyCode.ITestService TestService => new global::MyCode.TestService();
+        public global::MyCode.ITestService TestService {
+            get {
+                global::MyCode.TestService testService = new global::MyCode.TestService();
+
+                return testService;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITestDisposable"/><br />
         /// Implementation type: <see cref="global::MyCode.TestDisposable"/>
         /// </summary>
-        public global::MyCode.ITestDisposable TestDisposable => new global::MyCode.TestDisposable();
+        public global::MyCode.ITestDisposable TestDisposable {
+            get {
+                global::MyCode.TestDisposable testDisposable = new global::MyCode.TestDisposable();
+
+                return testDisposable;
+            }
+        }
 
 
         /// <summary>

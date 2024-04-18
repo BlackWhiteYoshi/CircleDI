@@ -97,7 +97,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Service type: <see cref="global::MyCode.ITransient"/><br />
     /// Implementation type: <see cref="global::MyCode.Transient"/>
     /// </summary>
-    public global::MyCode.ITransient Transient => new global::MyCode.Transient();
+    public global::MyCode.ITransient Transient {
+        get {
+            global::MyCode.Transient transient = new global::MyCode.Transient();
+
+            return transient;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
@@ -107,8 +113,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITransientDisposable TransientDisposable {
         get {
             global::MyCode.TransientDisposable transientDisposable = new global::MyCode.TransientDisposable();
+
             lock (disposeList)
                 disposeList.Add(transientDisposable);
+
             return transientDisposable;
         }
     }
@@ -121,8 +129,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITransientAsyncDisposable TransientAsyncDisposable {
         get {
             global::MyCode.TransientAsyncDisposable transientAsyncDisposable = new global::MyCode.TransientAsyncDisposable();
+
             lock (asyncDisposeList)
                 asyncDisposeList.Add(transientAsyncDisposable);
+
             return transientAsyncDisposable;
         }
     }
@@ -237,10 +247,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
         return new ValueTask(Task.WhenAll(disposeTasks));
     }
-
-
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_SingletonDependency1")]
-    private extern static void Set_SingletonDependency2_SingletonDependency1(global::MyCode.SingletonDependency2 instance, global::MyCode.ISingletonDependency1 value);
 
 
 
@@ -375,7 +381,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.ITransient"/><br />
         /// Implementation type: <see cref="global::MyCode.Transient"/>
         /// </summary>
-        public global::MyCode.ITransient Transient => new global::MyCode.Transient();
+        public global::MyCode.ITransient Transient {
+            get {
+                global::MyCode.Transient transient = new global::MyCode.Transient();
+
+                return transient;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
@@ -385,8 +397,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITransientDisposable TransientDisposable {
             get {
                 global::MyCode.TransientDisposable transientDisposable = new global::MyCode.TransientDisposable();
+
                 lock (disposeList)
                     disposeList.Add(transientDisposable);
+
                 return transientDisposable;
             }
         }
@@ -399,8 +413,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITransientAsyncDisposable TransientAsyncDisposable {
             get {
                 global::MyCode.TransientAsyncDisposable transientAsyncDisposable = new global::MyCode.TransientAsyncDisposable();
+
                 lock (asyncDisposeList)
                     asyncDisposeList.Add(transientAsyncDisposable);
+
                 return transientAsyncDisposable;
             }
         }
@@ -539,11 +555,15 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
             return new ValueTask(Task.WhenAll(disposeTasks));
         }
-
-
-        [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ScopedDependency1")]
-        private extern static void Set_ScopedDependency2_ScopedDependency1(global::MyCode.ScopedDependency2 instance, global::MyCode.IScopedDependency1 value);
     }
+
+
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ScopedDependency1")]
+    private extern static void Set_ScopedDependency2_ScopedDependency1(global::MyCode.ScopedDependency2 instance, global::MyCode.IScopedDependency1 value);
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_SingletonDependency1")]
+    private extern static void Set_SingletonDependency2_SingletonDependency1(global::MyCode.SingletonDependency2 instance, global::MyCode.ISingletonDependency1 value);
 }
 
 

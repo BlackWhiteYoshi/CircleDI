@@ -178,7 +178,13 @@ public sealed partial class MyProvider : global::IMyProvider, IServiceProvider {
         /// Service type: <see cref="global::Service1"/><br />
         /// Implementation type: <see cref="global::Service1"/>
         /// </summary>
-        public global::Service1 Service1 => new global::Service1(Service2, Service3);
+        public global::Service1 Service1 {
+            get {
+                global::Service1 service1 = new global::Service1(Service2, Service3);
+
+                return service1;
+            }
+        }
 
 
         /// <summary>
@@ -603,10 +609,6 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
     }
 
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_MyService1")]
-    private extern static void Set_MyService2_MyService1(global::MyService2 instance, global::IMyService1 value);
-
-
 
     /// <summary>
     /// <para>
@@ -709,6 +711,11 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
             return default;
         }
     }
+
+
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_MyService1")]
+    private extern static void Set_MyService2_MyService1(global::MyService2 instance, global::IMyService1 value);
 }
 ```
 
@@ -990,7 +997,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Service type: <see cref="global::MyCode.ITestService"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService"/>
     /// </summary>
-    public global::MyCode.ITestService TestService => global::MyCode.ITestModule.CreateService;
+    public global::MyCode.ITestService TestService {
+        get {
+            global::MyCode.TestService testService = global::MyCode.ITestModule.CreateService;
+
+            return testService;
+        }
+    }
 
 
     /// <summary>
@@ -1079,7 +1092,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.ITestService"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService"/>
         /// </summary>
-        public global::MyCode.ITestService TestService => global::MyCode.ITestModule.CreateService;
+        public global::MyCode.ITestService TestService {
+            get {
+                global::MyCode.TestService testService = global::MyCode.ITestModule.CreateService;
+
+                return testService;
+            }
+        }
 
 
         /// <summary>
@@ -1882,8 +1901,10 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     public global::IMyService3 MyService3 {
         get {
             global::MyService3 myService3 = new global::MyService3();
+
             lock (disposeList)
                 disposeList.Add(myService3);
+
             return myService3;
         }
     }
@@ -1896,8 +1917,10 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     public global::IMyService4 MyService4 {
         get {
             global::MyService4 myService4 = new global::MyService4();
+
             lock (asyncDisposeList)
                 asyncDisposeList.Add(myService4);
+
             return myService4;
         }
     }
@@ -2050,8 +2073,10 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         public global::IMyService3 MyService3 {
             get {
                 global::MyService3 myService3 = new global::MyService3();
+
                 lock (disposeList)
                     disposeList.Add(myService3);
+
                 return myService3;
             }
         }
@@ -2064,8 +2089,10 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         public global::IMyService4 MyService4 {
             get {
                 global::MyService4 myService4 = new global::MyService4();
+
                 lock (asyncDisposeList)
                     asyncDisposeList.Add(myService4);
+
                 return myService4;
             }
         }
@@ -2750,7 +2777,9 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
     public global::IDisposableService DisposableService {
         get {
             global::DisposableService disposableService = new global::DisposableService();
+
             disposeList.Add(disposableService);
+
             return disposableService;
         }
     }
@@ -2863,7 +2892,9 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
         public global::IDisposableService DisposableService {
             get {
                 global::DisposableService disposableService = new global::DisposableService();
+
                 disposeList.Add(disposableService);
+
                 return disposableService;
             }
         }

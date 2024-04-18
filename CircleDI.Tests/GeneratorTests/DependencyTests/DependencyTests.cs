@@ -654,6 +654,34 @@ public static class DependencyTests {
     }
 
     [Fact]
+    public static Task CircularTransient() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Transient<ITestService1, TestService1>]
+            [Singleton<ITestService2, TestService2>]
+            public sealed partial class TestProvider;
+            
+            public interface ITestService1;
+            public sealed class TestService1 : ITestService1 {
+                public required ITestService2 TestService2 { private get; init; }
+            }
+
+            public interface ITestService2;
+            public sealed class TestService2(ITestService1 testService1) : ITestService2;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+    [Fact]
     public static Task CircularManyServices() {
         const string input = """
             using CircleDIAttributes;

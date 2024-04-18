@@ -38,6 +38,13 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
     }
 
 
+    /// <summary>
+    /// The list for <see cref="AppendConstructorService"/> and <see cref="AppendCircularDependencyList"/>.<br />
+    /// The list is filtered in <see cref="AppendConstructorService"/> and used/emptied in <see cref="AppendCircularDependencyList"/>.
+    /// </summary>
+    private readonly List<(Service service, PropertyDependency dependency)> circularDependencyList = [];
+
+
     #region Constructor Services
 
     /// <summary>
@@ -83,10 +90,9 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         }
 
         // singleton/scoped services inizialization
-        List<(Service, PropertyDependency)> circularDependencies = [];
         foreach (Service service in serviceList)
-            AppendConstructorService(service, circularDependencies);
-        AppendCircularDependencies(circularDependencies, indent.Sp8);
+            AppendConstructorService(service);
+        AppendCircularDependencyList(indent.Sp8);
         
         if (builder[^2] == '\n')
             builder.Length--;
@@ -193,7 +199,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         }
     }
 
-    private readonly void AppendConstructorService(Service service, List<(Service, PropertyDependency)> circularDependencies) {
+    private readonly void AppendConstructorService(Service service) {
         if (service.TreeState.HasFlag(DependencyTreeFlags.Generated))
             return;
         service.TreeState |= DependencyTreeFlags.Generated;
@@ -207,10 +213,10 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
 
 
         foreach (ConstructorDependency dependency in service.ConstructorDependencyList)
-            AppendConstructorService(dependency.Service!, circularDependencies);
+            AppendConstructorService(dependency.Service!);
         foreach (PropertyDependency dependency in service.PropertyDependencyList)
             if (!dependency.IsCircular)
-                AppendConstructorService(dependency.Service!, circularDependencies);
+                AppendConstructorService(dependency.Service!);
 
         builder.Append(indent.Sp8);
         builder.AppendServiceField(service);
@@ -220,7 +226,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                 builder.Append("new global::");
                 builder.AppendClosedFullyQualified(service.ImplementationType);
                 AppendConstructorDependencyList(service);
-                AppendPropertyDependencyList(service, circularDependencies, indent.Sp8);
+                AppendPropertyDependencyList(service, indent.Sp8);
                 break;
             case MemberType.Method:
                 if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
@@ -345,12 +351,10 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                 builder.Append("new global::");
                 builder.AppendClosedFullyQualified(service.ImplementationType);
                 AppendConstructorDependencyList(service);
-
-                List<(Service, PropertyDependency)> circularDependencies = [];
-                AppendPropertyDependencyList(service, circularDependencies, indentCreation);
+                AppendPropertyDependencyList(service, indentCreation);
                 builder.Append(";\n");
 
-                AppendCircularDependencies(circularDependencies, indentCreation);
+                AppendCircularDependencyList(indentCreation);
                 break;
             case MemberType.Property:
                 if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
@@ -420,20 +424,28 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             builder.AppendClosedFullyQualified(service.ServiceType);
             builder.Append(' ');
 
-            switch ((service.IsDisposable, service.IsAsyncDisposable, generateDisposeMethods)) {
-                case (true, false, not DisposeGeneration.NoDisposing):
-                    hasDisposeList = true;
-                    AppendTransientGetterWithDisposeList("disposeList", service);
-                    break;
-                case (_, true, not DisposeGeneration.NoDisposing):
-                    hasAsyncDisposeList = true;
-                    AppendTransientGetterWithDisposeList("asyncDisposeList", service);
-                    break;
-                default:
-                    builder.AppendServiceGetter(service);
-                    builder.Append(" => ");
-                    AppendServiceCreationTransient(service, indent.Sp4);
-                    break;
+            if (service.GetAccessor == GetAccess.Property) {
+                builder.Append(service.Name);
+                builder.Append(" {\n");
+                builder.Append(indent.Sp8);
+                builder.Append("get {\n");
+
+                (bool hasDisposeList, bool hasAsyncDisposeList) result = AppendTransientGetter(service, indent.Sp12);
+                hasDisposeList |= result.hasDisposeList;
+                hasAsyncDisposeList |= result.hasAsyncDisposeList;
+
+                builder.Append(indent.Sp8);
+                builder.Append("}\n");
+                builder.Append(indent.Sp4);
+                builder.Append('}');
+            }
+            else {
+                builder.Append("Get");
+                builder.Append(service.Name);
+                builder.Append("() {\n");
+                AppendTransientGetter(service, indent.Sp8);
+                builder.Append(indent.Sp4);
+                builder.Append('}');
             }
 
             builder.Append("\n\n");
@@ -445,38 +457,71 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         return (hasDisposeList, hasAsyncDisposeList);
     }
 
-    private readonly void AppendTransientGetterWithDisposeList(string disposeListName, Service service) {
-        if (service.GetAccessor == GetAccess.Property) {
-            builder.Append(service.Name);
-            builder.Append(" {\n");
-            builder.Append(indent.Sp8);
-            builder.Append("get {\n");
-            AppendTransientGetterWithDisposeListCore(disposeListName, service, indent.Sp12);
-            builder.Append(indent.Sp8);
-            builder.Append("}\n");
-            builder.Append(indent.Sp4);
-            builder.Append('}');
-        }
-        else {
-            builder.Append("Get");
-            builder.Append(service.Name);
-            builder.Append("() {\n");
-            AppendTransientGetterWithDisposeListCore(disposeListName, service, indent.Sp8);
-            builder.Append(indent.Sp4);
-            builder.Append('}');
-        }
-    }
-
-    private readonly void AppendTransientGetterWithDisposeListCore(string disposeListName, Service service, string indentation) {
+    private readonly (bool, bool) AppendTransientGetter(Service service, string indentation) {
         builder.Append(indentation);
         builder.Append("global::");
         builder.AppendClosedFullyQualified(service.ImplementationType);
         builder.Append(' ');
         builder.AppendFirstLower(service.Name);
         builder.Append(" = ");
-        AppendServiceCreationTransient(service, indentation);
-        builder.Append('\n');
 
+        // service creation
+        if (service.Implementation.Type == MemberType.None) {
+            builder.Append("new global::");
+            builder.AppendClosedFullyQualified(service.ImplementationType);
+            AppendConstructorDependencyList(service);
+            AppendPropertyDependencyList(service, indentation);
+            builder.Append(";\n");
+            AppendCircularDependencyList(indentation);
+            circularDependencyList.Clear();
+        }
+        else {
+            bool isScopedMemberImplementation = isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic;
+            if (isScopedMemberImplementation && service.Lifetime == ServiceLifetime.Transient) {
+                builder.Append('_');
+                builder.AppendFirstLower(serviceProvider.Identifier.Name);
+                builder.Append('.');
+                builder.AppendServiceGetter(service);
+                builder.Append(";\n");
+            }
+            else {
+                if (isScopedMemberImplementation)
+                    AppendServiceProviderFieldWithCast();
+
+                builder.AppendImplementationName(service);
+                if (service.Implementation.Type == MemberType.Method)
+                    AppendConstructorDependencyList(service);
+                builder.Append(";\n");
+            }
+        }
+
+        bool hasDisposeList, hasAsyncDisposeList;
+        switch ((service.IsDisposable, service.IsAsyncDisposable, generateDisposeMethods)) {
+            case (true, false, not DisposeGeneration.NoDisposing):
+                (hasDisposeList, hasAsyncDisposeList) = (true, false);
+                AppendTransientDisposeList("disposeList", service, indentation);
+                break;
+            case (_, true, not DisposeGeneration.NoDisposing):
+                (hasDisposeList, hasAsyncDisposeList) = (false, true);
+                AppendTransientDisposeList("asyncDisposeList", service, indentation);
+                break;
+            default:
+                (hasDisposeList, hasAsyncDisposeList) = (false, false);
+                break;
+        }
+
+        builder.Append('\n');
+        builder.Append(indentation);
+        builder.Append("return ");
+        builder.AppendFirstLower(service.Name);
+        builder.Append(";\n");
+
+        return (hasDisposeList, hasAsyncDisposeList);
+    }
+
+    private readonly void AppendTransientDisposeList(string disposeListName, Service service, string indentation) {
+        builder.Append('\n');
+        
         if (threadSafe) {
             builder.Append(indentation);
             builder.Append("lock (");
@@ -484,46 +529,12 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             builder.Append(")\n");
             builder.Append(Indent.SP4);  // add 1 indent to next indent
         }
+
         builder.Append(indentation);
         builder.Append(disposeListName);
         builder.Append(".Add(");
         builder.AppendFirstLower(service.Name);
         builder.Append(");\n");
-
-        builder.Append(indentation);
-        builder.Append("return ");
-        builder.AppendFirstLower(service.Name);
-        builder.Append(";\n");
-    }
-
-
-    private readonly void AppendServiceCreationTransient(Service service, string indentation) {
-        if (service.Implementation.Type == MemberType.None) {
-            builder.Append("new global::");
-            builder.AppendClosedFullyQualified(service.ImplementationType);
-            AppendConstructorDependencyList(service);
-            AppendPropertyDependencyList(service, null!, indentation); // Transient is not allowed to have circular dependencies, so circularList is not accessed
-            builder.Append(';');
-            return;
-        }
-
-        if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-            if (service.Lifetime == ServiceLifetime.Transient) {
-                builder.Append('_');
-                builder.AppendFirstLower(serviceProvider.Identifier.Name);
-                builder.Append('.');
-                builder.AppendServiceGetter(service);
-                builder.Append(';');
-                return;
-            }
-
-            AppendServiceProviderFieldWithCast();
-        }
-
-        builder.AppendImplementationName(service);
-        if (service.Implementation.Type == MemberType.Method)
-            AppendConstructorDependencyList(service);
-        builder.Append(';');
     }
 
     #endregion
@@ -1041,41 +1052,6 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
     #endregion
 
 
-    #region UnsafeAccessor
-
-    /// <summary>
-    /// Generates the [UnsafeAccessor]-methods to access init-only circle dependencies.
-    /// </summary>
-    public readonly void AppendUnsafeAccessorMethods() {
-        int currentPosition = builder.Length;
-
-        foreach (Service service in serviceList)
-            foreach (PropertyDependency dependency in service.PropertyDependencyList)
-                if (dependency.IsCircular && dependency.IsInit) {
-                    builder.Append(indent.Sp4);
-                    builder.Append("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = \"set_");
-                    builder.Append(dependency.Name);
-                    builder.Append("\")]\n");
-
-                    builder.Append(indent.Sp4);
-                    builder.Append("private extern static void Set_");
-                    builder.Append(service.Name);
-                    builder.Append('_');
-                    builder.Append(dependency.Name);
-                    builder.Append("(global::");
-                    builder.AppendClosedFullyQualified(dependency.ImplementationBaseName);
-                    builder.Append(" instance, global::");
-                    builder.AppendClosedFullyQualified(dependency.Service!.ServiceType);
-                    builder.Append(" value);\n\n");
-                }
-
-        if (builder.Length > currentPosition)
-            builder.Append('\n');
-    }
-
-    #endregion
-
-
     /// <summary>
     /// <para>Appends "(service1Type service1Name, service2Type service2Name, ..., serviceNType serviceNName)"</para>
     /// <para>If dependencyList is empty, only "()" is appended.</para>
@@ -1118,13 +1094,12 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
 
     /// <summary>
     /// <para>Appends " { name1 = service1, name2 = service2, ..., nameN = serviceN }"</para>
-    /// <para>In case of a circular dependency, "name1 = default!" is appended and the dependency is added to the given circularDependencies list.</para>
+    /// <para>In case of a circular dependency, "name1 = default!" is appended and the dependency is added to <see cref="circularDependencyList"/>.</para>
     /// <para>If <see cref="Service.PropertyDependencyList"/> is empty, nothing is appended.</para>
     /// </summary>
     /// <param name="service"></param>
-    /// <param name="circularDependencies"></param>
     /// <param name="indentation"></param>
-    public readonly void AppendPropertyDependencyList(Service service, List<(Service, PropertyDependency)> circularDependencies, string indentation) {
+    public readonly void AppendPropertyDependencyList(Service service, string indentation) {
         if (service.PropertyDependencyList.Count > 0) {
             builder.Append(" {");
 
@@ -1138,7 +1113,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                         builder.Append(dependency.Name);
                         builder.Append(" = default!,");
                     }
-                    circularDependencies.Add((service, dependency));
+                    circularDependencyList.Add((service, dependency));
                 }
                 else {
                     builder.Append('\n');
@@ -1164,20 +1139,20 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
     }
 
     /// <summary>
-    /// <para>Appends foreach circularDependency:<br/>
+    /// <para>Appends foreach circularDependency in <see cref="circularDependencyList"/>:<br/>
     /// "Set_{serviceName}_{dependencyName}({serviceName}, {dependencyService})}" if init-accessor<br/>
     /// or<br/>
     /// "{serviceName}.{dependencyName} = {dependencyService}" if get-accessor
     /// </para>
-    /// <para>If the given list is empty, nothing is appended.</para>
+    /// <para>The list is emptied afterwards.</para>
+    /// <para>If the list is empty, nothing is appended.</para>
     /// </summary>
-    /// <param name="circularDependencies"></param>
     /// /// <param name="indentation"></param>
-    public readonly void AppendCircularDependencies(List<(Service, PropertyDependency)> circularDependencies, string indentation) {
-        if (circularDependencies.Count > 0) {
+    public readonly void AppendCircularDependencyList(string indentation) {
+        if (circularDependencyList.Count > 0) {
             builder.Append('\n');
 
-            foreach ((Service service, PropertyDependency dependency) in circularDependencies) {
+            foreach ((Service service, PropertyDependency dependency) in circularDependencyList) {
                 builder.Append(indentation);
                 if (dependency.IsInit) {
                     builder.Append("Set_");
@@ -1199,6 +1174,8 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                 }
                 builder.Append(";\n");
             }
+
+            circularDependencyList.Clear();
         }
     }
 

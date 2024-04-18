@@ -48,21 +48,39 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Service type: <see cref="global::MyCode.ITestService"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService"/>
     /// </summary>
-    public global::MyCode.ITestService TestService => new global::MyCode.TestService();
+    public global::MyCode.ITestService TestService {
+        get {
+            global::MyCode.TestService testService = new global::MyCode.TestService();
+
+            return testService;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITestService"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService"/>
     /// </summary>
-    public global::MyCode.ITestService TestService2 => new global::MyCode.TestService();
+    public global::MyCode.ITestService TestService2 {
+        get {
+            global::MyCode.TestService testService2 = new global::MyCode.TestService();
+
+            return testService2;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITestServiceM"/><br />
     /// Implementation type: <see cref="global::MyCode.TestServiceM"/>
     /// </summary>
-    public global::MyCode.ITestServiceM TestServiceM => new global::MyCode.TestServiceM();
+    public global::MyCode.ITestServiceM TestServiceM {
+        get {
+            global::MyCode.TestServiceM testServiceM = new global::MyCode.TestServiceM();
+
+            return testServiceM;
+        }
+    }
 
 
     /// <summary>
@@ -155,21 +173,39 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.ITestService"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService"/>
         /// </summary>
-        public global::MyCode.ITestService TestService => new global::MyCode.TestService();
+        public global::MyCode.ITestService TestService {
+            get {
+                global::MyCode.TestService testService = new global::MyCode.TestService();
+
+                return testService;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITestService"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService"/>
         /// </summary>
-        public global::MyCode.ITestService TestService2 => new global::MyCode.TestService();
+        public global::MyCode.ITestService TestService2 {
+            get {
+                global::MyCode.TestService testService2 = new global::MyCode.TestService();
+
+                return testService2;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITestServiceM"/><br />
         /// Implementation type: <see cref="global::MyCode.TestServiceM"/>
         /// </summary>
-        public global::MyCode.ITestServiceM TestServiceM => new global::MyCode.TestServiceM();
+        public global::MyCode.ITestServiceM TestServiceM {
+            get {
+                global::MyCode.TestServiceM testServiceM = new global::MyCode.TestServiceM();
+
+                return testServiceM;
+            }
+        }
 
 
         /// <summary>

@@ -48,16 +48,28 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Service type: <see cref="global::MyCode.ITestService"/><br />
     /// Implementation type: <see cref="global::MyCode.TestService"/>
     /// </summary>
-    public global::MyCode.ITestService TestService => new global::MyCode.TestService() {
-        TestDependency = TestDependency
-    };
+    public global::MyCode.ITestService TestService {
+        get {
+            global::MyCode.TestService testService = new global::MyCode.TestService() {
+                TestDependency = TestDependency
+            };
+
+            return testService;
+        }
+    }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
     /// Service type: <see cref="global::MyCode.ITestDependency"/><br />
     /// Implementation type: <see cref="global::MyCode.TestDependency"/>
     /// </summary>
-    public global::MyCode.ITestDependency TestDependency => new global::MyCode.TestDependency();
+    public global::MyCode.ITestDependency TestDependency {
+        get {
+            global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
+
+            return testDependency;
+        }
+    }
 
 
     /// <summary>
@@ -150,16 +162,28 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Service type: <see cref="global::MyCode.ITestService"/><br />
         /// Implementation type: <see cref="global::MyCode.TestService"/>
         /// </summary>
-        public global::MyCode.ITestService TestService => new global::MyCode.TestService() {
-            TestDependency = TestDependency
-        };
+        public global::MyCode.ITestService TestService {
+            get {
+                global::MyCode.TestService testService = new global::MyCode.TestService() {
+                    TestDependency = TestDependency
+                };
+
+                return testService;
+            }
+        }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
         /// Service type: <see cref="global::MyCode.ITestDependency"/><br />
         /// Implementation type: <see cref="global::MyCode.TestDependency"/>
         /// </summary>
-        public global::MyCode.ITestDependency TestDependency => new global::MyCode.TestDependency();
+        public global::MyCode.ITestDependency TestDependency {
+            get {
+                global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
+
+                return testDependency;
+            }
+        }
 
 
         /// <summary>
