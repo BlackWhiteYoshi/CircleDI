@@ -10,9 +10,9 @@ namespace MyCode;
 
 /// <summary>
 /// <para>
-/// Number of services registered: 2<br />
+/// Number of services registered: 3<br />
 /// - Singleton: 1<br />
-/// - Scoped: 1<br />
+/// - Scoped: 2<br />
 /// - Transient: 0<br />
 /// - Delegate: 0
 /// </para>
@@ -83,9 +83,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
     /// <summary>
     /// <para>
-    /// Number of services registered: 2<br />
+    /// Number of services registered: 3<br />
     /// - Singleton: 1<br />
-    /// - Scoped: 1<br />
+    /// - Scoped: 2<br />
     /// - Transient: 0<br />
     /// - Delegate: 0
     /// </para>
@@ -104,7 +104,17 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// <param name="testProvider">An instance of the service provider this provider is the scope of.</param>
         public Scope(global::MyCode.ITestProvider testProvider) {
             _testProvider = testProvider;
+
+            _testService = new global::MyCode.TestService(this);
         }
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
+        /// Service type: <see cref="global::MyCode.ITestService"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestService"/>
+        /// </summary>
+        public global::MyCode.ITestService TestService => _testService;
+        private global::MyCode.TestService _testService;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -137,6 +147,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                     if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                         return SelfScope;
                     return null;
+                case "ITestService":
+                    if (serviceType == typeof(global::MyCode.ITestService))
+                        return TestService;
+                    return null;
                 case "ITestProvider":
                     if (serviceType == typeof(global::MyCode.ITestProvider))
                         return Self;
@@ -148,9 +162,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
         /// <summary>
-        /// Disposes all disposable services instantiated by this provider. Should be called inside the Dispose() method.
+        /// Disposes all disposable services instantiated by this provider.
         /// </summary>
-        private void DisposeServices() {
+        public void Dispose() {
         }
 
         /// <summary>

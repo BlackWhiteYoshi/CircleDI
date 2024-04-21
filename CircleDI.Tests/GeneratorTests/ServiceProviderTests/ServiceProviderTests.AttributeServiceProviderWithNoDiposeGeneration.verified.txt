@@ -31,7 +31,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// <summary>
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
+    public global::MyCode.ITestProvider.IScope CreateScope() {
+        return new global::MyCode.TestProvider.Scope(this);
+    }
 
 
     /// <summary>
@@ -50,7 +52,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.IServiceDispose ServiceDispose {
         get {
             global::MyCode.ServiceDispose serviceDispose = new global::MyCode.ServiceDispose();
-
             return serviceDispose;
         }
     }
@@ -63,7 +64,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync {
         get {
             global::MyCode.ServiceDisposeAsync serviceDisposeAsync = new global::MyCode.ServiceDisposeAsync();
-
             return serviceDisposeAsync;
         }
     }
@@ -148,7 +148,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.IServiceDispose ServiceDispose {
             get {
                 global::MyCode.ServiceDispose serviceDispose = new global::MyCode.ServiceDispose();
-
                 return serviceDispose;
             }
         }
@@ -161,7 +160,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync {
             get {
                 global::MyCode.ServiceDisposeAsync serviceDisposeAsync = new global::MyCode.ServiceDisposeAsync();
-
                 return serviceDisposeAsync;
             }
         }

@@ -28,16 +28,18 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public TestProvider() {
         _testStruct = new global::MyCode.TestStruct();
-        _refInject = new global::MyCode.RefInject(ref TestStruct);
-        _inInject = new global::MyCode.InInject(in TestStruct);
-        _outInject = new global::MyCode.OutInject(out TestStruct);
-        _refReadonlyInject = new global::MyCode.RefReadonlyInject(ref TestStruct);
+        _refInject = new global::MyCode.RefInject(ref _testStruct);
+        _inInject = new global::MyCode.InInject(in _testStruct);
+        _outInject = new global::MyCode.OutInject(out _testStruct);
+        _refReadonlyInject = new global::MyCode.RefReadonlyInject(ref _testStruct);
     }
 
     /// <summary>
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
+    public global::MyCode.ITestProvider.IScope CreateScope() {
+        return new global::MyCode.TestProvider.Scope(this);
+    }
 
 
     /// <summary>

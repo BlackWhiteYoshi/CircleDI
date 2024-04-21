@@ -33,15 +33,17 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         _singletonDependency2 = new global::MyCode.SingletonDependency2() {
             SingletonDependency1 = default!
         };
-        _singletonDependency1 = new global::MyCode.SingletonDependency1(SingletonDependency2);
+        _singletonDependency1 = new global::MyCode.SingletonDependency1(_singletonDependency2);
 
-        Set_SingletonDependency2_SingletonDependency1(_singletonDependency2, SingletonDependency1);
+        Set_SingletonDependency2_SingletonDependency1(_singletonDependency2, _singletonDependency1);
     }
 
     /// <summary>
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
+    public global::MyCode.ITestProvider.IScope CreateScope() {
+        return new global::MyCode.TestProvider.Scope(this);
+    }
 
 
     /// <summary>
@@ -100,7 +102,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITransient Transient {
         get {
             global::MyCode.Transient transient = new global::MyCode.Transient();
-
             return transient;
         }
     }
@@ -113,10 +114,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITransientDisposable TransientDisposable {
         get {
             global::MyCode.TransientDisposable transientDisposable = new global::MyCode.TransientDisposable();
-
-            lock (disposeList)
+            lock (disposeList) {
                 disposeList.Add(transientDisposable);
-
+            }
             return transientDisposable;
         }
     }
@@ -129,10 +129,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITransientAsyncDisposable TransientAsyncDisposable {
         get {
             global::MyCode.TransientAsyncDisposable transientAsyncDisposable = new global::MyCode.TransientAsyncDisposable();
-
-            lock (asyncDisposeList)
+            lock (asyncDisposeList) {
                 asyncDisposeList.Add(transientAsyncDisposable);
-
+            }
             return transientAsyncDisposable;
         }
     }
@@ -280,9 +279,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             _scopedDependency2 = new global::MyCode.ScopedDependency2() {
                 ScopedDependency1 = default!
             };
-            _scopedDependency1 = new global::MyCode.ScopedDependency1(ScopedDependency2);
+            _scopedDependency1 = new global::MyCode.ScopedDependency1(_scopedDependency2);
 
-            Set_ScopedDependency2_ScopedDependency1(_scopedDependency2, ScopedDependency1);
+            Set_ScopedDependency2_ScopedDependency1(_scopedDependency2, _scopedDependency1);
         }
 
         /// <summary>
@@ -384,7 +383,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITransient Transient {
             get {
                 global::MyCode.Transient transient = new global::MyCode.Transient();
-
                 return transient;
             }
         }
@@ -397,10 +395,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITransientDisposable TransientDisposable {
             get {
                 global::MyCode.TransientDisposable transientDisposable = new global::MyCode.TransientDisposable();
-
-                lock (disposeList)
+                lock (disposeList) {
                     disposeList.Add(transientDisposable);
-
+                }
                 return transientDisposable;
             }
         }
@@ -413,10 +410,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITransientAsyncDisposable TransientAsyncDisposable {
             get {
                 global::MyCode.TransientAsyncDisposable transientAsyncDisposable = new global::MyCode.TransientAsyncDisposable();
-
-                lock (asyncDisposeList)
+                lock (asyncDisposeList) {
                     asyncDisposeList.Add(transientAsyncDisposable);
-
+                }
                 return transientAsyncDisposable;
             }
         }

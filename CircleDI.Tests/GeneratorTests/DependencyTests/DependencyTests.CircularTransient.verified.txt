@@ -27,13 +27,20 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public TestProvider() {
-        _testService2 = new global::MyCode.TestService2(TestService1);
+        global::MyCode.TestService1 testService1_TestService2 = new global::MyCode.TestService1() {
+            TestService2 = default!
+        };
+        _testService2 = new global::MyCode.TestService2(testService1_TestService2);
+
+        Set_TestService1_TestService2(testService1_TestService2, _testService2);
     }
 
     /// <summary>
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
+    public global::MyCode.ITestProvider.IScope CreateScope() {
+        return new global::MyCode.TestProvider.Scope(this);
+    }
 
 
     /// <summary>
@@ -62,9 +69,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             global::MyCode.TestService1 testService1 = new global::MyCode.TestService1() {
                 TestService2 = default!
             };
-
-            Set_TestService1_TestService2(testService1, TestService2);
-
+            global::MyCode.TestService1 testService1_TestService2 = new global::MyCode.TestService1() {
+                TestService2 = default!
+            };
+            _testService2 = new global::MyCode.TestService2(testService1_TestService2);
+            Set_TestService1_TestService2(testService1, _testService2);
             return testService1;
         }
     }
@@ -172,9 +181,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                 global::MyCode.TestService1 testService1 = new global::MyCode.TestService1() {
                     TestService2 = default!
                 };
-
-                Set_TestService1_TestService2(testService1, TestService2);
-
+                global::MyCode.TestService1 testService1_TestService2 = new global::MyCode.TestService1() {
+                    TestService2 = default!
+                };
+                ((global::MyCode.TestProvider)_testProvider)._testService2 = new global::MyCode.TestService2(testService1_TestService2);
+                Set_TestService1_TestService2(testService1, ((global::MyCode.TestProvider)_testProvider)._testService2);
                 return testService1;
             }
         }

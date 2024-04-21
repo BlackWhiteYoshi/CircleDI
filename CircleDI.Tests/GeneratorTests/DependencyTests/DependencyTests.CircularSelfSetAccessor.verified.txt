@@ -31,13 +31,15 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             Self = default!
         };
 
-        _testService.Self = TestService;
+        _testService.Self = _testService;
     }
 
     /// <summary>
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
+    public global::MyCode.ITestProvider.IScope CreateScope() {
+        return new global::MyCode.TestProvider.Scope(this);
+    }
 
 
     /// <summary>

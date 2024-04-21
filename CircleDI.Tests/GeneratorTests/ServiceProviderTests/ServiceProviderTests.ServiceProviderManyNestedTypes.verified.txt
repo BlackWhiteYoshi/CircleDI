@@ -35,7 +35,9 @@ partial class Wrapper {
                 /// <summary>
                 /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
                 /// </summary>
-                public global::MyCode.Wrapper.Data.Api.ITestProvider.IScope CreateScope() => new global::MyCode.Wrapper.Data.Api.TestProvider.Scope(Self);
+                public global::MyCode.Wrapper.Data.Api.ITestProvider.IScope CreateScope() {
+                    return new global::MyCode.Wrapper.Data.Api.TestProvider.Scope(this);
+                }
 
 
                 /// <summary>

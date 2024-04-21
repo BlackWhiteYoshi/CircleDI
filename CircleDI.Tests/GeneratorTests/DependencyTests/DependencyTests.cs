@@ -427,6 +427,58 @@ public static class DependencyTests {
 
 
     [Fact]
+    public static Task ServiceProviderDependency() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            public partial interface ITestProvider;
+
+            [ServiceProvider]
+            [Singleton<ITestService, TestService>]
+            [Scoped<ITestService, TestService>(Name = "TestServiceScoped")]
+            public sealed partial class TestProvider;
+            
+            public interface ITestService;
+            public sealed class TestService(ITestProvider testProvider) : ITestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+    [Fact]
+    public static Task ScopeProviderDependency() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            public partial interface ITestProvider {
+                public partial interface IScope;
+            }
+
+            [ServiceProvider]
+            [Scoped<ITestService, TestService>]
+            public sealed partial class TestProvider;
+            
+            public interface ITestService;
+            public sealed class TestService(ITestProvider.IScope testProvider) : ITestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+
+    [Fact]
     public static Task MultipleConstructorWithConstructorAttribute() {
         const string input = """
             using CircleDIAttributes;
@@ -548,6 +600,7 @@ public static class DependencyTests {
         Assert.Equal("CDI019", diagnostics[0].Id);
         Assert.Equal("Multiple ConstructorAttributes at ServiceImplementation 'MyCode.TestService', there must be exactly one when there are multiple constructors", diagnostics[0].GetMessage());
     }
+
 
     [Fact]
     public static Task CircularSelfSetAccessor() {

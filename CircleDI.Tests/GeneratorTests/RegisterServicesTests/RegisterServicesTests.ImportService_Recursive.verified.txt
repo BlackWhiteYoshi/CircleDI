@@ -37,7 +37,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// <summary>
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
+    public global::MyCode.ITestProvider.IScope CreateScope() {
+        return new global::MyCode.TestProvider.Scope(this);
+    }
 
 
     /// <summary>
@@ -64,7 +66,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService1 TestService1 {
         get {
             global::MyCode.TestService1 testService1 = global::MyCode.ITestModuleStatic.CreateService;
-
             return testService1;
         }
     }
@@ -77,7 +78,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService2 TestService2 {
         get {
             global::MyCode.TestService2 testService2 = TestModuleService.CreateService;
-
             return testService2;
         }
     }
@@ -90,7 +90,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService3 TestService3 {
         get {
             global::MyCode.TestService3 testService3 = global::MyCode.TestModuleService.CreateServiceStatic;
-
             return testService3;
         }
     }
@@ -103,7 +102,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService4 TestService4 {
         get {
             global::MyCode.TestService4 testService4 = _testModuleParameter.CreateService;
-
             return testService4;
         }
     }
@@ -116,7 +114,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService5 TestService5 {
         get {
             global::MyCode.TestService5 testService5 = global::MyCode.TestModuleParameter.CreateServiceStatic;
-
             return testService5;
         }
     }
@@ -238,7 +235,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestService1 TestService1 {
             get {
                 global::MyCode.TestService1 testService1 = global::MyCode.ITestModuleStatic.CreateService;
-
                 return testService1;
             }
         }
@@ -250,8 +246,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService2 TestService2 {
             get {
-                global::MyCode.TestService2 testService2 = _testProvider.TestService2;
-
+                global::MyCode.TestService2 testService2 = ((global::MyCode.TestProvider)_testProvider).TestModuleService.CreateService;
                 return testService2;
             }
         }
@@ -264,7 +259,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestService3 TestService3 {
             get {
                 global::MyCode.TestService3 testService3 = global::MyCode.TestModuleService.CreateServiceStatic;
-
                 return testService3;
             }
         }
@@ -276,8 +270,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService4 TestService4 {
             get {
-                global::MyCode.TestService4 testService4 = _testProvider.TestService4;
-
+                global::MyCode.TestService4 testService4 = ((global::MyCode.TestProvider)_testProvider)._testModuleParameter.CreateService;
                 return testService4;
             }
         }
@@ -290,7 +283,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestService5 TestService5 {
             get {
                 global::MyCode.TestService5 testService5 = global::MyCode.TestModuleParameter.CreateServiceStatic;
-
                 return testService5;
             }
         }

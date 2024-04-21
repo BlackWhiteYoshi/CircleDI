@@ -32,7 +32,9 @@ public sealed partial class TestProvider<T1> : global::MyCode.ITestProvider<T1>,
     /// <summary>
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider<T1>.IScope<T2> CreateScope<T2>() => new global::MyCode.TestProvider<T1>.Scope<T2>(Self);
+    public global::MyCode.ITestProvider<T1>.IScope<T2> CreateScope<T2>() {
+        return new global::MyCode.TestProvider<T1>.Scope<T2>(this);
+    }
 
 
     /// <summary>

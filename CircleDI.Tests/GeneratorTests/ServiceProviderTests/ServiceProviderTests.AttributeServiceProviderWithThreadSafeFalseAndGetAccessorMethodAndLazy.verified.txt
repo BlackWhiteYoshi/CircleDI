@@ -32,7 +32,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// <summary>
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(GetSelf());
+    public global::MyCode.ITestProvider.IScope CreateScope() {
+        return new global::MyCode.TestProvider.Scope(this);
+    }
 
 
     /// <summary>
@@ -44,7 +46,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         if (_singleton is null) {
             _singleton = new global::MyCode.Singleton();
         }
-
         return (global::MyCode.ISingleton)_singleton;
     }
     private global::MyCode.Singleton? _singleton;
@@ -64,7 +65,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITransient GetTransient() {
         global::MyCode.Transient transient = new global::MyCode.Transient();
-
         return transient;
     }
 
@@ -147,7 +147,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             if (_scoped is null) {
                 _scoped = new global::MyCode.Scoped();
             }
-
             return (global::MyCode.IScoped)_scoped;
         }
         private global::MyCode.Scoped? _scoped;
@@ -182,7 +181,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITransient GetTransient() {
             global::MyCode.Transient transient = new global::MyCode.Transient();
-
             return transient;
         }
 

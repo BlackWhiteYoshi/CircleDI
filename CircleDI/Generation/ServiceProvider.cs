@@ -598,7 +598,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                 CreateScope = new Service() {
                     Lifetime = ServiceLifetime.TransientSingleton,
-                    Name = "CreateScope()",
+                    Name = "MethodCreateScope",
                     ServiceType = serviceTypeScope,
                     ImplementationType = implementationTypeScope,
                     CreationTime = CreationTiming.Lazy,
@@ -1172,6 +1172,29 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         cycleList.RemoveAt(i--);
             }
         }
+    }
+
+
+    /// <summary>
+    /// A flag can be set to indicate that a node has been visited.<br />
+    /// Each node has 32 flags, where bit 0 is reserved for creating the tree, so the tree can be visited 31 times before the flags must be resetted.<br />
+    /// For advancing this flag to the next bit, see <see cref="NextDependencyTreeFlag"/>.
+    /// </summary>
+    public DependencyTreeFlags DependencyTreeFlag { get; private set; } = DependencyTreeFlags.Traversed;
+
+    /// <summary>
+    /// Advances <see cref="DependencyTreeFlag"/> to the next bit.<br />
+    /// If at the last bit (bit 32), all flags get resetted and it starts again at the second right bit. (the most right bit is reserved for creating the tree).
+    /// </summary>
+    public void NextDependencyTreeFlag() {
+        // check if left most bit (bit 32) is currently 1
+        if (DependencyTreeFlag == (DependencyTreeFlags)long.MinValue) {
+            // reset all flags, does not matter if DependencyTreeFlags.Traversed get also resetted
+            foreach (Service service in SortedServiceList)
+                service.TreeState = DependencyTreeFlags.New;
+            DependencyTreeFlag = DependencyTreeFlags.Traversed;
+        }
+        DependencyTreeFlag = (DependencyTreeFlags)((long)DependencyTreeFlag << 1);
     }
 
     #endregion

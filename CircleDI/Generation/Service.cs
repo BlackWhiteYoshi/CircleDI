@@ -209,18 +209,18 @@ public sealed class Service : IEquatable<Service> {
         }
         else {
             if (implementationName == "this") {
-                Implementation = new ImplementationMember(MemberType.Field, implementationName, IsStatic: false, IsScoped: Lifetime == ServiceLifetime.Scoped);
+                Implementation = new ImplementationMember(MemberType.Field, "this", IsStatic: false, IsScoped: Lifetime == ServiceLifetime.Scoped);
                 ConstructorDependencyList = [];
 
                 // check implementation type
                 switch (Lifetime) {
                     case ServiceLifetime.Singleton:
                         if (!SymbolEqualityComparer.Default.Equals(module, implementationType))
-                            errorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, module.ToDisplayString(), ImplementationType));
+                            errorList.Add(attributeData.CreateWrongFieldImplementationTypeError("this", module.ToDisplayString(), ImplementationType));
                         break;
                     case ServiceLifetime.Scoped:
                         if ($"{module.ToDisplayString()}.Scope" != implementationType.ToDisplayString())
-                            errorList.Add(attributeData.CreateWrongFieldImplementationTypeError(implementationName, $"{module.ToDisplayString()}.Scope", ImplementationType));
+                            errorList.Add(attributeData.CreateWrongFieldImplementationTypeError("this", $"{module.ToDisplayString()}.Scope", ImplementationType));
                         break;
                     case ServiceLifetime.Transient:
                         errorList.Add(attributeData.CreateTransientImplementationThisError());

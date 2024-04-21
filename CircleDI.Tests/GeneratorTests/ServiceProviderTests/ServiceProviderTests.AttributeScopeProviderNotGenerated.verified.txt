@@ -54,7 +54,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITransient Transient {
         get {
             global::MyCode.Transient transient = new global::MyCode.Transient();
-
             return transient;
         }
     }

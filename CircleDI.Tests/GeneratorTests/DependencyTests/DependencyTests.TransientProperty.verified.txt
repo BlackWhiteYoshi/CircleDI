@@ -32,7 +32,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// <summary>
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
+    public global::MyCode.ITestProvider.IScope CreateScope() {
+        return new global::MyCode.TestProvider.Scope(this);
+    }
 
 
     /// <summary>
@@ -50,10 +52,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
+            global::MyCode.TestDependency testDependency_TestService = new global::MyCode.TestDependency();
             global::MyCode.TestService testService = new global::MyCode.TestService() {
-                TestDependency = TestDependency
+                TestDependency = testDependency_TestService
             };
-
             return testService;
         }
     }
@@ -66,7 +68,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestDependency TestDependency {
         get {
             global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
-
             return testDependency;
         }
     }
@@ -164,10 +165,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
+                global::MyCode.TestDependency testDependency_TestService = new global::MyCode.TestDependency();
                 global::MyCode.TestService testService = new global::MyCode.TestService() {
-                    TestDependency = TestDependency
+                    TestDependency = testDependency_TestService
                 };
-
                 return testService;
             }
         }
@@ -180,7 +181,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestDependency TestDependency {
             get {
                 global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
-
                 return testDependency;
             }
         }

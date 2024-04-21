@@ -28,14 +28,16 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public TestProvider() {
         _int32 = new global::System.Int32();
-        _testClass = new global::MyCode.TestClass(Int32);
-        _testStruct = new global::MyCode.TestStruct(Int32);
+        _testClass = new global::MyCode.TestClass(_int32);
+        _testStruct = new global::MyCode.TestStruct(_int32);
     }
 
     /// <summary>
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
-    public global::MyCode.ITestProvider.IScope CreateScope() => new global::MyCode.TestProvider.Scope(Self);
+    public global::MyCode.ITestProvider.IScope CreateScope() {
+        return new global::MyCode.TestProvider.Scope(this);
+    }
 
 
     /// <summary>
