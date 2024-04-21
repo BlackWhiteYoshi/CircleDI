@@ -138,14 +138,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.ITestProvider _testProvider;
+        private global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="testProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="testProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="TestProvider"/>.</param>
         public Scope(global::MyCode.ITestProvider testProvider) {
-            _testProvider = testProvider;
+            _testProvider = (global::MyCode.TestProvider)testProvider;
         }
 
         /// <summary>
@@ -184,8 +184,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                 global::MyCode.TestService1 testService1_TestService2 = new global::MyCode.TestService1() {
                     TestService2 = default!
                 };
-                ((global::MyCode.TestProvider)_testProvider)._testService2 = new global::MyCode.TestService2(testService1_TestService2);
-                Set_TestService1_TestService2(testService1, ((global::MyCode.TestProvider)_testProvider)._testService2);
+                _testProvider._testService2 = new global::MyCode.TestService2(testService1_TestService2);
+                Set_TestService1_TestService2(testService1, _testProvider._testService2);
                 return testService1;
             }
         }

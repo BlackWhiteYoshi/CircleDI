@@ -150,9 +150,7 @@ public static class CircleDIBuilder {
                 builder.AppendServiceGetter(service);
                 builder.Append(" => ");
                 builder.Append(refOrEmpty);
-                builder.Append('_');
-                builder.AppendFirstLower(serviceProvider.Identifier.Name);
-                builder.Append('.');
+                core.AppendServiceProviderField();
                 builder.AppendServiceGetter(service);
                 builder.Append(";\n\n");
             }

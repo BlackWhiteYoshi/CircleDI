@@ -51,8 +51,22 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
     /// </summary>
     public readonly void AppendConstructor() {
         // parameter fields
-        if (constructorParameterList.Count > 0) {
-            foreach (ConstructorDependency dependency in constructorParameterList) {
+        {
+            int i;
+            if (isScopeProvider) {
+                builder.Append(indent.Sp4);
+                builder.Append("private global::");
+                builder.AppendOpenFullyQualified(serviceProvider.Identifier);
+                builder.Append(" _");
+                builder.AppendFirstLower(serviceProvider.Identifier.Name);
+                builder.Append(";\n");
+                i = 1;
+            }
+            else
+                i = 0;
+
+            for (; i < constructorParameterList.Count; i++) {
+                ConstructorDependency dependency = constructorParameterList[i];
                 builder.Append(indent.Sp4);
                 builder.Append("private global::");
                 // ConstructorParameterList items have always serviceType set
@@ -61,7 +75,9 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                 builder.AppendFirstLower(dependency.Name);
                 builder.Append(";\n");
             }
-            builder.Append('\n');
+
+            if (i > 0)
+                builder.Append('\n');
         }
 
         // <summary> + method name
@@ -72,8 +88,28 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         builder.Append(" {\n");
 
         // parameter field = parameter
-        if (constructorParameterList.Count > 0) {
-            foreach (ConstructorDependency dependency in constructorParameterList) {
+        {
+            int i;
+            if (isScopeProvider) {
+                builder.Append(indent.Sp8);
+                builder.Append('_');
+                builder.AppendFirstLower(serviceProvider.Identifier.Name);
+                builder.Append(" = ");
+                if (serviceProvider.HasInterface)
+                {
+                    builder.Append("(global::");
+                    builder.AppendOpenFullyQualified(serviceProvider.Identifier);
+                    builder.Append(')');
+                }
+                builder.AppendFirstLower(serviceProvider.Identifier.Name);
+                builder.Append(";\n");
+                i = 1;
+            }
+            else
+                i = 0;
+
+            for (; i < constructorParameterList.Count; i++) {
+                ConstructorDependency dependency = constructorParameterList[i];
                 builder.Append(indent.Sp8);
                 builder.Append('_');
                 builder.AppendFirstLower(dependency.Name);
@@ -81,7 +117,9 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                 builder.AppendFirstLower(dependency.Name);
                 builder.Append(";\n");
             }
-            builder.Append('\n');
+
+            if (i > 0)
+                builder.Append('\n');
         }
 
         // singleton/scoped services inizialization
@@ -133,7 +171,13 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                 builder.Append(indent.Sp4);
                 builder.Append("/// <param name=\"");
                 builder.AppendFirstLower(serviceProvider.Identifier.Name);
-                builder.Append("\">An instance of the service provider this provider is the scope of.</param>\n");
+                builder.Append("\">An instance of the service provider this provider is the scope of.");
+                if (serviceProvider.HasInterface) {
+                    builder.Append(" It must be an instance of <see cref=\"");
+                    builder.Append(serviceProvider.Identifier.Name);
+                    builder.Append("\"/>.");
+                }
+                builder.Append("</param>\n");
                 builder.Append(indent.Sp4);
                 builder.Append("public Scope");
             }
@@ -162,7 +206,13 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                 builder.AppendFirstLower(serviceProvider.Identifier.Name);
                 builder.Append("\">\n");
                 builder.Append(indent.Sp4);
-                builder.Append("/// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />\n");
+                builder.Append("/// The ServiceProvider this ScopedProvider is created from.");
+                if (serviceProvider.HasInterface) {
+                    builder.Append(" It must be an instance of <see cref=\"");
+                    builder.Append(serviceProvider.Identifier.Name);
+                    builder.Append("\"/>.");
+                }
+                builder.Append(" Usually it is the object you get injected to your constructor parameter:<br />\n");
                 builder.Append(indent.Sp4);
                 builder.Append("/// public Scope([Dependency] ");
                 if (serviceProvider.HasInterface)
@@ -335,7 +385,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         builder.Append(" => ");
         builder.Append(refOrEmpty);
         if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-            AppendServiceProviderFieldWithCast();
+            AppendServiceProviderField();
         builder.AppendImplementationName(service);
         builder.Append(";\n");
     }
@@ -527,7 +577,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             builder.AppendServiceGetter(service);
             builder.Append(" => ");
             if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                AppendServiceProviderFieldWithCast();
+                AppendServiceProviderField();
             builder.AppendImplementationName(service);
             builder.Append(";\n\n");
         }
@@ -1120,7 +1170,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             if (service.Lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped) {
                 core.builder.Append(indentation);
                 if (core.isScopeProvider && service.Lifetime is ServiceLifetime.Singleton)
-                    core.AppendServiceProviderFieldWithCast();
+                    core.AppendServiceProviderField();
                 core.builder.AppendServiceField(service);
                 core.builder.Append(' ');
                 if (service.CreationTimeTransitive is CreationTiming.Lazy && !ReferenceEquals(service, rootNode))
@@ -1134,7 +1184,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                 }
                 else {
                     if (core.isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                        core.AppendServiceProviderFieldWithCast();
+                        core.AppendServiceProviderField();
                     core.builder.AppendImplementationName(service);
                     if (service.Implementation.Type == MemberType.Method)
                         core.AppendConstructorDependencyList(service);
@@ -1161,7 +1211,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                 }
                 else {
                     if (core.isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                        core.AppendServiceProviderFieldWithCast();
+                        core.AppendServiceProviderField();
                     core.builder.AppendImplementationName(service);
                     if (service.Implementation.Type == MemberType.Method)
                         core.AppendConstructorDependencyList(service);
@@ -1217,7 +1267,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                     switch (service.Lifetime) {
                         case ServiceLifetime.Singleton:
                             if (core.isScopeProvider)
-                                core.AppendServiceProviderFieldWithCast();
+                                core.AppendServiceProviderField();
                             goto case ServiceLifetime.Scoped;
                         case ServiceLifetime.Scoped:
                             core.builder.AppendServiceField(service);
@@ -1238,7 +1288,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                     switch (service.Lifetime) {
                         case ServiceLifetime.Singleton:
                             if (core.isScopeProvider)
-                                core.AppendServiceProviderFieldWithCast();
+                                core.AppendServiceProviderField();
                             goto case ServiceLifetime.Scoped;
                         case ServiceLifetime.Scoped:
                             core.builder.AppendServiceField(service);
@@ -1320,16 +1370,12 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
 
     /// <summary>
     /// Appends serviceProvider field with casting to implementation type with trailing '.':<br />
-    /// "((<i>providerType</i>)<i>providerName</i>)."
+    /// "_{providerName}."
     /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="serviceProvider"></param>
-    public readonly void AppendServiceProviderFieldWithCast() {
-        builder.Append("((global::");
-        builder.AppendClosedFullyQualified(serviceProvider.Identifier);
-        builder.Append(")_");
+    public readonly void AppendServiceProviderField() {
+        builder.Append('_');
         builder.AppendFirstLower(serviceProvider.Identifier.Name);
-        builder.Append(").");
+        builder.Append('.');
     }
 
     /// <summary>
@@ -1347,7 +1393,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                     builder.AppendFirstLower(serviceProvider.Identifier.Name);
                 }
                 else {
-                    AppendServiceProviderFieldWithCast();
+                    AppendServiceProviderField();
                     builder.AppendServiceField(dependency.Service);
                 }
             }
@@ -1468,8 +1514,6 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
     /// &lt;/summary&gt;
     /// </para>
     /// </summary>
-    /// <param name="generateDisposeMethods"></param>
-    /// <param name="threadSafe"></param>
     public readonly void AppendClassSummary() {
         builder.Append(indent.Sp0);
         builder.Append("/// <summary>\n");

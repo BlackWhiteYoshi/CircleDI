@@ -96,14 +96,14 @@ public sealed partial class TestProvider<T1> : global::MyCode.ITestProvider<T1>,
     /// </para>
     /// </summary>
     public sealed partial class Scope<T2> : global::MyCode.ITestProvider<T1>.IScope<T2>, IServiceProvider {
-        private global::MyCode.ITestProvider<T1> _testProvider;
+        private global::MyCode.TestProvider<T1> _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="testProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="testProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="TestProvider"/>.</param>
         public Scope(global::MyCode.ITestProvider<T1> testProvider) {
-            _testProvider = testProvider;
+            _testProvider = (global::MyCode.TestProvider<T1>)testProvider;
         }
 
         /// <summary>

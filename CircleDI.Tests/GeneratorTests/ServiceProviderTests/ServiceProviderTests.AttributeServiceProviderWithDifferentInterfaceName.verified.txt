@@ -96,14 +96,14 @@ public sealed partial class TestProvider : global::MyCode.IOther, IServiceProvid
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.IOther.IScope, IServiceProvider {
-        private global::MyCode.IOther _testProvider;
+        private global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="testProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="testProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="TestProvider"/>.</param>
         public Scope(global::MyCode.IOther testProvider) {
-            _testProvider = testProvider;
+            _testProvider = (global::MyCode.TestProvider)testProvider;
         }
 
         /// <summary>
