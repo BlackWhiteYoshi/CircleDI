@@ -97,7 +97,7 @@ partial class Wrapper {
         /// </para>
         /// </summary>
         public sealed partial class Scope : global::MyCode.Wrapper.ITestProvider.IScope, IServiceProvider {
-            private global::MyCode.Wrapper.TestProvider _testProvider;
+            private readonly global::MyCode.Wrapper.TestProvider _testProvider;
 
             /// <summary>
             /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.

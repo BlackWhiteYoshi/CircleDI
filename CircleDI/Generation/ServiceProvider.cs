@@ -477,7 +477,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 if (attribute is not { ContainingNamespace: { Name: "CircleDIAttributes", ContainingNamespace.Name: "" }, ContainingType: null })
                     continue;
 
-                if (attribute.TypeArguments.Any((ITypeSymbol typeSymbol) => typeSymbol.TypeKind == TypeKind.Error)) {
+                if (attribute.TypeKind is TypeKind.Error || attribute.TypeArguments.Any((ITypeSymbol typeSymbol) => typeSymbol.TypeKind is TypeKind.Error)) {
                     ErrorList.Add(attributeData.CreateInvalidServiceRegistrationError(Identifier, InterfaceIdentifier));
                     continue;
                 }

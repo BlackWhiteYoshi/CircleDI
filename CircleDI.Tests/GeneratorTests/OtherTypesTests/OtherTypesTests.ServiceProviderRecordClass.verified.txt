@@ -96,7 +96,7 @@ public sealed partial record class TestProvider : global::MyCode.ITestProvider, 
     /// </para>
     /// </summary>
     public sealed partial record class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.TestProvider _testProvider;
+        private readonly global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.

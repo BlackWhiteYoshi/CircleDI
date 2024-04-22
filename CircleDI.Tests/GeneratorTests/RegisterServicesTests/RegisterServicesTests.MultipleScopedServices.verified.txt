@@ -96,7 +96,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.TestProvider _testProvider;
+        private readonly global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
@@ -116,7 +116,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Implementation type: <see cref="global::MyCode.TestService"/>
         /// </summary>
         public global::MyCode.ITestService TestService => _testService;
-        private global::MyCode.TestService _testService;
+        private readonly global::MyCode.TestService _testService;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -124,7 +124,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Implementation type: <see cref="global::MyCode.TestService"/>
         /// </summary>
         public global::MyCode.ITestService TestService2 => _testService2;
-        private global::MyCode.TestService _testService2;
+        private readonly global::MyCode.TestService _testService2;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -132,7 +132,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Implementation type: <see cref="global::MyCode.TestServiceM"/>
         /// </summary>
         public global::MyCode.ITestServiceM TestServiceM => _testServiceM;
-        private global::MyCode.TestServiceM _testServiceM;
+        private readonly global::MyCode.TestServiceM _testServiceM;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />

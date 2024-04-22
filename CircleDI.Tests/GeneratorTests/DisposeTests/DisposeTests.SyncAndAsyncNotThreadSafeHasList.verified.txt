@@ -27,6 +27,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public TestProvider() {
+        _disposeList = [];
+        _asyncDisposeList = [];
     }
 
     /// <summary>
@@ -53,7 +55,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService TestService {
         get {
             global::MyCode.TestService testService = new global::MyCode.TestService();
-            disposeList.Add(testService);
+            _disposeList.Add(testService);
             return testService;
         }
     }
@@ -66,7 +68,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService2 TestService2 {
         get {
             global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
-            asyncDisposeList.Add(testService2);
+            _asyncDisposeList.Add(testService2);
             return testService2;
         }
     }
@@ -101,18 +103,18 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     }
 
 
-    private global::System.Collections.Generic.List<IDisposable> disposeList = [];
+    private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
 
-    private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];
+    private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
     /// </summary>
     public void Dispose() {
-        foreach (IDisposable disposable in disposeList)
+        foreach (IDisposable disposable in _disposeList)
             disposable.Dispose();
 
-        foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+        foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
             if (asyncDisposable is IDisposable disposable)
                 disposable.Dispose();
             else
@@ -123,13 +125,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Disposes all disposable services instantiated by this provider asynchronously.
     /// </summary>
     public ValueTask DisposeAsync() {
-        foreach (IDisposable disposable in disposeList)
+        foreach (IDisposable disposable in _disposeList)
             disposable.Dispose();
 
-        Task[] disposeTasks = new Task[asyncDisposeList.Count];
+        Task[] disposeTasks = new Task[_asyncDisposeList.Count];
 
         int index = 0;
-        foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+        foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
             disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 
         return new ValueTask(Task.WhenAll(disposeTasks));
@@ -152,7 +154,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.TestProvider _testProvider;
+        private readonly global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
@@ -160,6 +162,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// <param name="testProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="TestProvider"/>.</param>
         public Scope(global::MyCode.ITestProvider testProvider) {
             _testProvider = (global::MyCode.TestProvider)testProvider;
+
+            _disposeList = [];
+            _asyncDisposeList = [];
         }
 
         /// <summary>
@@ -186,7 +191,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestService TestService {
             get {
                 global::MyCode.TestService testService = new global::MyCode.TestService();
-                disposeList.Add(testService);
+                _disposeList.Add(testService);
                 return testService;
             }
         }
@@ -199,7 +204,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestService2 TestService2 {
             get {
                 global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
-                asyncDisposeList.Add(testService2);
+                _asyncDisposeList.Add(testService2);
                 return testService2;
             }
         }
@@ -238,18 +243,18 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         }
 
 
-        private global::System.Collections.Generic.List<IDisposable> disposeList = [];
+        private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
 
-        private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];
+        private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
         /// </summary>
         public void Dispose() {
-            foreach (IDisposable disposable in disposeList)
+            foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
-            foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+            foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 if (asyncDisposable is IDisposable disposable)
                     disposable.Dispose();
                 else
@@ -260,13 +265,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Disposes all disposable services instantiated by this provider asynchronously.
         /// </summary>
         public ValueTask DisposeAsync() {
-            foreach (IDisposable disposable in disposeList)
+            foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
-            Task[] disposeTasks = new Task[asyncDisposeList.Count];
+            Task[] disposeTasks = new Task[_asyncDisposeList.Count];
 
             int index = 0;
-            foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+            foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 
             return new ValueTask(Task.WhenAll(disposeTasks));

@@ -44,7 +44,7 @@ public partial struct TestProvider : global::MyCode.ITestProvider, IServiceProvi
     /// Implementation type: <see cref="global::MyCode.TestStruct"/>
     /// </summary>
     public global::MyCode.TestStruct TestStruct => _testStruct;
-    private global::MyCode.TestStruct _testStruct;
+    private readonly global::MyCode.TestStruct _testStruct;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -109,7 +109,7 @@ public partial struct TestProvider : global::MyCode.ITestProvider, IServiceProvi
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.TestProvider _testProvider;
+        private readonly global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
@@ -127,7 +127,7 @@ public partial struct TestProvider : global::MyCode.ITestProvider, IServiceProvi
         /// Implementation type: <see cref="global::MyCode.TestStruct"/>
         /// </summary>
         public ref global::MyCode.TestStruct TestStructScoped => ref _testStructScoped;
-        private global::MyCode.TestStruct _testStructScoped;
+        private readonly global::MyCode.TestStruct _testStructScoped;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />

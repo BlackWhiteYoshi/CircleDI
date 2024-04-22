@@ -9,25 +9,73 @@ namespace CircleDI.Generation;
 /// </summary>
 /// <param name="builder"></param>
 /// <param name="serviceProvider"></param>
-public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider serviceProvider) {
-    private StringBuilder builder = builder;
-    private ServiceProvider serviceProvider = serviceProvider;
+public struct CircleDIBuilderCore {
+    private readonly StringBuilder builder;
+    private readonly ServiceProvider serviceProvider;
+
+    private List<Service> serviceList;
+    private List<ConstructorDependency> constructorParameterList;
+    private TypeKeyword keyword;
+    private DisposeGeneration generateDisposeMethods;
+    private bool hasConstructor;
+    private bool hasDisposeMethod;
+    private bool hasDisposeAsyncMethod;
+    private bool threadSafe;
+
+    private string readonlyStr;
+    private bool hasDisposeList;
+    private bool hasAsyncDisposeList;
+
     private bool isScopeProvider = false;
-    private List<Service> serviceList = serviceProvider.SingletonList;
-    private List<ConstructorDependency> constructorParameterList = serviceProvider.ConstructorParameterList;
-    private TypeKeyword keyword = serviceProvider.Keyword;
-    private DisposeGeneration generateDisposeMethods = serviceProvider.GenerateDisposeMethods;
-    private bool hasConstructor = serviceProvider.HasConstructor;
-    private bool hasDisposeMethod = serviceProvider.HasDisposeMethod;
-    private bool hasDisposeAsyncMethod = serviceProvider.HasDisposeAsyncMethod;
-    private bool threadSafe = serviceProvider.ThreadSafe;
     public Indent indent = new();
+
+    public CircleDIBuilderCore(StringBuilder builder, ServiceProvider serviceProvider) {
+        this.builder = builder;
+        this.serviceProvider = serviceProvider;
+
+        serviceList = serviceProvider.SingletonList;
+        constructorParameterList = serviceProvider.ConstructorParameterList;
+        keyword = serviceProvider.Keyword;
+        generateDisposeMethods = serviceProvider.GenerateDisposeMethods;
+        hasConstructor = serviceProvider.HasConstructor;
+        hasDisposeMethod = serviceProvider.HasDisposeMethod;
+        hasDisposeAsyncMethod = serviceProvider.HasDisposeAsyncMethod;
+        threadSafe = serviceProvider.ThreadSafe;
+
+        readonlyStr = hasConstructor switch {
+            true => "",
+            false => "readonly "
+        };
+
+        if (generateDisposeMethods == DisposeGeneration.NoDisposing) {
+            hasDisposeList = false;
+            hasAsyncDisposeList = false;
+        }
+        else
+            foreach (Service service in serviceProvider.TransientList) {
+                if (service.Lifetime is ServiceLifetime.TransientScoped)
+                    continue;
+
+                if (service.IsAsyncDisposable) {
+                    hasAsyncDisposeList = true;
+                    if (hasDisposeList)
+                        break;
+                }
+                else if (service.IsDisposable) {
+                    hasDisposeList = true;
+                    if (hasAsyncDisposeList)
+                        break;
+                }
+            }
+    }
 
     /// <summary>
     /// Sets all related ServiceProvider fields to ScopeProvider equivalents and increases indentation level by 1.
     /// </summary>
     public void SetToScope() {
         isScopeProvider = true;
+        indent.IncreaseLevel();
+
         serviceList = serviceProvider.ScopedList;
         constructorParameterList = serviceProvider.ConstructorParameterListScope;
         keyword = serviceProvider.KeywordScope;
@@ -36,7 +84,28 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         hasDisposeMethod = serviceProvider.HasDisposeMethodScope;
         hasDisposeAsyncMethod = serviceProvider.HasDisposeAsyncMethodScope;
         threadSafe = serviceProvider.ThreadSafeScope;
-        indent.IncreaseLevel();
+
+        readonlyStr = hasConstructor switch {
+            true => "",
+            false => "readonly "
+        };
+
+        if (generateDisposeMethods == DisposeGeneration.NoDisposing) {
+            hasDisposeList = false;
+            hasAsyncDisposeList = false;
+        }
+        else
+            foreach (Service service in serviceProvider.TransientList)
+                if (service.IsAsyncDisposable) {
+                    hasAsyncDisposeList = true;
+                    if (hasDisposeList)
+                        break;
+                }
+                else if (service.IsDisposable) {
+                    hasDisposeList = true;
+                    if (hasAsyncDisposeList)
+                        break;
+                }
     }
 
 
@@ -55,7 +124,9 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             int i;
             if (isScopeProvider) {
                 builder.Append(indent.Sp4);
-                builder.Append("private global::");
+                builder.Append("private ");
+                builder.Append(readonlyStr);
+                builder.Append("global::");
                 builder.AppendOpenFullyQualified(serviceProvider.Identifier);
                 builder.Append(" _");
                 builder.AppendFirstLower(serviceProvider.Identifier.Name);
@@ -68,7 +139,9 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
             for (; i < constructorParameterList.Count; i++) {
                 ConstructorDependency dependency = constructorParameterList[i];
                 builder.Append(indent.Sp4);
-                builder.Append("private global::");
+                builder.Append("private ");
+                builder.Append(readonlyStr);
+                builder.Append("global::");
                 // ConstructorParameterList items have always serviceType set
                 builder.AppendClosedFullyQualified(dependency.ServiceType!);
                 builder.Append(" _");
@@ -125,25 +198,30 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         // singleton/scoped services inizialization
         {
             ServiceTreeBuilder serviceTreeBuilder = new(this, indent.Sp8);
+            int currentPosition = builder.Length;
 
             serviceProvider.NextDependencyTreeFlag();
             foreach (Service service in serviceList)
                 if (service.CreationTimeTransitive is CreationTiming.Constructor)
-                    serviceTreeBuilder.AppendServiceTree(service);
+                    serviceTreeBuilder.AppendServiceTree(service, CreationTiming.Constructor);
 
-            builder.Append('\n');
+            if (builder.Length > currentPosition) {
+                builder.Append('\n');
+                currentPosition = builder.Length;
+            }
 
             serviceProvider.NextDependencyTreeFlag();
             foreach (Service service in serviceList)
                 if (service.CreationTimeTransitive is CreationTiming.Constructor)
                     serviceTreeBuilder.AppendCircularDependencies(service);
 
-            builder.Append("\n");
+            if (builder.Length > currentPosition)
+                builder.Append("\n");
 
-            serviceTreeBuilder.AppendDisposeLists();
+            serviceTreeBuilder.AppendDiposeListsConstructor();
         }
 
-        while (builder[^2] == '\n')
+        if (builder[^2] == '\n')
             builder.Length--;
 
         builder.Append(indent.Sp4);
@@ -245,6 +323,18 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                         builder.AppendFirstLower(service.Name);
                         builder.Append("), ");
                     }
+                }
+
+                // Dispose lists
+                if (hasDisposeList) {
+                    builder.Append("nameof(");
+                    builder.AppendFirstLower(DISPOSE_LIST);
+                    builder.Append("), ");
+                }
+                if (hasAsyncDisposeList) {
+                    builder.Append("nameof(");
+                    builder.AppendFirstLower(ASYNC_DISPOSE_LIST);
+                    builder.Append("), ");
                 }
 
                 if (builder.Length > startLength) {
@@ -398,7 +488,9 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         builder.Append(";\n");
 
         builder.Append(indent.Sp4);
-        builder.Append("private global::");
+        builder.Append("private ");
+        builder.Append(readonlyStr);
+        builder.Append("global::");
         builder.AppendClosedFullyQualified(service.ImplementationType);
         builder.Append(" _");
         builder.AppendFirstLower(service.Name);
@@ -446,7 +538,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         ServiceTreeBuilder serviceTreeBuilder = new(this, indentCreation);
 
         serviceProvider.NextDependencyTreeFlag();
-        serviceTreeBuilder.AppendServiceTree(service);
+        serviceTreeBuilder.AppendServiceTree(service, CreationTiming.Lazy);
 
         if (threadSafe) {
             builder.Append(indentNullCheck);
@@ -541,7 +633,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         ServiceTreeBuilder serviceTreeBuilder = new(this, indentation);
 
         serviceProvider.NextDependencyTreeFlag();
-        serviceTreeBuilder.AppendServiceTree(service);
+        serviceTreeBuilder.AppendServiceTree(service, CreationTiming.Lazy);
 
         serviceProvider.NextDependencyTreeFlag();
         serviceTreeBuilder.AppendCircularDependencies(service);
@@ -737,6 +829,9 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
 
     #region Dispose
 
+    private const string DISPOSE_LIST = "_disposeList";
+    private const string ASYNC_DISPOSE_LIST = "_asyncDisposeList";
+
     /// <summary>
     /// Generates the Dispose/AsyncDispose methods and the corresponding disposeLists for the transient services.
     /// </summary>
@@ -746,36 +841,23 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         if (generateDisposeMethods == DisposeGeneration.NoDisposing)
             return;
 
-        bool hasDisposeList = false;
-        bool hasAsyncDisposeList = false;
-        foreach (Service service in serviceProvider.TransientList) {
-            if (!isScopeProvider && service.Lifetime is ServiceLifetime.TransientScoped)
-                continue;
-
-            if (service.IsAsyncDisposable) {
-                hasAsyncDisposeList = true;
-                if (hasDisposeList)
-                    break;
-            }
-            else if (service.IsDisposable) {
-                hasDisposeList = true;
-                if (hasAsyncDisposeList)
-                    break;
-            }
-        }
-
 
         // disposeList
         if (hasDisposeList) {
             builder.Append(indent.Sp4);
-            builder.Append("private global::System.Collections.Generic.List<IDisposable> disposeList = [];\n\n");
+            builder.Append("private ");
+            builder.Append(readonlyStr);
+            builder.Append($"global::System.Collections.Generic.List<IDisposable> {DISPOSE_LIST};\n\n");
         }
 
         // asyncDisposeList
         if (hasAsyncDisposeList) {
             builder.Append(indent.Sp4);
-            builder.Append("private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];\n\n");
+            builder.Append("private ");
+            builder.Append(readonlyStr);
+            builder.Append($"global::System.Collections.Generic.List<IAsyncDisposable> {ASYNC_DISPOSE_LIST};\n\n");
         }
+
 
         uint singeltonDisposablesCount = 0;
         uint singeltonAsyncDisposablesCount = 0;
@@ -919,7 +1001,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                         AppendDisposingDisposeList();
 
                     builder.Append(indent.Sp8);
-                    builder.Append("Task[] disposeTasks = new Task[asyncDisposeList.Count];\n\n");
+                    builder.Append($"Task[] disposeTasks = new Task[{ASYNC_DISPOSE_LIST}.Count];\n\n");
 
                     builder.Append(indent.Sp8);
                     builder.Append("int index = 0;\n");
@@ -969,7 +1051,7 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                     builder.Append(indent.Sp8);
                     builder.Append("Task[] disposeTasks = new Task[");
                     builder.Append(singeltonAsyncDisposablesCount);
-                    builder.Append(" + asyncDisposeList.Count];\n\n");
+                    builder.Append($" + {ASYNC_DISPOSE_LIST}.Count];\n\n");
 
                     int index = 0;
                     foreach (Service service in serviceList)
@@ -1034,13 +1116,13 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         string sp12 = indent.Sp12;
         if (threadSafe) {
             builder.Append(indent.Sp8);
-            builder.Append("lock (disposeList)\n");
+            builder.Append($"lock ({DISPOSE_LIST})\n");
             sp8 = indent.Sp12;
             sp12 = indent.Sp16;
         }
 
         builder.Append(sp8);
-        builder.Append("foreach (IDisposable disposable in disposeList)\n");
+        builder.Append($"foreach (IDisposable disposable in {DISPOSE_LIST})\n");
         builder.Append(sp12);
         builder.Append("disposable.Dispose();\n\n");
     }
@@ -1051,14 +1133,14 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         string sp16 = indent.Sp16;
         if (threadSafe) {
             builder.Append(indent.Sp8);
-            builder.Append("lock (asyncDisposeList)\n");
+            builder.Append($"lock ({ASYNC_DISPOSE_LIST})\n");
             sp8 = indent.Sp12;
             sp12 = indent.Sp16;
             sp16 = indent.Sp20;
         }
 
         builder.Append(sp8);
-        builder.Append("foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)\n");
+        builder.Append($"foreach (IAsyncDisposable asyncDisposable in {ASYNC_DISPOSE_LIST})\n");
         builder.Append(sp12);
         builder.Append("if (asyncDisposable is IDisposable disposable)\n");
         builder.Append(sp16);
@@ -1074,13 +1156,13 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         string sp12 = indent.Sp12;
         if (threadSafe) {
             builder.Append(indent.Sp8);
-            builder.Append("lock (asyncDisposeList)\n");
+            builder.Append($"lock ({ASYNC_DISPOSE_LIST})\n");
             sp8 = indent.Sp12;
             sp12 = indent.Sp16;
         }
 
         builder.Append(sp8);
-        builder.Append("foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)\n");
+        builder.Append($"foreach (IAsyncDisposable asyncDisposable in {ASYNC_DISPOSE_LIST})\n");
         builder.Append(sp12);
         builder.Append("disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();\n\n");
     }
@@ -1096,6 +1178,11 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
 
     private struct ServiceTreeBuilder(CircleDIBuilderCore core, string indentation) {
         public string indentation = indentation;
+
+        /// <summary>
+        /// filtering in AppendServiceTreeRecursion
+        /// </summary>
+        private CreationTiming creationTiming;
         /// <summary>
         /// First node of entire subtree.
         /// </summary>
@@ -1131,7 +1218,8 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         /// </summary>
         /// <param name="service"></param>
         /// <param name="parentName"></param>
-        public void AppendServiceTree(Service service) {
+        public void AppendServiceTree(Service service, CreationTiming creationTiming) {
+            this.creationTiming = creationTiming;
             rootNode = service;
 
             firstNode = service;
@@ -1148,8 +1236,12 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         private readonly void AppendServiceTreeRecursion(Service service, string parentName) {
             if (service.TreeState.HasFlag(core.serviceProvider.DependencyTreeFlag))
                 return;
-            if (!service.Lifetime.HasFlag(ServiceLifetime.Transient))
+            if (!service.Lifetime.HasFlag(ServiceLifetime.Transient)) {
                 service.TreeState |= core.serviceProvider.DependencyTreeFlag;
+
+                if (service.CreationTimeTransitive != creationTiming)
+                    return;
+            }
 
             if (service.Lifetime.HasFlag(ServiceLifetime.Delegate))
                 return;
@@ -1317,9 +1409,9 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
         /// </summary>
         public readonly void AppendDisposeLists() {
             if (core.transientDisposeList.Count > 0)
-                AppendDisposeList(core.transientDisposeList, "disposeList");
+                AppendDisposeList(core.transientDisposeList, DISPOSE_LIST);
             if (core.transientAsyncDisposeList.Count > 0)
-                AppendDisposeList(core.transientAsyncDisposeList, "asyncDisposeList");
+                AppendDisposeList(core.transientAsyncDisposeList, ASYNC_DISPOSE_LIST);
         }
 
         private readonly void AppendDisposeList(List<(Service service, string parentName)> disposeList, string disposeListName) {
@@ -1358,6 +1450,54 @@ public struct CircleDIBuilderCore(StringBuilder builder, ServiceProvider service
                     core.builder.Append(");\n");
                 }
             }
+
+            disposeList.Clear();
+        }
+
+
+        /// <summary>
+        /// <para>Initializes the disposeList/asyncDisposeList with a collection expression containing all transients created in the constructor.</para>
+        /// <para>DisposeList is created first, then asyncDisposeList, but if a service implements both, it is put in asyncDisposeList.</para>
+        /// </summary>
+        public readonly void AppendDiposeListsConstructor() {
+            if (core.hasDisposeList)
+                AppendDiposeListConstructor(core.transientDisposeList, DISPOSE_LIST);
+            if (core.hasAsyncDisposeList)
+                AppendDiposeListConstructor(core.transientAsyncDisposeList, ASYNC_DISPOSE_LIST);
+        }
+
+        private readonly void AppendDiposeListConstructor(List<(Service service, string parentName)> disposeList, string disposeListName) {
+            core.builder.Append(core.indent.Sp8);
+            core.builder.Append(disposeListName);
+            core.builder.Append(" = [");
+            switch (disposeList.Count) {
+                case 0:
+                    break;
+                case 1:
+                    core.builder.AppendFirstLower(disposeList[0].service.Name);
+                    if (disposeList[0].parentName != string.Empty && !ReferenceEquals(disposeList[0].service, firstNode)) {
+                        core.builder.Append('_');
+                        core.builder.Append(disposeList[0].parentName);
+                    }
+                    break;
+                default:
+                    foreach ((Service service, string parentName) in disposeList) {
+                        core.builder.Append('\n');
+                        core.builder.Append(core.indent.Sp12);
+                        core.builder.AppendFirstLower(service.Name);
+                        if (parentName != string.Empty && !ReferenceEquals(service, firstNode)) {
+                            core.builder.Append('_');
+                            core.builder.Append(parentName);
+                        }
+                        core.builder.Append(",");
+                    }
+                    core.builder.Length--;
+                    core.builder.Append('\n');
+                    core.builder.Append(core.indent.Sp8);
+                    break;
+            }
+
+            core.builder.Append("];\n");
 
             disposeList.Clear();
         }

@@ -96,7 +96,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.TestProvider _testProvider;
+        private readonly global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
@@ -114,7 +114,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Implementation type: <see cref="global::MyCode.ScopedDependency"/>
         /// </summary>
         public global::MyCode.IScopedDependency ScopedDependency => _scopedDependency;
-        private global::MyCode.ScopedDependency _scopedDependency;
+        private readonly global::MyCode.ScopedDependency _scopedDependency;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -139,7 +139,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                _scopedDependency = new global::MyCode.ScopedDependency();
                 global::MyCode.TestDependency testDependency_TestService = new global::MyCode.TestDependency(_scopedDependency);
                 global::MyCode.TestService testService = new global::MyCode.TestService(testDependency_TestService);
                 return testService;
@@ -153,7 +152,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestDependency TestDependency {
             get {
-                _scopedDependency = new global::MyCode.ScopedDependency();
                 global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency(_scopedDependency);
                 return testDependency;
             }

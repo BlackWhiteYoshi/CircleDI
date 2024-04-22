@@ -46,7 +46,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.TestClass"/>
     /// </summary>
     public global::MyCode.TestClass TestClass => _testClass;
-    private global::MyCode.TestClass _testClass;
+    private readonly global::MyCode.TestClass _testClass;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -54,7 +54,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.TestStruct"/>
     /// </summary>
     public global::MyCode.ITestStruct TestStruct => _testStruct;
-    private global::MyCode.TestStruct _testStruct;
+    private readonly global::MyCode.TestStruct _testStruct;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -62,7 +62,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::System.Int32"/>
     /// </summary>
     public ref global::System.Int32 Int32 => ref _int32;
-    private global::System.Int32 _int32;
+    private readonly global::System.Int32 _int32;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -135,7 +135,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.TestProvider _testProvider;
+        private readonly global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.

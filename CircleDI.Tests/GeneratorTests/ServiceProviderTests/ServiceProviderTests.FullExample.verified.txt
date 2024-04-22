@@ -36,6 +36,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         _singletonDependency1 = new global::MyCode.SingletonDependency1(_singletonDependency2);
 
         Set_SingletonDependency2_SingletonDependency1(_singletonDependency2, _singletonDependency1);
+
+        _disposeList = [];
+        _asyncDisposeList = [];
     }
 
     /// <summary>
@@ -52,7 +55,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.Singleton"/>
     /// </summary>
     public global::MyCode.ISingleton Singleton => _singleton;
-    private global::MyCode.Singleton _singleton;
+    private readonly global::MyCode.Singleton _singleton;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -60,7 +63,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.SingletonDisposable"/>
     /// </summary>
     public global::MyCode.ISingletonDisposable SingletonDisposable => _singletonDisposable;
-    private global::MyCode.SingletonDisposable _singletonDisposable;
+    private readonly global::MyCode.SingletonDisposable _singletonDisposable;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -68,7 +71,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.SingletonAsyncDisposable"/>
     /// </summary>
     public global::MyCode.ISingletonAsyncDisposable SingletonAsyncDisposable => _singletonAsyncDisposable;
-    private global::MyCode.SingletonAsyncDisposable _singletonAsyncDisposable;
+    private readonly global::MyCode.SingletonAsyncDisposable _singletonAsyncDisposable;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -76,7 +79,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.SingletonDependency1"/>
     /// </summary>
     public global::MyCode.ISingletonDependency1 SingletonDependency1 => _singletonDependency1;
-    private global::MyCode.SingletonDependency1 _singletonDependency1;
+    private readonly global::MyCode.SingletonDependency1 _singletonDependency1;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -84,7 +87,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.SingletonDependency2"/>
     /// </summary>
     public global::MyCode.ISingletonDependency2 SingletonDependency2 => _singletonDependency2;
-    private global::MyCode.SingletonDependency2 _singletonDependency2;
+    private readonly global::MyCode.SingletonDependency2 _singletonDependency2;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -114,8 +117,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITransientDisposable TransientDisposable {
         get {
             global::MyCode.TransientDisposable transientDisposable = new global::MyCode.TransientDisposable();
-            lock (disposeList) {
-                disposeList.Add(transientDisposable);
+            lock (_disposeList) {
+                _disposeList.Add(transientDisposable);
             }
             return transientDisposable;
         }
@@ -129,8 +132,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITransientAsyncDisposable TransientAsyncDisposable {
         get {
             global::MyCode.TransientAsyncDisposable transientAsyncDisposable = new global::MyCode.TransientAsyncDisposable();
-            lock (asyncDisposeList) {
-                asyncDisposeList.Add(transientAsyncDisposable);
+            lock (_asyncDisposeList) {
+                _asyncDisposeList.Add(transientAsyncDisposable);
             }
             return transientAsyncDisposable;
         }
@@ -202,9 +205,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     }
 
 
-    private global::System.Collections.Generic.List<IDisposable> disposeList = [];
+    private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
 
-    private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];
+    private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
@@ -213,12 +216,12 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         ((IDisposable)_singletonDisposable).Dispose();
         _ = ((IAsyncDisposable)_singletonAsyncDisposable).DisposeAsync().Preserve();
 
-        lock (disposeList)
-            foreach (IDisposable disposable in disposeList)
+        lock (_disposeList)
+            foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
-        lock (asyncDisposeList)
-            foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+        lock (_asyncDisposeList)
+            foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 if (asyncDisposable is IDisposable disposable)
                     disposable.Dispose();
                 else
@@ -231,17 +234,17 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public ValueTask DisposeAsync() {
         ((IDisposable)_singletonDisposable).Dispose();
 
-        lock (disposeList)
-            foreach (IDisposable disposable in disposeList)
+        lock (_disposeList)
+            foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
-        Task[] disposeTasks = new Task[1 + asyncDisposeList.Count];
+        Task[] disposeTasks = new Task[1 + _asyncDisposeList.Count];
 
         disposeTasks[0] = ((IAsyncDisposable)_singletonAsyncDisposable).DisposeAsync().AsTask();
 
         int index = 1;
-        lock (asyncDisposeList)
-            foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+        lock (_asyncDisposeList)
+            foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 
         return new ValueTask(Task.WhenAll(disposeTasks));
@@ -264,7 +267,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.TestProvider _testProvider;
+        private readonly global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
@@ -282,6 +285,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             _scopedDependency1 = new global::MyCode.ScopedDependency1(_scopedDependency2);
 
             Set_ScopedDependency2_ScopedDependency1(_scopedDependency2, _scopedDependency1);
+
+            _disposeList = [];
+            _asyncDisposeList = [];
         }
 
         /// <summary>
@@ -290,7 +296,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Implementation type: <see cref="global::MyCode.Scoped"/>
         /// </summary>
         public global::MyCode.IScoped Scoped => _scoped;
-        private global::MyCode.Scoped _scoped;
+        private readonly global::MyCode.Scoped _scoped;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -298,7 +304,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Implementation type: <see cref="global::MyCode.ScopedDisposable"/>
         /// </summary>
         public global::MyCode.IScopedDisposable ScopedDisposable => _scopedDisposable;
-        private global::MyCode.ScopedDisposable _scopedDisposable;
+        private readonly global::MyCode.ScopedDisposable _scopedDisposable;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -306,7 +312,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Implementation type: <see cref="global::MyCode.ScopedAsyncDisposable"/>
         /// </summary>
         public global::MyCode.IScopedAsyncDisposable ScopedAsyncDisposable => _scopedAsyncDisposable;
-        private global::MyCode.ScopedAsyncDisposable _scopedAsyncDisposable;
+        private readonly global::MyCode.ScopedAsyncDisposable _scopedAsyncDisposable;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -314,7 +320,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Implementation type: <see cref="global::MyCode.ScopedDependency1"/>
         /// </summary>
         public global::MyCode.IScopedDependency1 ScopedDependency1 => _scopedDependency1;
-        private global::MyCode.ScopedDependency1 _scopedDependency1;
+        private readonly global::MyCode.ScopedDependency1 _scopedDependency1;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -322,7 +328,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Implementation type: <see cref="global::MyCode.ScopedDependency2"/>
         /// </summary>
         public global::MyCode.IScopedDependency2 ScopedDependency2 => _scopedDependency2;
-        private global::MyCode.ScopedDependency2 _scopedDependency2;
+        private readonly global::MyCode.ScopedDependency2 _scopedDependency2;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -395,8 +401,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITransientDisposable TransientDisposable {
             get {
                 global::MyCode.TransientDisposable transientDisposable = new global::MyCode.TransientDisposable();
-                lock (disposeList) {
-                    disposeList.Add(transientDisposable);
+                lock (_disposeList) {
+                    _disposeList.Add(transientDisposable);
                 }
                 return transientDisposable;
             }
@@ -410,8 +416,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITransientAsyncDisposable TransientAsyncDisposable {
             get {
                 global::MyCode.TransientAsyncDisposable transientAsyncDisposable = new global::MyCode.TransientAsyncDisposable();
-                lock (asyncDisposeList) {
-                    asyncDisposeList.Add(transientAsyncDisposable);
+                lock (_asyncDisposeList) {
+                    _asyncDisposeList.Add(transientAsyncDisposable);
                 }
                 return transientAsyncDisposable;
             }
@@ -507,9 +513,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         }
 
 
-        private global::System.Collections.Generic.List<IDisposable> disposeList = [];
+        private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
 
-        private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];
+        private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
@@ -518,12 +524,12 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             ((IDisposable)_scopedDisposable).Dispose();
             _ = ((IAsyncDisposable)_scopedAsyncDisposable).DisposeAsync().Preserve();
 
-            lock (disposeList)
-                foreach (IDisposable disposable in disposeList)
+            lock (_disposeList)
+                foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
 
-            lock (asyncDisposeList)
-                foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+            lock (_asyncDisposeList)
+                foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     if (asyncDisposable is IDisposable disposable)
                         disposable.Dispose();
                     else
@@ -536,17 +542,17 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public ValueTask DisposeAsync() {
             ((IDisposable)_scopedDisposable).Dispose();
 
-            lock (disposeList)
-                foreach (IDisposable disposable in disposeList)
+            lock (_disposeList)
+                foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
 
-            Task[] disposeTasks = new Task[1 + asyncDisposeList.Count];
+            Task[] disposeTasks = new Task[1 + _asyncDisposeList.Count];
 
             disposeTasks[0] = ((IAsyncDisposable)_scopedAsyncDisposable).DisposeAsync().AsTask();
 
             int index = 1;
-            lock (asyncDisposeList)
-                foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+            lock (_asyncDisposeList)
+                foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 
             return new ValueTask(Task.WhenAll(disposeTasks));

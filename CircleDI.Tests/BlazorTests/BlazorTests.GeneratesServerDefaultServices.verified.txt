@@ -52,7 +52,7 @@ namespace MyCode;
 /// </para>
 /// </summary>
 public sealed partial class TestProvider : global::MyCode.ITestProvider, IServiceProvider {
-    private global::System.IServiceProvider _builtinServiceProvider;
+    private readonly global::System.IServiceProvider _builtinServiceProvider;
 
     /// <summary>
     /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
@@ -86,7 +86,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::Microsoft.Extensions.Logging.ILoggerFactory"/>
     /// </summary>
     public global::Microsoft.Extensions.Logging.ILoggerFactory LoggerFactory => _loggerFactory;
-    private global::Microsoft.Extensions.Logging.ILoggerFactory _loggerFactory;
+    private readonly global::Microsoft.Extensions.Logging.ILoggerFactory _loggerFactory;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -94,7 +94,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::Microsoft.Extensions.Configuration.IConfiguration"/>
     /// </summary>
     public global::Microsoft.Extensions.Configuration.IConfiguration Configuration => _configuration;
-    private global::Microsoft.Extensions.Configuration.IConfiguration _configuration;
+    private readonly global::Microsoft.Extensions.Configuration.IConfiguration _configuration;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -102,7 +102,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/>
     /// </summary>
     public global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment WebHostEnvironment => _webHostEnvironment;
-    private global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment _webHostEnvironment;
+    private readonly global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment _webHostEnvironment;
 
 
     /// <summary>
@@ -168,8 +168,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.TestProvider _testProvider;
-        private global::System.IServiceProvider _builtinServiceProvider;
+        private readonly global::MyCode.TestProvider _testProvider;
+        private readonly global::System.IServiceProvider _builtinServiceProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.

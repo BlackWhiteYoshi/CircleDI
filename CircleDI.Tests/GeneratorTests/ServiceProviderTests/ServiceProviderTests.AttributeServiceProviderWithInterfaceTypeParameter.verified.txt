@@ -96,7 +96,7 @@ public sealed partial class MyProvider : global::MySpace.Interface.IWrapper.IPro
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MySpace.Interface.IWrapper.IProvider.IScope, IServiceProvider {
-        private global::MySpace.MyProvider _myProvider;
+        private readonly global::MySpace.MyProvider _myProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.

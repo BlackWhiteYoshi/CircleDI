@@ -48,7 +48,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.TestStruct"/>
     /// </summary>
     public ref global::MyCode.TestStruct TestStruct => ref _testStruct;
-    private global::MyCode.TestStruct _testStruct;
+    private readonly global::MyCode.TestStruct _testStruct;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -56,7 +56,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.RefInject"/>
     /// </summary>
     public global::MyCode.RefInject RefInject => _refInject;
-    private global::MyCode.RefInject _refInject;
+    private readonly global::MyCode.RefInject _refInject;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -64,7 +64,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.InInject"/>
     /// </summary>
     public global::MyCode.InInject InInject => _inInject;
-    private global::MyCode.InInject _inInject;
+    private readonly global::MyCode.InInject _inInject;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -72,7 +72,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.OutInject"/>
     /// </summary>
     public global::MyCode.OutInject OutInject => _outInject;
-    private global::MyCode.OutInject _outInject;
+    private readonly global::MyCode.OutInject _outInject;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -80,7 +80,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.RefReadonlyInject"/>
     /// </summary>
     public global::MyCode.RefReadonlyInject RefReadonlyInject => _refReadonlyInject;
-    private global::MyCode.RefReadonlyInject _refReadonlyInject;
+    private readonly global::MyCode.RefReadonlyInject _refReadonlyInject;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -161,7 +161,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.TestProvider _testProvider;
+        private readonly global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.

@@ -67,7 +67,7 @@ public sealed partial class MyProvider : global::IMyProvider, IServiceProvider {
     /// Implementation type: <see cref="global::Service3"/>
     /// </summary>
     public global::IService3 Service3 => _service3;
-    private global::Service3 _service3;
+    private readonly global::Service3 _service3;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -132,17 +132,17 @@ public sealed partial class MyProvider : global::IMyProvider, IServiceProvider {
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::IMyProvider.IScope, IServiceProvider {
-        private global::IMyProvider _myProvider;
+        private readonly global::MyProvider _myProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="myProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="myProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="MyProvider"/>.</param>
         public Scope(global::IMyProvider myProvider) {
-            _myProvider = myProvider;
+            _myProvider = (global::MyProvider)myProvider;
 
-            ((global::MyProvider)_myProvider)._service3 = new global::Service3();
-            _service2 = new global::Service2(((global::MyProvider)_myProvider)._service3);
+            _myProvider._service3 = new global::Service3();
+            _service2 = new global::Service2(_myProvider._service3);
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ public sealed partial class MyProvider : global::IMyProvider, IServiceProvider {
         /// Implementation type: <see cref="global::Service2"/>
         /// </summary>
         public global::IService2 Service2 => _service2;
-        private global::Service2 _service2;
+        private readonly global::Service2 _service2;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -183,9 +183,7 @@ public sealed partial class MyProvider : global::IMyProvider, IServiceProvider {
         /// </summary>
         public global::Service1 Service1 {
             get {
-                ((global::MyProvider)_myProvider)._service3 = new global::Service3();
-                _service2 = new global::Service2(((global::MyProvider)_myProvider)._service3);
-                global::Service1 service1 = new global::Service1(_service2, ((global::MyProvider)_myProvider)._service3);
+                global::Service1 service1 = new global::Service1(_service2, _myProvider._service3);
                 return service1;
             }
         }
@@ -317,7 +315,7 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
     /// Implementation type: <see cref="global::MyService1"/>
     /// </summary>
     public global::IMyService1 MyService1 => _myService1;
-    private global::MyService1 _myService1;
+    private readonly global::MyService1 _myService1;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -325,7 +323,7 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
     /// Implementation type: <see cref="global::MyService2"/>
     /// </summary>
     public global::IMyService2 MyService2 => _myService2;
-    private global::MyService2 _myService2;
+    private readonly global::MyService2 _myService2;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -394,14 +392,14 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::ICircleExampleProvider.IScope, IServiceProvider {
-        private global::ICircleExampleProvider _circleExampleProvider;
+        private readonly global::CircleExampleProvider _circleExampleProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="circleExampleProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="circleExampleProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="CircleExampleProvider"/>.</param>
         public Scope(global::ICircleExampleProvider circleExampleProvider) {
-            _circleExampleProvider = circleExampleProvider;
+            _circleExampleProvider = (global::CircleExampleProvider)circleExampleProvider;
         }
 
         /// <summary>
@@ -556,7 +554,7 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
     /// Implementation type: <see cref="global::MyService1"/>
     /// </summary>
     public global::IMyService1 MyService1 => _myService1;
-    private global::MyService1 _myService1;
+    private readonly global::MyService1 _myService1;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -564,7 +562,7 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
     /// Implementation type: <see cref="global::MyService2"/>
     /// </summary>
     public global::IMyService2 MyService2 => _myService2;
-    private global::MyService2 _myService2;
+    private readonly global::MyService2 _myService2;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -633,14 +631,14 @@ public partial class CircleExampleProvider : global::ICircleExampleProvider, ISe
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::ICircleExampleProvider.IScope, IServiceProvider {
-        private global::ICircleExampleProvider _circleExampleProvider;
+        private readonly global::CircleExampleProvider _circleExampleProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="circleExampleProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="circleExampleProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="CircleExampleProvider"/>.</param>
         public Scope(global::ICircleExampleProvider circleExampleProvider) {
-            _circleExampleProvider = circleExampleProvider;
+            _circleExampleProvider = (global::CircleExampleProvider)circleExampleProvider;
         }
 
         /// <summary>
@@ -854,14 +852,14 @@ public partial class DelegateProvider : global::IDelegateProvider, IServiceProvi
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::IDelegateProvider.IScope, IServiceProvider {
-        private global::IDelegateProvider _delegateProvider;
+        private readonly global::DelegateProvider _delegateProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="delegateProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="delegateProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="DelegateProvider"/>.</param>
         public Scope(global::IDelegateProvider delegateProvider) {
-            _delegateProvider = delegateProvider;
+            _delegateProvider = (global::DelegateProvider)delegateProvider;
         }
 
         /// <summary>
@@ -1072,14 +1070,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
-        private global::MyCode.ITestProvider _testProvider;
+        private readonly global::MyCode.TestProvider _testProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="testProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="testProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="TestProvider"/>.</param>
         public Scope(global::MyCode.ITestProvider testProvider) {
-            _testProvider = testProvider;
+            _testProvider = (global::MyCode.TestProvider)testProvider;
         }
 
         /// <summary>
@@ -1288,14 +1286,14 @@ public partial class FieldProvider : global::IFieldProvider, IServiceProvider {
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::IFieldProvider.IScope, IServiceProvider {
-        private global::IFieldProvider _fieldProvider;
+        private readonly global::FieldProvider _fieldProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="fieldProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="fieldProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="FieldProvider"/>.</param>
         public Scope(global::IFieldProvider fieldProvider) {
-            _fieldProvider = fieldProvider;
+            _fieldProvider = (global::FieldProvider)fieldProvider;
         }
 
         /// <summary>
@@ -1430,7 +1428,7 @@ public partial class PropertyProvider : global::IPropertyProvider, IServiceProvi
     /// Implementation type: <see cref="global::MyService"/>
     /// </summary>
     public global::IMyService MyService => _myService;
-    private global::MyService _myService;
+    private readonly global::MyService _myService;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -1495,14 +1493,14 @@ public partial class PropertyProvider : global::IPropertyProvider, IServiceProvi
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::IPropertyProvider.IScope, IServiceProvider {
-        private global::IPropertyProvider _propertyProvider;
+        private readonly global::PropertyProvider _propertyProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="propertyProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="propertyProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="PropertyProvider"/>.</param>
         public Scope(global::IPropertyProvider propertyProvider) {
-            _propertyProvider = propertyProvider;
+            _propertyProvider = (global::PropertyProvider)propertyProvider;
         }
 
         /// <summary>
@@ -1642,7 +1640,7 @@ public partial class MethodProvider : global::IMethodProvider, IServiceProvider 
     /// Implementation type: <see cref="global::MyService1"/>
     /// </summary>
     public global::IMyService1 MyService1 => _myService1;
-    private global::MyService1 _myService1;
+    private readonly global::MyService1 _myService1;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -1650,7 +1648,7 @@ public partial class MethodProvider : global::IMethodProvider, IServiceProvider 
     /// Implementation type: <see cref="global::MyService2"/>
     /// </summary>
     public global::IMyService2 MyService2 => _myService2;
-    private global::MyService2 _myService2;
+    private readonly global::MyService2 _myService2;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -1719,14 +1717,14 @@ public partial class MethodProvider : global::IMethodProvider, IServiceProvider 
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::IMethodProvider.IScope, IServiceProvider {
-        private global::IMethodProvider _methodProvider;
+        private readonly global::MethodProvider _methodProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="methodProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="methodProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="MethodProvider"/>.</param>
         public Scope(global::IMethodProvider methodProvider) {
-            _methodProvider = methodProvider;
+            _methodProvider = (global::MethodProvider)methodProvider;
         }
 
         /// <summary>
@@ -1877,6 +1875,9 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     public DisposingProvider() {
         _myService1 = new global::MyService1();
         _myService2 = new global::MyService2();
+
+        _disposeList = [];
+        _asyncDisposeList = [];
     }
 
     /// <summary>
@@ -1893,7 +1894,7 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     /// Implementation type: <see cref="global::MyService1"/>
     /// </summary>
     public global::IMyService1 MyService1 => _myService1;
-    private global::MyService1 _myService1;
+    private readonly global::MyService1 _myService1;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -1901,7 +1902,7 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     /// Implementation type: <see cref="global::MyService2"/>
     /// </summary>
     public global::IMyService2 MyService2 => _myService2;
-    private global::MyService2 _myService2;
+    private readonly global::MyService2 _myService2;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -1919,8 +1920,8 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     public global::IMyService3 MyService3 {
         get {
             global::MyService3 myService3 = new global::MyService3();
-            lock (disposeList) {
-                disposeList.Add(myService3);
+            lock (_disposeList) {
+                _disposeList.Add(myService3);
             }
             return myService3;
         }
@@ -1934,8 +1935,8 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     public global::IMyService4 MyService4 {
         get {
             global::MyService4 myService4 = new global::MyService4();
-            lock (asyncDisposeList) {
-                asyncDisposeList.Add(myService4);
+            lock (_asyncDisposeList) {
+                _asyncDisposeList.Add(myService4);
             }
             return myService4;
         }
@@ -1979,9 +1980,9 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     }
 
 
-    private global::System.Collections.Generic.List<IDisposable> disposeList = [];
+    private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
 
-    private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];
+    private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
@@ -1990,12 +1991,12 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         ((IDisposable)_myService1).Dispose();
         _ = ((IAsyncDisposable)_myService2).DisposeAsync().Preserve();
 
-        lock (disposeList)
-            foreach (IDisposable disposable in disposeList)
+        lock (_disposeList)
+            foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
-        lock (asyncDisposeList)
-            foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+        lock (_asyncDisposeList)
+            foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 if (asyncDisposable is IDisposable disposable)
                     disposable.Dispose();
                 else
@@ -2008,17 +2009,17 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     public ValueTask DisposeAsync() {
         ((IDisposable)_myService1).Dispose();
 
-        lock (disposeList)
-            foreach (IDisposable disposable in disposeList)
+        lock (_disposeList)
+            foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
-        Task[] disposeTasks = new Task[1 + asyncDisposeList.Count];
+        Task[] disposeTasks = new Task[1 + _asyncDisposeList.Count];
 
         disposeTasks[0] = ((IAsyncDisposable)_myService2).DisposeAsync().AsTask();
 
         int index = 1;
-        lock (asyncDisposeList)
-            foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+        lock (_asyncDisposeList)
+            foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 
         return new ValueTask(Task.WhenAll(disposeTasks));
@@ -2041,14 +2042,17 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::IDisposingProvider.IScope, IServiceProvider {
-        private global::IDisposingProvider _disposingProvider;
+        private readonly global::DisposingProvider _disposingProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="disposingProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="disposingProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="DisposingProvider"/>.</param>
         public Scope(global::IDisposingProvider disposingProvider) {
-            _disposingProvider = disposingProvider;
+            _disposingProvider = (global::DisposingProvider)disposingProvider;
+
+            _disposeList = [];
+            _asyncDisposeList = [];
         }
 
         /// <summary>
@@ -2089,8 +2093,8 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         public global::IMyService3 MyService3 {
             get {
                 global::MyService3 myService3 = new global::MyService3();
-                lock (disposeList) {
-                    disposeList.Add(myService3);
+                lock (_disposeList) {
+                    _disposeList.Add(myService3);
                 }
                 return myService3;
             }
@@ -2104,8 +2108,8 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         public global::IMyService4 MyService4 {
             get {
                 global::MyService4 myService4 = new global::MyService4();
-                lock (asyncDisposeList) {
-                    asyncDisposeList.Add(myService4);
+                lock (_asyncDisposeList) {
+                    _asyncDisposeList.Add(myService4);
                 }
                 return myService4;
             }
@@ -2153,20 +2157,20 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         }
 
 
-        private global::System.Collections.Generic.List<IDisposable> disposeList = [];
+        private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
 
-        private global::System.Collections.Generic.List<IAsyncDisposable> asyncDisposeList = [];
+        private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
         /// </summary>
         public void Dispose() {
-            lock (disposeList)
-                foreach (IDisposable disposable in disposeList)
+            lock (_disposeList)
+                foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
 
-            lock (asyncDisposeList)
-                foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+            lock (_asyncDisposeList)
+                foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     if (asyncDisposable is IDisposable disposable)
                         disposable.Dispose();
                     else
@@ -2177,15 +2181,15 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         /// Disposes all disposable services instantiated by this provider asynchronously.
         /// </summary>
         public ValueTask DisposeAsync() {
-            lock (disposeList)
-                foreach (IDisposable disposable in disposeList)
+            lock (_disposeList)
+                foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
 
-            Task[] disposeTasks = new Task[asyncDisposeList.Count];
+            Task[] disposeTasks = new Task[_asyncDisposeList.Count];
 
             int index = 0;
-            lock (asyncDisposeList)
-                foreach (IAsyncDisposable asyncDisposable in asyncDisposeList)
+            lock (_asyncDisposeList)
+                foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 
             return new ValueTask(Task.WhenAll(disposeTasks));
@@ -2330,14 +2334,14 @@ public partial class LazyProvider : global::ILazyProvider, IServiceProvider {
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::ILazyProvider.IScope, IServiceProvider {
-        private global::ILazyProvider _lazyProvider;
+        private readonly global::LazyProvider _lazyProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="lazyProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="lazyProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="LazyProvider"/>.</param>
         public Scope(global::ILazyProvider lazyProvider) {
-            _lazyProvider = lazyProvider;
+            _lazyProvider = (global::LazyProvider)lazyProvider;
         }
 
         /// <summary>
@@ -2470,7 +2474,7 @@ public partial class MethodProvider : global::IMethodProvider, IServiceProvider 
     /// Implementation type: <see cref="global::MyService"/>
     /// </summary>
     public global::IMyService GetMyService() => _myService;
-    private global::MyService _myService;
+    private readonly global::MyService _myService;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -2535,14 +2539,14 @@ public partial class MethodProvider : global::IMethodProvider, IServiceProvider 
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::IMethodProvider.IScope, IServiceProvider {
-        private global::IMethodProvider _methodProvider;
+        private readonly global::MethodProvider _methodProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="methodProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="methodProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="MethodProvider"/>.</param>
         public Scope(global::IMethodProvider methodProvider) {
-            _methodProvider = methodProvider;
+            _methodProvider = (global::MethodProvider)methodProvider;
         }
 
         /// <summary>
@@ -2667,7 +2671,7 @@ public partial class SkipGenerationProvider : global::ISkipGenerationProvider, I
     /// Implementation type: <see cref="global::MyService"/>
     /// </summary>
     public global::IMyService MyService => _myService;
-    private global::MyService _myService;
+    private readonly global::MyService _myService;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -2755,6 +2759,7 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
     /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public FastProvider() {
+        _disposeList = [];
     }
 
     /// <summary>
@@ -2796,7 +2801,7 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
     public global::IDisposableService DisposableService {
         get {
             global::DisposableService disposableService = new global::DisposableService();
-            disposeList.Add(disposableService);
+            _disposeList.Add(disposableService);
             return disposableService;
         }
     }
@@ -2831,13 +2836,13 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
     }
 
 
-    private global::System.Collections.Generic.List<IDisposable> disposeList = [];
+    private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
     /// </summary>
     public void Dispose() {
-        foreach (IDisposable disposable in disposeList)
+        foreach (IDisposable disposable in _disposeList)
             disposable.Dispose();
     }
 
@@ -2845,7 +2850,7 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
     /// Disposes all disposable services instantiated by this provider asynchronously.
     /// </summary>
     public ValueTask DisposeAsync() {
-        foreach (IDisposable disposable in disposeList)
+        foreach (IDisposable disposable in _disposeList)
             disposable.Dispose();
 
         return default;
@@ -2868,14 +2873,16 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::IFastProvider.IScope, IServiceProvider {
-        private global::IFastProvider _fastProvider;
+        private readonly global::FastProvider _fastProvider;
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
-        /// <param name="fastProvider">An instance of the service provider this provider is the scope of.</param>
+        /// <param name="fastProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="FastProvider"/>.</param>
         public Scope(global::IFastProvider fastProvider) {
-            _fastProvider = fastProvider;
+            _fastProvider = (global::FastProvider)fastProvider;
+
+            _disposeList = [];
         }
 
         /// <summary>
@@ -2909,7 +2916,7 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
         public global::IDisposableService DisposableService {
             get {
                 global::DisposableService disposableService = new global::DisposableService();
-                disposeList.Add(disposableService);
+                _disposeList.Add(disposableService);
                 return disposableService;
             }
         }
@@ -2948,13 +2955,13 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
         }
 
 
-        private global::System.Collections.Generic.List<IDisposable> disposeList = [];
+        private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
         /// </summary>
         public void Dispose() {
-            foreach (IDisposable disposable in disposeList)
+            foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
         }
 
@@ -2962,7 +2969,7 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
         /// Disposes all disposable services instantiated by this provider asynchronously.
         /// </summary>
         public ValueTask DisposeAsync() {
-            foreach (IDisposable disposable in disposeList)
+            foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
             return default;
@@ -3113,18 +3120,18 @@ public partial class OverwritingProvider : global::IOverwritingProvider, IServic
     /// </para>
     /// </summary>
     public sealed partial class Scope : global::IOverwritingProvider.IScope, IServiceProvider {
-        private global::IOverwritingProvider _overwritingProvider;
+        private global::OverwritingProvider _overwritingProvider;
 
         /// <summary>
         /// Constructs non-lazy scoped services. Should be called inside the constructor at the end.
         /// </summary>
         /// <param name="overwritingProvider">
-        /// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />
+        /// The ServiceProvider this ScopedProvider is created from. It must be an instance of <see cref="OverwritingProvider"/>. Usually it is the object you get injected to your constructor parameter:<br />
         /// public Scope([Dependency] IOverwritingProvider overwritingProvider) { ...
         /// </param>
         [System.Diagnostics.CodeAnalysis.MemberNotNull(nameof(_overwritingProvider))]
         private void InitServices(global::IOverwritingProvider overwritingProvider) {
-            _overwritingProvider = overwritingProvider;
+            _overwritingProvider = (global::OverwritingProvider)overwritingProvider;
         }
 
         /// <summary>
