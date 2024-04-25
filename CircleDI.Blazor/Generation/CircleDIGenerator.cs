@@ -119,7 +119,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
         // containing types
         for (int i = moduleName.ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.Append(indent.Sp0);
+            builder.AppendIndent(indent);
             builder.Append("partial ");
             builder.Append(moduleName.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
@@ -133,14 +133,14 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             if (component is null)
                 continue;
 
-            builder.Append(indent.Sp0);
+            builder.AppendIndent(indent);
             builder.Append("[global::CircleDIAttributes.TransientAttribute<");
             builder.AppendOpenFullyQualified(new TypeName(component));
             builder.Append(">(NoDispose = true)]\n");
         }
 
         // class head
-        builder.Append(indent.Sp0);
+        builder.AppendIndent(indent);
         builder.Append("partial ");
         builder.Append(moduleName.Keyword.AsString());
         builder.Append(' ');
@@ -151,7 +151,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         // containing types closing
         for (int i = 0; i < moduleName.ContainingTypeList.Count; i++) {
             indent.DecreaseLevel();
-            builder.Append(indent.Sp0);
+            builder.AppendIndent(indent);
             builder.Append('}');
             builder.Append('\n');
         }
@@ -384,7 +384,7 @@ file static class RegisterServiceProviderAttributeExtension {
 
         // containing types
         for (int i = serviceProvider.Identifier.ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.Append(indent.Sp0);
+            builder.AppendIndent(indent);
             builder.Append("partial ");
             builder.Append(serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
@@ -394,7 +394,7 @@ file static class RegisterServiceProviderAttributeExtension {
         }
 
         // class head
-        builder.Append(indent.Sp0);
+        builder.AppendIndent(indent);
         builder.Append("partial ");
         builder.Append(serviceProvider.Keyword.AsString());
         builder.Append(' ');
@@ -403,51 +403,55 @@ file static class RegisterServiceProviderAttributeExtension {
 
         // singletons getter
         if (!blazorServiceGeneration.HasFlag(BlazorServiceGeneration.Hybrid))
-            AppendGetMethod(builder, indent.Sp4, "GetConfiguration", "Microsoft.Extensions.Configuration.IConfiguration");
-        AppendGetMethod(builder, indent.Sp4, "GetLoggerFactory", "Microsoft.Extensions.Logging.ILoggerFactory");
+            AppendGetMethod(builder, indent, "GetConfiguration", "Microsoft.Extensions.Configuration.IConfiguration");
+        AppendGetMethod(builder, indent, "GetLoggerFactory", "Microsoft.Extensions.Logging.ILoggerFactory");
         // when unbound/open generics support
         // serviceProvider.SingletonList.Add(new Service() { ServiceType = "Microsoft.Extensions.Logging.ILogger<>" }
         switch (blazorServiceGeneration) {
             case BlazorServiceGeneration.Webassembly:
-                AppendGetMethod(builder, indent.Sp4, "GetLazyAssemblyLoader", "Microsoft.AspNetCore.Components.WebAssembly.Services.LazyAssemblyLoader");
-                AppendGetMethod(builder, indent.Sp4, "GetWebAssemblyHostEnvironment", "Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment");
+                AppendGetMethod(builder, indent, "GetLazyAssemblyLoader", "Microsoft.AspNetCore.Components.WebAssembly.Services.LazyAssemblyLoader");
+                AppendGetMethod(builder, indent, "GetWebAssemblyHostEnvironment", "Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment");
                 break;
             case BlazorServiceGeneration.Server:
-                AppendGetMethod(builder, indent.Sp4, "GetWebHostEnvironment", "Microsoft.AspNetCore.Hosting.IWebHostEnvironment");
+                AppendGetMethod(builder, indent, "GetWebHostEnvironment", "Microsoft.AspNetCore.Hosting.IWebHostEnvironment");
                 break;
         }
 
         // scope head
         builder.Append('\n');
-        builder.Append(indent.Sp4);
+        builder.AppendIndent(indent, 1);
         builder.Append("partial ");
         builder.Append(serviceProvider.KeywordScope.AsString());
         builder.Append(" Scope { \n");
 
+        indent.IncreaseLevel();
+
         // scope getter
-        AppendGetMethod(builder, indent.Sp8, "GetJSRuntime", "Microsoft.JSInterop.IJSRuntime");
-        AppendGetMethod(builder, indent.Sp8, "GetNavigationManager", "Microsoft.AspNetCore.Components.NavigationManager");
-        AppendGetMethod(builder, indent.Sp8, "GetNavigationInterception", "Microsoft.AspNetCore.Components.Routing.INavigationInterception");
-        AppendGetMethod(builder, indent.Sp8, "GetScrollToLocationHash", "Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash");
-        AppendGetMethod(builder, indent.Sp8, "GetErrorBoundaryLogger", "Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger");
+        AppendGetMethod(builder, indent, "GetJSRuntime", "Microsoft.JSInterop.IJSRuntime");
+        AppendGetMethod(builder, indent, "GetNavigationManager", "Microsoft.AspNetCore.Components.NavigationManager");
+        AppendGetMethod(builder, indent, "GetNavigationInterception", "Microsoft.AspNetCore.Components.Routing.INavigationInterception");
+        AppendGetMethod(builder, indent, "GetScrollToLocationHash", "Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash");
+        AppendGetMethod(builder, indent, "GetErrorBoundaryLogger", "Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger");
         if (!blazorServiceGeneration.HasFlag(BlazorServiceGeneration.Hybrid)) {
-            AppendGetMethod(builder, indent.Sp8, "GetComponentStatePersistenceManager", "Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager");
-            AppendGetMethod(builder, indent.Sp8, "GetPersistentComponentState", "Microsoft.AspNetCore.Components.PersistentComponentState");
-            AppendGetMethod(builder, indent.Sp8, "GetAntiforgeryStateProvider", "Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider");
+            AppendGetMethod(builder, indent, "GetComponentStatePersistenceManager", "Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager");
+            AppendGetMethod(builder, indent, "GetPersistentComponentState", "Microsoft.AspNetCore.Components.PersistentComponentState");
+            AppendGetMethod(builder, indent, "GetAntiforgeryStateProvider", "Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider");
         }
 
+        indent.DecreaseLevel();
+
         // closing brackets
-        builder.Append(indent.Sp4);
+        builder.AppendIndent(indent, 1);
         builder.Append('}');
         builder.Append('\n');
-        builder.Append(indent.Sp0);
+        builder.AppendIndent(indent);
         builder.Append('}');
         builder.Append('\n');
 
         // containing types closing
         for (int i = 0; i < serviceProvider.Identifier.ContainingTypeList.Count; i++) {
             indent.DecreaseLevel();
-            builder.Append(indent.Sp0);
+            builder.AppendIndent(indent);
             builder.Append('}');
             builder.Append('\n');
         }
@@ -460,8 +464,8 @@ file static class RegisterServiceProviderAttributeExtension {
         stringBuilderPool.Return(builder);
 
 
-        static void AppendGetMethod(StringBuilder builder, string indent, string methodName, string type) {
-            builder.Append(indent);
+        static void AppendGetMethod(StringBuilder builder, Indent indent, string methodName, string type) {
+            builder.AppendIndent(indent, 1);
             builder.Append("private global::");
             builder.Append(type);
             builder.Append(' ');

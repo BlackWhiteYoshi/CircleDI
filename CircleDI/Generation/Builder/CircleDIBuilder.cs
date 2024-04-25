@@ -51,7 +51,7 @@ public static class CircleDIBuilder {
 
         // containing types
         for (int i = serviceProvider.Identifier.ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.Append(core.indent.Sp0);
+            builder.AppendIndent(core.indent);
             builder.Append("partial ");
             builder.Append(serviceProvider.Identifier.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
@@ -62,7 +62,7 @@ public static class CircleDIBuilder {
 
         // class head
         core.AppendClassSummary();
-        builder.Append(core.indent.Sp0);
+        builder.AppendIndent(core.indent);
         foreach (string modifier in serviceProvider.Modifiers) {
             builder.Append(modifier);
             builder.Append(' ');
@@ -109,7 +109,7 @@ public static class CircleDIBuilder {
 
             // class head
             core.AppendClassSummary();
-            builder.Append(core.indent.Sp0);
+            builder.AppendIndent(core.indent);
             foreach (string modifier in serviceProvider.ModifiersScope) {
                 builder.Append(modifier);
                 builder.Append(' ');
@@ -141,7 +141,7 @@ public static class CircleDIBuilder {
                 };
 
                 core.AppendServiceSummary(service);
-                builder.Append(core.indent.Sp4);
+                builder.AppendIndent(core.indent, 1);
                 builder.Append("public ");
                 builder.Append(refOrEmpty);
                 builder.Append("global::");
@@ -170,7 +170,7 @@ public static class CircleDIBuilder {
 
             // ScopedProvider closing
             builder.Length -= 2;
-            builder.Append(core.indent.Sp0);
+            builder.AppendIndent(core.indent);
             builder.Append("}\n");
 
             core.indent.DecreaseLevel();
@@ -186,12 +186,12 @@ public static class CircleDIBuilder {
         foreach (Service service in serviceProvider.SortedServiceList)
             foreach (PropertyDependency dependency in service.PropertyDependencyList)
                 if (dependency.IsCircular && dependency.IsInit) {
-                    builder.Append(core.indent.Sp4);
+                    builder.AppendIndent(core.indent, 1);
                     builder.Append("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = \"set_");
                     builder.Append(dependency.Name);
                     builder.Append("\")]\n");
 
-                    builder.Append(core.indent.Sp4);
+                    builder.AppendIndent(core.indent, 1);
                     builder.Append("private extern static void Set_");
                     builder.Append(service.Name);
                     builder.Append('_');
@@ -210,13 +210,13 @@ public static class CircleDIBuilder {
 
 
         // ServiceProvider closing
-        builder.Append(core.indent.Sp0);
+        builder.AppendIndent(core.indent);
         builder.Append("}\n");
 
         // containing types closing
         for (int i = 0; i < serviceProvider.Identifier.ContainingTypeList.Count; i++) {
             core.indent.DecreaseLevel();
-            builder.Append(core.indent.Sp0);
+            builder.AppendIndent(core.indent);
             builder.Append("}\n");
         }
 
@@ -255,7 +255,7 @@ public static class CircleDIBuilder {
 
         // containing types
         for (int i = serviceProvider.InterfaceIdentifier.ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.Append(core.indent.Sp0);
+            builder.AppendIndent(core.indent);
             builder.Append("partial ");
             builder.Append(serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString());
             builder.Append(' ');
@@ -266,7 +266,7 @@ public static class CircleDIBuilder {
 
         // interface head
         core.AppendClassSummary();
-        builder.Append(core.indent.Sp0);
+        builder.AppendIndent(core.indent);
         builder.Append(serviceProvider.InterfaceAccessibility.AsString());
         builder.Append("partial interface ");
         builder.Append(serviceProvider.InterfaceIdentifier.Name);
@@ -283,7 +283,7 @@ public static class CircleDIBuilder {
         // "special" method CreateScope()
         if (serviceProvider.GenerateScope) {
             core.AppendCreateScopeSummary();
-            builder.Append(core.indent.Sp4);
+            builder.AppendIndent(core.indent, 1);
             builder.Append("global::");
             builder.AppendOpenFullyQualified(serviceProvider.InterfaceIdentifierScope);
             builder.Append(" CreateScope");
@@ -311,7 +311,7 @@ public static class CircleDIBuilder {
                 continue;
 
             core.AppendServiceSummary(service);
-            builder.Append(core.indent.Sp4);
+            builder.AppendIndent(core.indent, 1);
 
             if (service.IsRefable && !serviceProvider.Keyword.HasFlag(TypeKeyword.Struct))
                 builder.Append("ref ");
@@ -338,7 +338,7 @@ public static class CircleDIBuilder {
 
             // class head
             core.AppendClassSummary();
-            builder.Append(core.indent.Sp0);
+            builder.AppendIndent(core.indent);
             builder.Append(serviceProvider.InterfaceAccessibilityScope.AsString());
             builder.Append("partial interface IScope");
             builder.AppendOpenGenerics(serviceProvider.InterfaceIdentifierScope);
@@ -354,7 +354,7 @@ public static class CircleDIBuilder {
             // service getter
             foreach (Service service in serviceProvider.SortedServiceList) {
                 core.AppendServiceSummary(service);
-                builder.Append(core.indent.Sp4);
+                builder.AppendIndent(core.indent, 1);
 
                 bool isSingletonNotRefable = service.Lifetime == ServiceLifetime.Singleton && serviceProvider.Keyword.HasFlag(TypeKeyword.Struct);
                 if (service.IsRefable && !serviceProvider.KeywordScope.HasFlag(TypeKeyword.Struct) && !isSingletonNotRefable)
@@ -376,7 +376,7 @@ public static class CircleDIBuilder {
             }
 
             builder.Length--;
-            builder.Append(core.indent.Sp0);
+            builder.AppendIndent(core.indent);
             builder.Append("}\n");
 
             core.indent.DecreaseLevel();
@@ -384,13 +384,13 @@ public static class CircleDIBuilder {
         else
             builder.Length--;
 
-        builder.Append(core.indent.Sp0);
+        builder.AppendIndent(core.indent);
         builder.Append("}\n");
 
         // containing types closing
         for (int i = 0; i < serviceProvider.InterfaceIdentifier.ContainingTypeList.Count; i++) {
             core.indent.DecreaseLevel();
-            builder.Append(core.indent.Sp0);
+            builder.AppendIndent(core.indent);
             builder.Append("}\n");
         }
 

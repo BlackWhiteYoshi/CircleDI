@@ -10,6 +10,23 @@ namespace CircleDI.Extensions;
 /// </summary>
 public static class StringBuilderExtensions {
     /// <summary>
+    /// Appends <see cref="Indent.Level"/> of copies of <see cref="Indent.CHAR"/>.
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="indent"></param>
+    public static void AppendIndent(this StringBuilder builder, Indent indent) => builder.Append(Indent.CHAR, indent.Level);
+
+    /// <summary>
+    /// Appends a number of copies of <see cref="Indent.CHAR"/>.<br />
+    /// THe number of copies is:<br />
+    /// <see cref="Indent.Level"/> + <see cref="Indent.AMOUNT"/> * extraAmount
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="indent"></param>
+    /// <param name="extraAmount"></param>
+    public static void AppendIndent(this StringBuilder builder, Indent indent, int extraAmount) => builder.Append(Indent.CHAR, indent.Level + Indent.AMOUNT * extraAmount);
+
+    /// <summary>
     /// Appends the given string whereat the first character will be appended as lowercase.
     /// </summary>
     /// <param name="builder"></param>
