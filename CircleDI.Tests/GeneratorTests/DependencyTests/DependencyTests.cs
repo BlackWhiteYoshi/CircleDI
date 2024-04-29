@@ -129,7 +129,7 @@ public static class DependencyTests {
             public sealed partial class TestProvider;
             
             public interface IScopedService;
-            public sealed class ScopedService(ISingletonDependency singletonDependency) : ScopedService;
+            public sealed class ScopedService(ISingletonDependency singletonDependency) : IScopedService;
 
             public interface ISingletonDependency;
             public sealed class SingletonDependency : ISingletonDependency;

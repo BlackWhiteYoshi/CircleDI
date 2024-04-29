@@ -83,9 +83,9 @@ public static class CircleDIBuilder {
 
         core.AppendConstructor();
         core.AppendCreateScope();
-        core.AppendServicesGetter();
-        core.AppendServicesTransient();
-        core.AppendServicesDelegate();
+        core.AppendSingletonScopedServices();
+        core.AppendTransientServices();
+        core.AppendDelegateServices();
         core.AppendIServiceProviderNotScoped();
         core.AppendDisposeMethods();
 
@@ -116,10 +116,10 @@ public static class CircleDIBuilder {
             core.indent.IncreaseLevel(); // 2
 
             core.AppendConstructor();
-            core.AppendServicesGetter();
+            core.AppendSingletonScopedServices();
             core.AppendSingletonExposing();
-            core.AppendServicesTransient();
-            core.AppendServicesDelegate();
+            core.AppendTransientServices();
+            core.AppendDelegateServices();
             core.AppendIServiceProviderAllServices();
             core.AppendDisposeMethods();
 

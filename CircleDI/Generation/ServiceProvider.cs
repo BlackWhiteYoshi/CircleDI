@@ -482,6 +482,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     continue;
                 }
 
+                ModuleRegistration moduleRegistration = new(this, generateScope, creationTimeMainProvider, creationTimeScopeProvider, getAccessorMainProvider, getAccessorScopeProvider);
                 switch (attribute.Name) {
                     case "SingletonAttribute": {
                         Service service = new(serviceProvider, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, ErrorList);
@@ -520,7 +521,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         break;
                     }
                     case "ImportAttribute": {
-                        ModuleRegistration.RegisterServices(attributeData, this, generateScope, creationTimeMainProvider, creationTimeScopeProvider, getAccessorMainProvider, getAccessorScopeProvider);
+                        moduleRegistration.RegisterServices(attributeData);
                         break;
                     }
                 }
@@ -617,40 +618,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// <summary>
     /// This type can add all services in a module.
     /// </summary>
-    private readonly struct ModuleRegistration {
+    private readonly struct ModuleRegistration(ServiceProvider serviceProvider, bool generateScope, CreationTiming creationTimeMainProvider, CreationTiming creationTimeScopeProvider, GetAccess getAccessorMainProvider, GetAccess getAccessorScopeProvider) {
+        private readonly List<INamedTypeSymbol> path = [];
+
         /// <summary>
         /// Adds all services from the module to the service provider.
         /// </summary>
         /// <param name="importAttribute"></param>
-        /// <param name="serviceProvider"></param>
-        /// <param name="generateScope"></param>
-        /// <param name="creationTimeMainProvider"></param>
-        /// <param name="creationTimeScopeProvider"></param>
-        /// <param name="getAccessorMainProvider"></param>
-        /// <param name="getAccessorScopeProvider"></param>
-        public static void RegisterServices(AttributeData importAttribute, ServiceProvider serviceProvider, bool generateScope, CreationTiming creationTimeMainProvider, CreationTiming creationTimeScopeProvider, GetAccess getAccessorMainProvider, GetAccess getAccessorScopeProvider)
-            => new ModuleRegistration(serviceProvider, generateScope, creationTimeMainProvider, creationTimeScopeProvider, getAccessorMainProvider, getAccessorScopeProvider).RegisterServices(importAttribute);
-
-
-        private readonly ServiceProvider serviceProvider;
-        private readonly bool generateScope;
-        private readonly CreationTiming creationTimeMainProvider;
-        private readonly CreationTiming creationTimeScopeProvider;
-        private readonly GetAccess getAccessorMainProvider;
-        private readonly GetAccess getAccessorScopeProvider;
-        private readonly List<INamedTypeSymbol> path = [];
-
-        private ModuleRegistration(ServiceProvider serviceProvider, bool generateScope, CreationTiming creationTimeMainProvider, CreationTiming creationTimeScopeProvider, GetAccess getAccessorMainProvider, GetAccess getAccessorScopeProvider) {
-            this.serviceProvider = serviceProvider;
-            this.generateScope = generateScope;
-            this.creationTimeMainProvider = creationTimeMainProvider;
-            this.creationTimeScopeProvider = creationTimeScopeProvider;
-            this.getAccessorMainProvider = getAccessorMainProvider;
-            this.getAccessorScopeProvider = getAccessorScopeProvider;
-        }
-
-
-        private readonly void RegisterServices(AttributeData importAttribute) {
+        public readonly void RegisterServices(AttributeData importAttribute) {
             Debug.Assert(importAttribute.AttributeClass?.TypeArguments.Length > 0);
 
             INamedTypeSymbol module = (INamedTypeSymbol)importAttribute.AttributeClass!.TypeArguments[0];
