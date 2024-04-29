@@ -116,6 +116,32 @@ public static class DependencyTests {
         return Verify(sourceTextClass);
     }
 
+    [Fact]
+    public static Task ScopedServiceOnLazySingleton() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Scoped<IScopedService, ScopedService>]
+            [Singleton<ISingletonDependency, SingletonDependency>(CreationTime = CreationTiming.Lazy)]
+            public sealed partial class TestProvider;
+            
+            public interface IScopedService;
+            public sealed class ScopedService(ISingletonDependency singletonDependency) : ScopedService;
+
+            public interface ISingletonDependency;
+            public sealed class SingletonDependency : ISingletonDependency;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
 
     [Fact]
     public static Task MultipleSingleton() {
@@ -599,6 +625,103 @@ public static class DependencyTests {
         Assert.Single(diagnostics);
         Assert.Equal("CDI019", diagnostics[0].Id);
         Assert.Equal("Multiple ConstructorAttributes at ServiceImplementation 'MyCode.TestService', there must be exactly one when there are multiple constructors", diagnostics[0].GetMessage());
+    }
+
+
+    [Fact]
+    public static Task DeepTreeConstructor() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+
+            [Scoped<IRoot, Root>]
+
+            [Scoped<S1>]
+            [Transient<T1>]
+            [Transient<T15>]
+            
+            [Transient<T2>]
+            [Singleton<S2>(CreationTime = CreationTiming.Lazy]
+            
+            [Scoped<S3_1>]
+            [Scoped<S3_2>]
+            [Transient<T3>]
+            public sealed partial class TestProvider;
+            
+
+            public interface IRoot;
+            public sealed class Root(T1 t1, S1 s1) : Iroot;
+            
+            public sealed class S1(T2 t2, S2 s2);
+            public sealed class T1(T15 t15);
+            public sealed class T15(T2 t2) {
+                public required IRoot Root { private get; init; }
+            }
+            
+            public sealed class T2(S3_1 s3_1, S3_2 s3_2, T3 t3);
+            public sealed class S2(T3 t3);
+            
+            public sealed class S3_1;
+            public sealed class S3_2;
+            public sealed class T3 : System.IDisposable, System.IAsyncDisposable;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
+    }
+
+    [Fact]
+    public static Task DeepTreeLazy() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider(CreationTime = CreationTiming.Lazy)]
+
+            [Scoped<IRoot, Root>]
+
+            [Scoped<S1>]
+            [Transient<T1>]
+            [Transient<T15>]
+            
+            [Transient<T2>]
+            [Singleton<S2>(CreationTime = CreationTiming.Lazy]
+            
+            [Scoped<S3_1>]
+            [Scoped<S3_2>]
+            [Transient<T3>]
+            public sealed partial class TestProvider;
+            
+
+            public interface IRoot;
+            public sealed class Root(T1 t1, S1 s1) : Iroot;
+            
+            public sealed class S1(T2 t2, S2 s2);
+            public sealed class T1(T15 t15);
+            public sealed class T15(T2 t2) {
+                public required IRoot Root { private get; init; }
+            }
+            
+            public sealed class T2(S3_1 s3_1, S3_2 s3_2, T3 t3);
+            public sealed class S2(T3 t3);
+            
+            public sealed class S3_1;
+            public sealed class S3_2;
+            public sealed class T3 : System.IDisposable, System.IAsyncDisposable;
+            
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        return Verify(sourceTextClass);
     }
 
 

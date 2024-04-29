@@ -956,9 +956,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         }
 
         private readonly void InitNodeRecursion(Service service) {
-            if (service.TreeState.HasFlag(DependencyTreeFlags.Traversed))
+            if (service.TreeState.visited.HasFlag(serviceProvider.DependencyTreeFlag))
                 return;
-            service.TreeState |= DependencyTreeFlags.Traversed;
+            service.TreeState.visited = serviceProvider.DependencyTreeFlag;
 
             try {
                 foreach (Dependency dependency in service.Dependencies) {
@@ -1042,9 +1042,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         }
 
                         // check CreationTiming
-                        if (service.CreationTimeTransitive == CreationTiming.Constructor && dependency.Service.CreationTimeTransitive == CreationTiming.Lazy)
-                            if (!dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient))
-                                dependency.Service.CreationTimeTransitive = CreationTiming.Constructor;
+                        if (!dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient))
+                            // singleton or scoped dependency (delegate dependencies are automatically filtered at the next step)
+                            if (service.CreationTimeTransitive == CreationTiming.Constructor && dependency.Service.CreationTimeTransitive == CreationTiming.Lazy)
+                                // constructor on lazy
+                                if (service.Lifetime == dependency.Service.Lifetime)
+                                    // singleton on singleton or scoped on scoped
+                                    dependency.Service.CreationTimeTransitive = CreationTiming.Constructor;
 
                         // set cycleLists active
                         for (int i = 0; i < cycleList.Count; i++)
@@ -1167,6 +1171,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 }
             }
             finally {
+                service.TreeState.init = serviceProvider.DependencyTreeFlag;
                 for (int i = 0; i < cycleList.Count; i++)
                     if (cycleList[i].cycleEnd == path.Count)
                         cycleList.RemoveAt(i--);
@@ -1180,7 +1185,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// Each node has 32 flags, where bit 0 is reserved for creating the tree, so the tree can be visited 31 times before the flags must be resetted.<br />
     /// For advancing this flag to the next bit, see <see cref="NextDependencyTreeFlag"/>.
     /// </summary>
-    public DependencyTreeFlags DependencyTreeFlag { get; private set; } = DependencyTreeFlags.Traversed;
+    public DependencyTreeFlags DependencyTreeFlag { get; private set; } = DependencyTreeFlags.New;
 
     /// <summary>
     /// Advances <see cref="DependencyTreeFlag"/> to the next bit.<br />
@@ -1188,13 +1193,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// </summary>
     public void NextDependencyTreeFlag() {
         // check if left most bit (bit 32) is currently 1
-        if (DependencyTreeFlag == (DependencyTreeFlags)long.MinValue) {
-            // reset all flags, does not matter if DependencyTreeFlags.Traversed get also resetted
+        if (DependencyTreeFlag == (DependencyTreeFlags)int.MinValue) {
+            // reset all flags
             foreach (Service service in SortedServiceList)
-                service.TreeState = DependencyTreeFlags.New;
-            DependencyTreeFlag = DependencyTreeFlags.Traversed;
+                service.TreeState = default;
+            DependencyTreeFlag = DependencyTreeFlags.New;
         }
-        DependencyTreeFlag = (DependencyTreeFlags)((long)DependencyTreeFlag << 1);
+        else
+            DependencyTreeFlag = (DependencyTreeFlags)((int)DependencyTreeFlag << 1);
     }
 
     #endregion

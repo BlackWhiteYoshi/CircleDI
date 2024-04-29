@@ -52,11 +52,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
-            global::MyCode.TestDependency testDependency_TestService = new global::MyCode.TestDependency();
-            global::MyCode.TestService testService = new global::MyCode.TestService() {
-                TestDependency = testDependency_TestService
+            global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
+            global::MyCode.TestService testService_1 = new global::MyCode.TestService() {
+                TestDependency = testDependency
             };
-            return testService;
+            return testService_1;
         }
     }
 
@@ -165,11 +165,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestDependency testDependency_TestService = new global::MyCode.TestDependency();
-                global::MyCode.TestService testService = new global::MyCode.TestService() {
-                    TestDependency = testDependency_TestService
+                global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
+                global::MyCode.TestService testService_1 = new global::MyCode.TestService() {
+                    TestDependency = testDependency
                 };
-                return testService;
+                return testService_1;
             }
         }
 

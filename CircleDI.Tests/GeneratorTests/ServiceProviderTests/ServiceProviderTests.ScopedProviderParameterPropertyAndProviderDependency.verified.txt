@@ -33,9 +33,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     public global::MyCode.ITestProvider.IScope CreateScope(global::MyCode.IService1 service1, global::MyCode.IService3 service3) {
-        global::MyCode.Service2 service2_MethodCreateScope = new global::MyCode.Service2();
+        global::MyCode.Service2 service2 = new global::MyCode.Service2();
         return new global::MyCode.TestProvider.Scope(this, service1) {
-            Service2 = service2_MethodCreateScope,
+            Service2 = service2,
             Service3 = service3
         };
     }

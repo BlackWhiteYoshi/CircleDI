@@ -10,9 +10,9 @@ namespace MyCode;
 
 /// <summary>
 /// <para>
-/// Number of services registered: 3<br />
+/// Number of services registered: 4<br />
 /// - Singleton: 2<br />
-/// - Scoped: 1<br />
+/// - Scoped: 2<br />
 /// - Transient: 0<br />
 /// - Delegate: 0
 /// </para>
@@ -39,20 +39,20 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::MyCode.ITestService"/><br />
-    /// Implementation type: <see cref="global::MyCode.TestService"/>
+    /// Service type: <see cref="global::MyCode.ISingletonDependency"/><br />
+    /// Implementation type: <see cref="global::MyCode.SingletonDependency"/>
     /// </summary>
-    public global::MyCode.ITestService TestService {
+    public global::MyCode.ISingletonDependency SingletonDependency {
         get {
-            if (_testService is null)
+            if (_singletonDependency is null)
                 lock (this)
-                    if (_testService is null) {
-                        _testService = new global::MyCode.TestService();
+                    if (_singletonDependency is null) {
+                        _singletonDependency = new global::MyCode.SingletonDependency();
                     }
-            return (global::MyCode.ITestService)_testService;
+            return (global::MyCode.ISingletonDependency)_singletonDependency;
         }
     }
-    private global::MyCode.TestService? _testService;
+    private global::MyCode.SingletonDependency? _singletonDependency;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -73,13 +73,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
         switch (serviceType.Name) {
-            case "ITestService":
-                if (serviceType == typeof(global::MyCode.ITestService))
-                    return TestService;
-                return null;
             case "ITestProvider":
                 if (serviceType == typeof(global::MyCode.ITestProvider))
                     return Self;
+                return null;
+            case "ISingletonDependency":
+                if (serviceType == typeof(global::MyCode.ISingletonDependency))
+                    return SingletonDependency;
                 return null;
             default:
                 return null;
@@ -91,23 +91,22 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Disposes all disposable services instantiated by this provider.
     /// </summary>
     public void Dispose() {
-        _ = (_testService as IAsyncDisposable)?.DisposeAsync().Preserve();
     }
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider asynchronously.
     /// </summary>
     public ValueTask DisposeAsync() {
-        return (_testService as IAsyncDisposable)?.DisposeAsync() ?? default;
+        return default;
     }
 
 
 
     /// <summary>
     /// <para>
-    /// Number of services registered: 3<br />
+    /// Number of services registered: 4<br />
     /// - Singleton: 2<br />
-    /// - Scoped: 1<br />
+    /// - Scoped: 2<br />
     /// - Transient: 0<br />
     /// - Delegate: 0
     /// </para>
@@ -126,7 +125,22 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// <param name="testProvider">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="TestProvider"/>.</param>
         public Scope(global::MyCode.ITestProvider testProvider) {
             _testProvider = (global::MyCode.TestProvider)testProvider;
+
+            if (_testProvider._singletonDependency is null)
+                lock (_testProvider)
+                    if (_testProvider._singletonDependency is null) {
+                        _testProvider._singletonDependency = new global::MyCode.SingletonDependency();
+                    }
+            _scopedService = new global::MyCode.ScopedService(_testProvider._singletonDependency);
         }
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
+        /// Service type: <see cref="global::MyCode.IScopedService"/><br />
+        /// Implementation type: <see cref="global::MyCode.ScopedService"/>
+        /// </summary>
+        public global::MyCode.IScopedService ScopedService => _scopedService;
+        private readonly global::MyCode.ScopedService _scopedService;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -138,10 +152,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-        /// Service type: <see cref="global::MyCode.ITestService"/><br />
-        /// Implementation type: <see cref="global::MyCode.TestService"/>
+        /// Service type: <see cref="global::MyCode.ISingletonDependency"/><br />
+        /// Implementation type: <see cref="global::MyCode.SingletonDependency"/>
         /// </summary>
-        public global::MyCode.ITestService TestService => _testProvider.TestService;
+        public global::MyCode.ISingletonDependency SingletonDependency => _testProvider.SingletonDependency;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -166,13 +180,17 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                     if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                         return SelfScope;
                     return null;
-                case "ITestService":
-                    if (serviceType == typeof(global::MyCode.ITestService))
-                        return TestService;
-                    return null;
                 case "ITestProvider":
                     if (serviceType == typeof(global::MyCode.ITestProvider))
                         return Self;
+                    return null;
+                case "IScopedService":
+                    if (serviceType == typeof(global::MyCode.IScopedService))
+                        return ScopedService;
+                    return null;
+                case "ISingletonDependency":
+                    if (serviceType == typeof(global::MyCode.ISingletonDependency))
+                        return SingletonDependency;
                     return null;
                 default:
                     return null;

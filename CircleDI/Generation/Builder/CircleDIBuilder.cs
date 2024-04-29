@@ -79,26 +79,14 @@ public static class CircleDIBuilder {
             builder.Append(", ");
         }
         builder.Append("IServiceProvider {\n");
+        core.indent.IncreaseLevel(); // 1
 
-        // parameter fields, constructor or InitServices()
         core.AppendConstructor();
-
-        // "special" method CreateScope()
         core.AppendCreateScope();
-
-        // singletons getter/getMethods
         core.AppendServicesGetter();
-
-        // Transient services
         core.AppendServicesTransient();
-
-        // Delegate services
         core.AppendServicesDelegate();
-
-        // IServiceProvider
         core.AppendIServiceProviderNotScoped();
-
-        // Dispose
         core.AppendDisposeMethods();
 
 
@@ -125,91 +113,29 @@ public static class CircleDIBuilder {
                 builder.Append(", ");
             }
             builder.Append("IServiceProvider {\n");
+            core.indent.IncreaseLevel(); // 2
 
-            // parameter fields, constructor or InitServices()
             core.AppendConstructor();
-
-
-            // scoped getter/getMethods
             core.AppendServicesGetter();
-
-            // singleton exposing
-            foreach (Service service in serviceProvider.SingletonList) {
-                string refOrEmpty = (service.IsRefable && !serviceProvider.KeywordScope.HasFlag(TypeKeyword.Struct) && !serviceProvider.Keyword.HasFlag(TypeKeyword.Struct)) switch {
-                    true => "ref ",
-                    false => string.Empty
-                };
-
-                core.AppendServiceSummary(service);
-                builder.AppendIndent(core.indent, 1);
-                builder.Append("public ");
-                builder.Append(refOrEmpty);
-                builder.Append("global::");
-                builder.AppendClosedFullyQualified(service.ServiceType);
-                builder.Append(' ');
-                builder.AppendServiceGetter(service);
-                builder.Append(" => ");
-                builder.Append(refOrEmpty);
-                core.AppendServiceProviderField();
-                builder.AppendServiceGetter(service);
-                builder.Append(";\n\n");
-            }
-            builder.Append('\n');
-
-            // Transient services
+            core.AppendSingletonExposing();
             core.AppendServicesTransient();
-
-            // Delegate services
             core.AppendServicesDelegate();
-
-            // IServiceProvider
             core.AppendIServiceProviderAllServices();
-
-            // Dispose
             core.AppendDisposeMethods();
 
             // ScopedProvider closing
             builder.Length -= 2;
+            core.indent.DecreaseLevel(); // 1
             builder.AppendIndent(core.indent);
             builder.Append("}\n");
-
-            core.indent.DecreaseLevel();
         }
         else
             builder.Length -= 2;
 
-        
-        // UnsafeAccessor methods to access init-only circle dependencies
-        builder.Append("\n\n\n");
-        int currentPosition = builder.Length;
-
-        foreach (Service service in serviceProvider.SortedServiceList)
-            foreach (PropertyDependency dependency in service.PropertyDependencyList)
-                if (dependency.IsCircular && dependency.IsInit) {
-                    builder.AppendIndent(core.indent, 1);
-                    builder.Append("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = \"set_");
-                    builder.Append(dependency.Name);
-                    builder.Append("\")]\n");
-
-                    builder.AppendIndent(core.indent, 1);
-                    builder.Append("private extern static void Set_");
-                    builder.Append(service.Name);
-                    builder.Append('_');
-                    builder.Append(dependency.Name);
-                    builder.Append("(global::");
-                    builder.AppendClosedFullyQualified(dependency.ImplementationBaseName);
-                    builder.Append(" instance, global::");
-                    builder.AppendClosedFullyQualified(dependency.Service!.ServiceType);
-                    builder.Append(" value);\n\n");
-                }
-
-        if (builder.Length == currentPosition)
-            builder.Length -= 3;
-        else
-            builder.Length--;
-
+        core.AppendUnsafeAccessorMethods();
 
         // ServiceProvider closing
+        core.indent.DecreaseLevel(); // 0
         builder.AppendIndent(core.indent);
         builder.Append("}\n");
 
@@ -279,11 +205,12 @@ public static class CircleDIBuilder {
             _ => throw new Exception($"Invalid DisposeGenerationEnum value: serviceProvider.GenerateDisposeMethods = {serviceProvider.GenerateDisposeMethods}")
         });
         builder.Append(" {\n");
+        core.indent.IncreaseLevel(); // 1
 
         // "special" method CreateScope()
         if (serviceProvider.GenerateScope) {
             core.AppendCreateScopeSummary();
-            builder.AppendIndent(core.indent, 1);
+            builder.AppendIndent(core.indent);
             builder.Append("global::");
             builder.AppendOpenFullyQualified(serviceProvider.InterfaceIdentifierScope);
             builder.Append(" CreateScope");
@@ -311,7 +238,7 @@ public static class CircleDIBuilder {
                 continue;
 
             core.AppendServiceSummary(service);
-            builder.AppendIndent(core.indent, 1);
+            builder.AppendIndent(core.indent);
 
             if (service.IsRefable && !serviceProvider.Keyword.HasFlag(TypeKeyword.Struct))
                 builder.Append("ref ");
@@ -350,11 +277,12 @@ public static class CircleDIBuilder {
                 _ => throw new Exception($"Invalid DisposeGenerationEnum value: serviceProvider.GenerateDisposeMethodsScope = {serviceProvider.GenerateDisposeMethodsScope}")
             });
             builder.Append(" {\n");
+            core.indent.IncreaseLevel(); // 2
 
             // service getter
             foreach (Service service in serviceProvider.SortedServiceList) {
                 core.AppendServiceSummary(service);
-                builder.AppendIndent(core.indent, 1);
+                builder.AppendIndent(core.indent);
 
                 bool isSingletonNotRefable = service.Lifetime == ServiceLifetime.Singleton && serviceProvider.Keyword.HasFlag(TypeKeyword.Struct);
                 if (service.IsRefable && !serviceProvider.KeywordScope.HasFlag(TypeKeyword.Struct) && !isSingletonNotRefable)
@@ -376,14 +304,14 @@ public static class CircleDIBuilder {
             }
 
             builder.Length--;
+            core.indent.DecreaseLevel(); // 1
             builder.AppendIndent(core.indent);
             builder.Append("}\n");
-
-            core.indent.DecreaseLevel();
         }
         else
             builder.Length--;
 
+        core.indent.DecreaseLevel(); // 0
         builder.AppendIndent(core.indent);
         builder.Append("}\n");
 

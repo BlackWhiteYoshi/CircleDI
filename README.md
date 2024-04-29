@@ -363,3 +363,4 @@ And code conventions, structure, and quality is important to me. So there is a g
 - 0.8.0  
   Added ComponentModuleAttribute for cross project razor components importing.
   Breaking Change: ServiceProvider does not longer generate TransientAttributes, add ComponentModuleAttribute to the ServiceProvider to get the same behavior as before.
+  Improved service tree generation.

@@ -113,12 +113,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                if (_testService is null) {
+                if (_testService is null)
                     lock (this)
                         if (_testService is null) {
                             _testService = new global::MyCode.TestService();
                         }
-                }
                 return (global::MyCode.ITestService)_testService;
             }
         }

@@ -194,12 +194,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.JSInterop.IJSRuntime JSRuntime {
             get {
-                if (_jSRuntime is null) {
+                if (_jSRuntime is null)
                     lock (this)
                         if (_jSRuntime is null) {
                             _jSRuntime = GetJSRuntime();
                         }
-                }
                 return (global::Microsoft.JSInterop.IJSRuntime)_jSRuntime;
             }
         }
@@ -212,12 +211,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.NavigationManager NavigationManager {
             get {
-                if (_navigationManager is null) {
+                if (_navigationManager is null)
                     lock (this)
                         if (_navigationManager is null) {
                             _navigationManager = GetNavigationManager();
                         }
-                }
                 return (global::Microsoft.AspNetCore.Components.NavigationManager)_navigationManager;
             }
         }
@@ -230,12 +228,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.Routing.INavigationInterception NavigationInterception {
             get {
-                if (_navigationInterception is null) {
+                if (_navigationInterception is null)
                     lock (this)
                         if (_navigationInterception is null) {
                             _navigationInterception = GetNavigationInterception();
                         }
-                }
                 return (global::Microsoft.AspNetCore.Components.Routing.INavigationInterception)_navigationInterception;
             }
         }
@@ -248,12 +245,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash ScrollToLocationHash {
             get {
-                if (_scrollToLocationHash is null) {
+                if (_scrollToLocationHash is null)
                     lock (this)
                         if (_scrollToLocationHash is null) {
                             _scrollToLocationHash = GetScrollToLocationHash();
                         }
-                }
                 return (global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash)_scrollToLocationHash;
             }
         }
@@ -266,12 +262,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger ErrorBoundaryLogger {
             get {
-                if (_errorBoundaryLogger is null) {
+                if (_errorBoundaryLogger is null)
                     lock (this)
                         if (_errorBoundaryLogger is null) {
                             _errorBoundaryLogger = GetErrorBoundaryLogger();
                         }
-                }
                 return (global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger)_errorBoundaryLogger;
             }
         }
@@ -284,12 +279,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager ComponentStatePersistenceManager {
             get {
-                if (_componentStatePersistenceManager is null) {
+                if (_componentStatePersistenceManager is null)
                     lock (this)
                         if (_componentStatePersistenceManager is null) {
                             _componentStatePersistenceManager = GetComponentStatePersistenceManager();
                         }
-                }
                 return (global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager)_componentStatePersistenceManager;
             }
         }
@@ -302,12 +296,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.PersistentComponentState PersistentComponentState {
             get {
-                if (_persistentComponentState is null) {
+                if (_persistentComponentState is null)
                     lock (this)
                         if (_persistentComponentState is null) {
                             _persistentComponentState = GetPersistentComponentState();
                         }
-                }
                 return (global::Microsoft.AspNetCore.Components.PersistentComponentState)_persistentComponentState;
             }
         }
@@ -320,12 +313,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider AntiforgeryStateProvider {
             get {
-                if (_antiforgeryStateProvider is null) {
+                if (_antiforgeryStateProvider is null)
                     lock (this)
                         if (_antiforgeryStateProvider is null) {
                             _antiforgeryStateProvider = GetAntiforgeryStateProvider();
                         }
-                }
                 return (global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider)_antiforgeryStateProvider;
             }
         }

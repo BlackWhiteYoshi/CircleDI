@@ -24,6 +24,7 @@ This package includes all functionalities of CircleDI and including also the pla
 using CircleDIAttributes;
 
 [ServiceProvider]
+[ScopedProvider(ThreadSafe = false)]
 public partial class MyMinimalAPIServiceProvider;
 ```
 

@@ -143,12 +143,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.IScoped Scoped {
             get {
-                if (_scoped is null) {
+                if (_scoped is null)
                     lock (this)
                         if (_scoped is null) {
                             _scoped = new global::MyCode.Scoped();
                         }
-                }
                 return (global::MyCode.IScoped)_scoped;
             }
         }

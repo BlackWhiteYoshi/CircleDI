@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace CircleDI.Generation;
+﻿namespace CircleDI.Generation;
 
 /// <summary>
 /// An int wrapper to handle indentation.

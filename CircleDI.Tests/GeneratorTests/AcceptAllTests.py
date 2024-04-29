@@ -15,7 +15,7 @@ def accept_folder(directory: str):
         for filename in filenames:
             if filename.endswith(".received.txt"):
                 basename = filename[:-13]
-                os.system(f"move /y {dirpath}\{basename}.received.txt {dirpath}\{basename}.verified.txt")
+                os.system(f"move /y {dirpath}\\{basename}.received.txt {dirpath}\\{basename}.verified.txt")
                 print(f"accepted {basename}\n")
 
 

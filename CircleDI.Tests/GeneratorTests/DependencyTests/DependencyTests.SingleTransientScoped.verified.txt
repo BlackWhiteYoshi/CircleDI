@@ -139,9 +139,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestDependency testDependency_TestService = new global::MyCode.TestDependency(_scopedDependency);
-                global::MyCode.TestService testService = new global::MyCode.TestService(testDependency_TestService);
-                return testService;
+                global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency(_scopedDependency);
+                global::MyCode.TestService testService_1 = new global::MyCode.TestService(testDependency);
+                return testService_1;
             }
         }
 

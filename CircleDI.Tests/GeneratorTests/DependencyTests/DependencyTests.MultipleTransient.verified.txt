@@ -52,11 +52,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
-            global::MyCode.TestDependency1 testDependency1_TestService = new global::MyCode.TestDependency1();
-            global::MyCode.TestDependency2 testDependency2_TestService = new global::MyCode.TestDependency2();
-            global::MyCode.TestDependency3 testDependency3_TestService = new global::MyCode.TestDependency3();
-            global::MyCode.TestService testService = new global::MyCode.TestService(testDependency1_TestService, testDependency2_TestService, testDependency3_TestService);
-            return testService;
+            global::MyCode.TestDependency1 testDependency1 = new global::MyCode.TestDependency1();
+            global::MyCode.TestDependency2 testDependency2_1 = new global::MyCode.TestDependency2();
+            global::MyCode.TestDependency3 testDependency3_2 = new global::MyCode.TestDependency3();
+            global::MyCode.TestService testService_3 = new global::MyCode.TestService(testDependency1, testDependency2_1, testDependency3_2);
+            return testService_3;
         }
     }
 
@@ -197,11 +197,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestDependency1 testDependency1_TestService = new global::MyCode.TestDependency1();
-                global::MyCode.TestDependency2 testDependency2_TestService = new global::MyCode.TestDependency2();
-                global::MyCode.TestDependency3 testDependency3_TestService = new global::MyCode.TestDependency3();
-                global::MyCode.TestService testService = new global::MyCode.TestService(testDependency1_TestService, testDependency2_TestService, testDependency3_TestService);
-                return testService;
+                global::MyCode.TestDependency1 testDependency1 = new global::MyCode.TestDependency1();
+                global::MyCode.TestDependency2 testDependency2_1 = new global::MyCode.TestDependency2();
+                global::MyCode.TestDependency3 testDependency3_2 = new global::MyCode.TestDependency3();
+                global::MyCode.TestService testService_3 = new global::MyCode.TestService(testDependency1, testDependency2_1, testDependency3_2);
+                return testService_3;
             }
         }
 

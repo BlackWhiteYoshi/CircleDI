@@ -27,12 +27,12 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
     public TestProvider() {
-        global::MyCode.TestService1 testService1_TestService2 = new global::MyCode.TestService1() {
+        global::MyCode.TestService1 testService1 = new global::MyCode.TestService1() {
             TestService2 = default!
         };
-        _testService2 = new global::MyCode.TestService2(testService1_TestService2);
+        _testService2 = new global::MyCode.TestService2(testService1);
 
-        Set_TestService1_TestService2(testService1_TestService2, _testService2);
+        Set_TestService1_TestService2(testService1, _testService2);
     }
 
     /// <summary>

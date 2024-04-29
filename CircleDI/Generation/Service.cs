@@ -143,10 +143,12 @@ public sealed class Service : IEquatable<Service> {
 
 
     /// <summary>
-    /// Some space for flags to create, process or consume the dependency tree.
+    /// Some space for flags to create, process or consume the dependency tree.<br />
+    /// Visited is set as soon this node is traversed.<br />
+    /// Init is set when this node visits ends.
     /// </summary>
-    public DependencyTreeFlags TreeState { get; set; } = DependencyTreeFlags.New;
-
+    public ref (DependencyTreeFlags visited, DependencyTreeFlags init) TreeState => ref _treeState;
+    private (DependencyTreeFlags visited, DependencyTreeFlags init) _treeState = default;
 
 
     /// <summary>
@@ -325,7 +327,7 @@ public sealed class Service : IEquatable<Service> {
         PropertyDependencyList = [];
         Dependencies = DependenciesDefaultIterator;
         // Has no dependencies, so it is already dependency tree initialized
-        TreeState = DependencyTreeFlags.Traversed;
+        TreeState = (DependencyTreeFlags.New, DependencyTreeFlags.New);
 
 
         // check serviceType is delegate

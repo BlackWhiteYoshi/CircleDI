@@ -53,15 +53,15 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService1 TestService1 {
         get {
-            global::MyCode.TestService2 testService2_TestService1 = new global::MyCode.TestService2();
-            global::MyCode.TestService1 testService1 = new global::MyCode.TestService1() {
-                TestService2 = testService2_TestService1
+            global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
+            global::MyCode.TestService1 testService1_1 = new global::MyCode.TestService1() {
+                TestService2 = testService2
             };
             lock (_disposeList) {
-                _disposeList.Add(testService2_TestService1);
-                _disposeList.Add(testService1);
+                _disposeList.Add(testService2);
+                _disposeList.Add(testService1_1);
             }
-            return testService1;
+            return testService1_1;
         }
     }
 
@@ -184,15 +184,15 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService1 TestService1 {
             get {
-                global::MyCode.TestService2 testService2_TestService1 = new global::MyCode.TestService2();
-                global::MyCode.TestService1 testService1 = new global::MyCode.TestService1() {
-                    TestService2 = testService2_TestService1
+                global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
+                global::MyCode.TestService1 testService1_1 = new global::MyCode.TestService1() {
+                    TestService2 = testService2
                 };
                 lock (_disposeList) {
-                    _disposeList.Add(testService2_TestService1);
-                    _disposeList.Add(testService1);
+                    _disposeList.Add(testService2);
+                    _disposeList.Add(testService1_1);
                 }
-                return testService1;
+                return testService1_1;
             }
         }
 

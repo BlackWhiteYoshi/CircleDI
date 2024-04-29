@@ -341,6 +341,7 @@ file static class RegisterServiceProviderAttributeExtension {
                 ImplementationType = serviceType,
                 Name = component.Name,
                 CreationTime = CreationTiming.Lazy,
+                CreationTimeTransitive = CreationTiming.Lazy,
                 GetAccessor = GetAccess.Property,
                 Implementation = default,
                 ConstructorDependencyList = constructorDependencyList,
@@ -400,6 +401,7 @@ file static class RegisterServiceProviderAttributeExtension {
         builder.Append(' ');
         builder.Append(serviceProvider.Identifier.Name);
         builder.Append(" {\n");
+        indent.IncreaseLevel(); // 1
 
         // singletons getter
         if (!blazorServiceGeneration.HasFlag(BlazorServiceGeneration.Hybrid))
@@ -419,12 +421,12 @@ file static class RegisterServiceProviderAttributeExtension {
 
         // scope head
         builder.Append('\n');
-        builder.AppendIndent(indent, 1);
+        builder.AppendIndent(indent);
         builder.Append("partial ");
         builder.Append(serviceProvider.KeywordScope.AsString());
         builder.Append(" Scope { \n");
+        indent.IncreaseLevel(); // 2
 
-        indent.IncreaseLevel();
 
         // scope getter
         AppendGetMethod(builder, indent, "GetJSRuntime", "Microsoft.JSInterop.IJSRuntime");
@@ -438,12 +440,14 @@ file static class RegisterServiceProviderAttributeExtension {
             AppendGetMethod(builder, indent, "GetAntiforgeryStateProvider", "Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider");
         }
 
-        indent.DecreaseLevel();
 
         // closing brackets
-        builder.AppendIndent(indent, 1);
+        indent.DecreaseLevel(); // 1
+        builder.AppendIndent(indent);
         builder.Append('}');
         builder.Append('\n');
+
+        indent.DecreaseLevel(); // 0
         builder.AppendIndent(indent);
         builder.Append('}');
         builder.Append('\n');
@@ -465,7 +469,7 @@ file static class RegisterServiceProviderAttributeExtension {
 
 
         static void AppendGetMethod(StringBuilder builder, Indent indent, string methodName, string type) {
-            builder.AppendIndent(indent, 1);
+            builder.AppendIndent(indent);
             builder.Append("private global::");
             builder.Append(type);
             builder.Append(' ');
