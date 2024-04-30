@@ -467,6 +467,16 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             TypeName serviceTypeScope = HasInterface ? InterfaceIdentifierScope : implementationTypeScope;
             bool hasServiceSelfScope = false;
 
+            // add ServiceProvider as service parameter to ConstructorParameterList, it is important that it is the first member in the list
+            if (generateScope)
+                ConstructorParameterListScope.Add(new ConstructorDependency() {
+                    Name = Identifier.Name,
+                    ServiceName = string.Empty,
+                    ServiceType = serviceType,
+                    HasAttribute = true,
+                    ByRef = RefKind.None
+                });
+
             // register services [Singleton<>, Scoped<>, Transient<>, Delegate<>, Import<> attributes]
             IEnumerable<AttributeData> listedAttributes = serviceProviderScope switch {
                 null => serviceProvider.GetAttributes(),
@@ -546,15 +556,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 });
 
             if (generateScope) {
-                // add ServiceProvider as service parameter to ConstructorParameterList
-                ConstructorParameterListScope.Add(new ConstructorDependency() {
-                    Name = Identifier.Name,
-                    ServiceName = string.Empty,
-                    ServiceType = serviceType,
-                    HasAttribute = true,
-                    ByRef = RefKind.None
-                });
-
                 // Default Service ServiceProvider.Scope self
                 if (!hasServiceSelfScope)
                     ScopedList.Add(new Service() {
