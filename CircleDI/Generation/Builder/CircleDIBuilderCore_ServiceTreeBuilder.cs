@@ -27,7 +27,6 @@ public partial struct CircleDIBuilderCore {
     /// </summary>
     private void AppendConstructorServices() {
         transientNumber = 0;
-        currentDisposeLists = disposeLists;
         serviceProvider.NextDependencyTreeFlag();
 
         {
@@ -53,11 +52,9 @@ public partial struct CircleDIBuilderCore {
         }
 
         if (hasDisposeList)
-            AppendDiposeListConstructor(currentDisposeLists.syncList, DISPOSE_LIST);
+            AppendDiposeStackConstructor(transientDisposeStack, DISPOSE_LIST);
         if (hasAsyncDisposeList)
-            AppendDiposeListConstructor(currentDisposeLists.asyncList, ASYNC_DISPOSE_LIST);
-        AppendDisposeListLazy(transientDisposeList, DISPOSE_LIST, appendServiceProviderField: true);
-        AppendDisposeListLazy(transientAsyncDisposeList, ASYNC_DISPOSE_LIST, appendServiceProviderField: true);
+            AppendDiposeStackConstructor(transientAsyncDisposeStack, ASYNC_DISPOSE_LIST);
     }
 
     /// <summary>
@@ -65,7 +62,6 @@ public partial struct CircleDIBuilderCore {
     /// </summary>
     private void AppendCreateScopeServiceTree() {
         transientNumber = 0;
-        currentDisposeLists = disposeLists;
         serviceProvider.NextDependencyTreeFlag();
         Service service = serviceProvider.CreateScope!;
 
@@ -75,16 +71,16 @@ public partial struct CircleDIBuilderCore {
         for (int i = 0; i < service.ConstructorDependencyList.Count; i++) {
             ConstructorDependency dependency = service.ConstructorDependencyList[i];
             if (dependency.HasAttribute)
-                transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service!, 0);
+                transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service!, 0, 0, 0);
         }
         for (int i = 0; i < service.PropertyDependencyList.Count; i++) {
             PropertyDependency dependency = service.PropertyDependencyList[i];
             if (dependency.HasAttribute)
-                transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service!, 0);
+                transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service!, 0, 0, 0);
         }
 
-        AppendDisposeListLazy(transientDisposeList, DISPOSE_LIST, appendServiceProviderField: false);
-        AppendDisposeListLazy(transientAsyncDisposeList, ASYNC_DISPOSE_LIST, appendServiceProviderField: false);
+        AppendDisposeStackLazy(transientDisposeStack, 0, DISPOSE_LIST, appendServiceProviderField: false);
+        AppendDisposeStackLazy(transientAsyncDisposeStack, 0, ASYNC_DISPOSE_LIST, appendServiceProviderField: false);
 
         builder.AppendIndent(indent);
         builder.Append("return new global::");
@@ -105,15 +101,9 @@ public partial struct CircleDIBuilderCore {
     /// <param name="service"></param>
     private void AppendLazyService(Service service) {
         transientNumber = 0;
-        currentDisposeLists = disposeLists;
         serviceProvider.NextDependencyTreeFlag();
 
-        AppendLazyServiceTreeRecursion(service, 0);
-
-        AppendDisposeListLazy(currentDisposeLists.syncList, DISPOSE_LIST, appendServiceProviderField: false);
-        AppendDisposeListLazy(currentDisposeLists.asyncList, ASYNC_DISPOSE_LIST, appendServiceProviderField: false);
-        AppendDisposeListLazy(transientDisposeList, DISPOSE_LIST, appendServiceProviderField: true);
-        AppendDisposeListLazy(transientAsyncDisposeList, ASYNC_DISPOSE_LIST, appendServiceProviderField: true);
+        AppendLazyServiceTreeRecursion(service, 0, 0, 0);
     }
 
     /// <summary>
@@ -128,15 +118,12 @@ public partial struct CircleDIBuilderCore {
     /// <returns></returns>
     private int AppendTransientService(Service service) {
         transientNumber = 0;
-        currentDisposeLists = disposeLists;
         serviceProvider.NextDependencyTreeFlag();
 
-        int currentTransientNumber = AppendLazyServiceTreeRecursion(service, 0);
+        int currentTransientNumber = AppendLazyServiceTreeRecursion(service, 0, 0, 0);
 
-        AppendDisposeListLazy(currentDisposeLists.syncList, DISPOSE_LIST, appendServiceProviderField: false);
-        AppendDisposeListLazy(currentDisposeLists.asyncList, ASYNC_DISPOSE_LIST, appendServiceProviderField: false);
-        AppendDisposeListLazy(transientDisposeList, DISPOSE_LIST, appendServiceProviderField: true);
-        AppendDisposeListLazy(transientAsyncDisposeList, ASYNC_DISPOSE_LIST, appendServiceProviderField: true);
+        AppendDisposeStackLazy(transientDisposeStack, 0, DISPOSE_LIST, appendServiceProviderField: false);
+        AppendDisposeStackLazy(transientAsyncDisposeStack, 0, ASYNC_DISPOSE_LIST, appendServiceProviderField: false);
 
         return currentTransientNumber;
     }
@@ -147,11 +134,9 @@ public partial struct CircleDIBuilderCore {
     /// <summary>
     /// <para>Contains all circular dependencies where dependency is initialized before service.</para>
     /// <para>
-    /// Segmented into stackframes:<br />
-    /// - start of current stackframe = <see cref="circularDependencyStackIndex"/><br />
-    /// - other stack frame locations are the local variables 'currentStackIndex'
+    /// Segmented into stackframes where the start of the current stackframe is the local variable 'circularStackIndex'.<br />
+    /// Constructor service tree has only 1 segment/stackframe.
     /// </para>
-    /// <para>constructor service tree has only 1 segment/stackframe.</para>
     /// </summary>
     private readonly List<(Service service, int number, PropertyDependency dependency)> circularStack = [];
 
@@ -162,12 +147,23 @@ public partial struct CircleDIBuilderCore {
     private readonly List<(Service service, int number, PropertyDependency dependency)> circularNotInitList = [];
 
 
-    private readonly List<(Service service, int number)> transientDisposeList = [];
-    private readonly List<(Service service, int number)> transientAsyncDisposeList = [];
-    private readonly List<(Service service, int number)> scopeTransientDisposeList = [];
-    private readonly List<(Service service, int number)> scopeTransientAsyncDisposeList = [];
+    /// <summary>
+    /// <para>Contains all transient services that are instantiated and implementing dispose and not asyncDispose.</para>
+    /// <para>
+    /// Segmented into stackframes where the start of the current stackframe is the local variable 'disposeStackIndex'.<br />
+    /// Constructor service tree has only 1 segment/stackframe.
+    /// </para>
+    /// </summary>
+    private readonly List<(Service service, int number)> transientDisposeStack = [];
 
-    private (List<(Service service, int number)> syncList, List<(Service service, int number)> asyncList) currentDisposeLists;
+    /// <summary>
+    /// <para>Contains all transient services that are instantiated and implementing asyncDispose.</para>
+    /// <para>
+    /// Segmented into stackframes where the start of the current stackframe is the local variable 'asyncDisposeStackIndex'.<br />
+    /// Constructor service tree has only 1 segment/stackframe.
+    /// </para>
+    /// </summary>
+    private readonly List<(Service service, int number)> transientAsyncDisposeStack = [];
 
 
     /// <summary>
@@ -213,12 +209,8 @@ public partial struct CircleDIBuilderCore {
         for (int i = 0; i < service.ConstructorDependencyList.Count; i++) {
             ConstructorDependency dependency = service.ConstructorDependencyList[i];
             if (isScopeProvider && dependency.Service!.Lifetime is ServiceLifetime.Singleton) {
-                if (dependency.Service.CreationTimeTransitive is CreationTiming.Constructor)
-                    continue;
-
-                currentDisposeLists = (transientDisposeList, transientAsyncDisposeList);
-                transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count);
-                currentDisposeLists = (scopeTransientDisposeList, scopeTransientAsyncDisposeList);
+                if (dependency.Service.CreationTimeTransitive is CreationTiming.Lazy)
+                    transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
             }
             else
                 transientNumberConstructor[i] = AppendCounstructorServiceTreeRecursion(dependency.Service!);
@@ -227,12 +219,8 @@ public partial struct CircleDIBuilderCore {
             PropertyDependency dependency = service.PropertyDependencyList[i];
             if (!dependency.IsCircular)
                 if (isScopeProvider && dependency.Service!.Lifetime is ServiceLifetime.Singleton) {
-                    if (dependency.Service.CreationTimeTransitive is CreationTiming.Constructor)
-                        continue;
-
-                    currentDisposeLists = (transientDisposeList, transientAsyncDisposeList);
-                    transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count);
-                    currentDisposeLists = (scopeTransientDisposeList, scopeTransientAsyncDisposeList);
+                    if (dependency.Service.CreationTimeTransitive is CreationTiming.Lazy)
+                        transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
                 }
                 else
                     transientNumberProperty[i] = AppendCounstructorServiceTreeRecursion(dependency.Service!);
@@ -250,7 +238,7 @@ public partial struct CircleDIBuilderCore {
     /// <param name="service"></param>
     /// <param name="circularStackIndex"></param>
     /// <returns></returns>
-    private int AppendLazyServiceTreeRecursion(Service service, int circularStackIndex) {
+    private int AppendLazyServiceTreeRecursion(Service service, int circularStackIndex, int disposeStackIndex, int asyncDisposeStackIndex) {
         if (service.TreeState.visited.HasFlag(serviceProvider.DependencyTreeFlag))
             return 0;
 
@@ -339,33 +327,19 @@ public partial struct CircleDIBuilderCore {
         Span<int> transientNumberProperty = transientNumberList[service.ConstructorDependencyList.Count..];
         for (int i = 0; i < service.ConstructorDependencyList.Count; i++) {
             ConstructorDependency dependency = service.ConstructorDependencyList[i];
-            if (service.Lifetime is ServiceLifetime.Singleton && currentDisposeLists.syncList == scopeTransientDisposeList) {
-                currentDisposeLists = (transientDisposeList, transientAsyncDisposeList);
-                transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count);
-                currentDisposeLists = (scopeTransientDisposeList, scopeTransientAsyncDisposeList);
-            }
-            else
-                transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count);
+            transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
         }
 
         int circularNotInitDependencyListIndex = circularNotInitList.Count;
         for (int i = 0; i < service.PropertyDependencyList.Count; i++) {
             PropertyDependency dependency = service.PropertyDependencyList[i];
-            if (!dependency.IsCircular) {
-                if (service.Lifetime is ServiceLifetime.Singleton && currentDisposeLists.syncList == scopeTransientDisposeList) {
-                    currentDisposeLists = (transientDisposeList, transientAsyncDisposeList);
-                    transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count);
-                    currentDisposeLists = (scopeTransientDisposeList, scopeTransientAsyncDisposeList);
-                }
-                else
-                    transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count);
-            }
-            else {
+            if (!dependency.IsCircular)
+                transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
+            else
                 if (dependency.Service!.CreationTimeTransitive is CreationTiming.Constructor || dependency.Service.TreeState.init.HasFlag(serviceProvider.DependencyTreeFlag))
                     circularStack.Add((service, transientNumber, dependency));
                 else
                     circularNotInitList.Add((service, transientNumber, dependency));
-            }
         }
 
         int currentTransientNumber = AppendServiceCreation(service, transientNumberConstructor, transientNumberProperty);
@@ -375,15 +349,8 @@ public partial struct CircleDIBuilderCore {
             List<(Service service, int number, PropertyDependency dependency)> currentList = circularStack;
             int startIndex = circularStackIndex;
             for (int listCount = 0; listCount < 2; listCount++) {
-                for (int i = startIndex; i < currentList.Count; i++) {
-                    if (service.Lifetime is ServiceLifetime.Singleton && currentDisposeLists.syncList == scopeTransientDisposeList) {
-                        currentDisposeLists = (transientDisposeList, transientAsyncDisposeList);
-                        AppendLazyServiceTreeRecursion(currentList[i].dependency.Service!, circularStack.Count);
-                        currentDisposeLists = (scopeTransientDisposeList, scopeTransientAsyncDisposeList);
-                    }
-                    else
-                        AppendLazyServiceTreeRecursion(currentList[i].dependency.Service!, circularStack.Count);
-                }
+                for (int i = startIndex; i < currentList.Count; i++)
+                    AppendLazyServiceTreeRecursion(currentList[i].dependency.Service!, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
                 currentList = circularNotInitList;
                 startIndex = circularNotInitDependencyListIndex;
             }
@@ -395,6 +362,10 @@ public partial struct CircleDIBuilderCore {
 
 
         if (service.Lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped) {
+            bool appendServiceProviderField = isScopeProvider && service.Lifetime is ServiceLifetime.Singleton;
+            AppendDisposeStackLazy(transientDisposeStack, disposeStackIndex, DISPOSE_LIST, appendServiceProviderField);
+            AppendDisposeStackLazy(transientAsyncDisposeStack, asyncDisposeStackIndex, ASYNC_DISPOSE_LIST, appendServiceProviderField);
+
             indent.DecreaseLevel(); // +0
             builder.AppendIndent(indent);
             builder.Append("}\n");
@@ -514,7 +485,7 @@ public partial struct CircleDIBuilderCore {
     /// </summary>
     /// <param name="disposeList"></param>
     /// <param name="disposeListName"></param>
-    private void AppendDiposeListConstructor(List<(Service service, int number)> disposeList, string disposeListName) {
+    private void AppendDiposeStackConstructor(List<(Service service, int number)> disposeList, string disposeListName) {
         builder.AppendIndent(indent);
         builder.Append(disposeListName);
         builder.Append(" = [");
@@ -558,11 +529,11 @@ public partial struct CircleDIBuilderCore {
     /// <para>DisposeList is appended first, then asyncDisposeList, but if a service implements both, it is added to asyncDisposeList.</para>
     /// <para>The list is cleared afterwards.</para>
     /// </summary>
-    /// <param name="disposeList"></param>
-    /// <param name="disposeListName"></param>
+    /// <param name="disposeStack"></param>
+    /// <param name="disposeStackName"></param>
     /// <param name="appendServiceProviderField"></param>
-    private void AppendDisposeListLazy(List<(Service service, int number)> disposeList, string disposeListName, bool appendServiceProviderField) {
-        if (disposeList.Count == 0)
+    private void AppendDisposeStackLazy(List<(Service service, int number)> disposeStack, int disposeStackIndex, string disposeStackName, bool appendServiceProviderField) {
+        if (disposeStack.Count == 0)
             return;
 
         if (threadSafe) {
@@ -573,19 +544,21 @@ public partial struct CircleDIBuilderCore {
                 builder.AppendFirstLower(serviceProvider.Identifier.Name);
                 builder.Append('.');
             }
-            builder.Append(disposeListName);
+            builder.Append(disposeStackName);
             builder.Append(") {\n");
             indent.IncreaseLevel(); // +1
         }
 
-        foreach ((Service service, int number) in disposeList) {
+        for (int i = disposeStackIndex; i < disposeStack.Count; i++) {
+            (Service service, int number) = disposeStack[i];
+
             builder.AppendIndent(indent);
             if (appendServiceProviderField) {
                 builder.Append('_');
                 builder.AppendFirstLower(serviceProvider.Identifier.Name);
                 builder.Append('.');
             }
-            builder.Append(disposeListName);
+            builder.Append(disposeStackName);
             builder.Append(".Add(");
             builder.AppendFirstLower(service.Name);
             if (number > 0) {
@@ -601,7 +574,7 @@ public partial struct CircleDIBuilderCore {
             builder.Append("}\n");
         }
 
-        disposeList.Clear();
+        disposeStack.RemoveRange(disposeStackIndex, disposeStack.Count - disposeStackIndex);
     }
 
 
@@ -674,9 +647,9 @@ public partial struct CircleDIBuilderCore {
 
             if (generateDisposeMethods is not DisposeGeneration.NoDisposing)
                 if (service.IsAsyncDisposable)
-                    currentDisposeLists.asyncList.Add((service, transientNumber));
+                     transientAsyncDisposeStack.Add((service, transientNumber));
                 else if (service.IsDisposable)
-                    currentDisposeLists.syncList.Add((service, transientNumber));
+                    transientDisposeStack.Add((service, transientNumber));
 
             return transientNumber++;
         }

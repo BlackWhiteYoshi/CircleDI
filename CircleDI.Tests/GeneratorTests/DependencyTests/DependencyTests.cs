@@ -644,7 +644,7 @@ public static class DependencyTests {
             [Transient<T15>]
             
             [Transient<T2>]
-            [Singleton<S2>(CreationTime = CreationTiming.Lazy]
+            [Singleton<S2>(CreationTime = CreationTiming.Lazy)]
             
             [Scoped<S3_1>]
             [Scoped<S3_2>]
@@ -653,7 +653,7 @@ public static class DependencyTests {
             
 
             public interface IRoot;
-            public sealed class Root(T1 t1, S1 s1) : Iroot;
+            public sealed class Root(T1 t1, S1 s1) : IRoot;
             
             public sealed class S1(T2 t2, S2 s2);
             public sealed class T1(T15 t15);
@@ -692,7 +692,7 @@ public static class DependencyTests {
             [Transient<T15>]
             
             [Transient<T2>]
-            [Singleton<S2>(CreationTime = CreationTiming.Lazy]
+            [Singleton<S2>(CreationTime = CreationTiming.Lazy)]
             
             [Scoped<S3_1>]
             [Scoped<S3_2>]
@@ -701,7 +701,7 @@ public static class DependencyTests {
             
 
             public interface IRoot;
-            public sealed class Root(T1 t1, S1 s1) : Iroot;
+            public sealed class Root(T1 t1, S1 s1) : IRoot;
             
             public sealed class S1(T2 t2, S2 s2);
             public sealed class T1(T15 t15);

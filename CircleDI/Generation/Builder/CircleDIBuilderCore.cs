@@ -26,7 +26,6 @@ public partial struct CircleDIBuilderCore {
     private bool hasDisposeAsyncMethod;
     private bool threadSafe;
 
-    private (List<(Service service, int number)> syncList, List<(Service service, int number)> asyncList) disposeLists;
     private string readonlyStr;
     private bool hasDisposeList;
     private bool hasAsyncDisposeList;
@@ -52,8 +51,6 @@ public partial struct CircleDIBuilderCore {
         hasDisposeMethod = serviceProvider.HasDisposeMethod;
         hasDisposeAsyncMethod = serviceProvider.HasDisposeAsyncMethod;
         threadSafe = serviceProvider.ThreadSafe;
-
-        disposeLists = (transientDisposeList, transientAsyncDisposeList);
 
         readonlyStr = hasConstructor switch {
             true => "",
@@ -96,8 +93,6 @@ public partial struct CircleDIBuilderCore {
         hasDisposeMethod = serviceProvider.HasDisposeMethodScope;
         hasDisposeAsyncMethod = serviceProvider.HasDisposeAsyncMethodScope;
         threadSafe = serviceProvider.ThreadSafeScope;
-
-        disposeLists = (scopeTransientDisposeList, scopeTransientAsyncDisposeList);
 
         readonlyStr = hasConstructor switch {
             true => "",
