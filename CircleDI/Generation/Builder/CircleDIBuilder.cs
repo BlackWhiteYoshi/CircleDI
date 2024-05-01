@@ -24,8 +24,8 @@ public static class CircleDIBuilder {
     /// <param name="context"></param>
     /// <param name="serviceProvider"></param>
     public static void GenerateClass(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
-        if (serviceProvider.ErrorList.Count > 0) {
-            foreach (Diagnostic error in serviceProvider.ErrorList)
+        if (serviceProvider.ErrorManager.ErrorList.Count > 0) {
+            foreach (Diagnostic error in serviceProvider.ErrorManager.ErrorList)
                 context.ReportDiagnostic(error);
 
             return;
@@ -161,7 +161,7 @@ public static class CircleDIBuilder {
     /// <param name="serviceProvider"></param>
     /// <exception cref="Exception"></exception>
     public static void GenerateInterface(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ServiceProvider serviceProvider) {
-        if (!serviceProvider.HasInterface || serviceProvider.ErrorList.Count > 0)
+        if (!serviceProvider.HasInterface || serviceProvider.ErrorManager.ErrorList.Count > 0)
             return;
 
         StringBuilder builder = stringBuilderPool.Get();

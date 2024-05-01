@@ -325,14 +325,8 @@ file static class RegisterServiceProviderAttributeExtension {
             if (serviceProvider.SingletonList.Concat(serviceProvider.ScopedList).Concat(serviceProvider.TransientList).Any((Service service) => service.ServiceType == serviceType))
                 continue;
 
-
-            (List<ConstructorDependency> constructorDependencyList, Diagnostic? constructorListError) = component.CreateConstructorDependencyList(serviceProvider.Attribute);
-            if (constructorListError is not null)
-                serviceProvider.ErrorList.Add(constructorListError);
-
-            (List<PropertyDependency> propertyDependencyList, Diagnostic? propertyListError) = component.CreatePropertyDependencyList(serviceProvider.Attribute);
-            if (propertyListError is not null)
-                serviceProvider.ErrorList.Add(propertyListError);
+            List<ConstructorDependency> constructorDependencyList = component.CreateConstructorDependencyList(serviceProvider.ErrorManager) ?? [];
+            List<PropertyDependency> propertyDependencyList = component.CreatePropertyDependencyList(serviceProvider.ErrorManager) ?? [];
 
             serviceProvider.TransientList.Add(new Service() {
                 Lifetime = ServiceLifetime.Transient,

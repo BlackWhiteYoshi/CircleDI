@@ -240,23 +240,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     }
 
 
-    /// <summary>
-    /// <para>Diagnostics with Severity error that are related to the ServiceProvider or to the dependecy tree creation.</para>
-    /// <para>Diagnostics that are related to <see cref="Service">Services</see> are not listed here, see <see cref="Service.ErrorList"/>.</para>
-    /// </summary>
-    public List<Diagnostic> ErrorList { get; private set; } = [];
-
-    /// <summary>
-    /// The <i>[ServiceProvider]</i>-attribute above the class.
-    /// </summary>
-    public AttributeData Attribute { get; private set; }
+    public DiagnosticErrorManager ErrorManager { get; private set; }
 
 
     /// <summary>
     /// Creates a data-object representing a ServiceProviderAttribute.
     /// </summary>
     /// <param name="serviceProviderAttribute"></param>
-    public ServiceProvider(AttributeData serviceProviderAttribute) => Attribute = serviceProviderAttribute;
+    public ServiceProvider(AttributeData serviceProviderAttribute) => ErrorManager = new DiagnosticErrorManager(serviceProviderAttribute);
 
     /// <summary>
     /// Creates a data-object based on a ServiceProviderAttribute.
@@ -280,14 +271,15 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             serviceProviderScope = scope;
 
         Debug.Assert(syntaxContext.Attributes.Length > 0);
-        Attribute = syntaxContext.Attributes[0];
+        AttributeData serviceProviderAttribute = syntaxContext.Attributes[0];
+        ErrorManager = new DiagnosticErrorManager(serviceProviderAttribute);
 
 
         if (serviceProviderSyntax.Modifiers[^1].ValueText != "partial")
-            ErrorList.Add(Attribute.CreatePartialKeywordServiceProviderError());
+            ErrorManager.AddPartialKeywordServiceProviderError();
 
         if (serviceProviderScopeSyntax is not null && serviceProviderScopeSyntax.Modifiers[^1].ValueText != "partial")
-            ErrorList.Add(Attribute.CreatePartialKeywordScopeProviderError());
+            ErrorManager.AddPartialKeywordScopeProviderError();
 
 
         Keyword = serviceProviderSyntax switch {
@@ -331,7 +323,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         // interface type
         INamedTypeSymbol? interfaceSymbol = null;
         INamedTypeSymbol? interfaceScopeSymbol = null;
-        if (Attribute.AttributeClass!.TypeArguments.Length > 0 && Attribute.AttributeClass.TypeArguments[0] is INamedTypeSymbol { TypeKind: TypeKind.Interface } symbol) {
+        if (serviceProviderAttribute.AttributeClass!.TypeArguments.Length > 0 && serviceProviderAttribute.AttributeClass.TypeArguments[0] is INamedTypeSymbol { TypeKind: TypeKind.Interface } symbol) {
             interfaceSymbol = symbol;
             if (interfaceSymbol.GetMembers("IScope") is [INamedTypeSymbol { TypeKind: TypeKind.Interface } scopeSymbol])
                 interfaceScopeSymbol = scopeSymbol;
@@ -343,13 +335,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             InterfaceIdentifier = new TypeName(interfaceSymbol);
             InterfaceAccessibility = interfaceSymbol.DeclaredAccessibility;
         }
-        else if (Attribute.NamedArguments.GetArgument<string?>("InterfaceName") is string interfaceName)
+        else if (serviceProviderAttribute.NamedArguments.GetArgument<string?>("InterfaceName") is string interfaceName)
             InterfaceIdentifier = new TypeName(interfaceName, TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
         else
             InterfaceIdentifier = new TypeName(Identifier.Name != "ServiceProvider" ? $"I{Identifier.Name}" : "IServiceprovider", TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
 
         if (InterfaceIdentifier.Name == "IServiceProvider")
-            ErrorList.Add(Attribute.CreateInterfaceNameIServiceProviderError());
+            ErrorManager.AddInterfaceNameIServiceProviderError();
 
         if (interfaceScopeSymbol is not null) {
             InterfaceIdentifierScope = new TypeName(interfaceScopeSymbol);
@@ -364,14 +356,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         GetAccess getAccessorMainProvider = GetAccess.Property;
         GenerateDisposeMethods = DisposeGeneration.GenerateBoth;
         ThreadSafe = true;
-        if (Attribute.NamedArguments.Length > 0) {
-            if (Attribute.NamedArguments.GetArgument<int?>("CreationTime") is int creationTime)
+        if (serviceProviderAttribute.NamedArguments.Length > 0) {
+            if (serviceProviderAttribute.NamedArguments.GetArgument<int?>("CreationTime") is int creationTime)
                 creationTimeMainProvider = (CreationTiming)creationTime;
-            if (Attribute.NamedArguments.GetArgument<int?>("GetAccessor") is int getAccessor)
+            if (serviceProviderAttribute.NamedArguments.GetArgument<int?>("GetAccessor") is int getAccessor)
                 getAccessorMainProvider = (GetAccess)getAccessor;
-            if (Attribute.NamedArguments.GetArgument<int?>("GenerateDisposeMethods") is int generateDisposeMethods)
+            if (serviceProviderAttribute.NamedArguments.GetArgument<int?>("GenerateDisposeMethods") is int generateDisposeMethods)
                 GenerateDisposeMethods = (DisposeGeneration)generateDisposeMethods;
-            if (Attribute.NamedArguments.GetArgument<bool?>("ThreadSafe") is bool threadSafe)
+            if (serviceProviderAttribute.NamedArguments.GetArgument<bool?>("ThreadSafe") is bool threadSafe)
                 ThreadSafe = threadSafe;
         }
 
@@ -384,7 +376,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 if (scopedProviderAttribute is null)
                     scopedProviderAttribute = scopedProviderAttributeNested;
                 else {
-                    ErrorList.Add(scopedProviderAttributeNested.CreateScopeProviderAttributeTwiceError(scopedProviderAttribute));
+                    ErrorManager.AddScopeProviderAttributeTwiceError(scopedProviderAttributeNested, scopedProviderAttribute);
                     scopedProviderAttribute = null; // just ignore both and display error instead
                 }
             }
@@ -483,42 +475,44 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 _ => serviceProvider.GetAttributes().Concat(serviceProviderScope.GetAttributes())
             };
             foreach (AttributeData attributeData in listedAttributes) {
+                ErrorManager.CurrentAttribute = attributeData;
+
                 INamedTypeSymbol? attribute = attributeData.AttributeClass;
                 if (attribute is not { ContainingNamespace: { Name: "CircleDIAttributes", ContainingNamespace.Name: "" }, ContainingType: null })
                     continue;
 
                 if (attribute.TypeKind is TypeKind.Error || attribute.TypeArguments.Any((ITypeSymbol typeSymbol) => typeSymbol.TypeKind is TypeKind.Error)) {
-                    ErrorList.Add(attributeData.CreateInvalidServiceRegistrationError(Identifier, InterfaceIdentifier));
+                    ErrorManager.AddInvalidServiceRegistrationError(Identifier, InterfaceIdentifier);
                     continue;
                 }
 
                 ModuleRegistration moduleRegistration = new(this, generateScope, creationTimeMainProvider, creationTimeScopeProvider, getAccessorMainProvider, getAccessorScopeProvider);
                 switch (attribute.Name) {
                     case "SingletonAttribute": {
-                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, ErrorList);
+                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, ErrorManager);
                         hasServiceSelf |= service.ServiceType == serviceType;
                         SingletonList.Add(service);
 
                         // check for recursive cunstructor call
                         if (service.ImplementationType == implementationType && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
-                            ErrorList.Add(attributeData.CreateEndlessRecursiveConstructorCallError(service.Name));
+                            ErrorManager.AddEndlessRecursiveConstructorCallError(service.Name);
                         break;
                     }
                     case "ScopedAttribute": {
                         if (!generateScope)
                             break;
 
-                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, ErrorList);
+                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, ErrorManager);
                         hasServiceSelfScope |= service.ServiceType == serviceTypeScope;
                         ScopedList.Add(service);
 
                         // check for recursive cunstructor call
                         if (service.ImplementationType == implementationTypeScope && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
-                            ErrorList.Add(attributeData.CreateEndlessRecursiveConstructorCallScopeError(service.Name));
+                            ErrorManager.AddEndlessRecursiveConstructorCallScopeError(service.Name);
                         break;
                     }
                     case "TransientAttribute": {
-                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, ErrorList);
+                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, ErrorManager);
                         TransientList.Add(service);
                         break;
                     }
@@ -526,7 +520,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         if (attributeData.ConstructorArguments.Length == 0)
                             break;
 
-                        Service service = new(serviceProvider, attributeData, getAccessorScopeProvider, ErrorList);
+                        Service service = new(serviceProvider, attributeData, getAccessorScopeProvider, ErrorManager);
                         DelegateList.Add(service);
                         break;
                     }
@@ -580,17 +574,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 List<PropertyDependency> propertyDependencyList;
                 if (serviceProviderScope is not null) {
                     if (HasConstructorScope) {
-                        (constructorDependencyList, Diagnostic? constructorListError) = serviceProviderScope.CreateConstructorDependencyList(Attribute);
-                        if (constructorListError is not null)
-                            ErrorList.Add(constructorListError);
+                        constructorDependencyList = serviceProviderScope.CreateConstructorDependencyList(ErrorManager) ?? [];
                     }
                     else
                         // default constructorDependency
                         constructorDependencyList = ConstructorParameterListScope;
 
-                    (propertyDependencyList, Diagnostic? propertyListError) = serviceProviderScope.CreatePropertyDependencyList(Attribute);
-                    if (propertyListError is not null)
-                        ErrorList.Add(propertyListError);
+                    propertyDependencyList = serviceProviderScope.CreatePropertyDependencyList(ErrorManager) ?? [];
                 }
                 else {
                     // default constructorDependency and no propertyDependencyList
@@ -650,14 +640,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         goto case ImportMode.Static;
                     }
 
-                    (serivceConstructor, _) = module.FindConstructor(importAttribute);
+                    serivceConstructor = module.FindConstructor(serviceProvider.ErrorManager);
                     if (serivceConstructor?.Parameters.Length > 0) {
                         importMode = ImportMode.Parameter;
                         goto case ImportMode.Parameter;
                     }
 
                     if (moduleScope != null) {
-                        (serivceConstructorScope, _) = moduleScope.FindConstructor(importAttribute);
+                        serivceConstructorScope = moduleScope.FindConstructor(serviceProvider.ErrorManager);
                         if (serivceConstructorScope?.Parameters.Length > 0) {
                             importMode = ImportMode.Parameter;
                             goto case ImportMode.Parameter;
@@ -673,19 +663,15 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 case ImportMode.Service: {
                     {
                         if (serivceConstructor is null) {
-                            (serivceConstructor, Diagnostic? constructorDependencyError) = module.FindConstructor(importAttribute);
-                            if (constructorDependencyError is not null) {
-                                serviceProvider.ErrorList.Add(constructorDependencyError);
+                            serivceConstructor = module.FindConstructor(serviceProvider.ErrorManager);
+                            if (serivceConstructor is null)
                                 return;
-                            }
                         }
                         List<ConstructorDependency> constructorDependencyList = serivceConstructor!.CreateConstructorDependencyList();
 
-                        (List<PropertyDependency> propertyDependencyList, Diagnostic? propertyDependencyError) = module.CreatePropertyDependencyList(importAttribute);
-                        if (propertyDependencyError is not null) {
-                            serviceProvider.ErrorList.Add(propertyDependencyError);
+                        List<PropertyDependency>? propertyDependencyList = module.CreatePropertyDependencyList(serviceProvider.ErrorManager);
+                        if (propertyDependencyList is null)
                             return;
-                        }
 
                         serviceProvider.SingletonList.Add(new Service() {
                             Lifetime = ServiceLifetime.Singleton,
@@ -703,19 +689,15 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         TypeName moduleTypeNameScope = new(moduleScope);
 
                         if (serivceConstructorScope is null) {
-                            (serivceConstructorScope, Diagnostic? constructorDependencyError) = moduleScope.FindConstructor(importAttribute);
-                            if (constructorDependencyError is not null) {
-                                serviceProvider.ErrorList.Add(constructorDependencyError);
+                            serivceConstructorScope = moduleScope.FindConstructor(serviceProvider.ErrorManager);
+                            if (serivceConstructorScope is null)
                                 return;
-                            }
                         }
                         List<ConstructorDependency> constructorDependencyList = serivceConstructorScope!.CreateConstructorDependencyList();
 
-                        (List<PropertyDependency> propertyDependencyList, Diagnostic? propertyDependencyError) = moduleScope.CreatePropertyDependencyList(importAttribute);
-                        if (propertyDependencyError is not null) {
-                            serviceProvider.ErrorList.Add(propertyDependencyError);
+                        List<PropertyDependency>? propertyDependencyList = moduleScope.CreatePropertyDependencyList(serviceProvider.ErrorManager);
+                        if (propertyDependencyList is null)
                             return;
-                        }
 
                         serviceProvider.ScopedList.Add(new Service() {
                             Lifetime = ServiceLifetime.Scoped,
@@ -761,7 +743,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     // append first item again as last item to illustrate the circle
                     modulesInCircle = modulesInCircle.Concat(modulesInCircle.Take(1));
 
-                    serviceProvider.ErrorList.Add(serviceProvider.Attribute.CreateModuleCircleError(serviceProvider.Identifier, modulesInCircle));
+                    serviceProvider.ErrorManager.AddModuleCircleError(serviceProvider.Identifier, modulesInCircle);
                     return;
                 }
             path.Add(module);
@@ -773,18 +755,20 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 };
 
                 foreach (AttributeData attributeData in listedAttributes) {
+                    serviceProvider.ErrorManager.CurrentAttribute = attributeData;
+
                     INamedTypeSymbol? attribute = attributeData.AttributeClass;
                     if (attribute is not { ContainingNamespace: { Name: "CircleDIAttributes", ContainingNamespace.Name: "" }, ContainingType: null })
                         continue;
 
                     if (attribute.TypeKind is TypeKind.Error || attribute.TypeArguments.Any((ITypeSymbol typeSymbol) => typeSymbol.TypeKind is TypeKind.Error)) {
-                        serviceProvider.ErrorList.Add(attributeData.CreateInvalidServiceRegistrationError(serviceProvider.Identifier, serviceProvider.InterfaceIdentifier));
+                        serviceProvider.ErrorManager.AddInvalidServiceRegistrationError(serviceProvider.Identifier, serviceProvider.InterfaceIdentifier);
                         continue;
                     }
 
                     switch (attribute.Name) {
                         case "SingletonAttribute": {
-                            Service service = new(module, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, serviceProvider.ErrorList) {
+                            Service service = new(module, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, serviceProvider.ErrorManager) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
@@ -795,7 +779,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             if (!generateScope)
                                 break;
 
-                            Service service = new(module, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, serviceProvider.ErrorList) {
+                            Service service = new(module, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, serviceProvider.ErrorManager) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
@@ -803,7 +787,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             break;
                         }
                         case "TransientAttribute": {
-                            Service service = new(module, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, serviceProvider.ErrorList) {
+                            Service service = new(module, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, serviceProvider.ErrorManager) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
@@ -814,7 +798,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             if (attributeData.ConstructorArguments.Length == 0)
                                 break;
 
-                            Service service = new(module, attributeData, getAccessorScopeProvider, serviceProvider.ErrorList) {
+                            Service service = new(module, attributeData, getAccessorScopeProvider, serviceProvider.ErrorManager) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
@@ -852,7 +836,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// </summary>
     /// <remarks>In some circumstances circle dependencies are also allowed, so strictly spoken it's not a tree. Furthermore there is no one root node, there can be many root nodes and independent trees.</remarks>
     public ServiceProvider CreateDependencyTree() {
-        if (ErrorList.Count > 0)
+        if (ErrorManager.ErrorList.Count > 0)
             return this;
         
         SortedServiceList = [.. SingletonList, .. ScopedList, .. TransientList, .. DelegateList];
@@ -879,7 +863,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public void CreateDependencyTree(IEnumerable<(Service service, AttributeData attribute)> services) {
         DependencyTreeInitializer initializer = new(this);
         foreach ((Service service, AttributeData attribute) in services) {
-            initializer.InitNode(service, attribute);
+            ErrorManager.CurrentAttribute = attribute;
+            initializer.InitNode(service);
         }
     }
 
@@ -915,19 +900,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             public readonly Dependency[] shortcircuitList = shortcircuitNodeList;
         }
 
-        private AttributeData attribute = serviceProvider.Attribute;
         private readonly List<Dependency> path = [new ConstructorDependency() { Name = null!, ServiceType = null!, ServiceName = null!, HasAttribute = false, ByRef = default }];
         private readonly List<Cycle> cycleList = [];
 
 
         public readonly void InitNode(Service service) {
             path[0].Service = service;
-            InitNodeRecursion(service);
-        }
-
-        public void InitNode(Service service, AttributeData attribute) {
-            path[0].Service = service;
-            this.attribute = attribute;
             InitNodeRecursion(service);
         }
 
@@ -950,11 +928,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 }
                             // else
                             {
-                                Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                    true => attribute.CreateScopedProviderNamedUnregisteredError(serviceProvider.Identifier, dependency.ServiceName),
-                                    false => attribute.CreateDependencyNamedUnregisteredError(service.Name, dependency.ServiceName)
-                                };
-                                serviceProvider.ErrorList.Add(error);
+                                if (ReferenceEquals(service, serviceProvider.CreateScope))
+                                    serviceProvider.ErrorManager.AddScopedProviderNamedUnregisteredError(serviceProvider.Identifier, dependency.ServiceName);
+                                else
+                                    serviceProvider.ErrorManager.AddDependencyNamedUnregisteredError(service.Name, dependency.ServiceName);
                                 return;
                             }
                             dependencyServiceInitialized:;
@@ -963,18 +940,16 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             (int index, int count) = serviceProvider.FindService(dependency.ServiceType);
                             switch (count) {
                                 case 0: {
-                                    Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                        true => attribute.CreateScopedProviderUnregisteredError(serviceProvider.Identifier, dependency.ServiceType),
-                                        false => attribute.CreateDependencyUnregisteredError(service.Name, dependency.ServiceType)
-                                    };
-                                    serviceProvider.ErrorList.Add(error);
+                                    if (ReferenceEquals(service, serviceProvider.CreateScope))
+                                        serviceProvider.ErrorManager.AddScopedProviderUnregisteredError(serviceProvider.Identifier, dependency.ServiceType);
+                                    else
+                                        serviceProvider.ErrorManager.AddDependencyUnregisteredError(service.Name, dependency.ServiceType);
 
                                     if (serviceProvider.HasInterface)
-                                        if (dependency.ServiceType.Name == serviceProvider.InterfaceIdentifier.Name || dependency.ServiceType.Name == $"{serviceProvider.InterfaceIdentifier.Name}.IScope") {
-                                            Diagnostic hintError = attribute.CreateDependencyInterfaceUndeclaredError(dependency.ServiceType, string.Join(".", serviceProvider.Identifier.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceIdentifier.Name);
-                                            serviceProvider.ErrorList.Add(hintError);
-                                        }
-
+                                        if (dependency.ServiceType.Name == serviceProvider.InterfaceIdentifier.Name || dependency.ServiceType.Name == $"{serviceProvider.InterfaceIdentifier.Name}.IScope")
+                                            // hintError
+                                            serviceProvider.ErrorManager.AddDependencyInterfaceUndeclaredError(dependency.ServiceType, string.Join(".", serviceProvider.Identifier.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceIdentifier.Name);
+                                    
                                     return;
                                 }
                                 case 1: {
@@ -994,7 +969,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                                         if (serviceIndex == -1) {
                                             IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
-                                            serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, servicesWithSameType));
+                                            serviceProvider.ErrorManager.AddDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, servicesWithSameType);
                                             return;
                                         }
 
@@ -1006,11 +981,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                         IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
                                         bool isParameter = dependency is ConstructorDependency;
 
-                                        Diagnostic error = ReferenceEquals(service, serviceProvider.CreateScope) switch {
-                                            true => attribute.CreateScopedProviderAmbiguousError(serviceProvider.Identifier, dependency.ServiceType, servicesWithSameType, isParameter),
-                                            false => attribute.CreateDependencyAmbiguousError(service.Name, dependency.ServiceType, servicesWithSameType, isParameter)
-                                        };
-                                        serviceProvider.ErrorList.Add(error);
+                                        if (ReferenceEquals(service, serviceProvider.CreateScope))
+                                            serviceProvider.ErrorManager.AddScopedProviderAmbiguousError(serviceProvider.Identifier, dependency.ServiceType, servicesWithSameType, isParameter);
+                                        else
+                                            serviceProvider.ErrorManager.AddDependencyAmbiguousError(service.Name, dependency.ServiceType, servicesWithSameType, isParameter);
+
                                         return;
                                     }
                                 }
@@ -1061,7 +1036,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                             // append first item again as last item to illustrate the circle
                                             servicesInCircle = servicesInCircle.Concat(servicesInCircle.Take(1));
 
-                                            serviceProvider.ErrorList.Add(attribute.CreateDependencyCircleError(servicesInCircle));
+                                            serviceProvider.ErrorManager.AddDependencyCircleError(servicesInCircle);
                                             return;
                                         }
                                     }
@@ -1092,7 +1067,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 // else
                                 {
                                     IEnumerable<string> servicesInCircle = path.Skip(index - 1).Select((Dependency edge) => edge.Service!.Name);
-                                    serviceProvider.ErrorList.Add(attribute.CreateDependencyCircleError(servicesInCircle));
+                                    serviceProvider.ErrorManager.AddDependencyCircleError(servicesInCircle);
                                     return;
                                 }
                             }
@@ -1106,13 +1081,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 if (dependency.Service.Lifetime.HasFlag(ServiceLifetime.Scoped))
                                     switch (dependency.Service.Lifetime) {
                                         case ServiceLifetime.Scoped:
-                                            serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeScopeError(service.Name, dependency.Service.ServiceType));
+                                            serviceProvider.ErrorManager.AddDependencyLifetimeScopeError(service.Name, dependency.Service.ServiceType);
                                             return;
                                         case ServiceLifetime.TransientScoped:
-                                            serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeTransientError(service.Name, dependency.Service.ServiceType));
+                                            serviceProvider.ErrorManager.AddDependencyLifetimeTransientError(service.Name, dependency.Service.ServiceType);
                                             return;
                                         case ServiceLifetime.DelegateScoped:
-                                            serviceProvider.ErrorList.Add(attribute.CreateDependencyLifetimeDelegateError(service.Name, dependency.Service.ServiceType));
+                                            serviceProvider.ErrorManager.AddDependencyLifetimeDelegateError(service.Name, dependency.Service.ServiceType);
                                             return;
                                         default:
                                             throw new Exception($"Not Reachable: Singleton service has scoped dependency, but this specific scoped lifetime is not handled: {dependency.Service.Lifetime}");
@@ -1122,13 +1097,13 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 if (dependency.Service.Lifetime.HasFlag(ServiceLifetime.Scoped))
                                     switch (dependency.Service.Lifetime) {
                                         case ServiceLifetime.Scoped:
-                                            serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeScopeError(serviceProvider.Identifier, dependency.Service.ServiceType));
+                                            serviceProvider.ErrorManager.AddScopedProviderLifetimeScopeError(serviceProvider.Identifier, dependency.Service.ServiceType);
                                             return;
                                         case ServiceLifetime.TransientScoped:
-                                            serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeTransientError(serviceProvider.Identifier, dependency.Service.ServiceType));
+                                            serviceProvider.ErrorManager.AddScopedProviderLifetimeTransientError(serviceProvider.Identifier, dependency.Service.ServiceType);
                                             return;
                                         case ServiceLifetime.DelegateScoped:
-                                            serviceProvider.ErrorList.Add(attribute.CreateScopedProviderLifetimeDelegateError(serviceProvider.Identifier, dependency.Service.ServiceType));
+                                            serviceProvider.ErrorManager.AddScopedProviderLifetimeDelegateError(serviceProvider.Identifier, dependency.Service.ServiceType);
                                             return;
                                         default:
                                             throw new Exception($"Not Reachable: TransientSingleton service has scoped dependency, but this specific scoped lifetime is not handled: {dependency.Service.Lifetime}");
@@ -1142,7 +1117,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     }
                     finally {
                         path.RemoveAt(path.Count - 1);
-                        Debug.Assert(serviceProvider.ErrorList.Count > 0 || dependency.Service is not null);
+                        Debug.Assert(serviceProvider.ErrorManager.ErrorList.Count > 0 || dependency.Service is not null);
                     }
                 }
             }
@@ -1265,7 +1240,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         if (!DelegateList.SequenceEqual(other.DelegateList))
             return false;
 
-        if (!ErrorList.SequenceEqual(other.ErrorList))
+        if (!ErrorManager.ErrorList.SequenceEqual(other.ErrorManager.ErrorList))
             return false;
 
         return true;
@@ -1310,7 +1285,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         hashCode = CombineList(hashCode, TransientList);
         hashCode = CombineList(hashCode, DelegateList);
 
-        hashCode = CombineList(hashCode, ErrorList);
+        hashCode = CombineList(hashCode, ErrorManager.ErrorList);
 
         return hashCode;
 

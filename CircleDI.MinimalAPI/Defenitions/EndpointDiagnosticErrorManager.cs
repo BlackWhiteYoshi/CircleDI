@@ -7,11 +7,17 @@ namespace CircleDI.MinimalAPI;
 /// <summary>
 /// Collection of global <see cref="DiagnosticDescriptor"/> objects and methods to create <see cref="Diagnostic"/> objects from them.
 /// </summary>
-public static class DiagnosticErrors {
-    #region Endpoint
+public sealed class EndpointDiagnosticErrorManager(AttributeData endpointAttribute, List<Diagnostic> errorList) {
+    public AttributeData EndpointAttribute { get; } = endpointAttribute;
 
-    public static Diagnostic CreateEndpointMethodNonStaticError(this AttributeData endpointAttribute, MethodName methodName)
-        => Diagnostic.Create(EndpointMethodNonStatic, endpointAttribute.ToLocation(), [methodName.CreateFullyQualifiedName()]);
+    /// <summary>
+    /// Diagnostics with Severity error.
+    /// </summary>
+    public List<Diagnostic> ErrorList { get; } = errorList;
+
+
+    public void AddEndpointMethodNonStaticError(MethodName methodName)
+        => ErrorList.Add(Diagnostic.Create(EndpointMethodNonStatic, EndpointAttribute.ToLocation(), [methodName.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor EndpointMethodNonStatic { get; } = new(
         id: "CDIM01",
@@ -22,8 +28,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateEndpointMethodGenericError(this AttributeData endpointAttribute, MethodName methodName)
-        => Diagnostic.Create(EndpointMethodGeneric, endpointAttribute.ToLocation(), [methodName.CreateFullyQualifiedName()]);
+    public void AddEndpointMethodGenericError(MethodName methodName)
+        => ErrorList.Add(Diagnostic.Create(EndpointMethodGeneric, EndpointAttribute.ToLocation(), [methodName.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor EndpointMethodGeneric { get; } = new(
         id: "CDIM02",
@@ -34,8 +40,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateMissingRouteBuilderMethodError(this AttributeData endpointAttribute, INamedTypeSymbol container, string methodName)
-       => Diagnostic.Create(MissingRouteBuilderMethod, endpointAttribute.ToLocation(), [container.ToDisplayString(), methodName]);
+    public void AddMissingRouteBuilderMethodError(INamedTypeSymbol container, string methodName)
+       => ErrorList.Add(Diagnostic.Create(MissingRouteBuilderMethod, EndpointAttribute.ToLocation(), [container.ToDisplayString(), methodName]));
 
     private static DiagnosticDescriptor MissingRouteBuilderMethod { get; } = new(
         id: "CDIM03",
@@ -46,8 +52,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateRouteBuilderNonStaticError(this AttributeData endpointAttribute, string methodName)
-           => Diagnostic.Create(RouteBuilderNonStatic, endpointAttribute.ToLocation(), [methodName]);
+    public void AddRouteBuilderNonStaticError(string methodName)
+        => ErrorList.Add(Diagnostic.Create(RouteBuilderNonStatic, EndpointAttribute.ToLocation(), [methodName]));
 
     private static DiagnosticDescriptor RouteBuilderNonStatic { get; } = new(
         id: "CDIM04",
@@ -58,8 +64,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateRouteBuilderGenericError(this AttributeData endpointAttribute, string methodName)
-           => Diagnostic.Create(RouteBuilderGeneric, endpointAttribute.ToLocation(), [methodName]);
+    public void AddRouteBuilderGenericError(string methodName)
+        => ErrorList.Add(Diagnostic.Create(RouteBuilderGeneric, EndpointAttribute.ToLocation(), [methodName]));
 
     private static DiagnosticDescriptor RouteBuilderGeneric { get; } = new(
         id: "CDIM05",
@@ -70,8 +76,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateRouteBuilderParameterListError(this AttributeData endpointAttribute, string methodName)
-           => Diagnostic.Create(RouteBuilderParameterList, endpointAttribute.ToLocation(), [methodName]);
+    public void AddRouteBuilderParameterListError(string methodName)
+        => ErrorList.Add(Diagnostic.Create(RouteBuilderParameterList, EndpointAttribute.ToLocation(), [methodName]));
 
     private static DiagnosticDescriptor RouteBuilderParameterList { get; } = new(
         id: "CDIM06",
@@ -82,8 +88,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateMultipleSameEndpointError(this AttributeData endpointAttribute, string route, Http HttpMethod)
-        => Diagnostic.Create(MultipleSameEndpoint, endpointAttribute.ToLocation(), [route, HttpMethod]);
+    public void AddMultipleSameEndpointError(string route, Http HttpMethod)
+        => ErrorList.Add(Diagnostic.Create(MultipleSameEndpoint, EndpointAttribute.ToLocation(), [route, HttpMethod]));
 
     private static DiagnosticDescriptor MultipleSameEndpoint { get; } = new(
         id: "CDIM07",
@@ -94,7 +100,7 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateMultipleEndpointServiceProviderError(this AttributeData serviceProviderAttribute, AttributeData otherServiceProviderAttribute)
+    public static Diagnostic CreateMultipleEndpointServiceProviderError(AttributeData serviceProviderAttribute, AttributeData otherServiceProviderAttribute)
         => Diagnostic.Create(MultipleEndpointServiceProvider, serviceProviderAttribute.ToLocation(), additionalLocations: otherServiceProviderAttribute.ToLocationList());
 
     private static DiagnosticDescriptor MultipleEndpointServiceProvider { get; } = new(
@@ -106,8 +112,8 @@ public static class DiagnosticErrors {
         isEnabledByDefault: true);
 
 
-    public static Diagnostic CreateEndpointDependencyWithoutServiceProviderError(this AttributeData endpointAttribute)
-        => Diagnostic.Create(EndpointDependencyWithoutServiceProvider, endpointAttribute.ToLocation());
+    public Diagnostic AddEndpointDependencyWithoutServiceProviderError()
+        => Diagnostic.Create(EndpointDependencyWithoutServiceProvider, EndpointAttribute.ToLocation());
 
     private static DiagnosticDescriptor EndpointDependencyWithoutServiceProvider { get; } = new(
         id: "CDIM09",
@@ -116,24 +122,22 @@ public static class DiagnosticErrors {
         category: "CircleDI",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+}
 
-    #endregion
-
-
-
-    private static Location? ToLocation(this AttributeData attributeData)
+file static class EndpointDiagnosticErrorManagerExtensions {
+    public static Location? ToLocation(this AttributeData attributeData)
         => attributeData.ApplicationSyntaxReference switch {
             SyntaxReference reference => Location.Create(reference.SyntaxTree, reference.Span),
             _ => null
         };
 
-    private static Location[] ToLocationList(this AttributeData attributeData)
+    public static Location[] ToLocationList(this AttributeData attributeData)
         => attributeData.ApplicationSyntaxReference switch {
             SyntaxReference reference => [Location.Create(reference.SyntaxTree, reference.Span)],
             _ => []
         };
 
-    private static string CreateFullyQualifiedName(this MethodName methodName) {
+    public static string CreateFullyQualifiedName(this MethodName methodName) {
         StringBuilder builder = new();
         methodName.AppendFullyQualifiedName(builder);
         return builder.ToString();

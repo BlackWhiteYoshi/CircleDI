@@ -40,13 +40,14 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
         IncrementalValuesProvider<ServiceProviderWithEndpointFlag> serviceProviderList = context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute", stringBuilderPool);
         IncrementalValuesProvider<ServiceProviderWithEndpointFlag> genericServiceProviderList = context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute`1", stringBuilderPool);
+        List<Diagnostic> endpointErrorList = [];
 
 
         // find all endpoints
         IncrementalValueProvider<ImmutableArray<Endpoint>> endpointList = context.SyntaxProvider.ForAttributeWithMetadataName(
             "CircleDIAttributes.EndpointAttribute",
             static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is MethodDeclarationSyntax,
-            static (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new Endpoint(generatorAttributeSyntaxContext)
+            (GeneratorAttributeSyntaxContext generatorAttributeSyntaxContext, CancellationToken _) => new Endpoint(generatorAttributeSyntaxContext, endpointErrorList)
         ).Collect().Select(CheckRouteConflicts);
 
         // all service providers with all endpoints
@@ -56,7 +57,8 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             .Combine(endpointList);
 
         // generate endpoint extension method
-        context.RegisterSourceOutput(serviceProviderListWithEndpointList, stringBuilderPool.GenerateEndpointMethod);
+        context.RegisterSourceOutput(serviceProviderListWithEndpointList, (SourceProductionContext context, ((ImmutableArray<ServiceProviderWithEndpointFlag> serviceProvider, ImmutableArray<ServiceProviderWithEndpointFlag> genericServiceProvider) serviceProviders, ImmutableArray<Endpoint> endpointList) value)
+            => GenerateEndpointMethod(context, value.serviceProviders.serviceProvider, value.serviceProviders.genericServiceProvider, value.endpointList, stringBuilderPool, endpointErrorList));
     }
 
 
@@ -78,49 +80,13 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             for (int i = 1; i < 6; i++)
                 if (httpMethodCount[i] >= sameEndpointCount) {
                     Endpoint endpoint = endpointGroup.First();
-                    endpoint.ErrorList.Add(endpoint.Attribute.CreateMultipleSameEndpointError(endpointGroup.Key, (Http)i));
+                    endpoint.ErrorManager.AddMultipleSameEndpointError(endpointGroup.Key, (Http)i);
                     break;
                 }
         }
 
         return endpoints;
     }
-}
-
-file static class RegisterServiceProviderAttributeExtension {
-    public static IncrementalValuesProvider<ServiceProviderWithEndpointFlag> RegisterServiceProviderAttribute(this IncrementalGeneratorInitializationContext context, string serviceProviderAttributeName, ObjectPool<StringBuilder> stringBuilderPool) {
-        // all service providers
-        IncrementalValuesProvider<ServiceProviderWithEndpointFlag> serviceProviderWithEndpointFlag = context.SyntaxProvider.ForAttributeWithMetadataName(
-            serviceProviderAttributeName,
-            static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
-            CreateServiceProviderWithEndpointFlag
-        ).Select((ServiceProviderWithEndpointFlag providerAndFlag, CancellationToken _) => (providerAndFlag.serviceProvider.CreateDependencyTree(), providerAndFlag.endpointProvider)).WithComparer(NoComparison<ServiceProviderWithEndpointFlag>.Instance);
-        
-        context.RegisterSourceOutput(serviceProviderWithEndpointFlag, (SourceProductionContext context, ServiceProviderWithEndpointFlag value) => stringBuilderPool.GenerateClass(context, value.serviceProvider));
-        context.RegisterSourceOutput(serviceProviderWithEndpointFlag, (SourceProductionContext context, ServiceProviderWithEndpointFlag value) => stringBuilderPool.GenerateInterface(context, value.serviceProvider));
-
-        return serviceProviderWithEndpointFlag;
-    }
-
-
-    /// <summary>
-    /// Creates a <see cref="ServiceProvider"/>,
-    /// then reads the properties "AddRazorComponents" and "AddDefaultServices",
-    /// if "AddDefaultServices" is true or null default services and a constructorDependency is added to the created service provider
-    /// and then the service provider together with the property values are returned.
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="_">CancellationToken is not used</param>
-    /// <returns></returns>
-    private static ServiceProviderWithEndpointFlag CreateServiceProviderWithEndpointFlag(GeneratorAttributeSyntaxContext context, CancellationToken _) {
-        ServiceProvider serviceProvider = new(context);
-
-        Debug.Assert(context.Attributes.Length > 0);
-        bool endpointProvider = context.Attributes[0].NamedArguments.GetArgument<bool?>("EndpointProvider") != false;
-
-        return (serviceProvider, endpointProvider);
-    }
-
 
     /// <summary>
     /// <para>Init the endpoint methods and generates an endpoint extension method.</para>
@@ -132,40 +98,41 @@ file static class RegisterServiceProviderAttributeExtension {
     /// <param name="stringBuilderPool"></param>
     /// <param name="context"></param>
     /// <param name="value"></param>
-    public static void GenerateEndpointMethod(this ObjectPool<StringBuilder> stringBuilderPool, SourceProductionContext context, ((ImmutableArray<ServiceProviderWithEndpointFlag> serviceProvider, ImmutableArray<ServiceProviderWithEndpointFlag> genericServiceProvider) serviceProviders, ImmutableArray<Endpoint> endpointList) value) {
-        ImmutableArray<Endpoint> endpointList = value.endpointList;
-        bool errorReported = false;
-        foreach (Endpoint endpoint in endpointList)
-            if (endpoint.ErrorList.Count > 0) {
-                foreach (Diagnostic error in endpoint.ErrorList)
-                    context.ReportDiagnostic(error);
-                errorReported = true;
-            }
+    private static void GenerateEndpointMethod(
+            SourceProductionContext context,
+            ImmutableArray<ServiceProviderWithEndpointFlag> serviceProvider,
+            ImmutableArray<ServiceProviderWithEndpointFlag> genericServiceProvider,
+            ImmutableArray<Endpoint> endpointList,
+            ObjectPool<StringBuilder> stringBuilderPool,
+            List<Diagnostic> endpointErrorList) {
 
+        bool errorReported = endpointErrorList.Count > 0;
+        foreach (Diagnostic error in endpointErrorList)
+            context.ReportDiagnostic(error);
 
-        ServiceProvider? serviceProvider = null;
-        foreach ((ServiceProvider listedProvider, bool endpointFlag) in value.serviceProviders.serviceProvider.Concat(value.serviceProviders.genericServiceProvider))
+        ServiceProvider? endpointServiceProvider = null;
+        foreach ((ServiceProvider listedProvider, bool endpointFlag) in serviceProvider.Concat(genericServiceProvider))
             if (endpointFlag)
-                if (serviceProvider is null)
-                    serviceProvider = listedProvider;
+                if (endpointServiceProvider is null)
+                    endpointServiceProvider = listedProvider;
                 else {
                     // many ServiceProviders
-                    context.ReportDiagnostic(serviceProvider.Attribute.CreateMultipleEndpointServiceProviderError(listedProvider.Attribute));
+                    context.ReportDiagnostic(EndpointDiagnosticErrorManager.CreateMultipleEndpointServiceProviderError(endpointServiceProvider.ErrorManager.ServiceProviderAttribute, listedProvider.ErrorManager.ServiceProviderAttribute));
                     return;
                 }
 
         TypeName? serviceTypeScopeProvider = null;
-        if (serviceProvider is not null) {
+        if (endpointServiceProvider is not null) {
             // 1 ServiceProvider -> normal case
-            if (serviceProvider.ErrorList.Count > 0)
+            if (endpointServiceProvider.ErrorManager.ErrorList.Count > 0)
                 return;
 
-            serviceTypeScopeProvider = serviceProvider.HasInterface ? serviceProvider.InterfaceIdentifierScope : serviceProvider.IdentifierScope;
+            serviceTypeScopeProvider = endpointServiceProvider.HasInterface ? endpointServiceProvider.InterfaceIdentifierScope : endpointServiceProvider.IdentifierScope;
 
-            serviceProvider.CreateDependencyTree(endpointList.Select((Endpoint endpoint) => (endpoint.AsService, endpoint.Attribute)));
+            endpointServiceProvider.CreateDependencyTree(endpointList.Select((Endpoint endpoint) => (endpoint.AsService, endpoint.ErrorManager.EndpointAttribute)));
 
-            if (serviceProvider.ErrorList.Count > 0) {
-                foreach (Diagnostic error in serviceProvider.ErrorList)
+            if (endpointServiceProvider.ErrorManager.ErrorList.Count > 0) {
+                foreach (Diagnostic error in endpointServiceProvider.ErrorManager.ErrorList)
                     context.ReportDiagnostic(error);
                 return;
             }
@@ -175,7 +142,7 @@ file static class RegisterServiceProviderAttributeExtension {
             foreach (Endpoint endpoint in endpointList)
                 foreach (ConstructorDependency dependency in endpoint.AsService.ConstructorDependencyList)
                     if (dependency.HasAttribute) {
-                        context.ReportDiagnostic(endpoint.Attribute.CreateEndpointDependencyWithoutServiceProviderError());
+                        context.ReportDiagnostic(endpoint.ErrorManager.AddEndpointDependencyWithoutServiceProviderError());
                         return;
                     }
         }
@@ -205,8 +172,7 @@ file static class RegisterServiceProviderAttributeExtension {
 
         builder.Append($"{SP4}public static void MapCircleDIEndpoints");
         // type parameter
-        if (serviceTypeScopeProvider != null)
-        {
+        if (serviceTypeScopeProvider != null) {
             int initalPosition = builder.Length;
             builder.Append('<');
 
@@ -289,7 +255,7 @@ file static class RegisterServiceProviderAttributeExtension {
                     builder.Append("global::");
                     builder.AppendOpenFullyQualified(serviceTypeScopeProvider!);
                     builder.Append(' ');
-                    builder.AppendFirstLower(serviceProvider!.Identifier.Name);
+                    builder.AppendFirstLower(endpointServiceProvider!.Identifier.Name);
                 }
                 else
                     builder.Length -= 2;
@@ -303,7 +269,7 @@ file static class RegisterServiceProviderAttributeExtension {
                 foreach (ConstructorDependency parameter in endpoint.AsService.ConstructorDependencyList) {
                     if (parameter.HasAttribute) {
                         builder.Append(parameter.ByRef.AsString());
-                        builder.AppendFirstLower(serviceProvider!.Identifier.Name);
+                        builder.AppendFirstLower(endpointServiceProvider!.Identifier.Name);
                         builder.Append('.');
                         builder.AppendServiceGetter(parameter.Service!);
                     }
@@ -326,5 +292,40 @@ file static class RegisterServiceProviderAttributeExtension {
         context.AddSource("EndpointExtension.g.cs", builder.ToString());
 
         stringBuilderPool.Return(builder);
+    }
+}
+
+file static class RegisterServiceProviderAttributeExtension {
+    public static IncrementalValuesProvider<ServiceProviderWithEndpointFlag> RegisterServiceProviderAttribute(this IncrementalGeneratorInitializationContext context, string serviceProviderAttributeName, ObjectPool<StringBuilder> stringBuilderPool) {
+        // all service providers
+        IncrementalValuesProvider<ServiceProviderWithEndpointFlag> serviceProviderWithEndpointFlag = context.SyntaxProvider.ForAttributeWithMetadataName(
+            serviceProviderAttributeName,
+            static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
+            CreateServiceProviderWithEndpointFlag
+        ).Select((ServiceProviderWithEndpointFlag providerAndFlag, CancellationToken _) => (providerAndFlag.serviceProvider.CreateDependencyTree(), providerAndFlag.endpointProvider)).WithComparer(NoComparison<ServiceProviderWithEndpointFlag>.Instance);
+        
+        context.RegisterSourceOutput(serviceProviderWithEndpointFlag, (SourceProductionContext context, ServiceProviderWithEndpointFlag value) => stringBuilderPool.GenerateClass(context, value.serviceProvider));
+        context.RegisterSourceOutput(serviceProviderWithEndpointFlag, (SourceProductionContext context, ServiceProviderWithEndpointFlag value) => stringBuilderPool.GenerateInterface(context, value.serviceProvider));
+
+        return serviceProviderWithEndpointFlag;
+    }
+
+
+    /// <summary>
+    /// Creates a <see cref="ServiceProvider"/>,
+    /// then reads the properties "AddRazorComponents" and "AddDefaultServices",
+    /// if "AddDefaultServices" is true or null default services and a constructorDependency is added to the created service provider
+    /// and then the service provider together with the property values are returned.
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="_">CancellationToken is not used</param>
+    /// <returns></returns>
+    private static ServiceProviderWithEndpointFlag CreateServiceProviderWithEndpointFlag(GeneratorAttributeSyntaxContext context, CancellationToken _) {
+        ServiceProvider serviceProvider = new(context);
+
+        Debug.Assert(context.Attributes.Length > 0);
+        bool endpointProvider = context.Attributes[0].NamedArguments.GetArgument<bool?>("EndpointProvider") != false;
+
+        return (serviceProvider, endpointProvider);
     }
 }

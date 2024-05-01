@@ -61,58 +61,51 @@ public sealed class Endpoint : IEquatable<Endpoint> {
     public required ParameterAttribute[]?[] ParameterAttributesList { get; init; }
 
 
-    /// <summary>
-    /// Diagnostics with Severity error that are related to this endpoint.
-    /// </summary>
-    public List<Diagnostic> ErrorList { get; private set; } = [];
-
-    /// <summary>
-    /// The <i>[EndpointAttribute]</i>-attribute above the method.
-    /// </summary>
-    public AttributeData Attribute { get; private set; }
+    public EndpointDiagnosticErrorManager ErrorManager { get; private set; }
 
 
-    public Endpoint(AttributeData endpointAttribute) => Attribute = endpointAttribute;
+    public Endpoint(AttributeData attribute) => ErrorManager = new EndpointDiagnosticErrorManager(attribute, []);
 
     [SetsRequiredMembers]
-    public Endpoint(GeneratorAttributeSyntaxContext syntaxContext) {
+    public Endpoint(GeneratorAttributeSyntaxContext syntaxContext, List<Diagnostic> endpointErrorList) {
         Debug.Assert(syntaxContext.Attributes.Length > 0);
-        Attribute = syntaxContext.Attributes[0];
+        AttributeData attribute = syntaxContext.Attributes[0];
+        ErrorManager = new EndpointDiagnosticErrorManager(attribute, endpointErrorList);
         IMethodSymbol method = (IMethodSymbol)syntaxContext.TargetSymbol;
 
         MethodHandler = new MethodName(method);
 
         if (!method.IsStatic)
-            ErrorList.Add(Attribute.CreateEndpointMethodNonStaticError(MethodHandler));
+            ErrorManager.AddEndpointMethodNonStaticError(MethodHandler);
 
         if (method.TypeParameters.Length > 0)
-            ErrorList.Add(Attribute.CreateEndpointMethodGenericError(MethodHandler));
+            ErrorManager.AddEndpointMethodGenericError(MethodHandler);
 
 
-        if (Attribute.ConstructorArguments.Length >= 2) {
-            if (Attribute.ConstructorArguments[0] is TypedConstant { Value: string route })
+        if (attribute.ConstructorArguments.Length >= 2) {
+            if (attribute.ConstructorArguments[0] is TypedConstant { Value: string route })
                 Route = route;
-            if (Attribute.ConstructorArguments[1] is TypedConstant { Value: int httpMethod })
+            if (attribute.ConstructorArguments[1] is TypedConstant { Value: int httpMethod })
                 HttpMethod = (Http)httpMethod;
         }
 
-        if (Attribute.NamedArguments.GetArgument<string>("RouteBuilder") is string routeBuilderName) {
+        if (attribute.NamedArguments.GetArgument<string>("RouteBuilder") is string routeBuilderName) {
             if (method.ContainingType is not INamedTypeSymbol container)
                 // invalid source code, methods can't be top level
                 goto return_RouteBuilder;
 
             if (container.GetMembers(routeBuilderName) is not [IMethodSymbol routeBuilderMethod]) {
-                ErrorList.Add(Attribute.CreateMissingRouteBuilderMethodError(container, routeBuilderName));
+                ErrorManager.AddMissingRouteBuilderMethodError(container, routeBuilderName);
                 goto return_RouteBuilder;
             }
 
             if (!routeBuilderMethod.IsStatic) {
-                ErrorList.Add(Attribute.CreateRouteBuilderNonStaticError(routeBuilderName));
+                ErrorManager.AddRouteBuilderNonStaticError(routeBuilderName);
                 goto return_RouteBuilder;
             }
 
             if (routeBuilderMethod.TypeParameters.Length > 0) {
-                ErrorList.Add(Attribute.CreateRouteBuilderGenericError(routeBuilderName));
+                ErrorManager.AddRouteBuilderGenericError(routeBuilderName);
                 goto return_RouteBuilder;
             }
 
@@ -129,7 +122,7 @@ public sealed class Endpoint : IEquatable<Endpoint> {
                     }
                 }
             ]) {
-                ErrorList.Add(Attribute.CreateRouteBuilderParameterListError(routeBuilderName));
+                ErrorManager.AddRouteBuilderParameterListError(routeBuilderName);
                 goto return_RouteBuilder;
             }
 
@@ -216,7 +209,7 @@ public sealed class Endpoint : IEquatable<Endpoint> {
                     break;
             }
 
-        if (!ErrorList.SequenceEqual(other.ErrorList))
+        if (!ErrorManager.ErrorList.SequenceEqual(other.ErrorManager.ErrorList))
             return false;
 
         return true;
@@ -237,7 +230,7 @@ public sealed class Endpoint : IEquatable<Endpoint> {
             else
                 hashCode = Combine(hashCode, 0);
 
-        hashCode = CombineList(hashCode, ErrorList);
+        hashCode = CombineList(hashCode, ErrorManager.ErrorList);
 
         return hashCode;
 

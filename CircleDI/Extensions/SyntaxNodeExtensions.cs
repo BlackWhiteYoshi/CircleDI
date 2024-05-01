@@ -58,20 +58,23 @@ public static class SyntaxNodeExtensions {
 
 
     /// <summary>
-    /// Creates the ConstructorDependencyList by analyzing the available constructors at the given class/implementation.<br />
-    /// When an applicable constructor is found, the list will be created based on that constructor, otherwise an error will be created and the list will be empty.
+    /// Searches for the applicable constructor by analyzing the available constructors at the given class/implementation.<br />
+    /// When no or multiple constructors are found an error will be created and null is returned.
     /// </summary>
     /// <param name="implementation"></param>
-    /// <param name="attributeData"></param>
+    /// <param name="errorManager"></param>
     /// <returns></returns>
-    public static (IMethodSymbol? constructor, Diagnostic? error) FindConstructor(this INamedTypeSymbol implementation, AttributeData attributeData) {
+    public static IMethodSymbol? FindConstructor(this INamedTypeSymbol implementation, DiagnosticErrorManager errorManager) {
         switch (implementation.InstanceConstructors.Length) {
             case 0:
-                return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
+                errorManager.AddMissingClassOrConstructorError(implementation.ToDisplayString());
+                return null;
             case 1:
-                if (implementation.InstanceConstructors[0].DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
-                    return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
-                return (implementation.InstanceConstructors[0], null);
+                if (implementation.InstanceConstructors[0].DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal)) {
+                    errorManager.AddMissingClassOrConstructorError(implementation.ToDisplayString());
+                    return null;
+                }
+                return implementation.InstanceConstructors[0];
             default:
                 IMethodSymbol? attributeConstructor = null;
                 IMethodSymbol? lastAvailableConstructor = null;
@@ -89,20 +92,24 @@ public static class SyntaxNodeExtensions {
                         else {
                             AttributeData firstAttribute = attributeConstructor.GetAttribute("ConstructorAttribute")!;
                             AttributeData secondAttribute = ctor.GetAttribute("ConstructorAttribute")!;
-                            return (null, firstAttribute.CreateMultipleConstructorAttributesError(secondAttribute, implementation, implementation.ToDisplayString()));
+                            errorManager.AddMultipleConstructorAttributesError(firstAttribute, secondAttribute, implementation, implementation.ToDisplayString());
+                            return null;
                         }
                 }
 
                 switch (availableConstructors) {
                     case 0:
-                        return (null, attributeData.CreateMissingClassOrConstructorError(implementation.ToDisplayString()));
+                        errorManager.AddMissingClassOrConstructorError(implementation.ToDisplayString());
+                        return null;
                     case 1:
-                        return (lastAvailableConstructor, null);
+                        return lastAvailableConstructor;
                     default:
-                        if (attributeConstructor is null)
-                            return (null, attributeData.CreateMissingConstructorAttributesError(implementation, implementation.ToDisplayString()));
+                        if (attributeConstructor is null) {
+                            errorManager.AddMissingConstructorAttributesError(implementation, implementation.ToDisplayString());
+                            return null;
+                        }
                         else
-                            return (attributeConstructor, null);
+                            return attributeConstructor;
                 }
         }
     }
@@ -160,29 +167,29 @@ public static class SyntaxNodeExtensions {
 
     /// <summary>
     /// <para>First <see cref="FindConstructor(INamedTypeSymbol, AttributeData)">finds the constructor</see> and if found, <see cref="Extensions.SyntaxNodeExtensions.CreateConstructorDependencyList(IMethodSymbol)">creates the constructor dependency list.</see></para>
-    /// <para>If no constructor found or an invalid constructor dependency was found, an empty list and an error is returned.</para>
+    /// <para>If no constructor found or an invalid constructor dependency was found, an error is created and the null is returned.</para>
     /// </summary>
     /// <param name="implementation"></param>
-    /// <param name="attributeData"></param>
+    /// <param name="errorManager"></param>
     /// <returns></returns>
-    public static (List<ConstructorDependency> constructorDependencyList, Diagnostic? error) CreateConstructorDependencyList(this INamedTypeSymbol implementation, AttributeData attributeData) {
-        (IMethodSymbol? constructor, Diagnostic? constructorListError) = FindConstructor(implementation, attributeData);
+    public static List<ConstructorDependency>? CreateConstructorDependencyList(this INamedTypeSymbol implementation, DiagnosticErrorManager errorManager) {
+        IMethodSymbol? constructor = FindConstructor(implementation, errorManager);
         if (constructor is not null)
-            return (CreateConstructorDependencyList(constructor), null);
+            return CreateConstructorDependencyList(constructor);
         else
-            return ([], constructorListError);
+            return null;
     }
 
 
     /// <summary>
     /// Creates the PropertyDependencyList based on the given class/implementation.<br />
     /// Each property marked with 'required' or '[Dependency]' will be added to the list.
-    /// If one of these properties have no set/init accessor, then an error will be created and the list will be empty.
+    /// If one of these properties have no set/init accessor, then an error will be created and null is returned.
     /// </summary>
     /// <param name="implementation"></param>
-    /// <param name="attributeData"></param>
+    /// <param name="errorManager"></param>
     /// <returns></returns>
-    public static (List<PropertyDependency> propertyDependencyList, Diagnostic? error) CreatePropertyDependencyList(this INamedTypeSymbol implementation, AttributeData attributeData) {
+    public static List<PropertyDependency>? CreatePropertyDependencyList(this INamedTypeSymbol implementation, DiagnosticErrorManager errorManager) {
         List<PropertyDependency> propertyDependencyList = [];
 
         for (INamedTypeSymbol? baseType = implementation; baseType is not null; baseType = baseType.BaseType) {
@@ -195,8 +202,10 @@ public static class SyntaxNodeExtensions {
                 TypeName? serviceType;
                 bool hasAttribute;
                 if (property.GetAttribute("DependencyAttribute") is AttributeData propertyAttribute) {
-                    if (property.SetMethod is null)
-                        return ([], attributeData.CreateMissingSetAccessorError(property, baseType, property.ToDisplayString()));
+                    if (property.SetMethod is null) {
+                        errorManager.AddMissingSetAccessorError(property, baseType, property.ToDisplayString());
+                        return null;
+                    }
 
                     if (propertyAttribute.NamedArguments.GetArgument<string>("Name") is string dependencyName) {
                         serviceName = dependencyName;
@@ -215,8 +224,10 @@ public static class SyntaxNodeExtensions {
                 else if (property.IsRequired) {
                     if (property.Type is not INamedTypeSymbol namedType)
                         continue;
-                    if (property.SetMethod is null)
-                        return ([], attributeData.CreateMissingSetAccessorError(property, baseType, property.ToDisplayString()));
+                    if (property.SetMethod is null) {
+                        errorManager.AddMissingSetAccessorError(property, baseType, property.ToDisplayString());
+                        return null;
+                    }
 
                     serviceName = string.Empty;
                     serviceType = new TypeName(namedType);
@@ -237,6 +248,6 @@ public static class SyntaxNodeExtensions {
             }
         }
 
-        return (propertyDependencyList, null);
+        return propertyDependencyList;
     }
 }
