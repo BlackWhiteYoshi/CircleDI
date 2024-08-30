@@ -98,7 +98,7 @@ public static class BlazorTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        Assert.Empty(sourceTexts.Where((string sourceText) => sourceText.Contains("private global::Microsoft.Extensions.Configuration.IConfiguration GetConfiguration()")));
+        Assert.DoesNotContain("private global::Microsoft.Extensions.Configuration.IConfiguration GetConfiguration()", sourceTexts);
         return Verify($"""
             {sourceTextClass}
 

@@ -355,12 +355,12 @@ And code conventions, structure, and quality is important to me. So there is a g
   Added CicleDI.Blazor.  
   Removed Error *CDI029* "Dependency CreationTiming: Constructor on Lazy" and instead the lazy instantiated service will become constructor instantiated.
 - 0.6.0  
-  Added Minimal.API.
-  Added support for ServiceProvider being generic.
+  Added Minimal.API.  
+  Added support for ServiceProvider being generic.  
   Improved IServiceProvder.GetService(Type) method.
 - 0.7.0  
   Added ImportAttribute.
 - 0.8.0  
-  Added ComponentModuleAttribute for cross project razor components importing.
-  Breaking Change: ServiceProvider does not longer generate TransientAttributes, add ComponentModuleAttribute to the ServiceProvider to get the same behavior as before.
+  Added ComponentModuleAttribute for cross project razor components importing.  
+  Breaking Change: ServiceProvider does not longer generate TransientAttributes, add ComponentModuleAttribute to the ServiceProvider to get the same behavior as before.  
   Improved service tree generation.

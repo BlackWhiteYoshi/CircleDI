@@ -1,8 +1,8 @@
 ﻿namespace CircleDI.Tests;
 
-public sealed class AssemblyNameAndVersionTest {
+public static class AssemblyNameAndVersionTest {
     [Fact]
-    public void AssemblyNameAndVersionMatch() {
+    public static void AssemblyNameAndVersionMatch() {
         const string NAME = Defenitions.Attributes.NAME;
         const string VERSION = Defenitions.Attributes.VERSION;
 
