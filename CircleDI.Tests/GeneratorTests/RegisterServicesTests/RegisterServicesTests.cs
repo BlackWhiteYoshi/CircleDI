@@ -75,6 +75,67 @@ public static class RegisterServicesTests {
     }
 
     [Fact]
+    public static Task SingletonWithTypesAsParameter() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton(typeof(ITestService), typeof(TestService))]
+            public sealed partial class TestProvider;
+
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task SingletonWithImplementationTypeOnlyAsParameter() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton(typeof(TestService))]
+            public sealed partial class TestProvider;
+
+            public sealed class TestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
     public static Task SingletonWithName() {
         const string input = """
             using CircleDIAttributes;
@@ -637,6 +698,67 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<TestService>]
+            public sealed partial class TestProvider;
+
+            public sealed class TestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ScopedWithTypesAsParameter() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Scoped(typeof(ITestService), typeof(TestService))]
+            public sealed partial class TestProvider;
+
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ScopedWithImplementationTypeOnlyAsParameter() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Scoped(typeof(TestService))]
             public sealed partial class TestProvider;
 
             public sealed class TestService;
@@ -1293,6 +1415,67 @@ public static class RegisterServicesTests {
     }
 
     [Fact]
+    public static Task TransientWithTypesAsParameter() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Transient(typeof(ITestService), typeof(TestService))]
+            public sealed partial class TestProvider;
+
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task TransientWithImplementationTypeOnlyAsParameter() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Transient(typeof(TestService))]
+            public sealed partial class TestProvider;
+
+            public sealed class TestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
     public static Task TransientWithName() {
         const string input = """
             using CircleDIAttributes;
@@ -1805,6 +1988,76 @@ public static class RegisterServicesTests {
 
             [Transient<ITestService, TestService>]
             public interface ITestModule;
+            
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ImportServiceTypeAsParameter() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import(typeof(ITestModule))]
+            public sealed partial class TestProvider;
+
+            [Transient<ITestService, TestService>]
+            public interface ITestModule;
+            
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ImportServiceTypeAsParameterAndImportMode() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import(typeof(ITestModule), ImportMode.Static)]
+            public sealed partial class TestProvider;
+
+            [Transient<ITestService, TestService>(Implementation = nameof(TestService))]
+            public interface ITestModule {
+                public static TestService TestService => new();
+            }
             
             public interface ITestService;
             public sealed class TestService : ITestService;

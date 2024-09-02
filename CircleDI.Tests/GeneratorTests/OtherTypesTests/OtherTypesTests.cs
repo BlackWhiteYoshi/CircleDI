@@ -416,6 +416,38 @@ public static class OtherTypesTests {
     }
 
     [Fact]
+    public static Task DelegateTypeAsParameter() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Delegate(typeof(TestDelegate), nameof(DelegateImpl))]
+            public sealed partial class TestProvider {
+                private string DelegateImpl(int number) => string.Empty;
+            }
+
+            public delegate string TestDelegate(int number);
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
     public static Task DelegateStatic() {
         const string input = """
             using CircleDIAttributes;

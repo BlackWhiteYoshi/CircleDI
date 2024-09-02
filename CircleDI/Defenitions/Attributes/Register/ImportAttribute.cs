@@ -23,25 +23,46 @@ public static partial class Attributes {
         /// </para>
         /// </summary>
         /// <typeparam name="TModule">The class, struct or interface containing the attributes to include.</typeparam>
+        /// <param name="mode">
+        /// <para>
+        /// Option for handling the instantiation of the module.<br />
+        /// It can be static (no instantiation), injected as service or given as parameter.
+        /// </para>
+        /// <para>Default is <see cref="ImportMode.Auto"/>.</para>
+        /// </param>
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
-        internal sealed class ImportAttribute<TModule> : Attribute {
+        internal sealed class ImportAttribute<TModule>(ImportMode mode) : Attribute {
             /// <summary>
             /// Automatically chooses the import option, see <see cref="ImportMode.Auto"/>.
             /// </summary>
-            public ImportAttribute() { }
+            public ImportAttribute() : this(ImportMode.Auto) { }
+        }
 
+        /// <summary>
+        /// <para>Registers all attributes of the specified class/struct/interface in <i>TModule</i>.</para>
+        /// <para>
+        /// There are several options to handle the instantiation of the module:<br />
+        /// - static (no instantiation)<br />
+        /// - injected as service<br />
+        /// - given as parameter
+        /// </para>
+        /// </summary>
+        /// <param name="module">The class, struct or interface containing the attributes to include.</param>
+        /// <param name="mode">
+        /// <para>
+        /// Option for handling the instantiation of the module.<br />
+        /// It can be static (no instantiation), injected as service or given as parameter.
+        /// </para>
+        /// <para>Default is <see cref="ImportMode.Auto"/>.</para>
+        /// </param>
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
+        internal sealed class ImportAttribute(Type module, ImportMode mode) : Attribute {
             /// <summary>
-            /// An import option for handling the instantiation of the module.
+            /// Automatically chooses the import option, see <see cref="ImportMode.Auto"/>.
             /// </summary>
-            /// <param name="mode">
-            /// <para>
-            /// Option for handling the instantiation of the module.<br />
-            /// It can be static (no instantiation), injected as service or given as parameter.
-            /// </para>
-            /// <para>Default is <see cref="ImportMode.Auto"/>.</para>
-            /// </param>
-            public ImportAttribute(ImportMode mode) { }
+            public ImportAttribute(Type module) : this(module, ImportMode.Auto) { }
         }
 
         #endif

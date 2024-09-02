@@ -303,7 +303,7 @@ public static class ServiceProviderTests {
             using CircleDIAttributes;
             
             namespace MyCode;
-            [ServiceProvider<ITestProvider<T>>]
+            [ServiceProvider(InterfaceType = typeof(ITestProvider<>))]
             public sealed partial class TestProvider<T>;
 
             public partial interface ITestProvider<T>;
@@ -363,7 +363,7 @@ public static class ServiceProviderTests {
             using CircleDIAttributes;
             
             namespace MyCode;
-            [ServiceProvider<ITestProvider<T1>>]
+            [ServiceProvider(InterfaceType = typeof(ITestProvider<>))]
             public sealed partial class TestProvider<T1> {
                 public sealed partial class Scope<T2>;
             }
@@ -998,6 +998,40 @@ public static class ServiceProviderTests {
         return Verify(sourceTextClass);
     }
 
+    [Fact]
+    public static Task AttributeServiceProviderWithInterfaceType() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MySpace {
+                [ServiceProvider(InterfaceType = typeof(Interface.IWrapper.IProvider))]
+                public sealed partial class MyProvider;
+            }
+
+            namespace MySpace.Interface {
+                public partial interface IWrapper {
+                    internal partial interface IProvider {
+                        protected internal partial interface IScope;
+                    }
+                }
+            }
+            
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
 
     [Fact]
     public static Task AttributeServiceProviderWithInterfaceTypeParameter() {
@@ -1032,6 +1066,33 @@ public static class ServiceProviderTests {
 
             {sourceTextInterface}
             """);
+    }
+
+    [Fact]
+    public static void AttributeServiceProviderWithInterfaceTypeAndInterfaceNameError() {
+        const string input = """
+            using CircleDIAttributes;
+            
+            namespace MySpace {
+                [ServiceProvider(InterfaceType = typeof(Interface.IWrapper.IProvider), InterfaceName = "IProvider")]
+                public sealed partial class MyProvider;
+            }
+
+            namespace MySpace.Interface {
+                public partial interface IWrapper {
+                    internal partial interface IProvider {
+                        protected internal partial interface IScope;
+                    }
+                }
+            }
+            
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI040", diagnostics[0].Id);
+        Assert.Equal("InterfaceType and InterfaceName are not compatible, at most one property must be set.", diagnostics[0].GetMessage());
     }
 
 

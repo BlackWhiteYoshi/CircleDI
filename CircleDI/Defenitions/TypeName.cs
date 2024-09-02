@@ -111,8 +111,8 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
             TypeParameterList.Add(typeParameter.Name);
 
         TypeArgumentList = new List<TypeName?>(typeSymbol.TypeArguments.Length);
-        foreach (ITypeSymbol typeArgument in typeSymbol.TypeArguments)
-            if (typeArgument is INamedTypeSymbol namedTypeArgument)
+        for (int i = 0; i < typeSymbol.TypeArguments.Length; i++)
+            if (typeSymbol.TypeArguments[i] is INamedTypeSymbol namedTypeArgument && namedTypeArgument.Name != TypeParameterList[i])
                 TypeArgumentList.Add(new TypeName(namedTypeArgument));
             else
                 TypeArgumentList.Add(null);
@@ -150,7 +150,8 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
         if (!ContainingTypeList.SequenceEqual(other.ContainingTypeList))
             return false;
 
-        if (!TypeParameterList.SequenceEqual(other.TypeParameterList))
+        // When type parameters differ, it is still the same Type, only arity matters
+        if (TypeParameterList.Count != other.TypeParameterList.Count)
             return false;
 
         if (!TypeArgumentList.SequenceEqual(other.TypeArgumentList))
@@ -165,7 +166,7 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
 
         hashCode = CombineList(hashCode, NameSpaceList);
         hashCode = CombineList(hashCode, ContainingTypeList);
-        hashCode = CombineList(hashCode, TypeParameterList);
+        hashCode = Combine(hashCode, TypeParameterList.Count.GetHashCode());
 
         foreach (TypeName? typeName in TypeArgumentList)
             hashCode = Combine(hashCode, typeName?.GetHashCode() ?? 0);
@@ -222,15 +223,10 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
         }
 
 
+        // When type parameters differ, it is still the same Type, only arity matters
         int typeParameterListDiff = TypeParameterList.Count.CompareTo(other.TypeParameterList.Count);
         if (typeParameterListDiff != 0)
             return typeParameterListDiff;
-
-        for (int i = 1; i < TypeParameterList.Count; i++) {
-            int typeNameDiff = TypeParameterList[i].CompareTo(other.TypeParameterList[i]);
-            if (typeNameDiff != 0)
-                return typeNameDiff;
-        }
 
 
         int typeArgumentListDiff = TypeArgumentList.Count.CompareTo(other.TypeArgumentList.Count);

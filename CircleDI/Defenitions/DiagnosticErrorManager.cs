@@ -52,18 +52,6 @@ public sealed class DiagnosticErrorManager(AttributeData serviceProviderAttribut
         isEnabledByDefault: true);
 
 
-    public void AddInterfaceNameIServiceProviderError()
-        => ErrorList.Add(Diagnostic.Create(InterfaceNameIServiceProvider, ServiceProviderAttribute.ToLocation()));
-
-    private static DiagnosticDescriptor InterfaceNameIServiceProvider { get; } = new(
-        id: "CDI035",
-        title: "InterfaceName is IServiceProvider",
-        messageFormat: "InterfaceName 'IServiceProvider' is not allowed, it collides with 'System.IServiceProvider'",
-        category: "CircleDI",
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true);
-
-
     public void AddScopeProviderAttributeTwiceError(AttributeData scopedProviderAttributeNested, AttributeData scopedProviderAttribute)
         => ErrorList.Add(Diagnostic.Create(ScopeProviderAttributeTwice, scopedProviderAttributeNested.ToLocation(), additionalLocations: scopedProviderAttribute.ToLocationList()));
 
@@ -71,6 +59,30 @@ public sealed class DiagnosticErrorManager(AttributeData serviceProviderAttribut
         id: "CDI003",
         title: "ScopedProviderAttribute is defined twice",
         messageFormat: "Double ScopedProviderAttribute is not allowed, put either one on the ServiceProvider or ScopedProvider, but not both",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
+    public void AddInterfaceTypeAndNameError()
+        => ErrorList.Add(Diagnostic.Create(InterfaceTypeAndName, ServiceProviderAttribute.ToLocation()));
+
+    private static DiagnosticDescriptor InterfaceTypeAndName { get; } = new(
+        id: "CDI040",
+        title: "InterfaceType and InterfaceName are incompatible",
+        messageFormat: "InterfaceType and InterfaceName are not compatible, at most one property must be set.",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
+    public void AddInterfaceNameIServiceProviderError()
+        => ErrorList.Add(Diagnostic.Create(InterfaceNameIServiceProvider, ServiceProviderAttribute.ToLocation()));
+
+    private static DiagnosticDescriptor InterfaceNameIServiceProvider { get; } = new(
+        id: "CDI035",
+        title: "InterfaceName is IServiceProvider",
+        messageFormat: "InterfaceName 'IServiceProvider' is not allowed, it collides with 'System.IServiceProvider'",
         category: "CircleDI",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);

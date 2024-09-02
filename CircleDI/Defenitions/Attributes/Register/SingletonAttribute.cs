@@ -35,6 +35,24 @@ public static partial class Attributes {
             {{SINGLETON_ATTRIBUTE_CONTENT}}
         }
 
+        /// <summary>
+        /// <para>Specifies a singleton service. That means there will be a single instance of that service in every ServiceProvider instance.</para>
+        /// <para>If <see cref="ServiceProviderAttribute"/> is used at the same class, this service will be added to the provider.</para>
+        /// </summary>
+        /// <param name="service">Type of the service.</param>
+        /// <param name="implementation">Type of the implementation.</param>
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
+        internal sealed class SingletonAttribute(Type service, Type implementation) : Attribute {
+            /// <summary>
+            /// Specifies a singleton service where type of service and implementation is the same.
+            /// </summary>
+            /// <param name="service">Type of the service and implementation.</param>
+            public SingletonAttribute(Type service) : this(service, service) { }
+
+            {{SINGLETON_ATTRIBUTE_CONTENT}}
+        }
+
         #endif
 
         """;

@@ -35,6 +35,24 @@ public static partial class Attributes {
             {{SCOPED_ATTRIBUTE_CONTENT}}
         }
 
+        /// <summary>
+        /// <para>Specifies a scoped service. That means this service will only be available in the ScopedProvider and there will be a single instance of that service in every ScopedProvider instance.</para>
+        /// <para>If <see cref="ServiceProviderAttribute"/> is used at the same class, this service will be added to the provider.</para>
+        /// </summary>
+        /// <param name="service">Type of the service.</param>
+        /// <param name="implementation">Type of the implementation.</param>
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
+        internal sealed class ScopedAttribute(Type service, Type implementation) : Attribute {
+            /// <summary>
+            /// Specifies a scoped service where type of service and implementation is the same.
+            /// </summary>
+            /// <param name="service">Type of the service and implementation.</param>
+            public ScopedAttribute(Type service) : this(service, service) { }
+
+            {{SCOPED_ATTRIBUTE_CONTENT}}
+        }
+
         #endif
 
         """;

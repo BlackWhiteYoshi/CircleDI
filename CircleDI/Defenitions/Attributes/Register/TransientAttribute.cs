@@ -35,6 +35,24 @@ public static partial class Attributes {
             {{TRANSIENT_ATTRIBUTE_CONTENT}}
         }
 
+        /// <summary>
+        /// <para>Specifies a transient service. That means this service will be instantiated each time requested.</para>
+        /// <para>If <see cref="ServiceProviderAttribute"/> is used at the same class, this service will be added to the provider.</para>
+        /// </summary>
+        /// <param name="service">Type of the service.</param>
+        /// <param name="implementation">Type of the implementation.</param>
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
+        internal sealed class TransientAttribute(Type service, Type implementation) : Attribute {
+            /// <summary>
+            /// Specifies a transient service where type of service and implementation is the same.
+            /// </summary>
+            /// <param name="service">Type of the service and implementation.</param>
+            public TransientAttribute(Type service) : this(service, service) { }
+
+            {{TRANSIENT_ATTRIBUTE_CONTENT}}
+        }
+
         #endif
 
         """;

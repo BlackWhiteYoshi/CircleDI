@@ -49,16 +49,21 @@ The [ScopedProviderAttribute](TypeTables.md#scopedproviderattribute) without set
 The other 5 attributes are for registering services.  
 There are several properties that can be configured to change the generated code:
 
-- *InterfaceName*:
+- *InterfaceName*:  
 Together with the ServiceProvider an interface will be generated based on the ServiceProvider.
 This sets the name/identifier of the generated interface explicitly.
 When *InterfaceName* is explicitly set to an empty string, no interface will be generated.  
 The default name is "I\{classname\}".
 An Exception is when the class name is "ServiceProvider", then the default interface name will be "IServiceprovider"
 and explicitly setting the interface name to "IServiceProvider" is not allowed, otherwise it will collide with [System.IServiceProvider](https://learn.microsoft.com/en-us//dotnet/api/system.iserviceprovider).  
-There is also the option to set the interface properties based on a declared interface, see [Interface name, namespace, access modifier and containing types](#interface-name-namespace-access-modifier-and-containing-types).
+There is also the option to set the interface properties based on a declared interface, see [Interface name, namespace, access modifier, containing types and generic](#interface-name-namespace-access-modifier-containing-types-and-generic).
+When setting this property, you must not set property *InterfaceType*.
 
-- *CreationTime*:
+- *InterfaceType*:  
+Sets the interface properties based on a declared interface, see [Interface name, namespace, access modifier, containing types and generic](#interface-name-namespace-access-modifier-containing-types-and-generic).
+When setting this property, you must not set property *InterfaceName*.
+
+- *CreationTime*:  
 Sets when the instantiation of a service happens: at ServiceProvider instantiation (inside the constructor) or lazy (first time used).
 This option is available at the [ServiceProviderAttribute](TypeTables.md#serviceproviderattribute) to set all services, at the [ScopedProviderAttribute](TypeTables.md#scopedproviderattribute) to set all scoped services or at a [registration attribute](TypeTables.md#singletonattribute) to set this option for that specific service.
 It is structured hierarchically: Specific service settings take priority over ScopedProvider settings and ScopedProvider settings take priority over ServiceProvider settings.  
@@ -66,32 +71,32 @@ Note that [TransientAttribute](TypeTables.md#transientattribute) and [DelegateAt
 If a Singleton/Scoped service with CreationTiming.Constructor has a dependency on a service with same Lifetime and CreationTiming.Lazy, the lazy instantiated service will automatically also become constructor instantiated.
 A Scoped service with CreationTiming.Constructor can have a dependency on a Singleton service with CreationTiming.Lazy, the other way around (Singleton has dependency on Scoped) is not allowed/possible.
 
-- *GetAccessor*:
+- *GetAccessor*:  
 The type of the member to access the service: tt can be either a get property or a parameterless method.
 This option is available at the [ServiceProviderAttribute](TypeTables.md#serviceproviderattribute) to set all services, at the [ScopedProviderAttribute](TypeTables.md#scopedproviderattribute) to set all scoped services or at a [registration attribute](TypeTables.md#singletonattribute) to set this option for that specific service.
 It is structured hierarchically: Specific service settings take priority over ScopedProvider settings and ScopedProvider settings take priority over ServiceProvider settings. 
 
-- *Implementation*:
+- *Implementation*:  
 If nothing is specified the constructor is used to create the service, but you can also use a field to provide an instance or a property/method to use a factory method instead.
 For in depth explanation see [Implementation Property](#implementation-property).
 
-- *Name*:
+- *Name*:  
 Sets the name/identifier of the service getter property/method explicitly. This can be used to avoid naming conflicts, configure named services or just for better naming.
 For in depth explanation see [Named Services](#named-services).
 
-- *GenerateDisposeMethods*:
+- *GenerateDisposeMethods*:  
 If nothing is specified both Dispose() and DisposeAsync() methods are generated to implement IDisposable and IAsyncDisposable.
 You can configure this property to only generate one method or omit both.
 
-- *NoDispose*
+- *NoDispose*:  
 Skips the generation for disposing a specific service, regardless the service implements [IDisposable](https://learn.microsoft.com/en-us/dotnet/api/system.idisposable) or [IAsyncDisposable](https://learn.microsoft.com/en-us/dotnet/api/system.iasyncdisposable).
 If the service does not implement [IDisposable](https://learn.microsoft.com/en-us/dotnet/api/system.idisposable)/[IAsyncDisposable](https://learn.microsoft.com/en-us/dotnet/api/system.iasyncdisposable), this will have no effect.
 
-- *Generate* (ScopeProvider):
+- *Generate* (ScopeProvider):  
 Toggles the generation off the Scope Class inside the ServiceProvider.
 If turned off, no Scope is generated and therefore [ScopedAttribute](TypeTables.md#scopedattribute) has no effect.
 
-- *ThreadSafe*:
+- *ThreadSafe*:  
 Toggle for generating lock()-statements to make the ServiceProvider thread safe or omitting those for better performance.
 This option should be set to false, if the ServiceProvider is used in a single threaded scenario or only accessed by one thread at a time.
 Default is generating lock()-statements.
@@ -440,7 +445,7 @@ public partial class Wrapper {
 
 When using [ServiceProviderAttribute&lt;TInterface&gt;](TypeTables.md#serviceproviderattributetinterface) the interface specified as type parameter is used for inferring the properties for the generated interface.
 The generated interface will have the same name, access modifiers, type parameters, will be in the same namespace and will be nested in the same types.  
-A generic interface is not possible, because an unbound type is not allowed here. However the scoped interface may be generic.
+
 
 ```csharp
 namespace MySpace {
@@ -465,6 +470,33 @@ namespace MySpace.Interface {
 //   access modifier: "internal", Scope -> "public"
 //   containing types: "interface IWrapper"
 //   type parameter: Scope -> "U"
+```
+
+For a generic interface set the property *InterfaceType* with an unbound generic.
+
+```csharp
+namespace MySpace {
+    [ServiceProvider(InterfaceType = typeof(Interface.IWrapper.IProvider<>))]
+    internal sealed partial class MyProvider<T> {
+        public sealed partial class Scope<U>;
+    }
+}
+
+namespace MySpace.Interface {
+    public partial interface IWrapper {
+        internal partial interface IProvider<T> {
+            public partial interface IScope<U>;
+        }
+    }
+}
+
+
+// generated interface will have:
+//   name: "IProvider"
+//   namespace: "MySpace.Interface"
+//   access modifier: "internal", Scope -> "public"
+//   containing types: "interface IWrapper"
+//   type parameter: "T", Scope -> "U"
 ```
 
 

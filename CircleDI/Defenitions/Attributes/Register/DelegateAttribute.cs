@@ -27,6 +27,20 @@ public static partial class Attributes {
             {{GET_ACCESSOR_PROPERTY}}
         }
 
+        /// <summary>
+        /// <para>Specifies a delegate service. That means requesting this service will give you a method.</para>
+        /// <para>If <see cref="ServiceProviderAttribute"/> is used at the same class, this service will be added to the provider.</para>
+        /// </summary>
+        /// <param name="service">Type of the service and implementation.</param>
+        /// <param name="methodName">Methodname that will be the implementation for the given service.</param>
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = true)]
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
+        internal sealed class DelegateAttribute(Type service, string methodName) : Attribute {
+            {{SERVICE_NAME_PROPERTY}}
+
+            {{GET_ACCESSOR_PROPERTY}}
+        }
+
         #endif
 
         """;

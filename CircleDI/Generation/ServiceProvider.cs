@@ -322,28 +322,37 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         // interface type
         INamedTypeSymbol? interfaceSymbol = null;
-        INamedTypeSymbol? interfaceScopeSymbol = null;
+        InterfaceAccessibility = Accessibility.Public;
         if (serviceProviderAttribute.AttributeClass!.TypeArguments.Length > 0 && serviceProviderAttribute.AttributeClass.TypeArguments[0] is INamedTypeSymbol { TypeKind: TypeKind.Interface } symbol) {
             interfaceSymbol = symbol;
-            if (interfaceSymbol.GetMembers("IScope") is [INamedTypeSymbol { TypeKind: TypeKind.Interface } scopeSymbol])
-                interfaceScopeSymbol = scopeSymbol;
-        }
-
-        InterfaceAccessibility = Accessibility.Public;
-        InterfaceAccessibilityScope = Accessibility.Public;
-        if (interfaceSymbol is not null) {
             InterfaceIdentifier = new TypeName(interfaceSymbol);
             InterfaceAccessibility = interfaceSymbol.DeclaredAccessibility;
         }
-        else if (serviceProviderAttribute.NamedArguments.GetArgument<string?>("InterfaceName") is string interfaceName)
-            InterfaceIdentifier = new TypeName(interfaceName, TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
-        else
-            InterfaceIdentifier = new TypeName(Identifier.Name != "ServiceProvider" ? $"I{Identifier.Name}" : "IServiceprovider", TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
-
+        else {
+            interfaceSymbol = serviceProviderAttribute.NamedArguments.GetArgument<INamedTypeSymbol?>("InterfaceType");
+            string? interfaceName = serviceProviderAttribute.NamedArguments.GetArgument<string?>("InterfaceName");
+            switch ((interfaceSymbol, interfaceName)) {
+                case (INamedTypeSymbol, string):
+                    ErrorManager.AddInterfaceTypeAndNameError();
+                    InterfaceIdentifier = new TypeName(Identifier.Name != "ServiceProvider" ? $"I{Identifier.Name}" : "IServiceprovider", TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
+                    break;
+                case (INamedTypeSymbol, null):
+                    InterfaceIdentifier = new TypeName(interfaceSymbol);
+                    InterfaceAccessibility = interfaceSymbol.DeclaredAccessibility;
+                    break;
+                case (null, string):
+                    InterfaceIdentifier = new TypeName(interfaceName, TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
+                    break;
+                case (null, null):
+                    InterfaceIdentifier = new TypeName(Identifier.Name != "ServiceProvider" ? $"I{Identifier.Name}" : "IServiceprovider", TypeKeyword.Interface, Identifier.NameSpaceList, Identifier.ContainingTypeList, [], []);
+                    break;
+            }
+        }
         if (InterfaceIdentifier.Name == "IServiceProvider")
             ErrorManager.AddInterfaceNameIServiceProviderError();
 
-        if (interfaceScopeSymbol is not null) {
+        InterfaceAccessibilityScope = Accessibility.Public;
+        if (interfaceSymbol?.GetMembers("IScope") is [INamedTypeSymbol { TypeKind: TypeKind.Interface } interfaceScopeSymbol]) {
             InterfaceIdentifierScope = new TypeName(interfaceScopeSymbol);
             InterfaceAccessibilityScope = interfaceScopeSymbol.DeclaredAccessibility;
         }
@@ -490,6 +499,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 switch (attribute.Name) {
                     case "SingletonAttribute": {
                         Service service = new(serviceProvider, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, ErrorManager);
+                        if (service.Name == string.Empty) // invalid service
+                            break;
+
                         hasServiceSelf |= service.ServiceType == serviceType;
                         SingletonList.Add(service);
 
@@ -503,6 +515,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             break;
 
                         Service service = new(serviceProvider, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, ErrorManager);
+                        if (service.Name == string.Empty) // invalid service
+                            break;
+
                         hasServiceSelfScope |= service.ServiceType == serviceTypeScope;
                         ScopedList.Add(service);
 
@@ -513,6 +528,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     }
                     case "TransientAttribute": {
                         Service service = new(serviceProvider, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, ErrorManager);
+                        if (service.Name == string.Empty) // invalid service
+                            break;
+
                         TransientList.Add(service);
                         break;
                     }
@@ -521,6 +539,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             break;
 
                         Service service = new(serviceProvider, attributeData, getAccessorScopeProvider, ErrorManager);
+                        if (service.Name == string.Empty) // invalid service
+                            break;
+
                         DelegateList.Add(service);
                         break;
                     }
@@ -617,18 +638,29 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         /// </summary>
         /// <param name="importAttribute"></param>
         public readonly void RegisterServices(AttributeData importAttribute) {
-            Debug.Assert(importAttribute.AttributeClass?.TypeArguments.Length > 0);
+            INamedTypeSymbol attributeType = importAttribute.AttributeClass!;
 
-            INamedTypeSymbol module = (INamedTypeSymbol)importAttribute.AttributeClass!.TypeArguments[0];
+            INamedTypeSymbol? module = attributeType.TypeArguments.Length switch {
+                1 /*Import<TModule>([mode])*/ => importAttribute.AttributeClass!.TypeArguments[0] as INamedTypeSymbol,
+                0 /*Import(module, [mode])*/ => importAttribute.ConstructorArguments.Length switch {
+                    >= 1 => importAttribute.ConstructorArguments[0].Value as INamedTypeSymbol,
+                    _ => null
+                },
+                _ => null
+            };
+            if (module is null)
+                return; // Syntax Error
+
             INamedTypeSymbol? moduleScope = module.GetMembers("Scope") switch {
                 [INamedTypeSymbol scope] => scope,
                 _ => null
             };
+
             TypeName moduleTypeName = new(module);
 
 
             ImportMode importMode = importAttribute.ConstructorArguments switch {
-                [TypedConstant { Value: int importModeValue }] => (ImportMode)importModeValue,
+                [.., TypedConstant { Value: int importModeValue }] => (ImportMode)importModeValue,
                 _ => ImportMode.Auto
             };
             IMethodSymbol? serivceConstructor = null;
@@ -772,6 +804,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
+                            if (service.Name == string.Empty) // invalid service
+                                break;
+
                             serviceProvider.SingletonList.Add(service);
                             break;
                         }
@@ -783,6 +818,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
+                            if (service.Name == string.Empty) // invalid service
+                                break;
+
                             serviceProvider.ScopedList.Add(service);
                             break;
                         }
@@ -791,6 +829,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
+                            if (service.Name == string.Empty) // invalid service
+                                break;
+
                             serviceProvider.TransientList.Add(service);
                             break;
                         }
@@ -802,6 +843,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
+                            if (service.Name == string.Empty) // invalid service
+                                break;
+
                             serviceProvider.DelegateList.Add(service);
                             break;
                         }

@@ -169,15 +169,55 @@ public sealed class Service : IEquatable<Service> {
         Debug.Assert(attributeData.AttributeClass?.TypeKind != TypeKind.Error == true || attributeData.AttributeClass?.TypeArguments.All((ITypeSymbol typeSymbol) => typeSymbol.TypeKind != TypeKind.Error) == true);
 
         INamedTypeSymbol attributeType = attributeData.AttributeClass!;
-        INamedTypeSymbol serviceType = (INamedTypeSymbol)attributeType.TypeArguments[0];
-        INamedTypeSymbol implementationType = attributeType.TypeArguments.Length switch {
-            >= 2 => (INamedTypeSymbol)attributeType.TypeArguments[1],
-            _ => serviceType
-        };
+        INamedTypeSymbol? serviceType;
+        INamedTypeSymbol? implementationType;
+        switch (attributeType.TypeArguments.Length) {
+            case 2: // Service<TService, TImplementation>
+                serviceType = attributeType.TypeArguments[0] as INamedTypeSymbol;
+                implementationType = attributeType.TypeArguments[1] as INamedTypeSymbol;
+                break;
+
+            case 1: // Service<TService>
+                serviceType = attributeType.TypeArguments[0] as INamedTypeSymbol;
+                implementationType = serviceType;
+                break;
+
+            case 0: // Service(typeof(service)) || Service(typeof(service), typeof(implementation))
+                switch (attributeData.ConstructorArguments.Length) {
+                    case 2: // Service(typeof(service), typeof(implementation))
+                        serviceType = attributeData.ConstructorArguments[0].Value as INamedTypeSymbol;
+                        implementationType = attributeData.ConstructorArguments[1].Value as INamedTypeSymbol;
+                        break;
+                    case 1: // Service(typeof(service))
+                        serviceType = attributeData.ConstructorArguments[0].Value as INamedTypeSymbol;
+                        implementationType = serviceType;
+                        break;
+                    default: // syntax error input: 0 || >2
+                        serviceType = null;
+                        implementationType = null;
+                        break;
+                }
+                break;
+
+            default: // syntax error input: >2
+                serviceType = null;
+                implementationType = null;
+                break;
+        }
+        if (serviceType is null || implementationType is null) {
+            ServiceType = new TypeName(string.Empty);
+            ImplementationType = new TypeName(string.Empty);
+            Name = string.Empty;
+            ConstructorDependencyList = [];
+            PropertyDependencyList = [];
+            Dependencies = [];
+            return; // Syntax Error
+        }
         
         Lifetime = lifetime;
+        
         ServiceType = new TypeName(serviceType);
-        IsRefable = lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped && serviceType.IsValueType && SymbolEqualityComparer.Default.Equals(serviceType, implementationType);
+        IsRefable = lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped && serviceType.IsValueType == true && SymbolEqualityComparer.Default.Equals(serviceType, implementationType);
         ImplementationType = new TypeName(implementationType);
 
         Name = implementationType.Name;
@@ -306,9 +346,25 @@ public sealed class Service : IEquatable<Service> {
     public Service(INamedTypeSymbol module, AttributeData attributeData, GetAccess getAccessorProvider, DiagnosticErrorManager errorManager) {
         Debug.Assert(attributeData.AttributeClass?.TypeArguments.All((ITypeSymbol typeSymbol) => typeSymbol.TypeKind != TypeKind.Error) == true);
 
-        INamedTypeSymbol attribute = attributeData.AttributeClass!;
-        INamedTypeSymbol serviceType = (INamedTypeSymbol)attribute.TypeArguments[0];
-
+        INamedTypeSymbol attributeType = attributeData.AttributeClass!;
+        INamedTypeSymbol? serviceType = attributeType.TypeArguments.Length switch {
+            1 /*Delegate<TService>("method")*/ => attributeType.TypeArguments[0] as INamedTypeSymbol,
+            0 /*Delegate(typeof(service), "method")*/ => attributeData.ConstructorArguments.Length switch {
+                2 => attributeData.ConstructorArguments[0].Value as INamedTypeSymbol,
+                _ => null
+            },
+            _ => null
+        };
+        if (serviceType is null) {
+            ServiceType = new TypeName(string.Empty);
+            ImplementationType = new TypeName(string.Empty);
+            Name = string.Empty;
+            ConstructorDependencyList = [];
+            PropertyDependencyList = [];
+            Dependencies = [];
+            return; // Syntax Error
+        }
+        
         ServiceType = new TypeName(serviceType);
         ImplementationType = ServiceType;
 
@@ -332,7 +388,7 @@ public sealed class Service : IEquatable<Service> {
 
 
         // implementation method
-        if (attributeData.ConstructorArguments is not [TypedConstant { Value: string methodName }]) {
+        if (attributeData.ConstructorArguments is not [.., TypedConstant { Value: string methodName }]) {
             Implementation = new ImplementationMember(MemberType.Method, string.Empty, IsStatic: false, IsScoped: false);
             errorManager.AddMissingDelegateImplementationError(module.ToDisplayString(), string.Empty);
             return;
