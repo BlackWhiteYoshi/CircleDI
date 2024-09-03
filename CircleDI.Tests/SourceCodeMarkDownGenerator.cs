@@ -116,7 +116,7 @@ public static class SourceCodeMarkDownGenerator {
 
         builder.AppendSection("Import Services", """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -127,7 +127,7 @@ public static class SourceCodeMarkDownGenerator {
             public interface ITestModule {
                 public static TestService CreateService => new();
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
 

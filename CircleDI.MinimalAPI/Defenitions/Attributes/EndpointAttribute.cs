@@ -8,11 +8,11 @@ public static partial class Attributes {
 
 
         #if !CIRCLEDI_EXCLUDE_ATTRIBUTES
-        
+
         using System;
-    
+
         namespace CircleDIAttributes;
-        
+
         /// <summary>
         /// <para>Adds a <see cref="Microsoft.AspNetCore.Routing.RouteEndpoint"/> to the <see cref="Microsoft.AspNetCore.Routing.IEndpointRouteBuilder"/> that matches HTTP requests for the specified pattern with the specified HTTP method.</para>
         /// <para>The method must be static and non-generic. Dependencies must be explicitly marked with <see cref="CircleDIAttributes.DependencyAttribute">[Dependency]</see>.</para>

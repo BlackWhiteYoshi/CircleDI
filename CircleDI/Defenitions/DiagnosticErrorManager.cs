@@ -175,7 +175,7 @@ public sealed class DiagnosticErrorManager(AttributeData serviceProviderAttribut
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    
+
     public void AddWrongFieldImplementationTypeError(string implementationName, string actualType, TypeName expectedType)
         => ErrorList.Add(Diagnostic.Create(WrongFieldImplementationTypeError, CurrentAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]));
 
@@ -306,7 +306,7 @@ public sealed class DiagnosticErrorManager(AttributeData serviceProviderAttribut
         List<Location> locationList;
         if (SymbolEqualityComparer.Default.Equals(implementation.ContainingAssembly, ServiceProviderAttribute.AttributeClass!.ContainingAssembly)) {
             location = secondAttribute.ToLocation();
-            
+
             locationList = new List<Location>(1 + implementation.Locations.Length);
             if (firstAttribute.ApplicationSyntaxReference is SyntaxReference reference)
                 locationList.Add(Location.Create(reference.SyntaxTree, reference.Span));

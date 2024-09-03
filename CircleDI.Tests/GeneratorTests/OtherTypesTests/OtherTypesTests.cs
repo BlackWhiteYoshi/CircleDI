@@ -17,7 +17,7 @@ public static class OtherTypesTests {
     public static Task ServiceProviderStruct() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -46,7 +46,7 @@ public static class OtherTypesTests {
     public static Task ServiceProviderRecord() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -75,7 +75,7 @@ public static class OtherTypesTests {
     public static Task ServiceProviderRecordClass() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -104,7 +104,7 @@ public static class OtherTypesTests {
     public static Task ServiceProviderRecordStruct() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -171,14 +171,14 @@ public static class OtherTypesTests {
     public static Task Struct() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             [method: Constructor]
             public struct TestService(ITestDependency testDependency) : ITestService;
@@ -207,14 +207,14 @@ public static class OtherTypesTests {
     public static Task RecordClass() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public record class TestService(ITestDependency testDependency) : ITestService;
 
@@ -242,14 +242,14 @@ public static class OtherTypesTests {
     public static Task RecordStruct() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             [method: Constructor]
             public record struct TestService(ITestDependency testDependency) : ITestService;
@@ -278,7 +278,7 @@ public static class OtherTypesTests {
     public static Task NativeType() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -286,7 +286,7 @@ public static class OtherTypesTests {
             [Singleton<ITestStruct, TestStruct>]
             [Singleton<int>]
             public sealed partial class TestProvider;
-            
+
 
             public class TestClass(int number);
 
@@ -316,14 +316,14 @@ public static class OtherTypesTests {
     public static Task RefInClassProviderAndNoRefInStructProvider() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<TestStruct>]
             [Scoped<TestStruct>(Name = $"{nameof(TestStruct)}Scoped")]
             public partial struct TestProvider;
-            
+
             public struct TestStruct;
 
             """;
@@ -347,7 +347,7 @@ public static class OtherTypesTests {
     public static Task RefInOutInjection() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -357,7 +357,7 @@ public static class OtherTypesTests {
             [Singleton<OutInject>]
             [Singleton<RefReadonlyInject>]
             public sealed partial class TestProvider;
-            
+
             public struct TestStruct;
 
             public sealed class RefInject(ref TestStruct testStruct);
@@ -624,7 +624,7 @@ public static class OtherTypesTests {
             public sealed partial class TestProvider {
                 private string DelegateImpl(int number) => string.Empty;
             }
-            
+
             public interface ITestService;
             public sealed class TestService(TestDelegate testDelegate) : ITestService;
 
@@ -660,7 +660,7 @@ public static class OtherTypesTests {
             public sealed partial class TestProvider {
                 private string DelegateImpl(int number) => string.Empty;
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 public required TestDelegate TestDelegate { private get; init; }
@@ -863,7 +863,7 @@ public static class OtherTypesTests {
     public static Task GenericClass() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -890,19 +890,19 @@ public static class OtherTypesTests {
             {sourceTextInterface}
             """);
     }
-    
-    
+
+
     [Fact]
     public static void InterfaceFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITest>]
             public sealed partial class TestProvider;
-            
+
             public interface ITest;
 
             """;

@@ -12,14 +12,14 @@ public static class DependencyTests {
     public static Task SingleSingleton() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService(ITestDependency testDependency) : ITestService;
 
@@ -38,14 +38,14 @@ public static class DependencyTests {
     public static Task SingleScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>]
             [Scoped<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService(ITestDependency testDependency) : ITestService;
 
@@ -64,14 +64,14 @@ public static class DependencyTests {
     public static Task SingleTransient() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Transient<ITestService, TestService>]
             [Transient<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService(ITestDependency testDependency) : ITestService;
 
@@ -90,7 +90,7 @@ public static class DependencyTests {
     public static Task SingleTransientScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -98,10 +98,10 @@ public static class DependencyTests {
             [Transient<ITestDependency, TestDependency>]
             [Scoped<IScopedDependency, ScopedDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService(ITestDependency testDependency) : ITestService;
-            
+
             public interface ITestDependency;
             public sealed class TestDependency(IScopedDependency scopedDependency) : ITestDependency;
 
@@ -120,14 +120,14 @@ public static class DependencyTests {
     public static Task ScopedServiceOnLazySingleton() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Scoped<IScopedService, ScopedService>]
             [Singleton<ISingletonDependency, SingletonDependency>(CreationTime = CreationTiming.Lazy)]
             public sealed partial class TestProvider;
-            
+
             public interface IScopedService;
             public sealed class ScopedService(ISingletonDependency singletonDependency) : IScopedService;
 
@@ -147,7 +147,7 @@ public static class DependencyTests {
     public static Task MultipleSingleton() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -156,7 +156,7 @@ public static class DependencyTests {
             [Singleton<ITestDependency2, TestDependency2>]
             [Singleton<ITestDependency3, TestDependency3>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService(ITestDependency1 testDependency1, ITestDependency2 testDependency2, ITestDependency3 testDependency3) : ITestService;
 
@@ -181,7 +181,7 @@ public static class DependencyTests {
     public static Task MultipleScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -190,7 +190,7 @@ public static class DependencyTests {
             [Scoped<ITestDependency2, TestDependency2>]
             [Scoped<ITestDependency3, TestDependency3>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService(ITestDependency1 testDependency1, ITestDependency2 testDependency2, ITestDependency3 testDependency3) : ITestService;
 
@@ -215,7 +215,7 @@ public static class DependencyTests {
     public static Task MultipleTransient() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -224,7 +224,7 @@ public static class DependencyTests {
             [Transient<ITestDependency2, TestDependency2>]
             [Transient<ITestDependency3, TestDependency3>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService(ITestDependency1 testDependency1, ITestDependency2 testDependency2, ITestDependency3 testDependency3) : ITestService;
 
@@ -249,14 +249,14 @@ public static class DependencyTests {
     public static Task NamedDependency() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>(Name = "Asdf")]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService([Dependency(Name = "Asdf")] ITestDependency testDependency) : ITestService;
 
@@ -275,14 +275,14 @@ public static class DependencyTests {
     public static Task SingleProperty() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 public required ITestDependency TestDependency { private get; init; }
@@ -303,14 +303,14 @@ public static class DependencyTests {
     public static Task TransientProperty() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Transient<ITestService, TestService>]
             [Transient<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 public required ITestDependency TestDependency { private get; init; }
@@ -331,7 +331,7 @@ public static class DependencyTests {
     public static Task MultipleProperties() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -340,7 +340,7 @@ public static class DependencyTests {
             [Singleton<ITestDependency2, TestDependency2>]
             [Singleton<ITestDependency3, TestDependency3>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 public required ITestDependency1 TestDependency1 { private get; init; }
@@ -369,14 +369,14 @@ public static class DependencyTests {
     public static Task PropertyWithAttribute() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 [Dependency]
@@ -398,14 +398,14 @@ public static class DependencyTests {
     public static Task PropertyAsNamedDependency() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>(Name = "Asdf")]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 [Dependency(Name = "Asdf")]
@@ -427,14 +427,14 @@ public static class DependencyTests {
     public static Task NormalPropertyIsIgnored() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 public ITestDependency TestDependency { private get; init; }
@@ -456,7 +456,7 @@ public static class DependencyTests {
     public static Task ServiceProviderDependency() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             public partial interface ITestProvider;
@@ -465,7 +465,7 @@ public static class DependencyTests {
             [Singleton<ITestService, TestService>]
             [Scoped<ITestService, TestService>(Name = "TestServiceScoped")]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService(ITestProvider testProvider) : ITestService;
 
@@ -481,7 +481,7 @@ public static class DependencyTests {
     public static Task ScopeProviderDependency() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             public partial interface ITestProvider {
@@ -491,7 +491,7 @@ public static class DependencyTests {
             [ServiceProvider]
             [Scoped<ITestService, TestService>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService(ITestProvider.IScope testProvider) : ITestService;
 
@@ -508,14 +508,14 @@ public static class DependencyTests {
     public static Task MultipleConstructorWithConstructorAttribute() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 [Constructor]
@@ -539,14 +539,14 @@ public static class DependencyTests {
     public static Task MultipleConstructorWithConstructorAttributeOnPrimary() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
 
             [method: Constructor]
@@ -569,14 +569,14 @@ public static class DependencyTests {
     public static void MultipleConstructorWithoutAttributeFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
 
             public sealed class TestService(ITestDependency testDependency) : ITestService {
@@ -599,14 +599,14 @@ public static class DependencyTests {
     public static void MultipleConstructorWithMultipleAttributesFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             [Singleton<ITestDependency, TestDependency>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
 
             [method: Constructor]
@@ -632,7 +632,7 @@ public static class DependencyTests {
     public static Task DeepTreeConstructor() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -642,28 +642,28 @@ public static class DependencyTests {
             [Scoped<S1>]
             [Transient<T1>]
             [Transient<T15>]
-            
+
             [Transient<T2>]
             [Singleton<S2>(CreationTime = CreationTiming.Lazy)]
-            
+
             [Scoped<S3_1>]
             [Scoped<S3_2>]
             [Transient<T3>]
             public sealed partial class TestProvider;
-            
+
 
             public interface IRoot;
             public sealed class Root(T1 t1, S1 s1) : IRoot;
-            
+
             public sealed class S1(T2 t2, S2 s2);
             public sealed class T1(T15 t15);
             public sealed class T15(T2 t2) {
                 public required IRoot Root { private get; init; }
             }
-            
+
             public sealed class T2(S3_1 s3_1, S3_2 s3_2, T3 t3);
             public sealed class S2(T3 t3);
-            
+
             public sealed class S3_1;
             public sealed class S3_2;
             public sealed class T3 : System.IDisposable, System.IAsyncDisposable;
@@ -680,7 +680,7 @@ public static class DependencyTests {
     public static Task DeepTreeLazy() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider(CreationTime = CreationTiming.Lazy)]
@@ -690,32 +690,32 @@ public static class DependencyTests {
             [Scoped<S1>]
             [Transient<T1>]
             [Transient<T15>]
-            
+
             [Transient<T2>]
             [Singleton<S2>(CreationTime = CreationTiming.Lazy)]
-            
+
             [Scoped<S3_1>]
             [Scoped<S3_2>]
             [Transient<T3>]
             public sealed partial class TestProvider;
-            
+
 
             public interface IRoot;
             public sealed class Root(T1 t1, S1 s1) : IRoot;
-            
+
             public sealed class S1(T2 t2, S2 s2);
             public sealed class T1(T15 t15);
             public sealed class T15(T2 t2) {
                 public required IRoot Root { private get; init; }
             }
-            
+
             public sealed class T2(S3_1 s3_1, S3_2 s3_2, T3 t3);
             public sealed class S2(T3 t3);
-            
+
             public sealed class S3_1;
             public sealed class S3_2;
             public sealed class T3 : System.IDisposable, System.IAsyncDisposable;
-            
+
             """;
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
@@ -729,13 +729,13 @@ public static class DependencyTests {
     public static Task CircularSelfSetAccessor() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 public required ITestService Self { private get; set; }
@@ -753,13 +753,13 @@ public static class DependencyTests {
     public static Task CircularSelfInitAccessor() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 public required ITestService Self { private get; init; }
@@ -777,13 +777,13 @@ public static class DependencyTests {
     public static void CircularSelfNoAccessorFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService {
                 [Dependency]
@@ -803,14 +803,14 @@ public static class DependencyTests {
     public static Task CircularServices() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<ITestService1, TestService1>]
             [Singleton<ITestService2, TestService2>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService1;
             public sealed class TestService1 : ITestService1 {
                 public required ITestService2 TestService2 { private get; init; }
@@ -833,14 +833,14 @@ public static class DependencyTests {
     public static Task CircularTransient() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Transient<ITestService1, TestService1>]
             [Singleton<ITestService2, TestService2>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService1;
             public sealed class TestService1 : ITestService1 {
                 public required ITestService2 TestService2 { private get; init; }
@@ -861,7 +861,7 @@ public static class DependencyTests {
     public static Task CircularManyServices() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -871,7 +871,7 @@ public static class DependencyTests {
             [Singleton<ITestService4, TestService4>]
             [Singleton<ITestService5, TestService5>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService1;
             public sealed class TestService1(ITestService2 TestService2) : ITestService1;
 
@@ -901,14 +901,14 @@ public static class DependencyTests {
     public static Task CircularLazyServices() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider(CreationTime = CreationTiming.Lazy)]
             [Singleton<ITestService1, TestService1>]
             [Singleton<ITestService2, TestService2>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService1;
             public sealed class TestService1(ITestService2 TestService2) : ITestService1;
 
@@ -930,7 +930,7 @@ public static class DependencyTests {
     public static Task FullTangle3() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -967,7 +967,7 @@ public static class DependencyTests {
     public static Task FullTangle4() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1014,7 +1014,7 @@ public static class DependencyTests {
     public static Task FullTangle5() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1074,7 +1074,7 @@ public static class DependencyTests {
     public static Task CircularDependencyShortCircuit2() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1089,7 +1089,7 @@ public static class DependencyTests {
             }
 
             public sealed class Service2(Service1 Service1);
-            
+
             """;
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
@@ -1102,7 +1102,7 @@ public static class DependencyTests {
     public static Task CircularDependencyShortCircuit3() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1118,9 +1118,9 @@ public static class DependencyTests {
             }
 
             public sealed class Service2(Service3 Service3);
-            
+
             public sealed class Service3(Service1 Service1);
-            
+
             """;
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
@@ -1133,7 +1133,7 @@ public static class DependencyTests {
     public static void CircularDependencyShortCircuitError() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1149,9 +1149,9 @@ public static class DependencyTests {
             }
 
             public sealed class Service2(Service3 Service3);
-            
+
             public sealed class Service3(Service1 Service1);
-            
+
             """;
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);

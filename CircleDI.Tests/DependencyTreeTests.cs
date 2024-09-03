@@ -59,7 +59,7 @@ public static class DependencyTreeTests {
     public static void MultipleServicesWithSameTypeWithoutNamingFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -67,7 +67,7 @@ public static class DependencyTreeTests {
             [Singleton<TestService2>(Name = "TestService2_1")]
             [Singleton<TestService2>(Name = "TestService2_2")]
             public sealed partial class TestProvider;
-            
+
             public sealed class TestService1(TestService2 testService2);
             public sealed class TestService2;
 
@@ -80,7 +80,7 @@ public static class DependencyTreeTests {
         Assert.Equal("Ambiguous dependency at Service 'TestService1' with type 'MyCode.TestService2': There are multiple Services registered for this type: [\"TestService2_1\", \"TestService2_2\"]. Use the '[Dependency(Name=\"...\")]'-attribute on the parameter to choose one specific service", diagnostics[0].GetMessage());
     }
 
-    
+
     #region Tree
 
     [Fact]
@@ -592,13 +592,13 @@ public static class DependencyTreeTests {
     public static void Tree_MissingDependencyFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<TestService1>]
             public sealed partial class TestProvider;
-            
+
             public sealed class TestService1(TestService2 testService2);
 
             public sealed class TestService2;
@@ -616,7 +616,7 @@ public static class DependencyTreeTests {
     public static void Tree_NotDeclaredInterfaceDependencyFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -642,13 +642,13 @@ public static class DependencyTreeTests {
     public static void Tree_MissingNamedDependencyFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<TestService1>]
             public sealed partial class TestProvider;
-            
+
             public sealed class TestService1([Dependency(Name = "Asdf")]TestService2 testService2);
 
             """;
@@ -1030,7 +1030,7 @@ public static class DependencyTreeTests {
 
         serviceProvider.CreateDependencyTree();
 
-        
+
         Assert.Same(service1.PropertyDependencyList[0].Service, service2);
         Assert.Same(service2.PropertyDependencyList[0].Service, service1);
         Assert.True(service1.PropertyDependencyList[0].IsCircular ^ service2.PropertyDependencyList[0].IsCircular);
@@ -1129,13 +1129,13 @@ public static class DependencyTreeTests {
     public static void Circles_InvalidCircle() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<TestService1>]
             public sealed partial class TestProvider;
-            
+
             public sealed class TestService1(TestService1 testService1);
 
             """;
@@ -1156,14 +1156,14 @@ public static class DependencyTreeTests {
     public static void Lifetime_SingletonToScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<TestService1>]
             [Scoped<TestService2>]
             public sealed partial class TestProvider;
-            
+
             public sealed class TestService1(TestService2 testService2);
             public sealed class TestService2;
 
@@ -1224,7 +1224,7 @@ public static class DependencyTreeTests {
     public static void Lifetime_SingletonToTransientScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1232,7 +1232,7 @@ public static class DependencyTreeTests {
             [Transient<TestService2>]
             [Scoped<TestService3>]
             public sealed partial class TestProvider;
-            
+
             public sealed class TestService1(TestService2 testService2);
             public sealed class TestService2(TestService3 testService3);
             public sealed class TestService3;
@@ -1293,19 +1293,19 @@ public static class DependencyTreeTests {
     public static void Lifetime_SingletonToDelegateScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Singleton<TestService1>]
             public sealed partial class TestProvider {
-                
+
                 [Delegate<System.Action>(nameof(ScopedMethod))]
                 public sealed partial class Scope {
                     private static void ScopedMethod() { }
                 }
             }
-            
+
             public sealed class TestService1(System.Action scopedMethod);
 
             """;
@@ -1321,7 +1321,7 @@ public static class DependencyTreeTests {
     public static void Lifetime_SingletonToMutlipleScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1329,7 +1329,7 @@ public static class DependencyTreeTests {
             [Scoped<ITestDependency, TestDependency1>]
             [Scoped<ITestDependency, TestDependency2>]
             public sealed partial class TestProvider;
-            
+
             public sealed class TestService(ITestDependency testDependency);
 
             public interface ITestDependency;

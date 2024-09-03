@@ -29,7 +29,7 @@
     <DevelopmentDependency>true</DevelopmentDependency>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
-    
+
     <Version>0.8.0</Version>
   </PropertyGroup>
 
@@ -42,7 +42,7 @@
     <None Include="ICON.png" Pack="True" PackagePath="/" />
     <None Include="..\LICENSE" Pack="True" PackagePath="/" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />

@@ -13,7 +13,7 @@ public static class MinimalAPITests {
     public static Task EndpointParameterless() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -36,7 +36,7 @@ public static class MinimalAPITests {
     public static Task EndpointOneParameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -59,7 +59,7 @@ public static class MinimalAPITests {
     public static Task EndpointMultipleParameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -82,7 +82,7 @@ public static class MinimalAPITests {
     public static Task EndpointOneDependency() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -109,7 +109,7 @@ public static class MinimalAPITests {
     public static Task EndpointMultipleDependencies() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             public partial interface ITestProvider;
@@ -139,7 +139,7 @@ public static class MinimalAPITests {
     public static Task EndpointMultipleParameterAndDependencies() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             public partial interface ITestProvider;
@@ -169,7 +169,7 @@ public static class MinimalAPITests {
     public static Task EndpointMultiple() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -198,7 +198,7 @@ public static class MinimalAPITests {
     public static Task EndpointParameterWithOneAttribute() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode {
                 [ServiceProvider]
                 public sealed partial class TestProvider;
@@ -225,7 +225,7 @@ public static class MinimalAPITests {
     public static Task EndpointParameterWithMultipleAttributes() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode {
                 using Microsoft.AspNetCore.Mvc;
                 using Microsoft.Extensions.DependencyInjection;
@@ -262,7 +262,7 @@ public static class MinimalAPITests {
     public static Task EndpointAttributePattern() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -291,7 +291,7 @@ public static class MinimalAPITests {
 
             string input = $$"""
                 using CircleDIAttributes;
-            
+
                 namespace MyCode;
 
                 [ServiceProvider]
@@ -307,13 +307,13 @@ public static class MinimalAPITests {
             string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
 
             builder.Append($"""
-                
+
 
                 -------------
                 HTTP method: {((Http)i).ToString()}
                 -------------
 
-           
+
                 """);
             builder.Append(sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension")));
         }
@@ -325,7 +325,7 @@ public static class MinimalAPITests {
     public static Task EndpointAttributeRouteHandler() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode {
                 [ServiceProvider]
                 public sealed partial class TestProvider;
@@ -355,7 +355,7 @@ public static class MinimalAPITests {
     public static Task EndpointWithoutProvider() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             public static class Endpoints {
@@ -375,7 +375,7 @@ public static class MinimalAPITests {
     public static Task EndpointScopeProviderGeneric() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             public partial interface ITestProvider {
@@ -402,7 +402,7 @@ public static class MinimalAPITests {
     public static Task EndpointScopeProviderMultipleGenerics() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             public sealed class Wrapper<T> {
@@ -436,7 +436,7 @@ public static class MinimalAPITests {
     public static void ErrorNonStaticEEndpoint() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -460,7 +460,7 @@ public static class MinimalAPITests {
     public static void ErrorGenericEEndpoint() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -484,7 +484,7 @@ public static class MinimalAPITests {
     public static void ErrorMissingRouteBuilderMethod() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -508,7 +508,7 @@ public static class MinimalAPITests {
     public static void ErrorRouteBuilderNonStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode {
                 [ServiceProvider]
                 public sealed partial class TestProvider;
@@ -538,7 +538,7 @@ public static class MinimalAPITests {
     public static void ErrorRouteBuilderGeneric() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode {
                 [ServiceProvider]
                 public sealed partial class TestProvider;
@@ -572,7 +572,7 @@ public static class MinimalAPITests {
     public static void ErrorRouteBuilderParameterList(string parameter) {
         string input = $$"""
             using CircleDIAttributes;
-            
+
             namespace MyCode {
                 [ServiceProvider]
                 public sealed partial class TestProvider;
@@ -584,7 +584,7 @@ public static class MinimalAPITests {
                     public static void MyHandler() { }
                 }
             }
-            
+
             namespace Microsoft.AspNetCore.Builder {
                 public class RouteHandlerBuilder;
             }
@@ -602,7 +602,7 @@ public static class MinimalAPITests {
     public static void ErrorMultipleSameEndpoint() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -611,7 +611,7 @@ public static class MinimalAPITests {
             public static class Endpoints {
                 [Endpoint("Hello", Http.Get)]
                 public static void MyHandler() { }
-                    
+
                 [Endpoint("Hello", Http.Get)]
                 public static void MyHandler2() { }
             }
@@ -629,7 +629,7 @@ public static class MinimalAPITests {
     public static void ErrorMultipleEndpointServiceProvider() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -651,7 +651,7 @@ public static class MinimalAPITests {
     public static void ErrorEndpointDependencyWithoutServiceProvider() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             public static class Endpoints {

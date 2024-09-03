@@ -882,7 +882,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public ServiceProvider CreateDependencyTree() {
         if (ErrorManager.ErrorList.Count > 0)
             return this;
-        
+
         SortedServiceList = [.. SingletonList, .. ScopedList, .. TransientList, .. DelegateList];
         SortedServiceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
 
@@ -993,7 +993,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                         if (dependency.ServiceType.Name == serviceProvider.InterfaceIdentifier.Name || dependency.ServiceType.Name == $"{serviceProvider.InterfaceIdentifier.Name}.IScope")
                                             // hintError
                                             serviceProvider.ErrorManager.AddDependencyInterfaceUndeclaredError(dependency.ServiceType, string.Join(".", serviceProvider.Identifier.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceIdentifier.Name);
-                                    
+
                                     return;
                                 }
                                 case 1: {

@@ -8,10 +8,10 @@ public static class AssemblyNameAndVersionTest {
 
         string assemblyName = typeof(Generation.CircleDIGenerator).Assembly.GetName().Name!;
         Assert.Equal(NAME, assemblyName);
-        
+
         string assemblyVersion = typeof(Generation.CircleDIGenerator).Assembly.GetName().Version!.ToString()[..^2];
         Assert.Equal(VERSION, assemblyVersion);
-        
+
         string assemblyVersionBlazor = typeof(Blazor.Generation.CircleDIGenerator).Assembly.GetName().Version!.ToString()[..^2];
         Assert.Equal(VERSION, assemblyVersionBlazor);
 

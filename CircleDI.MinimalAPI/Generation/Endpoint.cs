@@ -152,7 +152,7 @@ public sealed class Endpoint : IEquatable<Endpoint> {
             Lifetime = ServiceLifetime.Scoped,
             ServiceType = null!,
             ImplementationType = null!,
-            
+
             ConstructorDependencyList = constructorDependencyList,
             PropertyDependencyList = [],
             Dependencies = constructorDependencyList.Where((Dependency dependency) => dependency.HasAttribute)

@@ -8,7 +8,7 @@ public static partial class Attributes {
 
 
         #if !CIRCLEDI_EXCLUDE_ATTRIBUTES
-        
+
         using Microsoft.AspNetCore.Components;
         using System.CodeDom.Compiler;
         using System.Diagnostics.CodeAnalysis;

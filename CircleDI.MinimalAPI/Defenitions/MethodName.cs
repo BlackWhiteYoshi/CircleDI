@@ -92,8 +92,8 @@ public sealed class MethodName : IEquatable<MethodName> {
 
         builder.Append(Name);
     }
-    
-    
+
+
     #region Equals
 
     public static bool operator ==(MethodName? left, MethodName? right)

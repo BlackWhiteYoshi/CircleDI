@@ -213,9 +213,9 @@ public sealed class Service : IEquatable<Service> {
             Dependencies = [];
             return; // Syntax Error
         }
-        
+
         Lifetime = lifetime;
-        
+
         ServiceType = new TypeName(serviceType);
         IsRefable = lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped && serviceType.IsValueType == true && SymbolEqualityComparer.Default.Equals(serviceType, implementationType);
         ImplementationType = new TypeName(implementationType);
@@ -364,7 +364,7 @@ public sealed class Service : IEquatable<Service> {
             Dependencies = [];
             return; // Syntax Error
         }
-        
+
         ServiceType = new TypeName(serviceType);
         ImplementationType = ServiceType;
 

@@ -56,7 +56,7 @@ public partial struct CircleDIBuilderCore {
         // constructor parameters
         {
             builder.Append('(');
-        
+
             foreach (Dependency dependency in constructorParameterList) {
                 builder.Append("global::");
                 builder.AppendClosedFullyQualified(dependency.ServiceType ?? dependency.Service!.ServiceType);
@@ -66,7 +66,7 @@ public partial struct CircleDIBuilderCore {
             }
             if (builder[^1] == ' ')
                 builder.Length -= 2;
-        
+
             builder.Append(") {\n");
         }
 

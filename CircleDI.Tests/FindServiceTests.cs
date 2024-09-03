@@ -38,7 +38,7 @@ public static class FindServiceTests {
         ServiceProvider serviceProvider = CreateProvider(["test1, test2, test3"]);
 
         (int index, int count) = serviceProvider.FindService(new TypeName("notPresent"));
-        
+
         Assert.Equal(-1, index);
         Assert.Equal(0, count);
     }

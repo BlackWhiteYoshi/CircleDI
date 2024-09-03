@@ -55,7 +55,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
 
         ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
-        
+
         context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute", componentList, stringBuilderPool);
         context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute`1", componentList, stringBuilderPool);
 
@@ -111,7 +111,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             #nullable enable annotations
 
 
-            
+
             """
         );
 
@@ -371,7 +371,7 @@ file static class RegisterServiceProviderAttributeExtension {
             #nullable enable annotations
 
 
-            
+
             """
         );
 

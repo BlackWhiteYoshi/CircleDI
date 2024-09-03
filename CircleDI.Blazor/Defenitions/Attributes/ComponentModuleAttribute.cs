@@ -8,12 +8,12 @@ public static partial class Attributes {
 
 
         #if !CIRCLEDI_EXCLUDE_ATTRIBUTES
-        
+
         using System;
-    
+
         namespace CircleDIAttributes;
-        
-        
+
+
         /// <summary>
         /// <para>
         /// This attribute is for cross project razor components importing.<br />

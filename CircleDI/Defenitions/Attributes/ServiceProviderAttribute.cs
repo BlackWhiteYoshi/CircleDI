@@ -8,11 +8,11 @@ public static partial class Attributes {
 
 
         #if !CIRCLEDI_EXCLUDE_ATTRIBUTES
-        
+
         using System;
-    
+
         namespace CircleDIAttributes;
-        
+
         {{ServiceProviderAttributeSummary}}
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]

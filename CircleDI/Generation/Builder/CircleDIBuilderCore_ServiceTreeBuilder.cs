@@ -647,7 +647,7 @@ public partial struct CircleDIBuilderCore {
 
             if (generateDisposeMethods is not DisposeGeneration.NoDisposing)
                 if (service.IsAsyncDisposable)
-                     transientAsyncDisposeStack.Add((service, transientNumber));
+                    transientAsyncDisposeStack.Add((service, transientNumber));
                 else if (service.IsDisposable)
                     transientDisposeStack.Add((service, transientNumber));
 

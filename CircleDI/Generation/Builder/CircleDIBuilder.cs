@@ -174,8 +174,8 @@ public static class CircleDIBuilder {
 
 
             using System;
-    
-            
+
+
             """);
         builder.AppendNamespace(serviceProvider.InterfaceIdentifier.NameSpaceList);
 

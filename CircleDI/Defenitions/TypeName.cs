@@ -78,7 +78,7 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
         TypeParameterList = typeParameterList;
         TypeArgumentList = typeArgumentList;
     }
-    
+
     [SetsRequiredMembers]
     public TypeName(INamedTypeSymbol typeSymbol) {
         Name = typeSymbol.Name;
@@ -170,7 +170,7 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
 
         foreach (TypeName? typeName in TypeArgumentList)
             hashCode = Combine(hashCode, typeName?.GetHashCode() ?? 0);
-        
+
         return hashCode;
 
 

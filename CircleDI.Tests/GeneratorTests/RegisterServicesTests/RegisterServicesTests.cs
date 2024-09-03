@@ -17,7 +17,7 @@ public static class RegisterServicesTests {
     public static Task Singleton() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -48,7 +48,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithImplementationTypeOnly() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -78,7 +78,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithTypesAsParameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -109,7 +109,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithImplementationTypeOnlyAsParameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -139,7 +139,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithName() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -170,7 +170,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -201,7 +201,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -233,7 +233,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithImplementationThis() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -261,7 +261,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithImplementationField() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -294,7 +294,7 @@ public static class RegisterServicesTests {
     public static void SingletonWithImplementationFieldScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -321,7 +321,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithImplementationFieldStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -354,7 +354,7 @@ public static class RegisterServicesTests {
     public static void SingletonWithImplementationFieldStaticScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -382,7 +382,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -442,7 +442,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithImplementationPropertyStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -503,7 +503,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithImplementationMethod() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -536,7 +536,7 @@ public static class RegisterServicesTests {
     public static void SingletonWithImplementationMethodScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -563,7 +563,7 @@ public static class RegisterServicesTests {
     public static Task SingletonWithImplementationMethodStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -596,7 +596,7 @@ public static class RegisterServicesTests {
     public static void SingletonWithImplementationMethodStaticScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -624,7 +624,7 @@ public static class RegisterServicesTests {
     public static Task MultipleSingletons() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -632,10 +632,10 @@ public static class RegisterServicesTests {
             [Singleton<ITestService, TestService>(Name = "TestService2")]
             [Singleton<ITestServiceM, TestServiceM>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public interface ITestServiceM;
             public sealed class TestServiceM : ITestServiceM;
 
@@ -662,7 +662,7 @@ public static class RegisterServicesTests {
     public static Task Scoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -693,7 +693,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationTypeOnly() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -723,7 +723,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithTypesAsParameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -754,7 +754,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationTypeOnlyAsParameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -784,7 +784,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithName() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -815,7 +815,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -846,7 +846,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -878,7 +878,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationThis() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -908,7 +908,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationField() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -941,7 +941,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationFieldScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -976,7 +976,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationFieldStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1009,7 +1009,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationFieldStaticScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1045,7 +1045,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1078,7 +1078,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationPropertyScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1113,7 +1113,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationPropertyStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1146,7 +1146,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationPropertyStaticScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1182,7 +1182,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationMethod() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1215,7 +1215,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationMethodScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1250,7 +1250,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationMethodStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1283,7 +1283,7 @@ public static class RegisterServicesTests {
     public static Task ScopedWithImplementationMethodStaticScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1319,7 +1319,7 @@ public static class RegisterServicesTests {
     public static Task MultipleScopedServices() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1327,10 +1327,10 @@ public static class RegisterServicesTests {
             [Scoped<ITestService, TestService>(Name = "TestService2")]
             [Scoped<ITestServiceM, TestServiceM>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public interface ITestServiceM;
             public sealed class TestServiceM : ITestServiceM;
 
@@ -1357,7 +1357,7 @@ public static class RegisterServicesTests {
     public static Task Transient() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1388,7 +1388,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithImplementationTypeOnly() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1418,7 +1418,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithTypesAsParameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1449,7 +1449,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithImplementationTypeOnlyAsParameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1479,7 +1479,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithName() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1510,7 +1510,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1542,7 +1542,7 @@ public static class RegisterServicesTests {
     public static void TransientWithImplementationThis() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1562,7 +1562,7 @@ public static class RegisterServicesTests {
     public static void TransientWithImplementationField() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1587,7 +1587,7 @@ public static class RegisterServicesTests {
     public static void TransientWithImplementationFieldScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1614,7 +1614,7 @@ public static class RegisterServicesTests {
     public static void TransientWithImplementationFieldStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1639,7 +1639,7 @@ public static class RegisterServicesTests {
     public static void TransientWithImplementationFieldStaticScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1667,7 +1667,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1700,7 +1700,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithImplementationPropertyScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1735,7 +1735,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithImplementationPropertyStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1768,7 +1768,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithImplementationPropertyStaticScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1804,7 +1804,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithImplementationMethod() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1837,7 +1837,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithImplementationMethodScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1872,7 +1872,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithImplementationMethodStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1905,7 +1905,7 @@ public static class RegisterServicesTests {
     public static Task TransientWithImplementationMethodStaticScoped() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1941,7 +1941,7 @@ public static class RegisterServicesTests {
     public static Task MultipleTransientServices() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1949,10 +1949,10 @@ public static class RegisterServicesTests {
             [Transient<ITestService, TestService>(Name = "TestService2")]
             [Transient<ITestServiceM, TestServiceM>]
             public sealed partial class TestProvider;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public interface ITestServiceM;
             public sealed class TestServiceM : ITestServiceM;
 
@@ -1979,7 +1979,7 @@ public static class RegisterServicesTests {
     public static Task ImportService() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -1988,7 +1988,7 @@ public static class RegisterServicesTests {
 
             [Transient<ITestService, TestService>]
             public interface ITestModule;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
 
@@ -2013,7 +2013,7 @@ public static class RegisterServicesTests {
     public static Task ImportServiceTypeAsParameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2022,7 +2022,7 @@ public static class RegisterServicesTests {
 
             [Transient<ITestService, TestService>]
             public interface ITestModule;
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
 
@@ -2047,7 +2047,7 @@ public static class RegisterServicesTests {
     public static Task ImportServiceTypeAsParameterAndImportMode() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2058,7 +2058,7 @@ public static class RegisterServicesTests {
             public interface ITestModule {
                 public static TestService TestService => new();
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
 
@@ -2084,7 +2084,7 @@ public static class RegisterServicesTests {
     public static Task ImportService_Static() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2095,7 +2095,7 @@ public static class RegisterServicesTests {
             public interface ITestModule {
                 public static TestService TestService => new();
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
 
@@ -2120,7 +2120,7 @@ public static class RegisterServicesTests {
     public static Task ImportService_AutoStatic() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2131,7 +2131,7 @@ public static class RegisterServicesTests {
             public interface ITestModule {
                 public static TestService TestService => new();
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
 
@@ -2157,7 +2157,7 @@ public static class RegisterServicesTests {
     public static Task ImportService_AsService() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2171,10 +2171,10 @@ public static class RegisterServicesTests {
 
                 public static TestService2 TestService2 => new();
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public interface ITestService2;
             public sealed class TestService2 : ITestService2;
 
@@ -2199,7 +2199,7 @@ public static class RegisterServicesTests {
     public static Task ImportService_AutoAsService() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2213,10 +2213,10 @@ public static class RegisterServicesTests {
 
                 public static TestService2 TestService2 => new();
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public interface ITestService2;
             public sealed class TestService2 : ITestService2;
 
@@ -2242,7 +2242,7 @@ public static class RegisterServicesTests {
     public static Task ImportService_Parameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2258,10 +2258,10 @@ public static class RegisterServicesTests {
 
                 public static TestService2 TestService2 => new();
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public interface ITestService2;
             public sealed class TestService2 : ITestService2;
 
@@ -2286,7 +2286,7 @@ public static class RegisterServicesTests {
     public static Task ImportService_AutoParameter() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2302,10 +2302,10 @@ public static class RegisterServicesTests {
 
                 public static TestService2 TestService2 => new();
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public interface ITestService2;
             public sealed class TestService2 : ITestService2;
 
@@ -2331,7 +2331,7 @@ public static class RegisterServicesTests {
     public static Task ImportService_StaticScope() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2344,7 +2344,7 @@ public static class RegisterServicesTests {
                     public static TestService TestService => new();
                 }
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
 
@@ -2369,7 +2369,7 @@ public static class RegisterServicesTests {
     public static Task ImportService_AsServiceScope() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2385,10 +2385,10 @@ public static class RegisterServicesTests {
                     public static TestService2 TestService2 => new();
                 }
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public interface ITestService2;
             public sealed class TestService2 : ITestService2;
 
@@ -2413,7 +2413,7 @@ public static class RegisterServicesTests {
     public static Task ImportService_ParameterScope() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2431,10 +2431,10 @@ public static class RegisterServicesTests {
                     public static TestService2 TestService2 => new();
                 }
             }
-            
+
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public interface ITestService2;
             public sealed class TestService2 : ITestService2;
 
@@ -2460,7 +2460,7 @@ public static class RegisterServicesTests {
     public static Task ImportService_Recursive() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2491,8 +2491,8 @@ public static class RegisterServicesTests {
 
                 public static TestService5 CreateServiceStatic => new();
             }
-            
-            
+
+
             public interface ITestService1;
             public sealed class TestService1 : ITestService1;
 
@@ -2529,13 +2529,13 @@ public static class RegisterServicesTests {
     public static void ImportService_CycleError() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
             [Import<MyModule>]
             public sealed partial class TestProvider;
-            
+
             [Import<MyModule2>]
             public class MyModule;
 
@@ -2557,7 +2557,7 @@ public static class RegisterServicesTests {
     public static void InvalidServiceRegistration() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2577,7 +2577,7 @@ public static class RegisterServicesTests {
     public static void RegisterServiceThatDoesNotExistsFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2600,7 +2600,7 @@ public static class RegisterServicesTests {
     public static Task RegisterServiceThatDerivesFromBaseClass() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2642,7 +2642,7 @@ public static class RegisterServicesTests {
     public static Task OverwriteDefaultServiceSelf() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2672,7 +2672,7 @@ public static class RegisterServicesTests {
     public static void OverwriteDefaultServiceSelfAsConstuctorCallFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2694,7 +2694,7 @@ public static class RegisterServicesTests {
     public static Task OverwriteDefaultServiceSelfScope() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2728,7 +2728,7 @@ public static class RegisterServicesTests {
     public static void OverwriteDefaultServiceSelfScopeAsConstuctorCallFails() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2755,7 +2755,7 @@ public static class RegisterServicesTests {
     public static void RegisterServiceWithFieldImplementationOfWrongType() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2780,7 +2780,7 @@ public static class RegisterServicesTests {
     public static void RegisterServiceWithPropertyImplementationOfWrongType() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]
@@ -2805,7 +2805,7 @@ public static class RegisterServicesTests {
     public static void RegisterServiceWithMethodImplementationOfWrongType() {
         const string input = """
             using CircleDIAttributes;
-            
+
             namespace MyCode;
 
             [ServiceProvider]

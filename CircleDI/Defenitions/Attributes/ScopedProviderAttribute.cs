@@ -8,9 +8,9 @@ public static partial class Attributes {
 
 
         #if !CIRCLEDI_EXCLUDE_ATTRIBUTES
-        
+
         using System;
-    
+
         namespace CircleDIAttributes;
 
         /// <summary>
