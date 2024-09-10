@@ -165,7 +165,7 @@ The singleton services have CreationTime constructor and the scoped services hav
 
 When a service with the same lifetime and service type as a default service is registered, the corresponding default service will not be generated.
 
-There is no guarantee that all default services are present, especially not in the server environment. Services that are unbound generic (e.g. ILogger<>) are not present yet because of missing support of [Open/Unbound Generic Types](ConfigurationAndCustomization.md#openunbound-generic-types).
+There is no guarantee that all default services are present, especially not in the server environment.
 
 
 <br></br>

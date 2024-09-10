@@ -9,7 +9,6 @@ partial class TestProvider {
     private global::Microsoft.Extensions.Configuration.IConfiguration GetConfiguration() => (Microsoft.Extensions.Configuration.IConfiguration)_builtinServiceProvider.GetService(typeof(Microsoft.Extensions.Configuration.IConfiguration));
     private global::Microsoft.Extensions.Logging.ILoggerFactory GetLoggerFactory() => (Microsoft.Extensions.Logging.ILoggerFactory)_builtinServiceProvider.GetService(typeof(Microsoft.Extensions.Logging.ILoggerFactory));
     private global::Microsoft.Extensions.Logging.ILogger<TCategoryName> GetLogger<TCategoryName>() => (Microsoft.Extensions.Logging.ILogger<TCategoryName>)_builtinServiceProvider.GetService(typeof(Microsoft.Extensions.Logging.ILogger<TCategoryName>));
-    private global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment GetWebHostEnvironment() => (Microsoft.AspNetCore.Hosting.IWebHostEnvironment)_builtinServiceProvider.GetService(typeof(Microsoft.AspNetCore.Hosting.IWebHostEnvironment));
 
     partial class Scope {
         private global::Microsoft.JSInterop.IJSRuntime GetJSRuntime() => (Microsoft.JSInterop.IJSRuntime)_builtinServiceProvider.GetService(typeof(Microsoft.JSInterop.IJSRuntime));
@@ -40,8 +39,8 @@ namespace MyCode;
 
 /// <summary>
 /// <para>
-/// Number of services registered: 13<br />
-/// - Singleton: 4<br />
+/// Number of services registered: 14<br />
+/// - Singleton: 5<br />
 /// - Scoped: 9<br />
 /// - Transient: 0<br />
 /// - Delegate: 0
@@ -61,9 +60,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public TestProvider(global::System.IServiceProvider builtinServiceProvider) {
         _builtinServiceProvider = builtinServiceProvider;
 
+        _logger_TestService = GetLogger<global::MyCode.TestService>();
+        _testService = new global::MyCode.TestService(_logger_TestService);
         _loggerFactory = GetLoggerFactory();
         _configuration = GetConfiguration();
-        _webHostEnvironment = GetWebHostEnvironment();
     }
 
     /// <summary>
@@ -73,6 +73,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         return new global::MyCode.TestProvider.Scope(this, builtinServiceProvider);
     }
 
+
+    /// <summary>
+    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+    /// Service type: <see cref="global::MyCode.TestService"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestService"/>
+    /// </summary>
+    public global::MyCode.TestService TestService => _testService;
+    private readonly global::MyCode.TestService _testService;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -99,11 +107,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/><br />
-    /// Implementation type: <see cref="global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/>
+    /// Service type: <see cref="global::Microsoft.Extensions.Logging.ILogger{global::MyCode.TestService}"/><br />
+    /// Implementation type: <see cref="global::Microsoft.Extensions.Logging.ILogger{global::MyCode.TestService}"/>
     /// </summary>
-    public global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment WebHostEnvironment => _webHostEnvironment;
-    private readonly global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment _webHostEnvironment;
+    public global::Microsoft.Extensions.Logging.ILogger<global::MyCode.TestService> Logger_TestService => _logger_TestService;
+    private readonly global::Microsoft.Extensions.Logging.ILogger<global::MyCode.TestService> _logger_TestService;
 
 
     /// <summary>
@@ -117,6 +125,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     object? IServiceProvider.GetService(Type serviceType) {
         switch (serviceType.Name) {
+            case "ILogger`1":
+                if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILogger<global::MyCode.TestService>))
+                    return Logger_TestService;
+                return null;
+            case "TestService":
+                if (serviceType == typeof(global::MyCode.TestService))
+                    return TestService;
+                return null;
             case "ITestProvider":
                 if (serviceType == typeof(global::MyCode.ITestProvider))
                     return Self;
@@ -128,10 +144,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             case "ILoggerFactory":
                 if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILoggerFactory))
                     return LoggerFactory;
-                return null;
-            case "IWebHostEnvironment":
-                if (serviceType == typeof(global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment))
-                    return WebHostEnvironment;
                 return null;
             default:
                 return null;
@@ -156,8 +168,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
     /// <summary>
     /// <para>
-    /// Number of services registered: 13<br />
-    /// - Singleton: 4<br />
+    /// Number of services registered: 14<br />
+    /// - Singleton: 5<br />
     /// - Scoped: 9<br />
     /// - Transient: 0<br />
     /// - Delegate: 0
@@ -327,6 +339,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+        /// Service type: <see cref="global::MyCode.TestService"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestService"/>
+        /// </summary>
+        public global::MyCode.TestService TestService => _testProvider.TestService;
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
         /// Service type: <see cref="global::MyCode.ITestProvider"/><br />
         /// Implementation type: <see cref="global::MyCode.TestProvider"/>
         /// </summary>
@@ -348,10 +367,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-        /// Service type: <see cref="global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/><br />
-        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/>
+        /// Service type: <see cref="global::Microsoft.Extensions.Logging.ILogger{global::MyCode.TestService}"/><br />
+        /// Implementation type: <see cref="global::Microsoft.Extensions.Logging.ILogger{global::MyCode.TestService}"/>
         /// </summary>
-        public global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment WebHostEnvironment => _testProvider.WebHostEnvironment;
+        public global::Microsoft.Extensions.Logging.ILogger<global::MyCode.TestService> Logger_TestService => _testProvider.Logger_TestService;
 
 
         /// <summary>
@@ -369,9 +388,17 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                     if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                         return SelfScope;
                     return null;
+                case "ILogger`1":
+                    if (serviceType == typeof(global::Microsoft.Extensions.Logging.ILogger<global::MyCode.TestService>))
+                        return Logger_TestService;
+                    return null;
                 case "IJSRuntime":
                     if (serviceType == typeof(global::Microsoft.JSInterop.IJSRuntime))
                         return JSRuntime;
+                    return null;
+                case "TestService":
+                    if (serviceType == typeof(global::MyCode.TestService))
+                        return TestService;
                     return null;
                 case "ITestProvider":
                     if (serviceType == typeof(global::MyCode.ITestProvider))
@@ -388,10 +415,6 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                 case "NavigationManager":
                     if (serviceType == typeof(global::Microsoft.AspNetCore.Components.NavigationManager))
                         return NavigationManager;
-                    return null;
-                case "IWebHostEnvironment":
-                    if (serviceType == typeof(global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment))
-                        return WebHostEnvironment;
                     return null;
                 case "IErrorBoundaryLogger":
                     if (serviceType == typeof(global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger))
@@ -454,8 +477,8 @@ namespace MyCode;
 
 /// <summary>
 /// <para>
-/// Number of services registered: 13<br />
-/// - Singleton: 4<br />
+/// Number of services registered: 14<br />
+/// - Singleton: 5<br />
 /// - Scoped: 9<br />
 /// - Transient: 0<br />
 /// - Delegate: 0
@@ -471,6 +494,20 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
     /// </summary>
     global::MyCode.ITestProvider.IScope CreateScope(global::System.IServiceProvider builtinServiceProvider);
+
+    /// <summary>
+    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+    /// Service type: <see cref="global::Microsoft.Extensions.Logging.ILogger{global::MyCode.TestService}"/><br />
+    /// Implementation type: <see cref="global::Microsoft.Extensions.Logging.ILogger{global::MyCode.TestService}"/>
+    /// </summary>
+    global::Microsoft.Extensions.Logging.ILogger<global::MyCode.TestService> Logger_TestService { get; }
+
+    /// <summary>
+    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+    /// Service type: <see cref="global::MyCode.TestService"/><br />
+    /// Implementation type: <see cref="global::MyCode.TestService"/>
+    /// </summary>
+    global::MyCode.TestService TestService { get; }
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -493,18 +530,11 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
     /// </summary>
     global::Microsoft.Extensions.Logging.ILoggerFactory LoggerFactory { get; }
 
-    /// <summary>
-    /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-    /// Service type: <see cref="global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/><br />
-    /// Implementation type: <see cref="global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/>
-    /// </summary>
-    global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment WebHostEnvironment { get; }
-
 
     /// <summary>
     /// <para>
-    /// Number of services registered: 13<br />
-    /// - Singleton: 4<br />
+    /// Number of services registered: 14<br />
+    /// - Singleton: 5<br />
     /// - Scoped: 9<br />
     /// - Transient: 0<br />
     /// - Delegate: 0
@@ -524,11 +554,25 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
         global::MyCode.ITestProvider.IScope SelfScope { get; }
 
         /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+        /// Service type: <see cref="global::Microsoft.Extensions.Logging.ILogger{global::MyCode.TestService}"/><br />
+        /// Implementation type: <see cref="global::Microsoft.Extensions.Logging.ILogger{global::MyCode.TestService}"/>
+        /// </summary>
+        global::Microsoft.Extensions.Logging.ILogger<global::MyCode.TestService> Logger_TestService { get; }
+
+        /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
         /// Service type: <see cref="global::Microsoft.JSInterop.IJSRuntime"/><br />
         /// Implementation type: <see cref="global::Microsoft.JSInterop.IJSRuntime"/>
         /// </summary>
         global::Microsoft.JSInterop.IJSRuntime JSRuntime { get; }
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
+        /// Service type: <see cref="global::MyCode.TestService"/><br />
+        /// Implementation type: <see cref="global::MyCode.TestService"/>
+        /// </summary>
+        global::MyCode.TestService TestService { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
@@ -557,13 +601,6 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
         /// Implementation type: <see cref="global::Microsoft.AspNetCore.Components.NavigationManager"/>
         /// </summary>
         global::Microsoft.AspNetCore.Components.NavigationManager NavigationManager { get; }
-
-        /// <summary>
-        /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
-        /// Service type: <see cref="global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/><br />
-        /// Implementation type: <see cref="global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment"/>
-        /// </summary>
-        global::Microsoft.AspNetCore.Hosting.IWebHostEnvironment WebHostEnvironment { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />

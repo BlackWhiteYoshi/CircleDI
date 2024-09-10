@@ -29,6 +29,8 @@ public partial struct CircleDIBuilderCore {
                 builder.Append('.');
             }
             builder.AppendImplementationName(service);
+            if (service.IsGeneric)
+                builder.AppendClosedGenerics(service.ImplementationType);
             builder.Append(";\n\n");
         }
 

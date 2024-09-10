@@ -213,18 +213,25 @@ public static class BlazorTests {
     }
 
     [Fact]
-    public static Task GeneratesServerAndWebassemblyDefaultServices() {
+    public static Task GeneratesGenericServiceLogger() {
         const string input = """
             using CircleDIAttributes;
 
-            namespace MyCode;
+            namespace MyCode {
+                [ServiceProvider]
+                [Singleton<TestService>]
+                public sealed partial class TestProvider;
 
-            [ServiceProvider(DefaultServiceGeneration = BlazorServiceGeneration.ServerAndWebassembly)]
-            public sealed partial class TestProvider;
+                public sealed class TestService(Microsoft.Extensions.Logging.ILogger<TestService> logger);
+            }
+
+            namespace Microsoft.Extensions.Logging {
+                public interface ILogger<TestService>;
+            }
 
             """;
 
-        string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out _);
+        string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out var t);
         string defaultServicesPartial = sourceTexts.Single((string sourceText) => sourceText.Contains("private global::Microsoft.JSInterop.IJSRuntime GetJSRuntime()"));
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
@@ -245,6 +252,8 @@ public static class BlazorTests {
             {sourceTextInterface}
             """);
     }
+
+
 
     #endregion
 

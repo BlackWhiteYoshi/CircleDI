@@ -193,61 +193,69 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public List<Service> TransientList { get; } = [];
 
     /// <summary>
-    /// <para>All registered services of type <see cref="Delegate"/>.</para>
-    /// <para>DelegateServices have no dependencies, so they are always leaf nodes in the dependency tree.</para>
+    /// All registered services of type <see cref="Delegate"/>.
     /// </summary>
+    /// <remarks>DelegateServices have no dependencies, so they are always leaf nodes in the dependency tree.</remarks>
     public List<Service> DelegateList { get; } = [];
 
     /// <summary>
-    /// <para>All Services listed in this provider.<br />
-    /// The list is sorted by <see cref="Service.ServiceType"/>.</para>
-    /// <para>When setter is used, the given list will be modified/sorted.</para>
+    /// <para>
+    /// All non generic Services listed in this provider:<br />
+    /// [.. <see cref="SingletonList"/>, .. <see cref="ScopedList"/>, .. <see cref="TransientList"/>, .. <see cref="DelegateList"/>]
+    /// </para>
+    /// <para>
+    /// The list is sorted by <see cref="Service.ServiceType"/>.<br />
+    /// When setter is used, the given list will be modified/sorted.
+    /// </para>
     /// </summary>
     public List<Service> SortedServiceList { get; private set; } = [];
 
+
     /// <summary>
-    /// Binary search the sorted <see cref="SortedServiceList"/>.
+    /// All registered services with at least one unbound type parameter and lifetime <see cref="ServiceLifetime.Singleton"/>.
     /// </summary>
-    /// <param name="serviceType"></param>
-    /// <returns>The index of the first occurrence and the number of matched services.</returns>
-    public (int index, int count) FindService(TypeName serviceType) {
-        int lowerBound = 0;
-        int upperBound = SortedServiceList.Count;
-        while (lowerBound < upperBound) {
-            int index = (lowerBound + upperBound) / 2;
+    public List<Service> GenericSingletonList { get; } = [];
 
-            switch (SortedServiceList[index].ServiceType.CompareTo(serviceType)) {
-                case -1:
-                    lowerBound = index + 1;
-                    break;
-                case 1:
-                    upperBound = index;
-                    break;
-                case 0:
-                    int start = index;
-                    while (start > 0 && SortedServiceList[start - 1].ServiceType == serviceType)
-                        start--;
+    /// <summary>
+    /// All registered services with at least one unbound type parameter and lifetime <see cref="ServiceLifetime.Scoped"/>.
+    /// </summary>
+    public List<Service> GenericScopedList { get; } = [];
 
-                    int end = index + 1;
-                    while (end < SortedServiceList.Count && SortedServiceList[end].ServiceType == serviceType)
-                        end++;
+    /// <summary>
+    /// All registered services with at least one unbound type parameter and lifetime <see cref="ServiceLifetime.Transient"/> or <see cref="ServiceLifetime.TransientScoped"/>.
+    /// </summary>
+    public List<Service> GenericTransientList { get; } = [];
 
-                    return (start, end - start);
-            }
-        }
+    /// <summary>
+    /// All registered services with at least one unbound type parameter and of type <see cref="Delegate"/>.
+    /// </summary>
+    /// <remarks>DelegateServices have no dependencies, so they are always leaf nodes in the dependency tree.</remarks>
+    public List<Service> GenericDelegateList { get; } = [];
 
-        return (-1, 0);
-    }
+    /// <summary>
+    /// <para>
+    /// All generic Services listed in this provider:<br />
+    /// [.. <see cref="GenericSingletonList"/>, .. <see cref="GenericScopedList"/>, .. <see cref="GenericTransientList"/>, .. <see cref="GenericDelegateList"/>]
+    /// </para>
+    /// <para>
+    /// The list is sorted by <see cref="Service.ServiceType"/>.<br />
+    /// When setter is used, the given list will be modified/sorted.
+    /// </para>
+    /// </summary>
+    public List<Service> GenericSortedServiceList { get; private set; } = [];
 
 
-    public DiagnosticErrorManager ErrorManager { get; private set; }
+    /// <summary>
+    /// List of errors.
+    /// </summary>
+    public ErrorManager ErrorManager { get; private set; }
 
 
     /// <summary>
     /// Creates a data-object representing a ServiceProviderAttribute.
     /// </summary>
     /// <param name="serviceProviderAttribute"></param>
-    public ServiceProvider(AttributeData serviceProviderAttribute) => ErrorManager = new DiagnosticErrorManager(serviceProviderAttribute);
+    public ServiceProvider(AttributeData serviceProviderAttribute) => ErrorManager = new ErrorManager(serviceProviderAttribute);
 
     /// <summary>
     /// Creates a data-object based on a ServiceProviderAttribute.
@@ -272,7 +280,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         Debug.Assert(syntaxContext.Attributes.Length > 0);
         AttributeData serviceProviderAttribute = syntaxContext.Attributes[0];
-        ErrorManager = new DiagnosticErrorManager(serviceProviderAttribute);
+        ErrorManager = new ErrorManager(serviceProviderAttribute);
 
 
         if (serviceProviderSyntax.Modifiers[^1].ValueText != "partial")
@@ -503,7 +511,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             break;
 
                         hasServiceSelf |= service.ServiceType == serviceType;
-                        SingletonList.Add(service);
+                        if (!service.IsGeneric)
+                            SingletonList.Add(service);
+                        else
+                            GenericSingletonList.Add(service);
 
                         // check for recursive cunstructor call
                         if (service.ImplementationType == implementationType && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
@@ -519,7 +530,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             break;
 
                         hasServiceSelfScope |= service.ServiceType == serviceTypeScope;
-                        ScopedList.Add(service);
+                        if (!service.IsGeneric)
+                            ScopedList.Add(service);
+                        else
+                            GenericScopedList.Add(service);
 
                         // check for recursive cunstructor call
                         if (service.ImplementationType == implementationTypeScope && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
@@ -531,7 +545,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         if (service.Name == string.Empty) // invalid service
                             break;
 
-                        TransientList.Add(service);
+                        if (!service.IsGeneric)
+                            TransientList.Add(service);
+                        else
+                            GenericTransientList.Add(service);
                         break;
                     }
                     case "DelegateAttribute": {
@@ -542,7 +559,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         if (service.Name == string.Empty) // invalid service
                             break;
 
-                        DelegateList.Add(service);
+                        if (!service.IsGeneric)
+                            DelegateList.Add(service);
+                        else
+                            GenericDelegateList.Add(service);
                         break;
                     }
                     case "ImportAttribute": {
@@ -651,12 +671,18 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             if (module is null)
                 return; // Syntax Error
 
+            TypeName moduleTypeName = new(module);
+            foreach (TypeName? argument in moduleTypeName.TypeArgumentList)
+                if (argument is null) {
+                    // isGeneric
+                    module = module.ConstructedFrom;
+                    break;
+                }
+
             INamedTypeSymbol? moduleScope = module.GetMembers("Scope") switch {
                 [INamedTypeSymbol scope] => scope,
                 _ => null
             };
-
-            TypeName moduleTypeName = new(module);
 
 
             ImportMode importMode = importAttribute.ConstructorArguments switch {
@@ -719,6 +745,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     }
                     if (moduleScope is not null) {
                         TypeName moduleTypeNameScope = new(moduleScope);
+                        foreach (TypeName? argument in moduleTypeNameScope.TypeArgumentList)
+                            if (argument is null) {
+                                // isGeneric
+                                moduleScope = moduleScope.ConstructedFrom;
+                                break;
+                            }
 
                         if (serivceConstructorScope is null) {
                             serivceConstructorScope = moduleScope.FindConstructor(serviceProvider.ErrorManager);
@@ -807,7 +839,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             if (service.Name == string.Empty) // invalid service
                                 break;
 
-                            serviceProvider.SingletonList.Add(service);
+                            if (!service.IsGeneric)
+                                serviceProvider.SingletonList.Add(service);
+                            else
+                                serviceProvider.GenericSingletonList.Add(service);
                             break;
                         }
                         case "ScopedAttribute": {
@@ -821,7 +856,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             if (service.Name == string.Empty) // invalid service
                                 break;
 
-                            serviceProvider.ScopedList.Add(service);
+                            if (!service.IsGeneric)
+                                serviceProvider.ScopedList.Add(service);
+                            else
+                                serviceProvider.GenericScopedList.Add(service);
                             break;
                         }
                         case "TransientAttribute": {
@@ -832,7 +870,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             if (service.Name == string.Empty) // invalid service
                                 break;
 
-                            serviceProvider.TransientList.Add(service);
+                            if (!service.IsGeneric)
+                                serviceProvider.TransientList.Add(service);
+                            else
+                                serviceProvider.GenericTransientList.Add(service);
                             break;
                         }
                         case "DelegateAttribute": {
@@ -846,7 +887,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             if (service.Name == string.Empty) // invalid service
                                 break;
 
-                            serviceProvider.DelegateList.Add(service);
+                            if (!service.IsGeneric)
+                                serviceProvider.DelegateList.Add(service);
+                            else
+                                serviceProvider.GenericDelegateList.Add(service);
                             break;
                         }
                         case "ImportAttribute": {
@@ -869,7 +913,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
     /// <summary>
     /// <para>Fills <see cref="SortedServiceList"/> with <see cref="SingletonList"/>, <see cref="ScopedList"/>, <see cref="TransientList"/>, <see cref="DelegateList"/> and sorts by <see cref="Service.ServiceType"/>.</para>
-    /// <para>Creates and validates the dependency tree of <see cref="SortedServiceList"/> + <see cref="CreateScope"/>.</para>
+    /// <para>Fills <see cref="GenericSortedServiceList"/> with <see cref="GenericSingletonList"/>, <see cref="GenericScopedList"/>, <see cref="GenericTransientList"/>, <see cref="GenericDelegateList"/> and sorts by <see cref="Service.ServiceType"/>.</para>
+    /// <para>
+    /// Creates and validates the dependency tree of <see cref="SortedServiceList"/> + <see cref="CreateScope"/>.<br />
+    /// If a dependency does not exists but a fitting generic service exists, a concrete service is created out of the generic one and is then added to the corresponding service list and inserted <see cref="SortedServiceList"/>.
+    /// </para>
     /// <para>
     /// The tree itself are <see cref="Service"/> nodes and the edges are <see cref="Dependency">Dependencies</see>.<br />
     /// The dependencies of a service can be found at <see cref="Service.Dependencies"/>.<br />
@@ -886,6 +934,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         SortedServiceList = [.. SingletonList, .. ScopedList, .. TransientList, .. DelegateList];
         SortedServiceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
 
+        GenericSortedServiceList = [.. GenericSingletonList, .. GenericScopedList, .. GenericTransientList, .. GenericDelegateList];
+        GenericSortedServiceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
+
         // init dependency tree
         {
             DependencyTreeInitializer initializer = new(this);
@@ -893,8 +944,18 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             if (CreateScope is not null)
                 initializer.InitNode(CreateScope);
 
-            foreach (Service service in SortedServiceList)
-                initializer.InitNode(service);
+            // iterate through all services ->  services get appended during iteration, ignore them.
+            // delegates can be skipped, they have no dependencies
+            // iterate scoped first (small optimization) -> higher propability to be upper/root node
+            int scopedCount = ScopedList.Count;
+            int singletonCount = SingletonList.Count;
+            int transientCount = TransientList.Count;
+            for (int i = 0; i < ScopedList.Count; i++)
+                initializer.InitNode(ScopedList[i]);
+            for (int i = 0; i < SingletonList.Count; i++)
+                initializer.InitNode(SingletonList[i]);
+            for (int i = 0; i < TransientList.Count; i++)
+                initializer.InitNode(TransientList[i]);
         }
 
         return this;
@@ -964,6 +1025,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     path.Add(dependency);
 
                     try {
+                        // setting dependency.Service
                         if (dependency.ServiceType is null) {
                             foreach (Service providerService in serviceProvider.SortedServiceList)
                                 if (providerService.Name == dependency.ServiceName) {
@@ -981,63 +1043,97 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             dependencyServiceInitialized:;
                         }
                         else {
-                            (int index, int count) = serviceProvider.FindService(dependency.ServiceType);
-                            switch (count) {
-                                case 0: {
-                                    if (ReferenceEquals(service, serviceProvider.CreateScope))
-                                        serviceProvider.ErrorManager.AddScopedProviderUnregisteredError(serviceProvider.Identifier, dependency.ServiceType);
-                                    else
-                                        serviceProvider.ErrorManager.AddDependencyUnregisteredError(service.Name, dependency.ServiceType);
+                            IEnumerable<string> noLifetimeMatchList = []; // if multiple matches but all have no compatible lifetime
+                            int missingIndex = -1; // index of sorted list where the closed service should be located
+                            List<Service> currentServiceList = serviceProvider.SortedServiceList;
+                            // 2 iterations, first with *SortedServiceList*, second with *GenericSortedServiceList*
+                            for (int iteration = 0; iteration < 2; iteration++) {
+                                (int index, int count) = FindService(dependency.ServiceType, currentServiceList);
+                                switch (count) {
+                                    case 0: {
+                                        if (iteration == 0)
+                                            break;
 
-                                    if (serviceProvider.HasInterface)
-                                        if (dependency.ServiceType.Name == serviceProvider.InterfaceIdentifier.Name || dependency.ServiceType.Name == $"{serviceProvider.InterfaceIdentifier.Name}.IScope")
-                                            // hintError
-                                            serviceProvider.ErrorManager.AddDependencyInterfaceUndeclaredError(dependency.ServiceType, string.Join(".", serviceProvider.Identifier.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceIdentifier.Name);
-
-                                    return;
-                                }
-                                case 1: {
-                                    dependency.Service = serviceProvider.SortedServiceList[index];
-                                    break;
-                                }
-                                default: {
-                                    // filter all invalid services and if only
-                                    if (service.Lifetime.HasFlag(ServiceLifetime.Singleton)) {
-                                        int serviceIndex = -1;
-                                        for (int i = index; i < index + count; i++)
-                                            if (!serviceProvider.SortedServiceList[i].Lifetime.HasFlag(ServiceLifetime.Scoped))
-                                                if (serviceIndex == -1)
-                                                    serviceIndex = i;
-                                                else
-                                                    goto error;
-
-                                        if (serviceIndex == -1) {
-                                            IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
-                                            serviceProvider.ErrorManager.AddDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, servicesWithSameType);
+                                        if (noLifetimeMatchList.Any()) {
+                                            serviceProvider.ErrorManager.AddDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, noLifetimeMatchList);
                                             return;
                                         }
 
-                                        dependency.Service = serviceProvider.SortedServiceList[serviceIndex];
-                                        break;
-                                    }
-                                    error:
-                                    {
-                                        IEnumerable<string> servicesWithSameType = serviceProvider.SortedServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
-                                        bool isParameter = dependency is ConstructorDependency;
-
                                         if (ReferenceEquals(service, serviceProvider.CreateScope))
-                                            serviceProvider.ErrorManager.AddScopedProviderAmbiguousError(serviceProvider.Identifier, dependency.ServiceType, servicesWithSameType, isParameter);
+                                            serviceProvider.ErrorManager.AddScopedProviderUnregisteredError(serviceProvider.Identifier, dependency.ServiceType);
                                         else
-                                            serviceProvider.ErrorManager.AddDependencyAmbiguousError(service.Name, dependency.ServiceType, servicesWithSameType, isParameter);
+                                            serviceProvider.ErrorManager.AddDependencyUnregisteredError(service.Name, dependency.ServiceType);
+
+                                        if (serviceProvider.HasInterface)
+                                            if (dependency.ServiceType.Name == serviceProvider.InterfaceIdentifier.Name || dependency.ServiceType.Name == $"{serviceProvider.InterfaceIdentifier.Name}.IScope")
+                                                // hintError
+                                                serviceProvider.ErrorManager.AddDependencyInterfaceUndeclaredError(dependency.ServiceType, string.Join(".", serviceProvider.Identifier.NameSpaceList.Reverse<string>()), serviceProvider.InterfaceIdentifier.Name);
 
                                         return;
                                     }
+                                    case 1: {
+                                        if (iteration == 0)
+                                            dependency.Service = serviceProvider.SortedServiceList[index];
+                                        else {
+                                            Service closedService = Service.CreateClosedService(serviceProvider.GenericSortedServiceList[index], dependency.ServiceType);
+                                            dependency.Service = closedService;
+
+                                            serviceProvider.SortedServiceList.Insert(missingIndex, closedService);
+                                            (closedService.Lifetime switch {
+                                                ServiceLifetime.Singleton => serviceProvider.SingletonList,
+                                                ServiceLifetime.Scoped => serviceProvider.ScopedList,
+                                                ServiceLifetime.Transient or ServiceLifetime.TransientScoped => serviceProvider.TransientList,
+                                                ServiceLifetime.Delegate or ServiceLifetime.DelegateScoped => serviceProvider.DelegateList,
+                                                _ => throw new Exception($"Unreachable code: invalid enum ServiceLifetime: {closedService.Lifetime}")
+                                            }).Add(closedService);
+                                        }
+                                        goto dependencyServiceFound;
+                                    }
+                                    default: {
+                                        // filter all invalid services and check if exact 1 remains
+                                        if (service.Lifetime.HasFlag(ServiceLifetime.Singleton)) {
+                                            int serviceIndex = -1;
+                                            for (int i = index; i < index + count; i++)
+                                                if (!currentServiceList[i].Lifetime.HasFlag(ServiceLifetime.Scoped))
+                                                    if (serviceIndex == -1)
+                                                        serviceIndex = i;
+                                                    else
+                                                        // multiple matches
+                                                        goto error;
+
+                                            if (serviceIndex == -1) {
+                                                // no match
+                                                noLifetimeMatchList = noLifetimeMatchList.Concat(currentServiceList.Skip(index).Take(count).Select((Service service) => service.Name));
+                                                goto case 0;
+                                            }
+
+                                            index = serviceIndex;
+                                            goto case 1;
+                                        }
+
+                                        error:
+                                        {
+                                            IEnumerable<string> servicesWithSameType = currentServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
+                                            bool isParameter = dependency is ConstructorDependency;
+
+                                            if (ReferenceEquals(service, serviceProvider.CreateScope))
+                                                serviceProvider.ErrorManager.AddScopedProviderAmbiguousError(serviceProvider.Identifier, dependency.ServiceType, servicesWithSameType, isParameter);
+                                            else
+                                                serviceProvider.ErrorManager.AddDependencyAmbiguousError(service.Name, dependency.ServiceType, servicesWithSameType, isParameter);
+
+                                            return;
+                                        }
+                                    }
                                 }
+
+                                missingIndex = index;
+                                currentServiceList = serviceProvider.GenericSortedServiceList;
                             }
                         }
+                        dependencyServiceFound:
 
                         // check CreationTiming
-                        if (!dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient))
+                        if (!dependency.Service!.Lifetime.HasFlag(ServiceLifetime.Transient))
                             // singleton or scoped dependency (delegate dependencies are automatically filtered at the next step)
                             if (service.CreationTimeTransitive == CreationTiming.Constructor && dependency.Service.CreationTimeTransitive == CreationTiming.Lazy)
                                 // constructor on lazy
@@ -1172,6 +1268,41 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         cycleList.RemoveAt(i--);
             }
         }
+
+
+        /// <summary>
+        /// Binary search the sorted <see cref="SortedServiceList"/>.
+        /// </summary>
+        /// <param name="serviceType"></param>
+        /// <returns>The index of the first occurrence and the number of matched services.</returns>
+        private static (int index, int count) FindService(TypeName serviceType, List<Service> serviceList) {
+            int lowerBound = 0;
+            int upperBound = serviceList.Count;
+            while (lowerBound < upperBound) {
+                int index = (lowerBound + upperBound) / 2;
+
+                switch (serviceList[index].ServiceType.CompareTo(serviceType)) {
+                    case -1:
+                        lowerBound = index + 1;
+                        break;
+                    case 1:
+                        upperBound = index;
+                        break;
+                    case 0:
+                        int start = index;
+                        while (start > 0 && serviceList[start - 1].ServiceType == serviceType)
+                            start--;
+
+                        int end = index + 1;
+                        while (end < serviceList.Count && serviceList[end].ServiceType == serviceType)
+                            end++;
+
+                        return (start, end - start);
+                }
+            }
+
+            return (upperBound, 0);
+        }
     }
 
 
@@ -1284,6 +1415,15 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         if (!DelegateList.SequenceEqual(other.DelegateList))
             return false;
 
+        if (!GenericSingletonList.SequenceEqual(other.GenericSingletonList))
+            return false;
+        if (!GenericScopedList.SequenceEqual(other.GenericScopedList))
+            return false;
+        if (!GenericTransientList.SequenceEqual(other.GenericTransientList))
+            return false;
+        if (!GenericDelegateList.SequenceEqual(other.GenericDelegateList))
+            return false;
+
         if (!ErrorManager.ErrorList.SequenceEqual(other.ErrorManager.ErrorList))
             return false;
 
@@ -1328,6 +1468,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         hashCode = CombineList(hashCode, ScopedList);
         hashCode = CombineList(hashCode, TransientList);
         hashCode = CombineList(hashCode, DelegateList);
+
+        hashCode = CombineList(hashCode, GenericSingletonList);
+        hashCode = CombineList(hashCode, GenericScopedList);
+        hashCode = CombineList(hashCode, GenericTransientList);
+        hashCode = CombineList(hashCode, GenericDelegateList);
 
         hashCode = CombineList(hashCode, ErrorManager.ErrorList);
 

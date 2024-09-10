@@ -107,15 +107,27 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
         }
 
         TypeParameterList = new List<string>(typeSymbol.TypeParameters.Length);
-        foreach (ITypeParameterSymbol typeParameter in typeSymbol.TypeParameters)
-            TypeParameterList.Add(typeParameter.Name);
-
         TypeArgumentList = new List<TypeName?>(typeSymbol.TypeArguments.Length);
-        for (int i = 0; i < typeSymbol.TypeArguments.Length; i++)
-            if (typeSymbol.TypeArguments[i] is INamedTypeSymbol namedTypeArgument && namedTypeArgument.Name != TypeParameterList[i])
-                TypeArgumentList.Add(new TypeName(namedTypeArgument));
-            else
-                TypeArgumentList.Add(null);
+        for (int i = 0; i < typeSymbol.TypeParameters.Length; i++)
+            switch (typeSymbol.TypeArguments[i]) {
+                case ITypeParameterSymbol:
+                    // TypeArgument is a forwarded type parameter
+                    TypeParameterList.Add(typeSymbol.TypeArguments[i].Name);
+                    TypeArgumentList.Add(null);
+                    break;
+                case IErrorTypeSymbol namedTypeArgument: // IErrorTypeSymbol : INamedTypeSymbol
+                    // unbound type parameter or invalid input
+                    TypeParameterList.Add(typeSymbol.TypeParameters[i].Name);
+                    TypeArgumentList.Add(null);
+                    break;
+                case INamedTypeSymbol namedTypeArgument:
+                    // closed type parameter
+                    TypeParameterList.Add(typeSymbol.TypeParameters[i].Name);
+                    TypeArgumentList.Add(new TypeName(namedTypeArgument));
+                    break;
+                default:
+                    throw new Exception($"Unreachable: typeParameter is not a 'ITypeParameterSymbol' nor a 'INamedTypeSymbol': {typeSymbol.TypeArguments[i].GetType()}");
+            }
     }
 
 
@@ -233,21 +245,19 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
         if (typeArgumentListDiff != 0)
             return typeArgumentListDiff;
 
-        for (int i = 1; i < TypeArgumentList.Count; i++) {
+        for (int i = 0; i < TypeArgumentList.Count; i++)
             switch ((TypeArgumentList[i], other.TypeArgumentList[i])) {
                 case (null, null):
                     break;
-                case (not null, null):
-                    return 1;
-                case (null, not null):
-                    return -1;
+                case (not null, null) or (null, not null):
+                    // allow match of closed generic with open/unbound generic
+                    break;
                 case (not null, not null):
                     int typeNameDiff = TypeArgumentList[i]!.CompareTo(other.TypeArgumentList[i]!);
                     if (typeNameDiff != 0)
                         return typeNameDiff;
                     break;
             }
-        }
 
 
         return 0;

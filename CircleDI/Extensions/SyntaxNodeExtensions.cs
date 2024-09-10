@@ -64,7 +64,7 @@ public static class SyntaxNodeExtensions {
     /// <param name="implementation"></param>
     /// <param name="errorManager"></param>
     /// <returns></returns>
-    public static IMethodSymbol? FindConstructor(this INamedTypeSymbol implementation, DiagnosticErrorManager errorManager) {
+    public static IMethodSymbol? FindConstructor(this INamedTypeSymbol implementation, ErrorManager errorManager) {
         switch (implementation.InstanceConstructors.Length) {
             case 0:
                 errorManager.AddMissingClassOrConstructorError(implementation.ToDisplayString());
@@ -127,9 +127,10 @@ public static class SyntaxNodeExtensions {
     public static List<ConstructorDependency> CreateConstructorDependencyList(this IMethodSymbol constructor) {
         List<ConstructorDependency> result = new(constructor.Parameters.Length);
 
-        foreach (IParameterSymbol parameter in constructor.Parameters)
+        foreach (IParameterSymbol parameter in constructor.Parameters) {
             if (parameter.GetAttribute("DependencyAttribute") is AttributeData attributeData)
                 if (attributeData.NamedArguments.GetArgument<string>("Name") is string dependencyName)
+                    // AddNamedDependency
                     result.Add(new ConstructorDependency() {
                         Name = parameter.Name,
                         ServiceName = dependencyName,
@@ -137,30 +138,28 @@ public static class SyntaxNodeExtensions {
                         HasAttribute = true,
                         ByRef = parameter.RefKind
                     });
-                else {
-                    if (parameter.Type is not INamedTypeSymbol namedType)
-                        continue;
+                else
+                    AddTypedDependency(hasAttribute: true, parameter, result);
+            else
+                AddTypedDependency(hasAttribute: false, parameter, result);
 
-                    result.Add(new ConstructorDependency() {
-                        Name = parameter.Name,
-                        ServiceName = string.Empty,
-                        ServiceType = new TypeName(namedType),
-                        HasAttribute = true,
-                        ByRef = parameter.RefKind
-                    });
-                }
-            else {
+            static void AddTypedDependency(bool hasAttribute, IParameterSymbol parameter, List<ConstructorDependency> result) {
                 if (parameter.Type is not INamedTypeSymbol namedType)
-                    continue;
+                    return;
+
+                foreach (ITypeSymbol argument in namedType.TypeArguments)
+                    if (argument is IErrorTypeSymbol) // unbound is not allowed in this context -> invalid input
+                        return; // no error needed, already syntax error
 
                 result.Add(new ConstructorDependency() {
                     Name = parameter.Name,
                     ServiceName = string.Empty,
                     ServiceType = new TypeName(namedType),
-                    HasAttribute = false,
+                    HasAttribute = hasAttribute,
                     ByRef = parameter.RefKind
                 });
             }
+        }
 
         return result;
     }
@@ -172,7 +171,7 @@ public static class SyntaxNodeExtensions {
     /// <param name="implementation"></param>
     /// <param name="errorManager"></param>
     /// <returns></returns>
-    public static List<ConstructorDependency>? CreateConstructorDependencyList(this INamedTypeSymbol implementation, DiagnosticErrorManager errorManager) {
+    public static List<ConstructorDependency>? CreateConstructorDependencyList(this INamedTypeSymbol implementation, ErrorManager errorManager) {
         IMethodSymbol? constructor = FindConstructor(implementation, errorManager);
         if (constructor is not null)
             return CreateConstructorDependencyList(constructor);
@@ -189,7 +188,7 @@ public static class SyntaxNodeExtensions {
     /// <param name="implementation"></param>
     /// <param name="errorManager"></param>
     /// <returns></returns>
-    public static List<PropertyDependency>? CreatePropertyDependencyList(this INamedTypeSymbol implementation, DiagnosticErrorManager errorManager) {
+    public static List<PropertyDependency>? CreatePropertyDependencyList(this INamedTypeSymbol implementation, ErrorManager errorManager) {
         List<PropertyDependency> propertyDependencyList = [];
 
         for (INamedTypeSymbol? baseType = implementation; baseType is not null; baseType = baseType.BaseType) {
@@ -215,6 +214,9 @@ public static class SyntaxNodeExtensions {
                     else {
                         if (property.Type is not INamedTypeSymbol namedType)
                             continue;
+                        foreach (ITypeSymbol argument in namedType.TypeArguments)
+                            if (argument is IErrorTypeSymbol) // unbound is not allowed in this context -> invalid input
+                                return null; // no error needed, already syntax error
 
                         serviceName = string.Empty;
                         serviceType = new TypeName(namedType);
@@ -224,6 +226,9 @@ public static class SyntaxNodeExtensions {
                 else if (property.IsRequired) {
                     if (property.Type is not INamedTypeSymbol namedType)
                         continue;
+                    foreach (ITypeSymbol argument in namedType.TypeArguments)
+                        if (argument is IErrorTypeSymbol) // unbound is not allowed in this context -> invalid input
+                            return null; // no error needed, already syntax error
                     if (property.SetMethod is null) {
                         errorManager.AddMissingSetAccessorError(property, baseType, property.ToDisplayString());
                         return null;

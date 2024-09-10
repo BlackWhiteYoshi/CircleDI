@@ -8,8 +8,9 @@ namespace MyCode;
 partial class TestProvider {
     private global::Microsoft.Extensions.Configuration.IConfiguration GetConfiguration() => (Microsoft.Extensions.Configuration.IConfiguration)_builtinServiceProvider.GetService(typeof(Microsoft.Extensions.Configuration.IConfiguration));
     private global::Microsoft.Extensions.Logging.ILoggerFactory GetLoggerFactory() => (Microsoft.Extensions.Logging.ILoggerFactory)_builtinServiceProvider.GetService(typeof(Microsoft.Extensions.Logging.ILoggerFactory));
+    private global::Microsoft.Extensions.Logging.ILogger<TCategoryName> GetLogger<TCategoryName>() => (Microsoft.Extensions.Logging.ILogger<TCategoryName>)_builtinServiceProvider.GetService(typeof(Microsoft.Extensions.Logging.ILogger<TCategoryName>));
 
-    partial class Scope { 
+    partial class Scope {
         private global::Microsoft.JSInterop.IJSRuntime GetJSRuntime() => (Microsoft.JSInterop.IJSRuntime)_builtinServiceProvider.GetService(typeof(Microsoft.JSInterop.IJSRuntime));
         private global::Microsoft.AspNetCore.Components.NavigationManager GetNavigationManager() => (Microsoft.AspNetCore.Components.NavigationManager)_builtinServiceProvider.GetService(typeof(Microsoft.AspNetCore.Components.NavigationManager));
         private global::Microsoft.AspNetCore.Components.Routing.INavigationInterception GetNavigationInterception() => (Microsoft.AspNetCore.Components.Routing.INavigationInterception)_builtinServiceProvider.GetService(typeof(Microsoft.AspNetCore.Components.Routing.INavigationInterception));

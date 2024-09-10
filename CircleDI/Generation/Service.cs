@@ -3,6 +3,8 @@ using CircleDI.Extensions;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace CircleDI.Generation;
 
@@ -14,7 +16,7 @@ namespace CircleDI.Generation;
 public sealed class Service : IEquatable<Service> {
     /// <summary>
     /// Lifetime type of the service.<br />
-    /// Additionally the service is also located in the corresponding list. See <see cref="ServiceProvider.SingletonList"/>, <see cref="ServiceProvider.ScopedList"/>, <see cref="ServiceProvider.TransientList"/>.
+    /// Additionally the service is also located in the corresponding list.
     /// </summary>
     public required ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Singleton;
 
@@ -30,6 +32,11 @@ public sealed class Service : IEquatable<Service> {
     /// Is false, when Class or record class.
     /// </summary>
     public bool IsRefable { get; init; } = false;
+
+    /// <summary>
+    /// Indicates wheather this service has open/unbound type paramters.
+    /// </summary>
+    public bool IsGeneric { get; init; } = false;
 
     /// <summary>
     /// <para>The type of the actual object that will be instatiated.</para>
@@ -165,7 +172,7 @@ public sealed class Service : IEquatable<Service> {
     /// <param name="creationTimeProvider"></param>
     /// <param name="getAccessorProvider"></param>
     [SetsRequiredMembers]
-    public Service(INamedTypeSymbol module, AttributeData attributeData, ServiceLifetime lifetime, CreationTiming creationTimeProvider, GetAccess getAccessorProvider, DiagnosticErrorManager errorManager) {
+    public Service(INamedTypeSymbol module, AttributeData attributeData, ServiceLifetime lifetime, CreationTiming creationTimeProvider, GetAccess getAccessorProvider, ErrorManager errorManager) {
         Debug.Assert(attributeData.AttributeClass?.TypeKind != TypeKind.Error == true || attributeData.AttributeClass?.TypeArguments.All((ITypeSymbol typeSymbol) => typeSymbol.TypeKind != TypeKind.Error) == true);
 
         INamedTypeSymbol attributeType = attributeData.AttributeClass!;
@@ -219,6 +226,23 @@ public sealed class Service : IEquatable<Service> {
         ServiceType = new TypeName(serviceType);
         IsRefable = lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped && serviceType.IsValueType == true && SymbolEqualityComparer.Default.Equals(serviceType, implementationType);
         ImplementationType = new TypeName(implementationType);
+
+        // map unbound generic to open generic
+        foreach (TypeName? argument in ServiceType.TypeArgumentList)
+            if (argument is null) {
+                IsGeneric = true;
+                serviceType = serviceType.ConstructedFrom;
+                implementationType = implementationType.ConstructedFrom;
+
+                if (ServiceType.TypeArgumentList.Count != ImplementationType.TypeArgumentList.Count)
+                    errorManager.AddServiceRegistrationTypeParameterMismatchError(ServiceType, ImplementationType);
+                else
+                    for (int i = 0; i < ServiceType.TypeArgumentList.Count; i++)
+                        if (ImplementationType.TypeArgumentList[i] is not null && ImplementationType.TypeArgumentList[i] != ServiceType.TypeArgumentList[i])
+                            errorManager.AddServiceRegistrationTypeParameterMismatchError(ServiceType, ImplementationType);
+
+                break;
+            }
 
         Name = implementationType.Name;
         CreationTime = creationTimeProvider;
@@ -313,15 +337,27 @@ public sealed class Service : IEquatable<Service> {
                         break;
                     case IFieldSymbol field:
                         if (!SymbolEqualityComparer.Default.Equals(field.Type, implementationType))
-                            errorManager.AddWrongFieldImplementationTypeError(implementationName, field.Type.ToDisplayString(), ImplementationType);
+                            if (!SymbolEqualityComparer.Default.Equals((field.Type as INamedTypeSymbol)?.ConstructedFrom, implementationType))
+                                errorManager.AddWrongFieldImplementationTypeError(implementationName, field.Type.ToDisplayString(), ImplementationType);
+
+                        if (implementationType.Arity > 0)
+                            errorManager.AddImplementationGenericError(implementationName, ImplementationType, implementationType.Arity);
                         break;
                     case IPropertySymbol property:
                         if (!SymbolEqualityComparer.Default.Equals(property.Type, implementationType))
-                            errorManager.AddWrongPropertyImplementationTypeError(implementationName, property.Type.ToDisplayString(), ImplementationType);
+                            if (!SymbolEqualityComparer.Default.Equals((property.Type as INamedTypeSymbol)?.ConstructedFrom, implementationType))
+                                errorManager.AddWrongPropertyImplementationTypeError(implementationName, property.Type.ToDisplayString(), ImplementationType);
+
+                        if (implementationType.Arity > 0)
+                            errorManager.AddImplementationGenericError(implementationName, ImplementationType, implementationType.Arity);
                         break;
                     case IMethodSymbol method: {
                         if (!SymbolEqualityComparer.Default.Equals(method.ReturnType, implementationType))
-                            errorManager.AddWrongMethodImplementationTypeError(implementationName, method.ReturnType.ToDisplayString(), ImplementationType);
+                            if (!SymbolEqualityComparer.Default.Equals((method.ReturnType as INamedTypeSymbol)?.ConstructedFrom, implementationType))
+                                errorManager.AddWrongMethodImplementationTypeError(implementationName, method.ReturnType.ToDisplayString(), ImplementationType);
+
+                        if (method.Arity != implementationType.Arity)
+                            errorManager.AddMethodImplementationTypeParameterMismatchError(implementationName, method.Arity, implementationType.Arity);
                         break;
                     }
                 }
@@ -343,7 +379,7 @@ public sealed class Service : IEquatable<Service> {
     /// <param name="attributeData"></param>
     /// <param name="getAccessorProvider"></param>
     [SetsRequiredMembers]
-    public Service(INamedTypeSymbol module, AttributeData attributeData, GetAccess getAccessorProvider, DiagnosticErrorManager errorManager) {
+    public Service(INamedTypeSymbol module, AttributeData attributeData, GetAccess getAccessorProvider, ErrorManager errorManager) {
         Debug.Assert(attributeData.AttributeClass?.TypeArguments.All((ITypeSymbol typeSymbol) => typeSymbol.TypeKind != TypeKind.Error) == true);
 
         INamedTypeSymbol attributeType = attributeData.AttributeClass!;
@@ -367,6 +403,12 @@ public sealed class Service : IEquatable<Service> {
 
         ServiceType = new TypeName(serviceType);
         ImplementationType = ServiceType;
+        IsGeneric = false;
+        foreach (TypeName? argumant in ServiceType.TypeArgumentList)
+            if (argumant is null) {
+                IsGeneric = true;
+                serviceType = serviceType.ConstructedFrom;
+            }
 
         Name = attributeData.NamedArguments.GetArgument<string>("Name") ?? serviceType.Name.Replace(".", "");
         CreationTime = CreationTiming.Constructor;
@@ -416,10 +458,200 @@ public sealed class Service : IEquatable<Service> {
         else
             for (int i = 0; i < implementation.Parameters.Length; i++)
                 if (!SymbolEqualityComparer.Default.Equals(implementation.Parameters[i].Type, serviceType.DelegateInvokeMethod.Parameters[i].Type))
-                    errorManager.AddDelegateWrongParameterTypeError(methodName, implementation.Parameters[i].Type.ToDisplayString(), serviceType.DelegateInvokeMethod.Parameters[i].Type.ToDisplayString(), i + 1);
+                    if (!SymbolEqualityComparer.Default.Equals((implementation.Parameters[i].Type as INamedTypeSymbol)?.ConstructedFrom, serviceType.DelegateInvokeMethod.Parameters[i].Type))
+                        if ((implementation.Parameters[i].Type as ITypeParameterSymbol)?.Name != serviceType.DelegateInvokeMethod.Parameters[i].Type.Name)
+                            errorManager.AddDelegateWrongParameterTypeError(methodName, implementation.Parameters[i].Type.ToDisplayString(), serviceType.DelegateInvokeMethod.Parameters[i].Type.ToDisplayString(), i + 1);
 
-        if (!SymbolEqualityComparer.Default.Equals(implementation.ReturnType, serviceType.DelegateInvokeMethod?.ReturnType))
-            errorManager.AddDelegateWrongReturnTypeError(methodName, implementation.ReturnType.ToDisplayString(), serviceType.DelegateInvokeMethod!.ReturnType.ToDisplayString());
+        if (!SymbolEqualityComparer.Default.Equals(implementation.ReturnType, serviceType.DelegateInvokeMethod.ReturnType))
+            if (!SymbolEqualityComparer.Default.Equals((implementation.ReturnType as INamedTypeSymbol)?.ConstructedFrom, serviceType.DelegateInvokeMethod.ReturnType))
+                if ((implementation.ReturnType as ITypeParameterSymbol)?.Name != serviceType.DelegateInvokeMethod.ReturnType.Name)
+                    errorManager.AddDelegateWrongReturnTypeError(methodName, implementation.ReturnType.ToDisplayString(), serviceType.DelegateInvokeMethod!.ReturnType.ToDisplayString());
+
+        if (implementation.Arity != serviceType.Arity)
+            errorManager.AddDelegateTypeParameterMismatchError(methodName, implementation.Arity, serviceType.Arity);
+    }
+
+
+    /// <summary>
+    /// Creates closed service out of a generic service
+    /// </summary>
+    /// <param name="genericService">open/unbound service</param>
+    /// <param name="serviceWithArgumentList">Contains the TypeArgumentList to fill the open/unbound type parameters</param>
+    /// <returns>A non generic service</returns>
+    public static Service CreateClosedService(Service genericService, TypeName serviceWithArgumentList) {
+        TypeName implementationType = new(
+            genericService.ImplementationType.Name,
+            genericService.ImplementationType.Keyword,
+            genericService.ImplementationType.NameSpaceList,
+            genericService.ImplementationType.ContainingTypeList,
+            genericService.ImplementationType.TypeParameterList,
+            serviceWithArgumentList.TypeArgumentList);
+
+        string name; // "{Name}_{generic1}_{generic2}.._{genericN}
+        {
+            StringBuilder builder = new(genericService.Name.Length + 8 * serviceWithArgumentList.TypeArgumentList.Count);
+            builder.Append(genericService.Name);
+
+            AppendTypeArguments(builder, serviceWithArgumentList.TypeArgumentList!);
+            static void AppendTypeArguments(StringBuilder builder, List<TypeName> typeArgumentList) {
+                foreach (TypeName typeName in typeArgumentList) {
+                    builder.Append('_');
+                    builder.Append(typeName.Name);
+                    AppendTypeArguments(builder, typeName.TypeArgumentList!);
+                }
+            }
+
+            name = builder.ToString();
+        }
+
+        List<ConstructorDependency> constructorDependencyList = CreateDependencyList(genericService.ConstructorDependencyList, implementationType);
+        List<PropertyDependency> propertyDependencyList = CreateDependencyList(genericService.PropertyDependencyList, implementationType);
+
+        return new Service() {
+            Lifetime = genericService.Lifetime,
+            IsRefable = genericService.IsRefable,
+            IsGeneric = genericService.IsGeneric,
+            Implementation = genericService.Implementation,
+            ImportMode = genericService.ImportMode,
+            Module = genericService.Module,
+            CreationTime = genericService.CreationTime,
+            CreationTimeTransitive = genericService.CreationTimeTransitive,
+            GetAccessor = genericService.GetAccessor,
+            IsDisposable = genericService.IsDisposable,
+            IsAsyncDisposable = genericService.IsAsyncDisposable,
+
+            Name = name,
+            ServiceType = serviceWithArgumentList,
+            ImplementationType = implementationType,
+
+            ConstructorDependencyList = constructorDependencyList,
+            PropertyDependencyList = propertyDependencyList,
+            Dependencies = constructorDependencyList.Concat<Dependency>(propertyDependencyList)
+        };
+
+
+        static List<T> CreateDependencyList<T>(List<T> dependencyList, TypeName implementationType) where T : Dependency {
+            List<T> result = dependencyList;
+            bool newListAllocated = false;
+
+            for (int i = 0; i < dependencyList.Count; i++) {
+                // check if argumentlist is different
+                TypeName? dependencyServiceType = null;
+                if (dependencyList[i].ServiceType is TypeName parameterServiceType)
+                    for (int j = 0; j < parameterServiceType.TypeArgumentList.Count; j++)
+                        if (parameterServiceType.TypeArgumentList[j] is null) {
+                            List<TypeName?> parameterTypeArgumentList = new(parameterServiceType.TypeArgumentList.Count);
+                            for (int jj = 0; jj < j; jj++)
+                                parameterTypeArgumentList.Add(parameterServiceType.TypeArgumentList[j]);
+
+                            do {
+                                if (parameterServiceType.TypeArgumentList[j] is null) {
+                                    string typeParameter = parameterServiceType.TypeParameterList[j];
+                                    for (int k = 0; k < implementationType.TypeParameterList.Count; k++)
+                                        if (implementationType.TypeParameterList[k] == typeParameter) {
+                                            parameterTypeArgumentList.Add(implementationType.TypeArgumentList[k]);
+                                            goto _break;
+                                        }
+                                    // else
+                                    {
+                                        // not defined typeparameter => syntax error
+                                        parameterTypeArgumentList.Add(null);
+                                    }
+                                    _break:;
+                                }
+                            } while (++j < implementationType.TypeArgumentList.Count);
+
+                            dependencyServiceType = new TypeName(
+                                parameterServiceType.Name,
+                                parameterServiceType.Keyword,
+                                parameterServiceType.NameSpaceList,
+                                parameterServiceType.ContainingTypeList,
+                                parameterServiceType.TypeParameterList,
+                                parameterTypeArgumentList);
+                            break;
+                        }
+
+                // check if implementationBase is different
+                TypeName? implementationBaseName = null;
+                if (typeof(T) == typeof(PropertyDependency)) {
+                    PropertyDependency propertyDependency = Unsafe.As<PropertyDependency>(dependencyList[i]);
+                    TypeName? baseImplementation = propertyDependency.ImplementationBaseName;
+                    List<TypeName?> baseArgumentList = baseImplementation.TypeArgumentList;
+
+                    for (int j = 0; j < baseArgumentList.Count; j++)
+                        if (baseArgumentList[j] is null) {
+                            List<TypeName?> filledArgumentList = new(baseArgumentList.Count);
+                            for (int jj = 0; jj < j; jj++)
+                                filledArgumentList.Add(baseArgumentList[j]);
+
+                            do {
+                                if (baseArgumentList[j] is null) {
+                                    string typeParameter = baseImplementation.TypeParameterList[j];
+                                    for (int k = 0; k < implementationType.TypeParameterList.Count; k++)
+                                        if (implementationType.TypeParameterList[k] == typeParameter) {
+                                            filledArgumentList.Add(implementationType.TypeArgumentList[k]);
+                                            goto _break;
+                                        }
+                                    // else
+                                    {
+                                        // not defined typeparameter => syntax error
+                                        filledArgumentList.Add(null);
+                                    }
+                                    _break:;
+                                }
+                            } while (++j < baseImplementation.TypeArgumentList.Count);
+
+                            implementationBaseName = new TypeName(
+                                baseImplementation.Name,
+                                baseImplementation.Keyword,
+                                baseImplementation.NameSpaceList,
+                                baseImplementation.ContainingTypeList,
+                                baseImplementation.TypeParameterList,
+                                filledArgumentList
+                                );
+                        }
+                }
+
+                if (dependencyServiceType is not null || implementationBaseName is not null) {
+                    // something is not equal, allocate a new list to make a copy
+                    if (!newListAllocated) {
+                        result = new(dependencyList.Count);
+                        for (int ii = 0; ii < i; ii++)
+                            result.Add(dependencyList[ii]);
+                        newListAllocated = true;
+                    }
+                    result.Add(dependencyList[i]);
+
+                    if (typeof(T) == typeof(ConstructorDependency)) {
+                        ConstructorDependency constructorDependency = Unsafe.As<ConstructorDependency>(dependencyList[i]);
+                        result[i] = Unsafe.As<T>(new ConstructorDependency() {
+                            Name = constructorDependency.Name,
+                            ServiceName = constructorDependency.ServiceName,
+                            ServiceType = dependencyServiceType ?? constructorDependency.ServiceType,
+                            HasAttribute = constructorDependency.HasAttribute,
+                            ByRef = constructorDependency.ByRef
+                        });
+                    }
+                    else if (typeof(T) == typeof(PropertyDependency)) {
+                        PropertyDependency propertyDependency = Unsafe.As<PropertyDependency>(dependencyList[i]);
+                        result[i] = Unsafe.As<T>(new PropertyDependency() {
+                            Name = propertyDependency.Name,
+                            ServiceName = propertyDependency.ServiceName,
+                            ServiceType = dependencyServiceType ?? propertyDependency.ServiceType,
+                            HasAttribute = propertyDependency.HasAttribute,
+                            IsInit = propertyDependency.IsInit,
+                            IsRequired = propertyDependency.IsRequired,
+                            ImplementationBaseName = implementationBaseName ?? propertyDependency.ImplementationBaseName
+                        });
+                    }
+                }
+                else
+                    if (newListAllocated)
+                        result.Add(dependencyList[i]);
+            }
+
+            return result;
+        }
     }
 
 
@@ -450,6 +682,8 @@ public sealed class Service : IEquatable<Service> {
         if (ServiceType != other.ServiceType)
             return false;
         if (IsRefable != other.IsRefable)
+            return false;
+        if (IsGeneric != other.IsGeneric)
             return false;
         if (ImplementationType != other.ImplementationType)
             return false;
@@ -489,6 +723,7 @@ public sealed class Service : IEquatable<Service> {
 
         hashCode = Combine(hashCode, ServiceType.GetHashCode());
         hashCode = Combine(hashCode, IsRefable.GetHashCode());
+        hashCode = Combine(hashCode, IsGeneric.GetHashCode());
         hashCode = Combine(hashCode, ImplementationType.GetHashCode());
         hashCode = Combine(hashCode, Implementation.GetHashCode());
 

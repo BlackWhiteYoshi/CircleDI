@@ -17,17 +17,9 @@ public static partial class Attributes {
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ServiceProviderAttribute : Attribute {
-            /// <summary>
-            /// <para>Name/Identifier of the generated Interface.</para>
-            /// <para>If omitted, the name will be "I{ClassName}".</para>
-            /// </summary>
-            public string InterfaceName { get; init; }
+            {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithInterfaceTypeAndName}}
 
-            {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
-
-            {{ServiceProviderAttributePropertyDefaultServiceGeneration}}
-
-            {{ServiceProviderAttributePropertyAddRazorComponents}}
+            {{ServiceProviderAttributePropertyDefaultServiceGenerationAndAddRazorComponents}}
         }
 
         {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeSummary}}
@@ -41,9 +33,7 @@ public static partial class Attributes {
         internal sealed class ServiceProviderAttribute<TInterface> : Attribute {
             {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
 
-            {{ServiceProviderAttributePropertyDefaultServiceGeneration}}
-
-            {{ServiceProviderAttributePropertyAddRazorComponents}}
+            {{ServiceProviderAttributePropertyDefaultServiceGenerationAndAddRazorComponents}}
         }
 
         #endif
@@ -51,7 +41,7 @@ public static partial class Attributes {
         """;
 
 
-    private const string ServiceProviderAttributePropertyDefaultServiceGeneration = """
+    private const string ServiceProviderAttributePropertyDefaultServiceGenerationAndAddRazorComponents = """
         /// <summary>
             /// <para>
             /// Toggles the generation of default services from the built-in service provider.<br />
@@ -61,10 +51,8 @@ public static partial class Attributes {
             /// <para>Default is <see cref="BlazorServiceGeneration.ServerAndWebassembly"/>.</para>
             /// </summary>
             public BlazorServiceGeneration DefaultServiceGeneration { get; init; }
-        """;
 
-    private const string ServiceProviderAttributePropertyAddRazorComponents = """
-        /// <summary>
+            /// <summary>
             /// <para>
             /// Decides whether classes derived from <see cref="Microsoft.AspNetCore.Components.ComponentBase"/> are automatically registered or not.
             /// </para>

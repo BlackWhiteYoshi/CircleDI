@@ -191,7 +191,7 @@ file static class RegisterServiceProviderAttributeExtension {
     /// <summary>
     /// Creates a <see cref="ServiceProvider"/>,
     /// then reads the properties "AddRazorComponents" and "AddDefaultServices",
-    /// if "AddDefaultServices" is true or null default services and a constructorDependency is added to the created service provider
+    /// if "AddDefaultServices" is true or null, default services and a constructorDependency is added to the created service provider
     /// and then the service provider together with the property values are returned.
     /// </summary>
     /// <param name="context"></param>
@@ -229,13 +229,12 @@ file static class RegisterServiceProviderAttributeExtension {
             // default services
             {
                 AddSingletonService(serviceProvider, "LoggerFactory", "GetLoggerFactory", new TypeName("ILoggerFactory", TypeKeyword.Interface, ["Logging", "Extensions", "Microsoft"], [], [], []));
+                AddSingletonService(serviceProvider, "Logger", "GetLogger", new TypeName("ILogger", TypeKeyword.Interface, ["Logging", "Extensions", "Microsoft"], [], ["TCategoryName"], [null]));
                 AddScopedService(serviceProvider, "JSRuntime", "GetJSRuntime", new TypeName("IJSRuntime", TypeKeyword.Interface, ["JSInterop", "Microsoft"], [], [], []));
                 AddScopedService(serviceProvider, "NavigationManager", "GetNavigationManager", new TypeName("NavigationManager", TypeKeyword.Class, ["Components", "AspNetCore", "Microsoft"], [], [], []));
                 AddScopedService(serviceProvider, "NavigationInterception", "GetNavigationInterception", new TypeName("INavigationInterception", TypeKeyword.Interface, ["Routing", "Components", "AspNetCore", "Microsoft"], [], [], []));
                 AddScopedService(serviceProvider, "ScrollToLocationHash", "GetScrollToLocationHash", new TypeName("IScrollToLocationHash", TypeKeyword.Interface, ["Routing", "Components", "AspNetCore", "Microsoft"], [], [], []));
                 AddScopedService(serviceProvider, "ErrorBoundaryLogger", "GetErrorBoundaryLogger", new TypeName("IErrorBoundaryLogger", TypeKeyword.Interface, ["Web", "Components", "AspNetCore", "Microsoft"], [], [], []));
-                // when support for unbound/open generics
-                // AddSingletonService(serviceProvider, "Logger", "GetLogger<T>", "Microsoft.Extensions.Logging.ILogger<>")
 
                 if (!blazorServiceGeneration.HasFlag(BlazorServiceGeneration.Hybrid)) {
                     // server or webassembly
@@ -258,12 +257,16 @@ file static class RegisterServiceProviderAttributeExtension {
 
 
             static void AddSingletonService(ServiceProvider serviceProvider, string name, string methodName, TypeName type) {
-                if (!serviceProvider.SingletonList.Any((Service service) => service.ServiceType == type))
-                    serviceProvider.SingletonList.Add(new Service() {
+                bool isGeneric = type.TypeParameterList.Count > 0;
+                List<Service> serviceList = !isGeneric ? serviceProvider.SingletonList : serviceProvider.GenericSingletonList;
+
+                if (!serviceList.Any((Service service) => service.ServiceType == type))
+                    serviceList.Add(new Service() {
                         Name = name,
                         Lifetime = ServiceLifetime.Singleton,
                         ServiceType = type,
                         IsRefable = false,
+                        IsGeneric = isGeneric,
                         ImplementationType = type,
                         CreationTime = CreationTiming.Constructor,
                         CreationTimeTransitive = CreationTiming.Constructor,
@@ -275,16 +278,19 @@ file static class RegisterServiceProviderAttributeExtension {
                         IsAsyncDisposable = false,
                         Dependencies = [],
                     });
-
             }
 
             static void AddScopedService(ServiceProvider serviceProvider, string name, string methodName, TypeName type) {
-                if (!serviceProvider.ScopedList.Any((Service service) => service.ServiceType == type))
-                    serviceProvider.ScopedList.Add(new Service() {
+                bool isGeneric = type.TypeParameterList.Count > 0;
+                List<Service> serviceList = !isGeneric ? serviceProvider.ScopedList : serviceProvider.GenericScopedList;
+
+                if (!serviceList.Any((Service service) => service.ServiceType == type))
+                    serviceList.Add(new Service() {
                         Name = name,
                         Lifetime = ServiceLifetime.Scoped,
                         ServiceType = type,
                         IsRefable = false,
+                        IsGeneric = isGeneric,
                         ImplementationType = type,
                         CreationTime = CreationTiming.Lazy,
                         CreationTimeTransitive = CreationTiming.Lazy,
@@ -401,8 +407,7 @@ file static class RegisterServiceProviderAttributeExtension {
         if (!blazorServiceGeneration.HasFlag(BlazorServiceGeneration.Hybrid))
             AppendGetMethod(builder, indent, "GetConfiguration", "Microsoft.Extensions.Configuration.IConfiguration");
         AppendGetMethod(builder, indent, "GetLoggerFactory", "Microsoft.Extensions.Logging.ILoggerFactory");
-        // when unbound/open generics support
-        // serviceProvider.SingletonList.Add(new Service() { ServiceType = "Microsoft.Extensions.Logging.ILogger<>" }
+        AppendGetMethod(builder, indent, "GetLogger<TCategoryName>", "Microsoft.Extensions.Logging.ILogger<TCategoryName>");
         switch (blazorServiceGeneration) {
             case BlazorServiceGeneration.Webassembly:
                 AppendGetMethod(builder, indent, "GetLazyAssemblyLoader", "Microsoft.AspNetCore.Components.WebAssembly.Services.LazyAssemblyLoader");
@@ -418,7 +423,7 @@ file static class RegisterServiceProviderAttributeExtension {
         builder.AppendIndent(indent);
         builder.Append("partial ");
         builder.Append(serviceProvider.KeywordScope.AsString());
-        builder.Append(" Scope { \n");
+        builder.Append(" Scope {\n");
         indent.IncreaseLevel(); // 2
 
 

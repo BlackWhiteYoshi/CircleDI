@@ -8,6 +8,7 @@
 - [Specific Attributes in Depth](#specific-attributes-in-depth)
   - [Implementation Property](#implementation-property)
   - [Named Services](#named-services)
+  - [Generic Services](#generic-services)
 - [Implicit Configurations](#implicit-configurations)
   - [Name, Namespace, Modifiers, Containing Types and Generic](#name-namespace-modifiers-containing-types-and-generic)
   - [Interface name, namespace, access modifier, containing types and generic](#interface-name-namespace-access-modifier-containing-types-and-generic)
@@ -18,7 +19,6 @@
 - [Workarounds for not supported Features](#workarounds-for-not-supported-features)
   - [Async Constructor](#async-constructor)
   - [Decoration](#decoration)
-  - [Open/Unbound Generic Types](#openunbound-generic-types)
 - [Remarks](#remarks)
   - [IServiceProvider Interface](#iserviceprovider-interface)
   - [Error Handling](#error-handling)
@@ -413,6 +413,37 @@ public sealed class MyService([Dependency(Name = "Service")] IService firstServi
 
 
 <br></br>
+### Generic Services
+
+You can register open/unbound generic services to create automatically all kinds of closed generic services out of it.
+
+```csharp
+namespace MySpace;
+
+[ServiceProvider]
+[Singleton(typeof(ILogger<>), typeof(Logger<>))]
+public partial class MyProvider;
+
+public class Service1(ILogger<Service1> logger);
+public class Service2(ILogger<Service2> logger);
+```
+
+Open generic services are treated differently than non-generic or closed generic services.
+Behind the scenes they get registered in a separate list.
+Each time a service cannot be resolved/found in the normal registration list, the open generic list is searched for a match.
+If a match can be found, the open generic service is taken as template to create a closed service out of it.  
+Consequently, if a closed generic service and an open generic service are registered and both would match,
+the already existing closed generic service is taken.  
+The other take away is, that open generic services are only for generating closed generic services.
+They do not generate anything on their own.
+That means, if you want to request a closed generic Service directly from the provider, you must explicitly register that closed version first.
+
+When registering an open generic delegate or provide an implementation method for an open generic service,
+the number of type parameters of the method and of the service must match.
+Therefore, fields and properties cannot be used as implementation for open generic services, since they cannot have type parameters.
+
+
+<br></br>
 ## Implicit Configurations
 
 
@@ -755,65 +786,6 @@ public sealed partial class MyProvider {
 public class ServiceBase;
 public class Service1(ServiceBase serviceBase);
 public class Service2(ServiceBase serviceBase);
-```
-
-
-<br></br>
-### Open/Unbound Generic Types
-
-Generic services, something like Logger&lt;T&gt;, are not supported yet.
-However, you can easily build your own service factory:
-
-```csharp
-[ServiceProvider]
-[Singleton<LoggerFactory>]
-[Transient<MyService>]
-public sealed partial class MyProvider;
-
-public struct LoggerFactory {
-    public Logger<T> CreateLogger<T>() => new Logger<T>();
-}
-
-
-public class MyService {
-    private readonly Logger<MyService> _logger;
-
-    public MyService(LoggerFactory loggerFactory) {
-        _logger = loggerFactory.CreateLogger<MyService>();
-    }
-}
-```
-
-If your produced loggers should be singletons, you have to track them in a list:
-
-```csharp
-[ServiceProvider]
-[Singleton<LoggerFactory>]
-[Transient<MyService>]
-public sealed partial class MyProvider;
-
-public struct LoggerFactory {
-    private readonly Dictionary<Type, object> _loggerList = [];
-
-    [Constructor]
-    public LoggerFactory() { }
-
-    public Logger<T> GetLogger<T>() {
-        if (_loggerList.TryGetValue(typeof(T), out object? logger))
-            return (Logger<T>)logger;
-        else
-            return new Logger<T>();
-    }
-}
-
-
-public class MyService {
-    private readonly Logger<MyService> _logger;
-
-    public MyService(LoggerFactory loggerFactory) {
-        _logger = loggerFactory.GetLogger<MyService>();
-    }
-}
 ```
 
 

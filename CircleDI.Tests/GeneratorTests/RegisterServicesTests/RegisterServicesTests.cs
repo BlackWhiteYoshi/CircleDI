@@ -9,7 +9,8 @@ namespace CircleDI.Tests;
 /// <para>
 /// Singleton<br />
 /// Scoped<br />
-/// Transient
+/// Transient<br />
+/// Import
 /// </para>
 /// </summary>
 public static class RegisterServicesTests {
@@ -2025,6 +2026,84 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ImportServiceClosedGeneric() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import<ITestModule<int>>]
+            public sealed partial class TTestProvider;
+
+            [Transient<ITestService, TestService>]
+            [Delegate<SomeAction>(nameof(MyAction))]
+            public interface ITestModule<T> {
+                public static void MyAction() { }
+            }
+
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
+            public delegate void SomeAction();
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task ImportUnboundGenericService() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import(typeof(ITestModule<>))]
+            public sealed partial class TTestProvider;
+
+            [Transient<ITestService, TestService>]
+            [Delegate<SomeAction>(nameof(MyAction))]
+            public interface ITestModule<T> {
+                public static void MyAction() { }
+            }
+
+            public interface ITestService;
+            public sealed class TestService : ITestService;
+
+            public delegate void SomeAction();
 
             """;
 

@@ -8,7 +8,7 @@ namespace CircleDI.Defenitions;
 /// Collection of global <see cref="DiagnosticDescriptor"/> objects
 /// and methods to add <see cref="Diagnostic"/> objects of severity error to the <see cref="ErrorList"/>.
 /// </summary>
-public sealed class DiagnosticErrorManager(AttributeData serviceProviderAttribute) {
+public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
     public AttributeData ServiceProviderAttribute { get; } = serviceProviderAttribute;
 
     private AttributeData _currentAttribute = serviceProviderAttribute;
@@ -139,6 +139,17 @@ public sealed class DiagnosticErrorManager(AttributeData serviceProviderAttribut
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
+    public void AddServiceRegistrationTypeParameterMismatchError(TypeName interfaceIdentifier, TypeName implementationIdentifier)
+        => ErrorList.Add(Diagnostic.Create(ServiceRegistrationTypeParameterMismatch, CurrentAttribute.ToLocation(), [interfaceIdentifier.CreateFullyQualifiedName(), implementationIdentifier.CreateFullyQualifiedName()]));
+
+    private static DiagnosticDescriptor ServiceRegistrationTypeParameterMismatch { get; } = new(
+        id: "CDI041",
+        title: "Service registration type parameter mismatch",
+        messageFormat: "Service registration type parameter mismatch at service '{0}' with implementation '{1}'. The number of type parameters must match and the type parameters must be open/unbound.",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
 
     public void AddTransientImplementationFieldError()
         => ErrorList.Add(Diagnostic.Create(TransientImplementationField, CurrentAttribute.ToLocation()));
@@ -177,9 +188,9 @@ public sealed class DiagnosticErrorManager(AttributeData serviceProviderAttribut
 
 
     public void AddWrongFieldImplementationTypeError(string implementationName, string actualType, TypeName expectedType)
-        => ErrorList.Add(Diagnostic.Create(WrongFieldImplementationTypeError, CurrentAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]));
+        => ErrorList.Add(Diagnostic.Create(WrongFieldImplementationType, CurrentAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]));
 
-    private static DiagnosticDescriptor WrongFieldImplementationTypeError { get; } = new(
+    private static DiagnosticDescriptor WrongFieldImplementationType { get; } = new(
         id: "CDI009",
         title: "Wrong field Implementation type",
         messageFormat: "Wrong type of field '{0}': '{1}' <-> '{2}' expected",
@@ -189,9 +200,9 @@ public sealed class DiagnosticErrorManager(AttributeData serviceProviderAttribut
 
 
     public void AddWrongPropertyImplementationTypeError(string implementationName, string actualType, TypeName expectedType)
-        => ErrorList.Add(Diagnostic.Create(WrongPropertyImplementationTypeError, CurrentAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]));
+        => ErrorList.Add(Diagnostic.Create(WrongPropertyImplementationType, CurrentAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]));
 
-    private static DiagnosticDescriptor WrongPropertyImplementationTypeError { get; } = new(
+    private static DiagnosticDescriptor WrongPropertyImplementationType { get; } = new(
         id: "CDI010",
         title: "Wrong property Implementation type",
         messageFormat: "Wrong type of property '{0}': '{1}' <-> '{2}' expected",
@@ -200,13 +211,37 @@ public sealed class DiagnosticErrorManager(AttributeData serviceProviderAttribut
         isEnabledByDefault: true);
 
 
-    public void AddWrongMethodImplementationTypeError(string implementationName, string actualType, TypeName expectedType)
-        => ErrorList.Add(Diagnostic.Create(WrongMethodImplementationTypeError, CurrentAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]));
+    public void AddImplementationGenericError(string implementationName, TypeName service, int serviceArity)
+        => ErrorList.Add(Diagnostic.Create(ImplementationGeneric, CurrentAttribute.ToLocation(), [implementationName, service.CreateFullyQualifiedName(), serviceArity, serviceArity != 1 ? "s" : ""]));
 
-    private static DiagnosticDescriptor WrongMethodImplementationTypeError { get; } = new(
+    private static DiagnosticDescriptor ImplementationGeneric { get; } = new(
+        id: "CDI044",
+        title: "Implementation must be generic method",
+        messageFormat: "Implementation '{0}' for type '{1}' must be a generic method with '{2}' type parameter{3}.",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
+    public void AddWrongMethodImplementationTypeError(string implementationName, string actualType, TypeName expectedType)
+        => ErrorList.Add(Diagnostic.Create(WrongMethodImplementationType, CurrentAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]));
+
+    private static DiagnosticDescriptor WrongMethodImplementationType { get; } = new(
         id: "CDI011",
         title: "Wrong method Implementation type",
         messageFormat: "Wrong return type of method '{0}': '{1}' <-> '{2}' expected",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
+    public void AddMethodImplementationTypeParameterMismatchError(string implementationName, int methodArity, int serviceArity)
+        => ErrorList.Add(Diagnostic.Create(MethodImplementationTypeParameterMismatch, CurrentAttribute.ToLocation(), [implementationName, methodArity, serviceArity]));
+
+    private static DiagnosticDescriptor MethodImplementationTypeParameterMismatch { get; } = new(
+        id: "CDI042",
+        title: "Method Implementation type parameter mismatch",
+        messageFormat: "Implementation Method '{0}' has the wrong number of type parameters: '{1}' <-> '{2}' expected",
         category: "CircleDI",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
@@ -267,6 +302,18 @@ public sealed class DiagnosticErrorManager(AttributeData serviceProviderAttribut
         id: "CDI016",
         title: "Delegate has wrong return type",
         messageFormat: "Method '{0}' has wrong return type: '{1}' <-> '{2}' expected",
+        category: "CircleDI",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+
+    public void AddDelegateTypeParameterMismatchError(string methodName, int methodArity, int serviceArity)
+        => ErrorList.Add(Diagnostic.Create(DelegateTypeParameterMismatch, CurrentAttribute.ToLocation(), [methodName, methodArity, serviceArity]));
+
+    private static DiagnosticDescriptor DelegateTypeParameterMismatch { get; } = new(
+        id: "CDI043",
+        title: "Delegate type parameter mismatch",
+        messageFormat: "Method '{0}' has the wrong number of type parameters: '{1}' <-> '{2}' expected",
         category: "CircleDI",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);

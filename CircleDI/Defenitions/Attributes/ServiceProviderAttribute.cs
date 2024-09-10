@@ -17,21 +17,7 @@ public static partial class Attributes {
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ServiceProviderAttribute : Attribute {
-            /// <summary>
-            /// <para>Type of the generated Interface.</para>
-            /// <para>If omitted, the name will be "I{ClassName}".</para>
-            /// </summary>
-            /// <remarks>Not compatible with <see cref="InterfaceName"/>. At most one property must be set.</remarks>
-            public Type InterfaceType { get; init; }
-
-            /// <summary>
-            /// <para>Name/Identifier of the generated Interface.</para>
-            /// <para>If omitted, the name will be "I{ClassName}".</para>
-            /// </summary>
-            /// <remarks>Not compatible with <see cref="InterfaceType"/>. At most one property must be set.</remarks>
-            public string InterfaceName { get; init; }
-
-            {{ServiceProviderAttributeContentWithoutInterfaceName}}
+            {{ServiceProviderAttributeContentWithInterfaceTypeAndName}}
         }
 
         {{ServiceProviderAttributeSummary}}
@@ -60,6 +46,24 @@ public static partial class Attributes {
         /// </para>
         /// <para>The source generator will generate a complete service provider, but you can add additional custom implementation to it.</para>
         /// </summary>
+        """;
+
+    public const string ServiceProviderAttributeContentWithInterfaceTypeAndName = $$"""
+        /// <summary>
+            /// <para>Type of the generated Interface.</para>
+            /// <para>If omitted, the name will be "I{ClassName}".</para>
+            /// </summary>
+            /// <remarks>Not compatible with <see cref="InterfaceName"/>. At most one property must be set.</remarks>
+            public Type InterfaceType { get; init; }
+
+            /// <summary>
+            /// <para>Name/Identifier of the generated Interface.</para>
+            /// <para>If omitted, the name will be "I{ClassName}".</para>
+            /// </summary>
+            /// <remarks>Not compatible with <see cref="InterfaceType"/>. At most one property must be set.</remarks>
+            public string InterfaceName { get; init; }
+
+            {{ServiceProviderAttributeContentWithoutInterfaceName}}
         """;
 
     public const string ServiceProviderAttributeContentWithoutInterfaceName = """

@@ -609,6 +609,8 @@ public partial struct CircleDIBuilderCore {
                     builder.Append('.');
                 }
                 builder.AppendImplementationName(service);
+                if (service.IsGeneric)
+                    builder.AppendClosedGenerics(service.ImplementationType);
                 if (service.Implementation.Type == MemberType.Method)
                     AppendConstructorDependencyList(service, transientNumberConstructor);
             }
@@ -640,6 +642,8 @@ public partial struct CircleDIBuilderCore {
                     builder.Append('.');
                 }
                 builder.AppendImplementationName(service);
+                if (service.IsGeneric)
+                    builder.AppendClosedGenerics(service.ImplementationType);
                 if (service.Implementation.Type == MemberType.Method)
                     AppendConstructorDependencyList(service, transientNumberConstructor);
             }

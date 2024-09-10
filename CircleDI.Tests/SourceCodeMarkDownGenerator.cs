@@ -114,6 +114,23 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
+        builder.AppendSection("Register Generic Service", """
+            using CircleDIAttributes;
+
+            [ServiceProvider]
+            [Singleton(typeof(IGenericService<>), typeof(GenericService<>))]
+            [Singleton<IMyService, MyService>]
+            public partial class GenericProvider;
+
+            
+            public interface IGenericService<T>;
+            public class GenericService<T> : IGenericService<T>;
+
+            public interface IMyService;
+            public class MyService(IGenericService<int> intService, IGenericService<string> stringService) : IMyService;
+
+            """);
+
         builder.AppendSection("Import Services", """
             using CircleDIAttributes;
 

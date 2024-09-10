@@ -17,13 +17,7 @@ public static partial class Attributes {
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ServiceProviderAttribute : Attribute {
-            /// <summary>
-            /// <para>Name/Identifier of the generated Interface.</para>
-            /// <para>If omitted, the name will be "I{ClassName}".</para>
-            /// </summary>
-            public string InterfaceName { get; init; }
-
-            {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
+            {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithInterfaceTypeAndName}}
 
             {{ServiceProviderAttributePropertyEndpointProvider}}
         }

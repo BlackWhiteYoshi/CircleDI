@@ -78,7 +78,7 @@ public static class StringBuilderExtensions {
             case ImportMode.Static: {
                 Debug.Assert(service.Module is not null);
                 builder.Append("global::");
-                builder.AppendOpenFullyQualified(service.Module!);
+                builder.AppendClosedFullyQualified(service.Module!);
                 if (service.Implementation.IsScoped)
                     builder.Append(".Scope");
                 builder.Append('.');
@@ -276,8 +276,8 @@ public static class StringBuilderExtensions {
 
         builder.Append('<');
 
-        for (int i = 0; i < typeName.TypeParameterList.Count; i++) {
-            builder.Append(typeName.TypeParameterList[i]);
+        foreach (string parameter in typeName.TypeParameterList) {
+            builder.Append(parameter);
             builder.Append(", ");
         }
         builder.Length -= 2;

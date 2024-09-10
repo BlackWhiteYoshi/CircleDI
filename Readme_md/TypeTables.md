@@ -11,7 +11,8 @@ The source generator will generate a complete service provider, but you can add 
 
 | **Name**               | **Type**                                     | **Description**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ---------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| InterfaceName          | string                                       | Name/Identifier of the generated Interface. If omitted, the name will be "I\{ClassName\}".                                                                                                                                                                                                                                                                                                                                                                                                               |
+| InterfaceType          | Type                                         | Type of the generated Interface. If omitted, the name will be "I\{ClassName\}".<br />Not compatible with *InterfaceName*. At most one property must be set.                                                                                                                                                                                                                                                                                                                                              |
+| InterfaceName          | string                                       | Name/Identifier of the generated Interface. If omitted, the name will be "I\{ClassName\}".<br />Not compatible with *InterfaceType*. At most one property must be set.                                                                                                                                                                                                                                                                                                                                   |
 | CreationTime           | [CreationTiming](#creationtiming-enum)       | Decides whether services defaulting to lazy construction or instantiation inside the constructor. This option applies to all services where the "CreationTime"-attribute is not set. Default is [CreationTiming.Constructor](#creationtiming-enum).                                                                                                                                                                                                                                                      |
 | GetAccessor            | [GetAccess](#getaccess-enum)                 | Decides whether the members to access the services in the ServiceProvider defaulting to properties or methods. This option applies to all services where the "GetAccessor"-attribute is not set. Default is [GetAccess.Property](#getaccess-enum).                                                                                                                                                                                                                                                       |
 | GenerateDisposeMethods | [DisposeGeneration](#disposegeneration-enum) | Toggles the generation of the Dispose methods: public void Dispose(); public ValueTask DisposeAsync(); It can be toggled that both are generated, only one of them or the generation is skipped entirely. Default is [DisposeGeneration.GenerateBoth](#disposegeneration-enum)                                                                                                                                                                                                                           |
@@ -73,7 +74,7 @@ That means there will be a single instance of that service in every ServiceProvi
 
 If [ServiceProviderAttribute](#serviceproviderattribute) is used at the same class, this service will be added to the provider.
 
-## Type Parameters
+## Type Parameters or Constructor Parameters
 
 | **Name**                   | **Description**                                                                           |
 | -------------------------- | ----------------------------------------------------------------------------------------- |
@@ -100,7 +101,7 @@ That means this service will only be available in the ScopedProvider and there w
 
 If [ServiceProviderAttribute](#serviceproviderattribute) is used at the same class, this service will be added to the provider.
 
-## Type Parameters
+## Type Parameters or Constructor Parameters
 
 | **Name**                   | **Description**                                                                           |
 | -------------------------- | ----------------------------------------------------------------------------------------- |
@@ -127,7 +128,7 @@ That means this service will be instantiated each time requested.
 
 If [ServiceProviderAttribute](#serviceproviderattribute) is used at the same class, this service will be added to the provider.
 
-## Type Parameters
+## Type Parameters or Constructor Parameters
 
 | **Name**                   | **Description**                                                                           |
 | -------------------------- | ----------------------------------------------------------------------------------------- |
@@ -153,13 +154,13 @@ That means requesting this service will give you a method.
 
 If [ServiceProviderAttribute](#serviceproviderattribute) is used at the same class, this service will be added to the provider.
 
-## Type Parameters
+## Type Parameters or Constructor Parameters
 
 | **Name** | **Description**                         |
 | -------- | --------------------------------------- |
 | TService | Type of the service and implementation. |
 
-## Parameters
+## Constructor Parameters
 
 | **Name**   | **Type** | **Description**                                                   |
 | ---------- | -------- | ----------------------------------------------------------------- |
@@ -184,13 +185,13 @@ There are several options to handle the instantiation of the module:
 - injected as service  
 - given as parameter
 
-## Type Parameters
+## Type Parameters or Constructor Parameters
 
 | **Name** | **Description**                                                      |
 | -------- | -------------------------------------------------------------------- |
 | TModule  | The class, struct or interface containing the attributes to include. |
 
-## Parameters
+## Constructor Parameters
 
 | **Name** | **Type**                                         | **Description**                                                   |
 | -------- | ------------------------------------------------ | ----------------------------------------------------------------- |

@@ -12,15 +12,17 @@ public partial struct CircleDIBuilderCore {
     /// <see cref="IServiceProvider.GetService(Type)">GetService</see> method inclusive summary filtered to Singleton and Transient services.
     /// </summary>
     public void AppendIServiceProviderNotScoped()
-        => AppendIServiceProvider(new ServiceListIterator(serviceProvider).GetNextNotScoped);
+        => AppendIServiceProvider(serviceProvider.SortedServiceList
+            .Where((Service service) => !service.Lifetime.HasFlag(ServiceLifetime.Scoped) && !(service.Implementation.Type != MemberType.None && service.Implementation.IsScoped))
+            .GetEnumerator());
 
     /// <summary>
     /// <see cref="IServiceProvider.GetService(Type)">GetService</see> method inclusive summary with all services.
     /// </summary>
     public void AppendIServiceProviderAllServices()
-        => AppendIServiceProvider(new ServiceListIterator(serviceProvider).GetNextService);
+        => AppendIServiceProvider(serviceProvider.SortedServiceList.GetEnumerator());
 
-    private void AppendIServiceProvider(Func<Service?> GetNextService) {
+    private void AppendIServiceProvider(IEnumerator<Service> serviceEnumerator) {
         builder.AppendIndent(indent);
         builder.Append("/// <summary>\n");
         builder.AppendIndent(indent);
@@ -48,8 +50,8 @@ public partial struct CircleDIBuilderCore {
         builder.Append("switch (serviceType.Name) {\n");
         indent.IncreaseLevel(); // 3
 
-        Service? service = GetNextService();
-        if (service is not null) {
+        if (serviceEnumerator.MoveNext()) {
+            Service? service = serviceEnumerator.Current;
             string currentserviceName = service.ServiceType.Name;
             int currentTypeParameterCount = service.ServiceType.TypeArgumentList.Count;
             builder.AppendIndent(indent);
@@ -91,7 +93,7 @@ public partial struct CircleDIBuilderCore {
                 builder.AppendIndent(indent);
                 builder.Append("return ");
 
-                Service? nextService = GetNextService();
+                Service? nextService = serviceEnumerator.MoveNext() ? serviceEnumerator.Current : null;
                 if (service.ServiceType != nextService?.ServiceType) {
                     builder.AppendServiceGetter(service);
                     builder.Append(";\n");
@@ -105,7 +107,7 @@ public partial struct CircleDIBuilderCore {
                     do {
                         builder.Append(", ");
                         builder.AppendServiceGetter(nextService!);
-                        nextService = GetNextService();
+                        nextService = serviceEnumerator.MoveNext() ? serviceEnumerator.Current : null;
                     }
                     while (service.ServiceType == nextService?.ServiceType);
 
@@ -136,32 +138,5 @@ public partial struct CircleDIBuilderCore {
         indent.DecreaseLevel(); // 1
         builder.AppendIndent(indent);
         builder.Append("}\n\n\n");
-    }
-
-    private struct ServiceListIterator(ServiceProvider serviceProvider) {
-        private int index = -1;
-
-        public Service? GetNextNotScoped() {
-            for (index++; index < serviceProvider.SortedServiceList.Count; index++) {
-                Service service = serviceProvider.SortedServiceList[index];
-
-                if (service.Lifetime.HasFlag(ServiceLifetime.Scoped))
-                    continue;
-                if (service.Implementation.Type != MemberType.None && service.Implementation.IsScoped)
-                    continue;
-
-                return service;
-            }
-
-            return null;
-        }
-
-        public Service? GetNextService() {
-            index++;
-            if (index < serviceProvider.SortedServiceList.Count)
-                return serviceProvider.SortedServiceList[index];
-            else
-                return null;
-        }
     }
 }
