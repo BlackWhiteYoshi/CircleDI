@@ -119,41 +119,32 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
         // containing types
         for (int i = moduleName.ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.AppendIndent(indent);
-            builder.Append("partial ");
-            builder.Append(moduleName.ContainingTypeList[i].Keyword.AsString());
-            builder.Append(' ');
-            builder.AppendOpenContainingType(moduleName.ContainingTypeList[i]);
-            builder.Append(" {\n");
+            builder.AppendIndent(indent)
+                .AppendInterpolation($"partial {moduleName.ContainingTypeList[i].Keyword.AsString()} ")
+                .AppendOpenName(moduleName.ContainingTypeList[i])
+                .Append(" {\n");
             indent.IncreaseLevel();
         }
 
         // components
-        foreach (INamedTypeSymbol? component in componentList) {
-            if (component is null)
-                continue;
-
-            builder.AppendIndent(indent);
-            builder.Append("[global::CircleDIAttributes.TransientAttribute<");
-            builder.AppendOpenFullyQualified(new TypeName(component));
-            builder.Append(">(NoDispose = true)]\n");
-        }
+        foreach (INamedTypeSymbol? component in componentList)
+            if (component is not null)
+                builder.AppendIndent(indent)
+                    .Append("[global::CircleDIAttributes.TransientAttribute<")
+                    .AppendOpenFullyQualified(new TypeName(component))
+                    .Append(">(NoDispose = true)]\n");
 
         // class head
-        builder.AppendIndent(indent);
-        builder.Append("partial ");
-        builder.Append(moduleName.Keyword.AsString());
-        builder.Append(' ');
-        builder.Append(moduleName.Name);
-        builder.AppendOpenGenerics(moduleName);
-        builder.Append(";\n");
+        builder.AppendIndent(indent)
+            .AppendInterpolation($"partial {moduleName.Keyword.AsString()} {moduleName.Name}")
+            .AppendOpenGenerics(moduleName)
+            .Append(";\n");
 
         // containing types closing
         for (int i = 0; i < moduleName.ContainingTypeList.Count; i++) {
             indent.DecreaseLevel();
-            builder.AppendIndent(indent);
-            builder.Append('}');
-            builder.Append('\n');
+            builder.AppendIndent(indent)
+                .Append("}\n");
         }
 
 
@@ -385,22 +376,16 @@ file static class RegisterServiceProviderAttributeExtension {
 
         // containing types
         for (int i = serviceProvider.Identifier.ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.AppendIndent(indent);
-            builder.Append("partial ");
-            builder.Append(serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString());
-            builder.Append(' ');
-            builder.AppendOpenContainingType(serviceProvider.Identifier.ContainingTypeList[i]);
-            builder.Append(" {\n");
+            builder.AppendIndent(indent)
+                .AppendInterpolation($"partial {serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString()} ")
+                .AppendOpenName(serviceProvider.Identifier.ContainingTypeList[i])
+                .Append(" {\n");
             indent.IncreaseLevel();
         }
 
         // class head
-        builder.AppendIndent(indent);
-        builder.Append("partial ");
-        builder.Append(serviceProvider.Keyword.AsString());
-        builder.Append(' ');
-        builder.Append(serviceProvider.Identifier.Name);
-        builder.Append(" {\n");
+        builder.AppendIndent(indent)
+            .AppendInterpolation($"partial {serviceProvider.Keyword.AsString()} {serviceProvider.Identifier.Name} {{\n");
         indent.IncreaseLevel(); // 1
 
         // singletons getter
@@ -418,12 +403,11 @@ file static class RegisterServiceProviderAttributeExtension {
                 break;
         }
 
-        // scope head
         builder.Append('\n');
-        builder.AppendIndent(indent);
-        builder.Append("partial ");
-        builder.Append(serviceProvider.KeywordScope.AsString());
-        builder.Append(" Scope {\n");
+
+        // scope head
+        builder.AppendIndent(indent)
+            .AppendInterpolation($"partial {serviceProvider.KeywordScope.AsString()} Scope {{\n");
         indent.IncreaseLevel(); // 2
 
 
@@ -442,21 +426,15 @@ file static class RegisterServiceProviderAttributeExtension {
 
         // closing brackets
         indent.DecreaseLevel(); // 1
-        builder.AppendIndent(indent);
-        builder.Append('}');
-        builder.Append('\n');
+        builder.AppendIndent(indent).Append("}\n");
 
         indent.DecreaseLevel(); // 0
-        builder.AppendIndent(indent);
-        builder.Append('}');
-        builder.Append('\n');
+        builder.AppendIndent(indent).Append("}\n");
 
         // containing types closing
         for (int i = 0; i < serviceProvider.Identifier.ContainingTypeList.Count; i++) {
             indent.DecreaseLevel();
-            builder.AppendIndent(indent);
-            builder.Append('}');
-            builder.Append('\n');
+            builder.AppendIndent(indent).Append("}\n");
         }
 
 
@@ -467,17 +445,8 @@ file static class RegisterServiceProviderAttributeExtension {
         stringBuilderPool.Return(builder);
 
 
-        static void AppendGetMethod(StringBuilder builder, Indent indent, string methodName, string type) {
-            builder.AppendIndent(indent);
-            builder.Append("private global::");
-            builder.Append(type);
-            builder.Append(' ');
-            builder.Append(methodName);
-            builder.Append("() => (");
-            builder.Append(type);
-            builder.Append(")_builtinServiceProvider.GetService(typeof(");
-            builder.Append(type);
-            builder.Append("));\n");
-        }
+        static void AppendGetMethod(StringBuilder builder, Indent indent, string methodName, string type)
+            => builder.AppendIndent(indent)
+                .AppendInterpolation($"private global::{type} {methodName}() => ({type})_builtinServiceProvider.GetService(typeof({type}));\n");
     }
 }

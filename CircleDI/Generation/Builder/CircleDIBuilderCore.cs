@@ -136,75 +136,65 @@ public partial struct CircleDIBuilderCore {
     /// </para>
     /// </summary>
     public void AppendClassSummary() {
-        builder.AppendIndent(indent);
-        builder.Append("/// <summary>\n");
+        builder.AppendIndent(indent)
+            .Append("/// <summary>\n");
 
 
-        builder.AppendIndent(indent);
-        builder.Append("/// <para>\n");
-
-        builder.AppendIndent(indent);
-        builder.Append("/// Number of services registered: ");
-        builder.Append(serviceProvider.SortedServiceList.Count);
-        builder.Append("<br />\n");
-
-        builder.AppendIndent(indent);
-        builder.Append("/// - Singleton: ");
-        builder.Append(serviceProvider.SingletonList.Count);
-        builder.Append("<br />\n");
-
-        builder.AppendIndent(indent);
-        builder.Append("/// - Scoped: ");
-        builder.Append(serviceProvider.ScopedList.Count);
-        builder.Append("<br />\n");
-
-        builder.AppendIndent(indent);
-        builder.Append("/// - Transient: ");
-        builder.Append(serviceProvider.TransientList.Count);
-        builder.Append("<br />\n");
-
-        builder.AppendIndent(indent);
-        builder.Append("/// - Delegate: ");
-        builder.Append(serviceProvider.DelegateList.Count);
-        builder.Append('\n');
-
-        builder.AppendIndent(indent);
-        builder.Append("/// </para>\n");
+        builder.AppendIndent(indent)
+            .Append("/// <para>\n");
+        
+        builder.AppendIndent(indent)
+            .AppendInterpolation($"/// Number of services registered: {serviceProvider.SortedServiceList.Count}<br />\n");
+        
+        builder.AppendIndent(indent)
+            .AppendInterpolation($"/// - Singleton: {serviceProvider.SingletonList.Count}<br />\n");
+        
+        builder.AppendIndent(indent)
+            .AppendInterpolation($"/// - Scoped: {serviceProvider.ScopedList.Count}<br />\n");
+        
+        builder.AppendIndent(indent)
+            .AppendInterpolation($"/// - Transient: {serviceProvider.TransientList.Count}<br />\n");
+        
+        builder.AppendIndent(indent)
+            .AppendInterpolation($"/// - Delegate: {serviceProvider.DelegateList.Count}\n");
+        
+        builder.AppendIndent(indent)
+            .Append("/// </para>\n");
 
 
-        builder.AppendIndent(indent);
-        builder.Append("/// <para>\n");
+        builder.AppendIndent(indent)
+            .Append("/// <para>\n");
+        
+        builder.AppendIndent(indent)
+            .Append(serviceProvider.GenerateScope switch {
+                true => "/// This provider can create a scope,",
+                false => "/// This provider has no scope,"
+            })
+            .Append("<br />\n");
+        
+        builder.AppendIndent(indent)
+            .Append(generateDisposeMethods switch {
+                DisposeGeneration.NoDisposing => "/// implements no Dispose methods",
+                DisposeGeneration.Dispose => "/// implements only synchronous Dispose() method",
+                DisposeGeneration.DisposeAsync => "/// implements only asynchronous DisposeAsync() method",
+                DisposeGeneration.GenerateBoth => "/// implements both Dispose() and DisposeAsync() methods",
+                _ => throw new Exception($"Invalid enum DisposeGeneration: {generateDisposeMethods}")
+            })
+            .Append("<br />\n");
+        
+        builder.AppendIndent(indent)
+            .Append(threadSafe switch {
+                true => "/// and is thread safe.",
+                false => "/// and is not thread safe."
+            })
+            .Append('\n');
+        
+        builder.AppendIndent(indent)
+            .Append("/// </para>\n");
 
-        builder.AppendIndent(indent);
-        builder.Append(serviceProvider.GenerateScope switch {
-            true => "/// This provider can create a scope,",
-            false => "/// This provider has no scope,"
-        });
-        builder.Append("<br />\n");
 
-        builder.AppendIndent(indent);
-        builder.Append(generateDisposeMethods switch {
-            DisposeGeneration.NoDisposing => "/// implements no Dispose methods",
-            DisposeGeneration.Dispose => "/// implements only synchronous Dispose() method",
-            DisposeGeneration.DisposeAsync => "/// implements only asynchronous DisposeAsync() method",
-            DisposeGeneration.GenerateBoth => "/// implements both Dispose() and DisposeAsync() methods",
-            _ => throw new Exception($"Invalid enum DisposeGeneration: {generateDisposeMethods}")
-        });
-        builder.Append("<br />\n");
-
-        builder.AppendIndent(indent);
-        builder.Append(threadSafe switch {
-            true => "/// and is thread safe.",
-            false => "/// and is not thread safe."
-        });
-        builder.Append('\n');
-
-        builder.AppendIndent(indent);
-        builder.Append("/// </para>\n");
-
-
-        builder.AppendIndent(indent);
-        builder.Append("/// </summary>\n");
+        builder.AppendIndent(indent)
+            .Append("/// </summary>\n");
     }
 
     /// <summary>
@@ -219,38 +209,31 @@ public partial struct CircleDIBuilderCore {
     /// </summary>
     /// <param name="service"></param>
     public void AppendServiceSummary(Service service) {
-        builder.AppendIndent(indent);
-        builder.Append("/// <summary>\n");
+        builder.AppendIndent(indent)
+            .Append("/// <summary>\n");
 
-        builder.AppendIndent(indent);
-        builder.Append("/// Lifetime: <see cref=\"global::CircleDIAttributes.");
-        builder.Append(service.Lifetime.AsString());
-        builder.Append("Attribute{TService}\">");
-        builder.Append(service.Lifetime.AsString());
-        builder.Append("</see><br />\n");
-
-        builder.AppendIndent(indent);
-        builder.Append("/// Service type: <see cref=\"global::");
+        builder.AppendIndent(indent)
+            .AppendInterpolation($"/// Lifetime: <see cref=\"global::CircleDIAttributes.{service.Lifetime.AsString()}Attribute{{TService}}\">{service.Lifetime.AsString()}</see><br />\n");
         {
-            int startIndex = builder.Length;
-            builder.AppendClosedFullyQualified(service.ServiceType);
-            builder.Replace('<', '{', startIndex, builder.Length - startIndex);
-            builder.Replace('>', '}', startIndex, builder.Length - startIndex);
+            int startIndex = builder.Length + indent.Level + 37; // "/// Service type: <see cref=\global::"
+            builder.AppendIndent(indent)
+                .Append("/// Service type: <see cref=\"global::")
+                .AppendClosedFullyQualified(service.ServiceType)
+                .Replace('<', '{', startIndex, builder.Length - startIndex)
+                .Replace('>', '}', startIndex, builder.Length - startIndex)
+                .Append("\"/><br />\n");
         }
-        builder.Append("\"/><br />\n");
-
-        builder.AppendIndent(indent);
-        builder.Append("/// Implementation type: <see cref=\"global::");
         {
-            int startIndex = builder.Length;
-            builder.AppendClosedFullyQualified(service.ImplementationType);
-            builder.Replace('<', '{', startIndex, builder.Length - startIndex);
-            builder.Replace('>', '}', startIndex, builder.Length - startIndex);
+            int startIndex = builder.Length + indent.Level + 44; // "/// Implementation type: <see cref=\"global::"
+            builder.AppendIndent(indent)
+                .Append("/// Implementation type: <see cref=\"global::")
+                .AppendClosedFullyQualified(service.ImplementationType)
+                .Replace('<', '{', startIndex, builder.Length - startIndex)
+                .Replace('>', '}', startIndex, builder.Length - startIndex)
+                .Append("\"/>\n");
         }
-        builder.Append("\"/>\n");
-
-        builder.AppendIndent(indent);
-        builder.Append("/// </summary>\n");
+        builder.AppendIndent(indent)
+            .Append("/// </summary>\n");
     }
 
     /// <summary>
@@ -262,13 +245,13 @@ public partial struct CircleDIBuilderCore {
     /// </para>
     /// </summary>
     public void AppendCreateScopeSummary() {
-        builder.AppendIndent(indent);
-        builder.Append("/// <summary>\n");
+        builder.AppendIndent(indent)
+            .Append("/// <summary>\n");
 
-        builder.AppendIndent(indent);
-        builder.Append("/// Creates an instance of a ScopeProvider together with all <see cref=\"global::CircleDIAttributes.CreationTiming.Constructor\">non-lazy</see> scoped services.\n");
+        builder.AppendIndent(indent)
+            .Append("/// Creates an instance of a ScopeProvider together with all <see cref=\"global::CircleDIAttributes.CreationTiming.Constructor\">non-lazy</see> scoped services.\n");
 
-        builder.AppendIndent(indent);
-        builder.Append("/// </summary>\n");
+        builder.AppendIndent(indent)
+            .Append("/// </summary>\n");
     }
 }

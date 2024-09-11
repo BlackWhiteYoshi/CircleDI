@@ -19,20 +19,16 @@ public partial struct CircleDIBuilderCore {
 
             AppendServiceSummary(service);
 
-            builder.AppendIndent(indent);
-            builder.Append("public ");
-            builder.Append(refOrEmpty);
-            builder.Append("global::");
-            builder.AppendClosedFullyQualified(service.ServiceType);
-            builder.Append(' ');
-            builder.AppendServiceGetter(service);
-            builder.Append(" => ");
-            builder.Append(refOrEmpty);
-            builder.Append('_');
-            builder.AppendFirstLower(serviceProvider.Identifier.Name);
-            builder.Append('.');
-            builder.AppendServiceGetter(service);
-            builder.Append(";\n\n");
+            builder.AppendIndent(indent)
+                .AppendInterpolation($"public {refOrEmpty}global::")
+                .AppendClosedFullyQualified(service.ServiceType)
+                .Append(' ')
+                .AppendServiceGetter(service)
+                .AppendInterpolation($" => {refOrEmpty}_")
+                .AppendFirstLower(serviceProvider.Identifier.Name)
+                .Append('.')
+                .AppendServiceGetter(service)
+                .Append(";\n\n");
         }
         builder.Append('\n');
     }

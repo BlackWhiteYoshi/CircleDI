@@ -19,79 +19,68 @@ public partial struct CircleDIBuilderCore {
                 };
 
                 AppendServiceSummary(service);
-                builder.AppendIndent(indent);
-                builder.Append("public ");
-                builder.Append(refOrEmpty);
-                builder.Append("global::");
-                builder.AppendClosedFullyQualified(service.ServiceType);
-                builder.Append(' ');
-                builder.AppendServiceGetter(service);
+                builder.AppendIndent(indent)
+                    .AppendInterpolation($"public {refOrEmpty}global::")
+                    .AppendClosedFullyQualified(service.ServiceType)
+                    .Append(' ')
+                    .AppendServiceGetter(service);
 
                 if (service.Implementation.Type == MemberType.Field) {
-                    builder.Append(" => ");
-                    builder.Append(refOrEmpty);
-                    if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-                        builder.Append('_');
-                        builder.AppendFirstLower(serviceProvider.Identifier.Name);
-                        builder.Append('.');
-                    }
-                    builder.AppendImplementationName(service);
-                    builder.Append(";\n");
+                    builder.AppendInterpolation($" => {refOrEmpty}");
+                    if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
+                        builder.Append('_')
+                            .AppendFirstLower(serviceProvider.Identifier.Name)
+                            .Append('.');
+                    builder.AppendImplementationName(service)
+                        .Append(";\n");
                 }
                 else if (service.CreationTimeTransitive == CreationTiming.Constructor) {
-                    builder.Append(" => ");
-                    builder.Append(refOrEmpty);
-                    builder.Append('_');
-                    builder.AppendFirstLower(service.Name);
-                    builder.Append(";\n");
+                    builder.AppendInterpolation($" => {refOrEmpty}_")
+                        .AppendFirstLower(service.Name)
+                        .Append(";\n");
 
-                    builder.AppendIndent(indent);
-                    builder.Append("private ");
-                    builder.Append(readonlyStr);
-                    builder.Append("global::");
-                    builder.AppendClosedFullyQualified(service.ImplementationType);
-                    builder.Append(" _");
-                    builder.AppendFirstLower(service.Name);
-                    builder.Append(";\n");
+                    builder.AppendIndent(indent)
+                        .AppendInterpolation($"private {readonlyStr}global::")
+                        .AppendClosedFullyQualified(service.ImplementationType)
+                        .Append(" _")
+                        .AppendFirstLower(service.Name)
+                        .Append(";\n");
                 }
                 else {
                     builder.Append(" {\n");
                     indent.IncreaseLevel(); // 2
 
                     if (service.GetAccessor == GetAccess.Property) {
-                        builder.AppendIndent(indent);
-                        builder.Append("get {\n");
+                        builder.AppendIndent(indent)
+                            .Append("get {\n");
                         indent.IncreaseLevel(); // 3
                     }
 
                     AppendLazyService(service);
 
-                    builder.AppendIndent(indent);
-                    builder.Append("return ");
-                    builder.Append(refOrEmpty);
-                    builder.Append("(global::");
-                    builder.AppendClosedFullyQualified(service.ServiceType);
-                    builder.Append(")_");
-                    builder.AppendFirstLower(service.Name);
-                    builder.Append(";\n");
+                    builder.AppendIndent(indent)
+                        .AppendInterpolation($"return {refOrEmpty}(global::")
+                        .AppendClosedFullyQualified(service.ServiceType)
+                        .Append(")_")
+                        .AppendFirstLower(service.Name)
+                        .Append(";\n");
 
                     if (service.GetAccessor == GetAccess.Property) {
                         indent.DecreaseLevel(); // 2
-                        builder.AppendIndent(indent);
-                        builder.Append("}\n");
+                        builder.AppendIndent(indent)
+                            .Append("}\n");
                     }
 
                     indent.DecreaseLevel(); // 1
-                    builder.AppendIndent(indent);
-                    builder.Append("}\n");
+                    builder.AppendIndent(indent)
+                        .Append("}\n");
 
-                    builder.AppendIndent(indent);
-                    builder.Append("private ");
-                    builder.Append("global::");
-                    builder.AppendClosedFullyQualified(service.ImplementationType);
-                    builder.Append("? _");
-                    builder.AppendFirstLower(service.Name);
-                    builder.Append(";\n");
+                    builder.AppendIndent(indent)
+                        .Append("private global::")
+                        .AppendClosedFullyQualified(service.ImplementationType)
+                        .Append("? _")
+                        .AppendFirstLower(service.Name)
+                        .Append(";\n");
                 }
 
                 builder.Append('\n');

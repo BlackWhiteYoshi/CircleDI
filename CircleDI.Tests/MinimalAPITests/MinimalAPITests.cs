@@ -1,4 +1,5 @@
-﻿using CircleDI.MinimalAPI.Defenitions;
+﻿using CircleDI.Extensions;
+using CircleDI.MinimalAPI.Defenitions;
 using CircleDI.Tests.GenerateSourceText;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -305,17 +306,15 @@ public static class MinimalAPITests {
                 """;
 
             string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
-
-            builder.Append($"""
+            builder.AppendInterpolation($"""
 
 
                 -------------
-                HTTP method: {((Http)i).ToString()}
+                HTTP method: {(Http)i}
                 -------------
 
-
+                {sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"))}
                 """);
-            builder.Append(sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension")));
         }
 
         return Verify(builder.ToString());

@@ -490,13 +490,13 @@ public sealed class Service : IEquatable<Service> {
         string name; // "{Name}_{generic1}_{generic2}.._{genericN}
         {
             StringBuilder builder = new(genericService.Name.Length + 8 * serviceWithArgumentList.TypeArgumentList.Count);
+            
             builder.Append(genericService.Name);
 
             AppendTypeArguments(builder, serviceWithArgumentList.TypeArgumentList!);
             static void AppendTypeArguments(StringBuilder builder, List<TypeName> typeArgumentList) {
                 foreach (TypeName typeName in typeArgumentList) {
-                    builder.Append('_');
-                    builder.Append(typeName.Name);
+                    builder.AppendInterpolation($"_{typeName.Name}");
                     AppendTypeArguments(builder, typeName.TypeArgumentList!);
                 }
             }

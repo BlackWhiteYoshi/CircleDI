@@ -1,6 +1,7 @@
 ﻿using CircleDI.Defenitions;
 using CircleDI.Generation;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace CircleDI.Extensions;
@@ -14,19 +15,21 @@ public static class StringBuilderExtensions {
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="indent"></param>
-    public static void AppendIndent(this StringBuilder builder, Indent indent) => builder.Append(Indent.CHAR, indent.Level);
+    public static StringBuilder AppendIndent(this StringBuilder builder, Indent indent) => builder.Append(Indent.CHAR, indent.Level);
 
     /// <summary>
     /// Appends the given string whereat the first character will be appended as lowercase.
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="str"></param>
-    public static void AppendFirstLower(this StringBuilder builder, string str) {
+    public static StringBuilder AppendFirstLower(this StringBuilder builder, string str) {
         if (str.Length == 0)
-            return;
+            return builder;
 
         builder.Append(char.ToLower(str[0]));
         builder.Append(str, 1, str.Length - 1);
+
+        return builder;
     }
 
 
@@ -36,13 +39,13 @@ public static class StringBuilderExtensions {
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="service"></param>
-    public static void AppendServiceField(this StringBuilder builder, Service service) {
+    public static StringBuilder AppendServiceField(this StringBuilder builder, Service service) {
         if (service.Implementation.Type == MemberType.Field)
             builder.AppendImplementationName(service);
-        else {
-            builder.Append('_');
-            builder.AppendFirstLower(service.Name);
-        }
+        else
+            builder.Append('_').AppendFirstLower(service.Name);
+
+        return builder;
     }
 
     /// <summary>
@@ -51,14 +54,13 @@ public static class StringBuilderExtensions {
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="service"></param>
-    public static void AppendServiceGetter(this StringBuilder builder, Service service) {
+    public static StringBuilder AppendServiceGetter(this StringBuilder builder, Service service) {
         if (service.GetAccessor == GetAccess.Property)
             builder.Append(service.Name);
-        else {
-            builder.Append("Get");
-            builder.Append(service.Name);
-            builder.Append("()");
-        }
+        else
+            builder.AppendInterpolation($"Get{service.Name}()");
+
+        return builder;
     }
 
     /// <summary>
@@ -73,7 +75,7 @@ public static class StringBuilderExtensions {
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="service"></param>
-    public static void AppendImplementationName(this StringBuilder builder, Service service) {
+    public static StringBuilder AppendImplementationName(this StringBuilder builder, Service service) {
         switch (service.ImportMode) {
             case ImportMode.Static: {
                 Debug.Assert(service.Module is not null);
@@ -113,6 +115,8 @@ public static class StringBuilderExtensions {
         }
 
         builder.Append(service.Implementation.Name);
+
+        return builder;
     }
 
 
@@ -125,16 +129,18 @@ public static class StringBuilderExtensions {
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="namespaceList"></param>
-    public static void AppendNamespace(this StringBuilder builder, List<string> namespaceList) {
+    public static StringBuilder AppendNamespace(this StringBuilder builder, List<string> namespaceList) {
         if (namespaceList.Count > 0) {
             builder.Append("namespace ");
-            for (int i = namespaceList.Count - 1; i > 0; i--) {
-                builder.Append(namespaceList[i]);
-                builder.Append(".");
-            }
+
+            for (int i = namespaceList.Count - 1; i > 0; i--)
+                builder.AppendInterpolation($"{namespaceList[i]}.");
             builder.Append(namespaceList[0]);
+            
             builder.Append(";\n\n");
         }
+
+        return builder;
     }
 
 
@@ -145,24 +151,22 @@ public static class StringBuilderExtensions {
     /// "{namespace1}.{namespaceN}.{containingType1}.{containingTypeN}.{name}&lt;{T1}.{TN}&gt;"
     /// </summary>
     /// <param name="builder"></param>
-    public static void AppendClosedFullyQualified(this StringBuilder builder, TypeName typeName) {
-        builder.AppendNamespaceList(typeName);
-        builder.AppendClosedContainingTypeList(typeName);
-        builder.Append(typeName.Name);
-        builder.AppendClosedGenerics(typeName);
-    }
+    public static StringBuilder AppendClosedFullyQualified(this StringBuilder builder, TypeName typeName)
+        => builder.AppendNamespaceList(typeName)
+            .AppendClosedContainingTypeList(typeName)
+            .Append(typeName.Name)
+            .AppendClosedGenerics(typeName);
 
     /// <summary>
     /// Appends fully qualified type:<br />
     /// "{namespace1}.{namespaceN}.{containingType1}.{containingTypeN}.{name}&lt;{T1}.{TN}&gt;"
     /// </summary>
     /// <param name="builder"></param>
-    public static void AppendOpenFullyQualified(this StringBuilder builder, TypeName typeName) {
-        builder.AppendNamespaceList(typeName);
-        builder.AppendOpenContainingTypeList(typeName);
-        builder.Append(typeName.Name);
-        builder.AppendOpenGenerics(typeName);
-    }
+    public static StringBuilder AppendOpenFullyQualified(this StringBuilder builder, TypeName typeName)
+        => builder.AppendNamespaceList(typeName)
+            .AppendOpenContainingTypeList(typeName)
+            .Append(typeName.Name)
+            .AppendOpenGenerics(typeName);
 
     /// <summary>
     /// Creates the fully qualified name, but '&lt;', '&gt;' and ':' are replaced with '{', '}' and ':' and the given extension is appended.
@@ -173,11 +177,11 @@ public static class StringBuilderExtensions {
     public static string CreateHintName(this StringBuilder builder, TypeName typeName, string extension) {
         builder.Clear();
 
-        builder.AppendClosedFullyQualified(typeName);
-        builder.Replace('<', '{');
-        builder.Replace('>', '}');
-        builder.Replace(':', '.');
-        builder.Append(extension);
+        builder.AppendClosedFullyQualified(typeName)
+            .Replace('<', '{')
+            .Replace('>', '}')
+            .Replace(':', '.')
+            .Append(extension);
 
         return builder.ToString();
     }
@@ -188,11 +192,11 @@ public static class StringBuilderExtensions {
     /// Appends namespace with trailing dot
     /// </summary>
     /// <param name="builder"></param>
-    public static void AppendNamespaceList(this StringBuilder builder, TypeName typeName) {
-        for (int i = typeName.NameSpaceList.Count - 1; i >= 0; i--) {
-            builder.Append(typeName.NameSpaceList[i]);
-            builder.Append('.');
-        }
+    public static StringBuilder AppendNamespaceList(this StringBuilder builder, TypeName typeName) {
+        for (int i = typeName.NameSpaceList.Count - 1; i >= 0; i--)
+            builder.AppendInterpolation($"{typeName.NameSpaceList[i]}.");
+
+        return builder;
     }
 
 
@@ -200,22 +204,22 @@ public static class StringBuilderExtensions {
     /// Appends containing types with trailing dot
     /// </summary>
     /// <param name="builder"></param>
-    public static void AppendClosedContainingTypeList(this StringBuilder builder, TypeName typeName) {
-        for (int i = typeName.ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.AppendClosedContainingType(typeName.ContainingTypeList[i]);
-            builder.Append('.');
-        }
+    public static StringBuilder AppendClosedContainingTypeList(this StringBuilder builder, TypeName typeName) {
+        for (int i = typeName.ContainingTypeList.Count - 1; i >= 0; i--)
+            builder.AppendClosedName(typeName.ContainingTypeList[i]).Append('.');
+
+        return builder;
     }
 
     /// <summary>
     /// Appends containing types with trailing dot
     /// </summary>
     /// <param name="builder"></param>
-    public static void AppendOpenContainingTypeList(this StringBuilder builder, TypeName typeName) {
-        for (int i = typeName.ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.AppendOpenContainingType(typeName.ContainingTypeList[i]);
-            builder.Append('.');
-        }
+    public static StringBuilder AppendOpenContainingTypeList(this StringBuilder builder, TypeName typeName) {
+        for (int i = typeName.ContainingTypeList.Count - 1; i >= 0; i--)
+            builder.AppendOpenName(typeName.ContainingTypeList[i]).Append('.');
+
+        return builder;
     }
 
 
@@ -223,19 +227,15 @@ public static class StringBuilderExtensions {
     /// Appends "{Name}<{T1}, {T2}, {TN}>"
     /// </summary>
     /// <param name="builder"></param>
-    public static void AppendClosedContainingType(this StringBuilder builder, TypeName typeName) {
-        builder.Append(typeName.Name);
-        builder.AppendClosedGenerics(typeName);
-    }
+    public static StringBuilder AppendClosedName(this StringBuilder builder, TypeName typeName)
+        => builder.Append(typeName.Name).AppendClosedGenerics(typeName);
 
     /// <summary>
     /// Appends "{Name}<{T1}, {T2}, {TN}>"
     /// </summary>
     /// <param name="builder"></param>
-    public static void AppendOpenContainingType(this StringBuilder builder, TypeName typeName) {
-        builder.Append(typeName.Name);
-        builder.AppendOpenGenerics(typeName);
-    }
+    public static StringBuilder AppendOpenName(this StringBuilder builder, TypeName typeName)
+        => builder.Append(typeName.Name).AppendOpenGenerics(typeName);
 
 
     /// <summary>
@@ -243,9 +243,9 @@ public static class StringBuilderExtensions {
     /// If <see cref="TypeArgumentList"/> empty, nothing is appended.
     /// </summary>
     /// <param name="builder"></param>
-    public static void AppendClosedGenerics(this StringBuilder builder, TypeName typeName) {
+    public static StringBuilder AppendClosedGenerics(this StringBuilder builder, TypeName typeName) {
         if (typeName.TypeArgumentList.Count == 0)
-            return;
+            return builder;
 
         builder.Append('<');
 
@@ -253,16 +253,16 @@ public static class StringBuilderExtensions {
             if (typeName.TypeArgumentList[i] is null)
                 // is open generic
                 builder.Append(typeName.TypeParameterList[i]);
-            else {
+            else
                 // is closed generic
-                builder.Append("global::");
-                builder.AppendClosedFullyQualified(typeName.TypeArgumentList[i]!);
-            }
+                builder.Append("global::").AppendClosedFullyQualified(typeName.TypeArgumentList[i]!);
             builder.Append(", ");
         }
         builder.Length -= 2;
 
         builder.Append('>');
+
+        return builder;
     }
 
     /// <summary>
@@ -270,20 +270,41 @@ public static class StringBuilderExtensions {
     /// If <see cref="TypeArgumentList"/> empty, nothing is appended.
     /// </summary>
     /// <param name="builder"></param>
-    public static void AppendOpenGenerics(this StringBuilder builder, TypeName typeName) {
+    public static StringBuilder AppendOpenGenerics(this StringBuilder builder, TypeName typeName) {
         if (typeName.TypeParameterList.Count == 0)
-            return;
+            return builder;
 
         builder.Append('<');
 
-        foreach (string parameter in typeName.TypeParameterList) {
-            builder.Append(parameter);
-            builder.Append(", ");
-        }
+        foreach (string parameter in typeName.TypeParameterList)
+            builder.AppendInterpolation($"{parameter}, ");
         builder.Length -= 2;
 
         builder.Append('>');
+
+        return builder;
     }
 
     #endregion
+
+
+    /// <summary>
+    /// The same as <see cref="StringBuilder.Append(string)"/>, but only for interpolated strings: $"..."<br />
+    /// It constructs the string directly in the builder, so no unnecessary string memory allocations.
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="handler"></param>
+    /// <returns></returns>
+    public static StringBuilder AppendInterpolation(this StringBuilder builder, [InterpolatedStringHandlerArgument("builder")] StringBuilderInterpolationHandler handler) => builder;
+
+    [InterpolatedStringHandler]
+    public readonly ref struct StringBuilderInterpolationHandler {
+        private readonly StringBuilder builder;
+
+        public StringBuilderInterpolationHandler(int literalLength, int formattedCount, StringBuilder builder) => this.builder = builder;
+
+        public void AppendLiteral(string str) => builder.Append(str);
+
+        public void AppendFormatted<T>(T item) => builder.Append(item);
+    }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CircleDI.Extensions;
+using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -80,15 +81,11 @@ public sealed class MethodName : IEquatable<MethodName> {
     /// </summary>
     /// <param name="builder"></param>
     public void AppendFullyQualifiedName(StringBuilder builder) {
-        for (int i = NameSpaceList.Count - 1; i >= 0; i--) {
-            builder.Append(NameSpaceList[i]);
-            builder.Append('.');
-        }
+        for (int i = NameSpaceList.Count - 1; i >= 0; i--)
+            builder.AppendInterpolation($"{NameSpaceList[i]}.");
 
-        for (int i = ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.Append(ContainingTypeList[i]);
-            builder.Append('.');
-        }
+        for (int i = ContainingTypeList.Count - 1; i >= 0; i--)
+            builder.AppendInterpolation($"{ContainingTypeList[i]}.");
 
         builder.Append(Name);
     }

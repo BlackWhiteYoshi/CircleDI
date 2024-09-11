@@ -106,7 +106,6 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             ObjectPool<StringBuilder> stringBuilderPool,
             List<Diagnostic> endpointErrorList) {
 
-        bool errorReported = endpointErrorList.Count > 0;
         foreach (Diagnostic error in endpointErrorList)
             context.ReportDiagnostic(error);
 
@@ -147,15 +146,11 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                     }
         }
 
-
-        if (errorReported)
+        if (endpointErrorList.Count > 0)
             return;
 
 
-
         StringBuilder builder = stringBuilderPool.Get();
-        const string SP4 = "    ";
-        const string SP8 = "        ";
 
 
         builder.Append("""
@@ -167,24 +162,18 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             namespace CircleDIAttributes;
 
             public static partial class EndpointExtension {
-
+                public static void MapCircleDIEndpoints
             """);
-
-        builder.Append($"{SP4}public static void MapCircleDIEndpoints");
         // type parameter
         if (serviceTypeScopeProvider != null) {
             int initalPosition = builder.Length;
             builder.Append('<');
 
-            foreach (string typeParameter in serviceTypeScopeProvider.TypeParameterList) {
-                builder.Append(typeParameter);
-                builder.Append(", ");
-            }
+            foreach (string typeParameter in serviceTypeScopeProvider.TypeParameterList)
+                builder.AppendInterpolation($"{typeParameter}, ");
             foreach (TypeName typeName in serviceTypeScopeProvider.ContainingTypeList)
-                foreach (string typeParameter in typeName.TypeParameterList) {
-                    builder.Append(typeParameter);
-                    builder.Append(", ");
-                }
+                foreach (string typeParameter in typeName.TypeParameterList)
+                    builder.AppendInterpolation($"{typeParameter}, ");
 
             builder.Length--;
             if (builder.Length > initalPosition)
@@ -193,21 +182,15 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         builder.Append("(this global::Microsoft.AspNetCore.Builder.WebApplication app) {\n");
 
         foreach (Endpoint endpoint in endpointList) {
-            builder.Append(SP8);
+            builder.Append("        "); // 8 spaces
 
-            string closeBracket = string.Empty;
             if (endpoint.MethodRouteBuilder is not null) {
                 builder.Append("global::");
                 endpoint.MethodRouteBuilder.AppendFullyQualifiedName(builder);
                 builder.Append('(');
-                closeBracket = ")";
             }
 
-            builder.Append("app.Map");
-            builder.Append(endpoint.HttpMethod.AsString());
-            builder.Append("(\"");
-            builder.Append(endpoint.Route);
-            builder.Append("\", (");
+            builder.AppendInterpolation($"""app.Map{endpoint.HttpMethod.AsString()}("{endpoint.Route}", (""");
 
             if (endpoint.AsService.ConstructorDependencyList.Count > 0) {
                 bool hasDependencyParameter = false;
@@ -221,42 +204,35 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
                     if (endpoint.ParameterAttributesList[i]!.Length > 0) {
                         foreach (ParameterAttribute attribute in endpoint.ParameterAttributesList[i]!) {
-                            builder.Append("[global::");
-                            builder.AppendClosedFullyQualified(attribute.Name);
+                            builder.Append("[global::")
+                                .AppendClosedFullyQualified(attribute.Name);
 
                             if (attribute.ParameterList.Length + attribute.PropertyList.Length > 0) {
                                 builder.Append('(');
-                                foreach (string attributeParameter in attribute.ParameterList) {
-                                    builder.Append(attributeParameter);
-                                    builder.Append(", ");
-                                }
-                                foreach ((string attributeName, string attributeValue) in attribute.PropertyList) {
-                                    builder.Append(attributeName);
-                                    builder.Append(" = ");
-                                    builder.Append(attributeValue);
-                                    builder.Append(", ");
-                                }
-                                builder.Length--;
-                                builder[^1] = ')';
+                                
+                                foreach (string attributeParameter in attribute.ParameterList)
+                                    builder.AppendInterpolation($"{attributeParameter}, ");
+                                foreach ((string attributeName, string attributeValue) in attribute.PropertyList)
+                                    builder.AppendInterpolation($"{attributeName} = {attributeValue}, ");
+                                builder.Length -= 2;
+
+                                builder.Append(')');
                             }
 
                             builder.Append(']');
                         }
                         builder.Append(' ');
                     }
-                    builder.Append("global::");
-                    builder.AppendClosedFullyQualified(parameter.HasAttribute ? parameter.Service!.ServiceType : parameter.ServiceType!);
-                    builder.Append(' ');
-                    builder.Append(parameter.Name);
-                    builder.Append(", ");
+                    builder.Append("global::")
+                        .AppendClosedFullyQualified(parameter.HasAttribute ? parameter.Service!.ServiceType : parameter.ServiceType!)
+                        .AppendInterpolation($" {parameter.Name}, ");
                 }
 
-                if (hasDependencyParameter) {
-                    builder.Append("global::");
-                    builder.AppendOpenFullyQualified(serviceTypeScopeProvider!);
-                    builder.Append(' ');
-                    builder.AppendFirstLower(endpointServiceProvider!.Identifier.Name);
-                }
+                if (hasDependencyParameter)
+                    builder.Append("global::")
+                        .AppendOpenFullyQualified(serviceTypeScopeProvider!)
+                        .Append(' ')
+                        .AppendFirstLower(endpointServiceProvider!.Identifier.Name);
                 else
                     builder.Length -= 2;
             }
@@ -267,25 +243,24 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
             if (endpoint.AsService.ConstructorDependencyList.Count > 0) {
                 foreach (ConstructorDependency parameter in endpoint.AsService.ConstructorDependencyList) {
-                    if (parameter.HasAttribute) {
-                        builder.Append(parameter.ByRef.AsString());
-                        builder.AppendFirstLower(endpointServiceProvider!.Identifier.Name);
-                        builder.Append('.');
-                        builder.AppendServiceGetter(parameter.Service!);
-                    }
+                    if (parameter.HasAttribute)
+                        builder.Append(parameter.ByRef.AsString())
+                            .AppendFirstLower(endpointServiceProvider!.Identifier.Name)
+                            .Append('.')
+                            .AppendServiceGetter(parameter.Service!);
                     else
                         builder.Append(parameter.Name);
                     builder.Append(", ");
                 }
-
                 builder.Length -= 2;
             }
 
-            builder.Append(closeBracket);
+            if (endpoint.MethodRouteBuilder is not null)
+                builder.Append(')');
             builder.Append("));\n");
         }
 
-        builder.Append($"{SP4}}}\n");
+        builder.Append($"    }}\n");
         builder.Append("}\n");
 
 

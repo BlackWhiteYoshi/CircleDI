@@ -17,17 +17,16 @@ public partial struct CircleDIBuilderCore {
                 continue;
 
             AppendServiceSummary(service);
-            builder.AppendIndent(indent);
-            builder.Append("public global::");
-            builder.AppendClosedFullyQualified(service.ServiceType);
-            builder.Append(' ');
-            builder.AppendServiceGetter(service);
-            builder.Append(" => ");
-            if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic) {
-                builder.Append('_');
-                builder.AppendFirstLower(serviceProvider.Identifier.Name);
-                builder.Append('.');
-            }
+            builder.AppendIndent(indent)
+                .Append("public global::")
+                .AppendClosedFullyQualified(service.ServiceType)
+                .Append(' ')
+                .AppendServiceGetter(service)
+                .Append(" => ");
+            if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
+                builder.Append('_')
+                    .AppendFirstLower(serviceProvider.Identifier.Name)
+                    .Append('.');
             builder.AppendImplementationName(service);
             if (service.IsGeneric)
                 builder.AppendClosedGenerics(service.ImplementationType);

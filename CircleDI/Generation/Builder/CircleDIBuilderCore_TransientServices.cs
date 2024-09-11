@@ -18,47 +18,39 @@ public partial struct CircleDIBuilderCore {
                 continue;
 
             AppendServiceSummary(service);
-            builder.AppendIndent(indent);
-            builder.Append("public global::");
-            builder.AppendClosedFullyQualified(service.ServiceType);
-            builder.Append(' ');
+            builder.AppendIndent(indent)
+                .Append("public global::")
+                .AppendClosedFullyQualified(service.ServiceType)
+                .Append(' ');
 
             if (service.GetAccessor == GetAccess.Property) {
-                builder.Append(service.Name);
-                builder.Append(" {\n");
+                builder.AppendInterpolation($"{service.Name} {{\n");
                 indent.IncreaseLevel(); // 2
-
-                builder.AppendIndent(indent);
-                builder.Append("get {\n");
-                indent.IncreaseLevel(); // 3
+                builder.AppendIndent(indent)
+                    .Append("get {\n");
             }
-            else {
-                builder.Append("Get");
-                builder.Append(service.Name);
-                builder.Append("() {\n");
-                indent.IncreaseLevel(); // 2
-            }
+            else
+                builder.AppendInterpolation($"Get{service.Name}() {{\n");
+            indent.IncreaseLevel(); // 2 or 3
 
             int transientNumber = AppendTransientService(service);
 
-            builder.AppendIndent(indent);
-            builder.Append("return ");
-            builder.AppendFirstLower(service.Name);
-            if (transientNumber > 0) {
-                builder.Append('_');
-                builder.Append(transientNumber);
-            }
+            builder.AppendIndent(indent)
+                .Append("return ")
+                .AppendFirstLower(service.Name);
+            if (transientNumber > 0)
+                builder.AppendInterpolation($"_{transientNumber}");
             builder.Append(";\n");
 
 
             indent.DecreaseLevel(); // 1 or 2
-            builder.AppendIndent(indent);
-            builder.Append("}\n");
+            builder.AppendIndent(indent)
+                .Append("}\n");
 
             if (service.GetAccessor == GetAccess.Property) {
                 indent.DecreaseLevel(); // 1
-                builder.AppendIndent(indent);
-                builder.Append("}\n");
+                builder.AppendIndent(indent)
+                    .Append("}\n");
             }
 
             builder.Append('\n');

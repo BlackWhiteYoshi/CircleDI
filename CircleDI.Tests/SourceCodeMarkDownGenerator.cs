@@ -1,4 +1,5 @@
-﻿using CircleDI.Tests.GenerateSourceText;
+﻿using CircleDI.Extensions;
+using CircleDI.Tests.GenerateSourceText;
 using System.Text;
 
 namespace CircleDI.Tests;
@@ -15,21 +16,23 @@ public static class SourceCodeMarkDownGenerator {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        builder.Append("\n\n\n<br></br>");
-        builder.Append("\n## ");
-        builder.Append(title);
+        Assert.Equal('\n', input[^1]);
+        Assert.Equal('\n', sourceTextClass[^1]);
 
-        builder.Append("\n\n```csharp\n");
-        builder.Append(input);
-        if (builder[^1] != '\n')
-            builder.Append('\n');
-        builder.Append("```");
+        builder.AppendInterpolation($"""
 
-        builder.Append("\n\n```csharp\n");
-        builder.Append(sourceTextClass);
-        if (builder[^1] != '\n')
-            builder.Append('\n');
-        builder.Append("```\n");
+
+
+            <br></br>
+            ## {title}
+
+            ```csharp
+            {input}```
+
+            ```csharp
+            {sourceTextClass}```
+
+            """);
     }
 
 

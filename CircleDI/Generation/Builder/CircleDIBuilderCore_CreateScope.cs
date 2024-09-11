@@ -24,8 +24,8 @@ public partial struct CircleDIBuilderCore {
 
         // method head
         {
-            builder.AppendIndent(indent);
-            builder.Append("public global::");
+            builder.AppendIndent(indent)
+                .Append("public global::");
             if (serviceProvider.HasInterface)
                 builder.AppendOpenFullyQualified(serviceProvider.InterfaceIdentifierScope);
             else
@@ -39,11 +39,11 @@ public partial struct CircleDIBuilderCore {
                 if (dependency.HasAttribute)
                     continue;
 
-                builder.Append("global::");
-                builder.AppendClosedFullyQualified(dependency.ServiceType ?? dependency.Service!.ServiceType);
-                builder.Append(' ');
-                builder.AppendFirstLower(dependency.Name);
-                builder.Append(", ");
+                builder.Append("global::")
+                    .AppendClosedFullyQualified(dependency.ServiceType ?? dependency.Service!.ServiceType)
+                    .Append(' ')
+                    .AppendFirstLower(dependency.Name)
+                    .Append(", ");
             }
             if (builder[^1] == ' ')
                 builder.Length -= 2;
