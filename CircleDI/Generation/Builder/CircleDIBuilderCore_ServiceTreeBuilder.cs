@@ -47,7 +47,6 @@ public partial struct CircleDIBuilderCore {
 
         if (circularStack.Count > 0) {
             AppendCircularDependencyList(0);
-
             builder.Append('\n');
         }
 
@@ -82,9 +81,7 @@ public partial struct CircleDIBuilderCore {
         AppendDisposeStackLazy(transientDisposeStack, 0, DISPOSE_LIST, appendServiceProviderField: false);
         AppendDisposeStackLazy(transientAsyncDisposeStack, 0, ASYNC_DISPOSE_LIST, appendServiceProviderField: false);
 
-        builder.AppendIndent(indent)
-            .Append("return new global::")
-            .AppendOpenFullyQualified(serviceProvider.IdentifierScope);
+        builder.AppendInterpolation($"{indent}return new global::{serviceProvider.IdentifierScope.AsOpenFullyQualified()}");
         AppendConstructorDependencyListCreateScope(service, transientNumberConstructor);
         AppendPropertyDependencyListCreateScope(service, transientNumberProperty);
         builder.Append(";\n");
@@ -262,37 +259,25 @@ public partial struct CircleDIBuilderCore {
                 isLocked = true;
                 lockedOnThisLevel = true;
 
-                builder.AppendIndent(indent)
-                    .Append("if (");
-                if (isScopeProvider)
-                    builder.Append('_')
-                        .AppendFirstLower(serviceProvider.Identifier.Name)
-                        .Append('.');
-                builder.Append('_')
-                    .AppendFirstLower(service.Name)
-                    .Append(" is null)\n");
-                indent.IncreaseLevel(); // (+1)
-
-                builder.AppendIndent(indent)
-                    .Append("lock (");
-                if (!isScopeProvider)
-                    builder.Append("this");
-                else
-                    builder.Append('_')
-                        .AppendFirstLower(serviceProvider.Identifier.Name);
-                builder.Append(")\n");
-                indent.IncreaseLevel(); // (+2)
+                if (!isScopeProvider) {
+                    builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null)\n");
+                    indent.IncreaseLevel(); // (+1)
+                    builder.AppendInterpolation($"{indent}lock (this)\n");
+                    indent.IncreaseLevel(); // (+2)
+                }
+                else {
+                    builder.AppendInterpolation($"{indent}if (_{serviceProvider.Identifier.Name.AsFirstLower()}._{service.Name.AsFirstLower()} is null)\n");
+                    indent.IncreaseLevel(); // (+1)
+                    builder.AppendInterpolation($"{indent}lock (_{serviceProvider.Identifier.Name.AsFirstLower()})\n");
+                    indent.IncreaseLevel(); // (+2)
+                }
             }
 
-            builder.AppendIndent(indent)
-                .Append("if (");
-            if (isScopeProvider)
-                builder.Append('_')
-                    .AppendFirstLower(serviceProvider.Identifier.Name)
-                    .Append('.');
-            builder.Append('_')
-                .AppendFirstLower(service.Name)
-                .Append(" is null) {\n");
+
+            if (!isScopeProvider)
+                builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null) {{\n");
+            else
+                builder.AppendInterpolation($"{indent}if (_{serviceProvider.Identifier.Name.AsFirstLower()}._{service.Name.AsFirstLower()} is null) {{\n");
             indent.IncreaseLevel(); // +1
         }
         else if (service.Lifetime is ServiceLifetime.Scoped) {
@@ -300,21 +285,14 @@ public partial struct CircleDIBuilderCore {
                 isLockedScope = true;
                 lockedOnThisLevel = true;
 
-                builder.AppendIndent(indent)
-                    .Append("if (_")
-                    .AppendFirstLower(service.Name)
-                    .Append(" is null)\n");
+                builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null)\n");
                 indent.IncreaseLevel(); // (+1)
 
-                builder.AppendIndent(indent)
-                    .Append("lock (this)\n");
+                builder.AppendInterpolation($"{indent}lock (this)\n");
                 indent.IncreaseLevel(); // (+2)
             }
 
-            builder.AppendIndent(indent)
-                .Append("if (_")
-                .AppendFirstLower(service.Name)
-                .Append(" is null) {\n");
+            builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null) {{\n");
             indent.IncreaseLevel(); // +1
         }
 
@@ -364,8 +342,7 @@ public partial struct CircleDIBuilderCore {
             AppendDisposeStackLazy(transientAsyncDisposeStack, asyncDisposeStackIndex, ASYNC_DISPOSE_LIST, appendServiceProviderField);
 
             indent.DecreaseLevel(); // +0
-            builder.AppendIndent(indent)
-                .Append("}\n");
+            builder.AppendInterpolation($"{indent}}}\n");
 
             if (lockedOnThisLevel) {
                 indent.DecreaseLevel(); // (+1)
@@ -416,49 +393,35 @@ public partial struct CircleDIBuilderCore {
     /// </summary>
     private void AppendCircularDependency(Service service, int number, PropertyDependency dependency) {
         builder.AppendIndent(indent);
-        if (dependency.IsInit) {
+
+        if (dependency.IsInit)
             builder.AppendInterpolation($"Set_{service.Name}_{dependency.Name}(");
 
-            switch (service.Lifetime) {
-                case ServiceLifetime.Singleton:
-                    if (isScopeProvider)
-                        builder.Append('_')
-                            .AppendFirstLower(serviceProvider.Identifier.Name)
-                            .Append('.');
-                    goto case ServiceLifetime.Scoped;
-                case ServiceLifetime.Scoped:
-                    builder.AppendServiceField(service);
-                    break;
-                default:
-                    builder.AppendFirstLower(service.Name);
-                    if (number > 0)
-                        builder.AppendInterpolation($"_{number}");
-                    break;
-            }
+        switch (service.Lifetime) {
+            case ServiceLifetime.Singleton:
+                if (isScopeProvider)
+                    builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}.");
+                goto case ServiceLifetime.Scoped;
+            case ServiceLifetime.Scoped:
+                builder.AppendServiceField(service);
+                break;
+            default:
+                builder.AppendFirstLower(service.Name);
+                if (number > 0)
+                    builder.AppendInterpolation($"_{number}");
+                break;
+        }
+
+        if (dependency.IsInit) {
             builder.Append(", ");
             AppendDependencyIdentifier(dependency, number);
             builder.Append(')');
         }
         else {
-            switch (service.Lifetime) {
-                case ServiceLifetime.Singleton:
-                    if (isScopeProvider)
-                        builder.Append('_')
-                            .AppendFirstLower(serviceProvider.Identifier.Name)
-                            .Append('.');
-                    goto case ServiceLifetime.Scoped;
-                case ServiceLifetime.Scoped:
-                    builder.AppendServiceField(service);
-                    break;
-                default:
-                    builder.AppendFirstLower(service.Name);
-                    if (number > 0)
-                        builder.AppendInterpolation($"_{number}");
-                    break;
-            }
             builder.AppendInterpolation($".{dependency.Name} = ");
             AppendDependencyIdentifier(dependency, number);
         }
+
         builder.Append(";\n");
     }
 
@@ -471,35 +434,31 @@ public partial struct CircleDIBuilderCore {
     /// <param name="disposeList"></param>
     /// <param name="disposeListName"></param>
     private void AppendDiposeStackConstructor(List<(Service service, int number)> disposeList, string disposeListName) {
-        builder.AppendIndent(indent)
-            .AppendInterpolation($"{disposeListName} = [");
         switch (disposeList.Count) {
             case 0:
+                builder.AppendInterpolation($"{indent}{disposeListName} = [];\n");
                 break;
             case 1:
-                builder.AppendFirstLower(disposeList[0].service.Name);
                 if (disposeList[0].number > 0)
-                    builder.AppendInterpolation($"_{disposeList[0].number}");
+                    builder.AppendInterpolation($"{indent}{disposeListName} = [{disposeList[0].service.Name.AsFirstLower()}_{disposeList[0].number}];\n");
+                else
+                    builder.AppendInterpolation($"{indent}{disposeListName} = [{disposeList[0].service.Name.AsFirstLower()}];\n");
                 break;
             default:
+                builder.AppendInterpolation($"{indent}{disposeListName} = [\n");
                 indent.IncreaseLevel(); // +1
-                foreach ((Service service, int number) in disposeList) {
-                    builder.Append('\n')
-                        .AppendIndent(indent)
-                        .AppendFirstLower(service.Name);
-                    if (number > 0)
-                        builder.AppendInterpolation($"_{number}");
-                    builder.Append(',');
-                }
-                indent.DecreaseLevel(); // +0
-                builder.Length--;
 
-                builder.Append('\n')
-                    .AppendIndent(indent);
+                foreach ((Service service, int number) in disposeList)
+                    if (number > 0)
+                        builder.AppendInterpolation($"{indent}{service.Name.AsFirstLower()}_{number},\n");
+                    else
+                        builder.AppendInterpolation($"{indent}{service.Name.AsFirstLower()},\n");
+
+                indent.DecreaseLevel(); // +0
+                builder.Length -= 2; // remove ",\n"
+                builder.AppendInterpolation($"\n{indent}];\n");
                 break;
         }
-
-        builder.Append("];\n");
 
         disposeList.Clear();
     }
@@ -517,35 +476,30 @@ public partial struct CircleDIBuilderCore {
             return;
 
         if (threadSafe) {
-            builder.AppendIndent(indent)
-                .Append("lock (");
             if (appendServiceProviderField)
-                builder.Append('_')
-                    .AppendFirstLower(serviceProvider.Identifier.Name)
-                    .Append('.');
-            builder.AppendInterpolation($"{disposeStackName}) {{\n");
+                builder.AppendInterpolation($"{indent}lock (_{serviceProvider.Identifier.Name.AsFirstLower()}.{disposeStackName}) {{\n");
+            else
+                builder.AppendInterpolation($"{indent}lock ({disposeStackName}) {{\n");
             indent.IncreaseLevel(); // +1
         }
 
         for (int i = disposeStackIndex; i < disposeStack.Count; i++) {
             (Service service, int number) = disposeStack[i];
-
-            builder.AppendIndent(indent);
             if (appendServiceProviderField)
-                builder.Append('_')
-                    .AppendFirstLower(serviceProvider.Identifier.Name)
-                    .Append('.');
-            builder.AppendInterpolation($"{disposeStackName}.Add(")
-                .AppendFirstLower(service.Name);
-            if (number > 0)
-                builder.AppendInterpolation($"_{number}");
-            builder.Append(");\n");
+                if (number > 0)
+                    builder.AppendInterpolation($"{indent}_{serviceProvider.Identifier.Name.AsFirstLower()}.{disposeStackName}.Add({service.Name.AsFirstLower()}_{number});\n");
+                else
+                    builder.AppendInterpolation($"{indent}_{serviceProvider.Identifier.Name.AsFirstLower()}.{disposeStackName}.Add({service.Name.AsFirstLower()});\n");
+            else
+                if (number > 0)
+                    builder.AppendInterpolation($"{indent}{disposeStackName}.Add({service.Name.AsFirstLower()}_{number});\n");
+                else
+                    builder.AppendInterpolation($"{indent}{disposeStackName}.Add({service.Name.AsFirstLower()});\n");
         }
 
         if (threadSafe) {
             indent.DecreaseLevel(); // +0
-            builder.AppendIndent(indent)
-                .Append("}\n");
+            builder.AppendInterpolation($"{indent}}}\n");
         }
 
         disposeStack.RemoveRange(disposeStackIndex, disposeStack.Count - disposeStackIndex);
@@ -561,63 +515,44 @@ public partial struct CircleDIBuilderCore {
     /// <param name="transientNumberProperty"></param>
     /// <returns></returns>
     private int AppendServiceCreation(Service service, Span<int> transientNumberConstructor, Span<int> transientNumberProperty) {
-        if (service.Lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped) {
-            builder.AppendIndent(indent);
+        if (service.Lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped)
             if (isScopeProvider && service.Lifetime is ServiceLifetime.Singleton)
-                builder.Append('_')
-                    .AppendFirstLower(serviceProvider.Identifier.Name)
-                    .Append('.');
-            builder.AppendServiceField(service)
-                .Append(" = ");
-            if (service.Implementation.Type == MemberType.None) {
-                builder.Append("new global::")
-                    .AppendClosedFullyQualified(service.ImplementationType);
-                AppendConstructorDependencyList(service, transientNumberConstructor);
-                AppendPropertyDependencyList(service, transientNumberProperty);
-            }
-            else {
-                if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                    builder.Append('_')
-                        .AppendFirstLower(serviceProvider.Identifier.Name)
-                        .Append('.');
+                builder.AppendInterpolation($"{indent}_{serviceProvider.Identifier.Name.AsFirstLower()}.{service.AsServiceField()} = ");
+            else
+                builder.AppendInterpolation($"{indent}{service.AsServiceField()} = ");
+        // ServiceLifetime.Transient
+        else
+            if (transientNumber > 0)
+                builder.AppendInterpolation($"{indent}global::{service.ImplementationType.AsClosedFullyQualified()} {service.Name.AsFirstLower()}_{transientNumber} = ");
+            else
+                builder.AppendInterpolation($"{indent}global::{service.ImplementationType.AsClosedFullyQualified()} {service.Name.AsFirstLower()} = ");
+
+
+        // constructor
+        if (service.Implementation.Type == MemberType.None) {
+            builder.AppendInterpolation($"new global::{service.ImplementationType.AsClosedFullyQualified()}");
+            AppendConstructorDependencyList(service, transientNumberConstructor);
+            AppendPropertyDependencyList(service, transientNumberProperty);
+        }
+        // implementation field, property or method
+        else {
+            if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
+                builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}.{service.AsImplementationName()}");
+            else
                 builder.AppendImplementationName(service);
-                if (service.IsGeneric)
-                    builder.AppendClosedGenerics(service.ImplementationType);
-                if (service.Implementation.Type == MemberType.Method)
-                    AppendConstructorDependencyList(service, transientNumberConstructor);
-            }
-            builder.Append(";\n");
+
+            if (service.IsGeneric)
+                builder.AppendClosedGenerics(service.ImplementationType);
+            if (service.Implementation.Type == MemberType.Method)
+                AppendConstructorDependencyList(service, transientNumberConstructor);
+        }
+        builder.Append(";\n");
+
+
+        if (service.Lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped) {
             return 0;
         }
-        else { // ServiceLifetime.Transient
-            builder.AppendIndent(indent)
-                .Append("global::")
-                .AppendClosedFullyQualified(service.ImplementationType)
-                .Append(' ')
-                .AppendFirstLower(service.Name);
-            if (transientNumber > 0)
-                builder.AppendInterpolation($"_{transientNumber}");
-            builder.Append(" = ");
-
-            if (service.Implementation.Type == MemberType.None) {
-                builder.Append("new global::")
-                    .AppendClosedFullyQualified(service.ImplementationType);
-                AppendConstructorDependencyList(service, transientNumberConstructor);
-                AppendPropertyDependencyList(service, transientNumberProperty);
-            }
-            else {
-                if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                    builder.Append('_')
-                        .AppendFirstLower(serviceProvider.Identifier.Name)
-                        .Append('.');
-                builder.AppendImplementationName(service);
-                if (service.IsGeneric)
-                    builder.AppendClosedGenerics(service.ImplementationType);
-                if (service.Implementation.Type == MemberType.Method)
-                    AppendConstructorDependencyList(service, transientNumberConstructor);
-            }
-            builder.Append(";\n");
-
+        else {
             if (generateDisposeMethods is not DisposeGeneration.NoDisposing)
                 if (service.IsAsyncDisposable)
                     transientAsyncDisposeStack.Add((service, transientNumber));
@@ -644,10 +579,12 @@ public partial struct CircleDIBuilderCore {
 
                 if (dependency.Service!.IsRefable && !keyword.HasFlag(TypeKeyword.Struct))
                     builder.Append(dependency.ByRef.AsString());
+
                 AppendDependencyIdentifier(dependency, numberList[i]);
                 builder.Append(", ");
             }
-            builder.Length -= 2;
+
+            builder.Length -= 2; // remove ", "
         }
 
         builder.Append(')');
@@ -666,16 +603,19 @@ public partial struct CircleDIBuilderCore {
             for (int i = 0; i < service.ConstructorDependencyList.Count; i++) {
                 ConstructorDependency dependency = service.ConstructorDependencyList[i];
 
-                if (!dependency.HasAttribute)
+                if (!dependency.HasAttribute) {
                     builder.AppendFirstLower(dependency.Name);
+                }
                 else {
                     if (dependency.Service!.IsRefable && !keyword.HasFlag(TypeKeyword.Struct))
                         builder.Append(dependency.ByRef.AsString());
                     AppendDependencyIdentifier(dependency, numberList[i]);
                 }
+
                 builder.Append(", ");
             }
-            builder.Length -= 2;
+
+            builder.Length -= 2; // remove ", "
         }
 
         builder.Append(')');
@@ -699,9 +639,7 @@ public partial struct CircleDIBuilderCore {
 
                 if (dependency.IsCircular) {
                     if (dependency.IsRequired) {
-                        builder.Append('\n')
-                            .AppendIndent(indent)
-                            .AppendInterpolation($"{dependency.Name} = ");
+                        builder.AppendInterpolation($"\n{indent}{dependency.Name} = ");
                         if (dependency.Service!.CreationTimeTransitive is CreationTiming.Lazy)
                             AppendDependencyIdentifier(dependency, numberList[i]);
                         else
@@ -710,23 +648,20 @@ public partial struct CircleDIBuilderCore {
                     }
                 }
                 else {
-                    builder.Append('\n')
-                        .AppendIndent(indent)
-                        .AppendInterpolation($"{dependency.Name} = ");
+                    builder.AppendInterpolation($"\n{indent}{dependency.Name} = ");
                     AppendDependencyIdentifier(dependency, numberList[i]);
                     builder.Append(',');
                 }
             }
             indent.DecreaseLevel(); // +0
 
+            // at least one item got appended
             if (builderLength != builder.Length) {
-                // at least one item got appended
-                builder[^1] = '\n'; // remove last ','
-                builder.AppendIndent(indent)
-                    .Append('}');
+                builder.Length--; // remove last ','
+                builder.AppendInterpolation($"\n{indent}}}");
             }
+            // nothing got appended
             else
-                // nothing got appended
                 builder.Length -= 2; // remove " {"
         }
     }
@@ -740,25 +675,22 @@ public partial struct CircleDIBuilderCore {
     private void AppendPropertyDependencyListCreateScope(Service service, Span<int> numberList) {
         if (service.PropertyDependencyList.Count > 0) {
             builder.Append(" {");
-
             indent.IncreaseLevel(); // +1
+
             for (int i = 0; i < service.PropertyDependencyList.Count; i++) {
                 PropertyDependency dependency = service.PropertyDependencyList[i];
-
-                builder.Append('\n')
-                    .AppendIndent(indent)
-                    .AppendInterpolation($"{dependency.Name} = ");
                 if (!dependency.HasAttribute)
-                    builder.AppendFirstLower(dependency.Name);
-                else
+                    builder.AppendInterpolation($"\n{indent}{dependency.Name} = {dependency.Name.AsFirstLower()},");
+                else {
+                    builder.AppendInterpolation($"\n{indent}{dependency.Name} = ");
                     AppendDependencyIdentifier(dependency, numberList[i]);
-                builder.Append(',');
+                    builder.Append(',');
+                }
             }
-            indent.DecreaseLevel(); // +0
 
-            builder[^1] = '\n'; // remove last ','
-            builder.AppendIndent(indent)
-                .Append('}');
+            indent.DecreaseLevel(); // +0
+            builder.Length--; // remove last ','
+            builder.AppendInterpolation($"\n{indent}}}");
         }
     }
 
@@ -770,27 +702,13 @@ public partial struct CircleDIBuilderCore {
     /// </summary>+
     /// <param name="dependency"></param>
     /// <param name="transientNumber"></param>
-    private void AppendDependencyIdentifier(Dependency dependency, int transientNumber) {
-        if (dependency.Service!.Lifetime is ServiceLifetime.Singleton)
-            if (isScopeProvider)
-                if (dependency.Service.Implementation.Name == "this")
-                    builder.Append('_')
-                        .AppendFirstLower(serviceProvider.Identifier.Name);
-                else
-                    builder.Append('_')
-                        .AppendFirstLower(serviceProvider.Identifier.Name)
-                        .Append('.')
-                        .AppendServiceField(dependency.Service);
-            else
-                builder.AppendServiceField(dependency.Service);
-        else if (dependency.Service!.Lifetime is ServiceLifetime.Scoped)
-            builder.AppendServiceField(dependency.Service);
-        else if (dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient)) {
-            builder.AppendFirstLower(dependency.Service.Name);
-            if (transientNumber > 0)
-                builder.AppendInterpolation($"_{transientNumber}");
-        }
-        else // if (dependency.Service!.Lifetime.HasFlag(ServiceLifetime.Delegate))
-            builder.AppendServiceGetter(dependency.Service!);
-    }
+    private void AppendDependencyIdentifier(Dependency dependency, int transientNumber)
+        => _ = dependency.Service!.Lifetime switch {
+            ServiceLifetime.Singleton when isScopeProvider && dependency.Service.Implementation.Name == "this" => builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}"),
+            ServiceLifetime.Singleton when isScopeProvider                                                     => builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}.{dependency.Service.AsServiceField()}"),
+            ServiceLifetime.Singleton or ServiceLifetime.Scoped                                                => builder.AppendServiceField(dependency.Service),
+            _ when dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient) && transientNumber > 0       => builder.AppendInterpolation($"{dependency.Service.Name.AsFirstLower()}_{transientNumber}"),
+            _ when dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient)                              => builder.AppendFirstLower(dependency.Service.Name),
+            _ /* when dependency.Service!.Lifetime.HasFlag(ServiceLifetime.Delegate) */                        => builder.AppendServiceGetter(dependency.Service)
+        };
 }

@@ -490,7 +490,7 @@ public sealed class Service : IEquatable<Service> {
         string name; // "{Name}_{generic1}_{generic2}.._{genericN}
         {
             StringBuilder builder = new(genericService.Name.Length + 8 * serviceWithArgumentList.TypeArgumentList.Count);
-            
+
             builder.Append(genericService.Name);
 
             AppendTypeArguments(builder, serviceWithArgumentList.TypeArgumentList!);

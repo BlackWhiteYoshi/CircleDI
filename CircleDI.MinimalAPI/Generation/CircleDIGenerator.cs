@@ -192,6 +192,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
             builder.AppendInterpolation($"""app.Map{endpoint.HttpMethod.AsString()}("{endpoint.Route}", (""");
 
+            // lambda parameters
             if (endpoint.AsService.ConstructorDependencyList.Count > 0) {
                 bool hasDependencyParameter = false;
 
@@ -204,12 +205,11 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
                     if (endpoint.ParameterAttributesList[i]!.Length > 0) {
                         foreach (ParameterAttribute attribute in endpoint.ParameterAttributesList[i]!) {
-                            builder.Append("[global::")
-                                .AppendClosedFullyQualified(attribute.Name);
+                            builder.AppendInterpolation($"[global::{attribute.Name.AsClosedFullyQualified()}");
 
                             if (attribute.ParameterList.Length + attribute.PropertyList.Length > 0) {
                                 builder.Append('(');
-                                
+
                                 foreach (string attributeParameter in attribute.ParameterList)
                                     builder.AppendInterpolation($"{attributeParameter}, ");
                                 foreach ((string attributeName, string attributeValue) in attribute.PropertyList)
@@ -223,36 +223,27 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                         }
                         builder.Append(' ');
                     }
-                    builder.Append("global::")
-                        .AppendClosedFullyQualified(parameter.HasAttribute ? parameter.Service!.ServiceType : parameter.ServiceType!)
-                        .AppendInterpolation($" {parameter.Name}, ");
+                    builder.AppendInterpolation($"global::{parameter.ServiceType!.AsClosedFullyQualified()} {parameter.Name}, ");
                 }
 
                 if (hasDependencyParameter)
-                    builder.Append("global::")
-                        .AppendOpenFullyQualified(serviceTypeScopeProvider!)
-                        .Append(' ')
-                        .AppendFirstLower(endpointServiceProvider!.Identifier.Name);
+                    builder.AppendInterpolation($"global::{serviceTypeScopeProvider!.AsOpenFullyQualified()} {endpointServiceProvider!.Identifier.Name.AsFirstLower()}");
                 else
-                    builder.Length -= 2;
+                    builder.Length -= 2; // remove ", "
             }
 
             builder.Append(") => global::");
             endpoint.MethodHandler.AppendFullyQualifiedName(builder);
             builder.Append('(');
 
+            // lambda agruments
             if (endpoint.AsService.ConstructorDependencyList.Count > 0) {
-                foreach (ConstructorDependency parameter in endpoint.AsService.ConstructorDependencyList) {
+                foreach (ConstructorDependency parameter in endpoint.AsService.ConstructorDependencyList)
                     if (parameter.HasAttribute)
-                        builder.Append(parameter.ByRef.AsString())
-                            .AppendFirstLower(endpointServiceProvider!.Identifier.Name)
-                            .Append('.')
-                            .AppendServiceGetter(parameter.Service!);
+                        builder.AppendInterpolation($"{parameter.ByRef.AsString()}{endpointServiceProvider!.Identifier.Name.AsFirstLower()}.{parameter.Service!.AsServiceGetter()}, ");
                     else
-                        builder.Append(parameter.Name);
-                    builder.Append(", ");
-                }
-                builder.Length -= 2;
+                        builder.AppendInterpolation($"{parameter.Name}, ");
+                builder.Length -= 2; // remove ", "
             }
 
             if (endpoint.MethodRouteBuilder is not null)

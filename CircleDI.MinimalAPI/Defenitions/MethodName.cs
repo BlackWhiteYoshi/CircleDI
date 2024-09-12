@@ -80,14 +80,14 @@ public sealed class MethodName : IEquatable<MethodName> {
     /// "{namespace1}.{namespaceN}.{containingType1}.{containingTypeN}.{name}"
     /// </summary>
     /// <param name="builder"></param>
-    public void AppendFullyQualifiedName(StringBuilder builder) {
+    public StringBuilder AppendFullyQualifiedName(StringBuilder builder) {
         for (int i = NameSpaceList.Count - 1; i >= 0; i--)
             builder.AppendInterpolation($"{NameSpaceList[i]}.");
 
         for (int i = ContainingTypeList.Count - 1; i >= 0; i--)
             builder.AppendInterpolation($"{ContainingTypeList[i]}.");
 
-        builder.Append(Name);
+        return builder.Append(Name);
     }
 
 

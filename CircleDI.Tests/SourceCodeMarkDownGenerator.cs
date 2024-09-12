@@ -125,7 +125,7 @@ public static class SourceCodeMarkDownGenerator {
             [Singleton<IMyService, MyService>]
             public partial class GenericProvider;
 
-            
+
             public interface IGenericService<T>;
             public class GenericService<T> : IGenericService<T>;
 

@@ -19,71 +19,45 @@ public partial struct CircleDIBuilderCore {
                 };
 
                 AppendServiceSummary(service);
-                builder.AppendIndent(indent)
-                    .AppendInterpolation($"public {refOrEmpty}global::")
-                    .AppendClosedFullyQualified(service.ServiceType)
-                    .Append(' ')
-                    .AppendServiceGetter(service);
 
-                if (service.Implementation.Type == MemberType.Field) {
-                    builder.AppendInterpolation($" => {refOrEmpty}");
+                if (service.Implementation.Type == MemberType.Field)
                     if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                        builder.Append('_')
-                            .AppendFirstLower(serviceProvider.Identifier.Name)
-                            .Append('.');
-                    builder.AppendImplementationName(service)
-                        .Append(";\n");
-                }
-                else if (service.CreationTimeTransitive == CreationTiming.Constructor) {
-                    builder.AppendInterpolation($" => {refOrEmpty}_")
-                        .AppendFirstLower(service.Name)
-                        .Append(";\n");
+                        builder.AppendInterpolation($"{indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {refOrEmpty}_{serviceProvider.Identifier.Name.AsFirstLower()}.{service.AsImplementationName()};\n\n");
+                    else
+                        builder.AppendInterpolation($"{indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {refOrEmpty}{service.AsImplementationName()};\n\n");
 
-                    builder.AppendIndent(indent)
-                        .AppendInterpolation($"private {readonlyStr}global::")
-                        .AppendClosedFullyQualified(service.ImplementationType)
-                        .Append(" _")
-                        .AppendFirstLower(service.Name)
-                        .Append(";\n");
-                }
+                else if (service.CreationTimeTransitive == CreationTiming.Constructor)
+                    builder.AppendInterpolation($"""
+                        {indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {refOrEmpty}_{service.Name.AsFirstLower()};
+                        {indent}private {readonlyStr}global::{service.ImplementationType.AsClosedFullyQualified()} _{service.Name.AsFirstLower()};
+
+
+                        """);
+
+                // CreationTiming.Lazy
                 else {
-                    builder.Append(" {\n");
+                    builder.AppendInterpolation($"{indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} {{\n");
                     indent.IncreaseLevel(); // 2
 
                     if (service.GetAccessor == GetAccess.Property) {
-                        builder.AppendIndent(indent)
-                            .Append("get {\n");
+                        builder.AppendInterpolation($"{indent}get {{\n");
                         indent.IncreaseLevel(); // 3
                     }
 
                     AppendLazyService(service);
-
-                    builder.AppendIndent(indent)
-                        .AppendInterpolation($"return {refOrEmpty}(global::")
-                        .AppendClosedFullyQualified(service.ServiceType)
-                        .Append(")_")
-                        .AppendFirstLower(service.Name)
-                        .Append(";\n");
+                    builder.AppendInterpolation($"{indent}return {refOrEmpty}(global::{service.ServiceType.AsClosedFullyQualified()})_{service.Name.AsFirstLower()};\n");
 
                     if (service.GetAccessor == GetAccess.Property) {
                         indent.DecreaseLevel(); // 2
-                        builder.AppendIndent(indent)
-                            .Append("}\n");
+                        builder.AppendInterpolation($"{indent}}}\n");
                     }
 
                     indent.DecreaseLevel(); // 1
-                    builder.AppendIndent(indent)
-                        .Append("}\n");
+                    builder.AppendInterpolation($"{indent}}}\n");
 
-                    builder.AppendIndent(indent)
-                        .Append("private global::")
-                        .AppendClosedFullyQualified(service.ImplementationType)
-                        .Append("? _")
-                        .AppendFirstLower(service.Name)
-                        .Append(";\n");
+
+                    builder.AppendInterpolation($"{indent}private global::{service.ImplementationType.AsClosedFullyQualified()}? _{service.Name.AsFirstLower()};\n\n");
                 }
-
-                builder.Append('\n');
             }
 
             builder.Append('\n');

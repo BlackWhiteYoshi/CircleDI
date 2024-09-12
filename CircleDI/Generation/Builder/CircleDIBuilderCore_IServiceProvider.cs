@@ -23,42 +23,33 @@ public partial struct CircleDIBuilderCore {
         => AppendIServiceProvider(serviceProvider.SortedServiceList.GetEnumerator());
 
     private void AppendIServiceProvider(IEnumerator<Service> serviceEnumerator) {
-        builder.AppendIndent(indent)
-            .Append("/// <summary>\n");
-        builder.AppendIndent(indent)
-            .Append("/// <para>Finds all registered services of the given type.</para>\n");
-        builder.AppendIndent(indent)
-            .Append("/// <para>\n");
-        builder.AppendIndent(indent)
-            .Append("/// The method returns<br />\n");
-        builder.AppendIndent(indent)
-            .Append("/// - null (when registered zero times)<br />\n");
-        builder.AppendIndent(indent)
-            .Append("/// - given type (when registered ones)<br />\n");
-        builder.AppendIndent(indent)
-            .Append("/// - Array of given type (when registered many times)\n");
-        builder.AppendIndent(indent)
-            .Append("/// </para>\n");
-        builder.AppendIndent(indent)
-            .Append("/// </summary>\n");
+        builder.AppendInterpolation($$"""
+            {{indent}}/// <summary>
+            {{indent}}/// <para>Finds all registered services of the given type.</para>
+            {{indent}}/// <para>
+            {{indent}}/// The method returns<br />
+            {{indent}}/// - null (when registered zero times)<br />
+            {{indent}}/// - given type (when registered ones)<br />
+            {{indent}}/// - Array of given type (when registered many times)
+            {{indent}}/// </para>
+            {{indent}}/// </summary>
+            {{indent}}object? IServiceProvider.GetService(Type serviceType) {
 
-        builder.AppendIndent(indent)
-            .Append("object? IServiceProvider.GetService(Type serviceType) {\n");
+            """);
         indent.IncreaseLevel(); // 2
 
-        builder.AppendIndent(indent)
-            .Append("switch (serviceType.Name) {\n");
+        builder.AppendInterpolation($"{indent}switch (serviceType.Name) {{\n");
         indent.IncreaseLevel(); // 3
 
         if (serviceEnumerator.MoveNext()) {
             Service? service = serviceEnumerator.Current;
             string currentserviceName = service.ServiceType.Name;
             int currentTypeParameterCount = service.ServiceType.TypeArgumentList.Count;
-            builder.AppendIndent(indent)
-                .AppendInterpolation($"case \"{currentserviceName}");
-            if (currentTypeParameterCount > 0)
-                builder.AppendInterpolation($"`{currentTypeParameterCount}");
-            builder.Append("\":\n");
+
+            if (currentTypeParameterCount == 0)
+                builder.AppendInterpolation($"{indent}case \"{currentserviceName}\":\n");
+            else
+                builder.AppendInterpolation($"{indent}case \"{currentserviceName}`{currentTypeParameterCount}\":\n");
             indent.IncreaseLevel(); // 4
 
             do {
@@ -66,39 +57,26 @@ public partial struct CircleDIBuilderCore {
                     currentserviceName = service.ServiceType.Name;
                     currentTypeParameterCount = service.ServiceType.TypeArgumentList.Count;
 
-                    builder.AppendIndent(indent)
-                        .Append("return null;\n");
+                    builder.AppendInterpolation($"{indent}return null;\n");
                     indent.DecreaseLevel(); // 3
 
-                    builder.AppendIndent(indent)
-                        .AppendInterpolation($"case \"{currentserviceName}");
-                    if (currentTypeParameterCount > 0)
-                        builder.AppendInterpolation($"`{currentTypeParameterCount}");
-                    builder.Append("\":\n");
+                    if (currentTypeParameterCount == 0)
+                        builder.AppendInterpolation($"{indent}case \"{currentserviceName}\":\n");
+                    else
+                        builder.AppendInterpolation($"{indent}case \"{currentserviceName}`{currentTypeParameterCount}\":\n");
                     indent.IncreaseLevel(); // 4
                 }
 
-                builder.AppendIndent(indent)
-                    .Append("if (serviceType == typeof(global::")
-                    .AppendClosedFullyQualified(service.ServiceType)
-                    .Append("))\n");
+                builder.AppendInterpolation($"{indent}if (serviceType == typeof(global::{service.ServiceType.AsClosedFullyQualified()}))\n");
                 indent.IncreaseLevel(); // 5
-
-                builder.AppendIndent(indent)
-                    .Append("return ");
 
                 Service? nextService = serviceEnumerator.MoveNext() ? serviceEnumerator.Current : null;
                 if (service.ServiceType != nextService?.ServiceType)
-                    builder.AppendServiceGetter(service)
-                        .Append(";\n");
+                    builder.AppendInterpolation($"{indent}return {service.AsServiceGetter()};\n");
                 else {
-                    builder.Append("(global::")
-                        .AppendClosedFullyQualified(service.ServiceType)
-                        .Append("[])[");
-                    builder.AppendServiceGetter(service);
+                    builder.AppendInterpolation($"{indent}return (global::{service.ServiceType.AsClosedFullyQualified()}[])[{service.AsServiceGetter()}");
                     do {
-                        builder.Append(", ")
-                            .AppendServiceGetter(nextService!);
+                        builder.AppendInterpolation($", {nextService!.AsServiceGetter()}");
                         nextService = serviceEnumerator.MoveNext() ? serviceEnumerator.Current : null;
                     }
                     while (service.ServiceType == nextService?.ServiceType);
@@ -109,25 +87,20 @@ public partial struct CircleDIBuilderCore {
                 service = nextService;
             } while (service is not null);
 
-            builder.AppendIndent(indent)
-                .Append("return null;\n");
+            builder.AppendInterpolation($"{indent}return null;\n");
             indent.DecreaseLevel(); // 3
         }
 
-        builder.AppendIndent(indent)
-            .Append("default:\n");
+        builder.AppendInterpolation($"{indent}default:\n");
         indent.IncreaseLevel(); // 4
 
-        builder.AppendIndent(indent)
-            .Append("return null;\n");
+        builder.AppendInterpolation($"{indent}return null;\n");
         indent.DecreaseLevel(); // 3
 
         indent.DecreaseLevel(); // 2
-        builder.AppendIndent(indent)
-            .Append("}\n");
+        builder.AppendInterpolation($"{indent}}}\n");
 
         indent.DecreaseLevel(); // 1
-        builder.AppendIndent(indent)
-            .Append("}\n\n\n");
+        builder.AppendInterpolation($"{indent}}}\n\n\n");
     }
 }

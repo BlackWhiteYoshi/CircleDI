@@ -24,31 +24,16 @@ public partial struct CircleDIBuilderCore {
 
         // method head
         {
-            builder.AppendIndent(indent)
-                .Append("public global::");
-            if (serviceProvider.HasInterface)
-                builder.AppendOpenFullyQualified(serviceProvider.InterfaceIdentifierScope);
-            else
-                builder.AppendOpenFullyQualified(serviceProvider.IdentifierScope);
-            builder.Append(" CreateScope");
+            TypeName identifier = serviceProvider.HasInterface ? serviceProvider.InterfaceIdentifierScope : serviceProvider.IdentifierScope;
+            builder.AppendInterpolation($"{indent}public global::{identifier.AsOpenFullyQualified()} CreateScope{serviceProvider.IdentifierScope.AsOpenGenerics()}(");
 
-            builder.AppendOpenGenerics(serviceProvider.IdentifierScope);
-
-            builder.Append('(');
-            foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList)) {
-                if (dependency.HasAttribute)
-                    continue;
-
-                builder.Append("global::")
-                    .AppendClosedFullyQualified(dependency.ServiceType ?? dependency.Service!.ServiceType)
-                    .Append(' ')
-                    .AppendFirstLower(dependency.Name)
-                    .Append(", ");
-            }
+            foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
+                if (!dependency.HasAttribute)
+                    builder.AppendInterpolation($"global::{(dependency.ServiceType ?? dependency.Service!.ServiceType).AsClosedFullyQualified()} {dependency.Name.AsFirstLower()}, ");
             if (builder[^1] == ' ')
                 builder.Length -= 2;
-            builder.Append(") {\n");
 
+            builder.Append(") {\n");
             indent.IncreaseLevel(); // 2
         }
 
@@ -56,7 +41,6 @@ public partial struct CircleDIBuilderCore {
         AppendCreateScopeServiceTree();
 
         indent.DecreaseLevel(); // 1
-        builder.AppendIndent(indent);
-        builder.Append("}\n\n\n");
+        builder.AppendInterpolation($"{indent}}}\n\n\n");
     }
 }

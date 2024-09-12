@@ -18,42 +18,36 @@ public partial struct CircleDIBuilderCore {
                 continue;
 
             AppendServiceSummary(service);
-            builder.AppendIndent(indent)
-                .Append("public global::")
-                .AppendClosedFullyQualified(service.ServiceType)
-                .Append(' ');
 
             if (service.GetAccessor == GetAccess.Property) {
-                builder.AppendInterpolation($"{service.Name} {{\n");
+                builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} {service.Name} {{\n");
                 indent.IncreaseLevel(); // 2
-                builder.AppendIndent(indent)
-                    .Append("get {\n");
+
+                builder.AppendInterpolation($"{indent}get {{\n");
+                indent.IncreaseLevel(); // 3
             }
-            else
-                builder.AppendInterpolation($"Get{service.Name}() {{\n");
-            indent.IncreaseLevel(); // 2 or 3
+            else {
+                builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} Get{service.Name}() {{\n");
+                indent.IncreaseLevel(); // 2
+            }
 
             int transientNumber = AppendTransientService(service);
-
-            builder.AppendIndent(indent)
-                .Append("return ")
-                .AppendFirstLower(service.Name);
             if (transientNumber > 0)
-                builder.AppendInterpolation($"_{transientNumber}");
-            builder.Append(";\n");
-
-
-            indent.DecreaseLevel(); // 1 or 2
-            builder.AppendIndent(indent)
-                .Append("}\n");
+                builder.AppendInterpolation($"{indent}return {service.Name.AsFirstLower()}_{transientNumber};\n");
+            else
+                builder.AppendInterpolation($"{indent}return {service.Name.AsFirstLower()};\n");
 
             if (service.GetAccessor == GetAccess.Property) {
-                indent.DecreaseLevel(); // 1
-                builder.AppendIndent(indent)
-                    .Append("}\n");
-            }
+                indent.DecreaseLevel(); //  2
+                builder.AppendInterpolation($"{indent}}}\n");
 
-            builder.Append('\n');
+                indent.DecreaseLevel(); // 1
+                builder.AppendInterpolation($"{indent}}}\n\n");
+            }
+            else {
+                indent.DecreaseLevel(); // 1
+                builder.AppendInterpolation($"{indent}}}\n\n");
+            }
         }
 
         if (builder.Length > currentPosition)

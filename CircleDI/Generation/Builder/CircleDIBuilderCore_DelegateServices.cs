@@ -17,20 +17,17 @@ public partial struct CircleDIBuilderCore {
                 continue;
 
             AppendServiceSummary(service);
-            builder.AppendIndent(indent)
-                .Append("public global::")
-                .AppendClosedFullyQualified(service.ServiceType)
-                .Append(' ')
-                .AppendServiceGetter(service)
-                .Append(" => ");
+
             if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                builder.Append('_')
-                    .AppendFirstLower(serviceProvider.Identifier.Name)
-                    .Append('.');
-            builder.AppendImplementationName(service);
-            if (service.IsGeneric)
-                builder.AppendClosedGenerics(service.ImplementationType);
-            builder.Append(";\n\n");
+                if (service.IsGeneric)
+                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => _{serviceProvider.Identifier.Name.AsFirstLower()}.{service.AsImplementationName()}{service.ImplementationType.AsClosedGenerics()};\n\n");
+                else
+                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => _{serviceProvider.Identifier.Name.AsFirstLower()}.{service.AsImplementationName()};\n\n");
+            else
+                if (service.IsGeneric)
+                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {service.AsImplementationName()}{service.ImplementationType.AsClosedGenerics()};\n\n");
+                else
+                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {service.AsImplementationName()};\n\n");
         }
 
         if (builder.Length > currentPosition)
