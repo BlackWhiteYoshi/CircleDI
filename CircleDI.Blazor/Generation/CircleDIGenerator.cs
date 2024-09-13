@@ -244,9 +244,10 @@ file static class RegisterServiceProviderAttributeExtension {
                         Name = name,
                         Lifetime = ServiceLifetime.Singleton,
                         ServiceType = type,
-                        IsRefable = false,
-                        IsGeneric = isGeneric,
                         ImplementationType = type,
+                        IsGeneric = isGeneric,
+                        IsValueType = false,
+                        IsRefable = false,
                         CreationTime = CreationTiming.Constructor,
                         CreationTimeTransitive = CreationTiming.Constructor,
                         GetAccessor = GetAccess.Property,
@@ -255,7 +256,7 @@ file static class RegisterServiceProviderAttributeExtension {
                         PropertyDependencyList = [],
                         IsDisposable = false,
                         IsAsyncDisposable = false,
-                        Dependencies = [],
+                        Dependencies = []
                     });
             }
 
@@ -268,9 +269,10 @@ file static class RegisterServiceProviderAttributeExtension {
                         Name = name,
                         Lifetime = ServiceLifetime.Scoped,
                         ServiceType = type,
-                        IsRefable = false,
-                        IsGeneric = isGeneric,
                         ImplementationType = type,
+                        IsGeneric = isGeneric,
+                        IsValueType = false,
+                        IsRefable = false,
                         CreationTime = CreationTiming.Lazy,
                         CreationTimeTransitive = CreationTiming.Lazy,
                         GetAccessor = GetAccess.Property,
@@ -279,7 +281,7 @@ file static class RegisterServiceProviderAttributeExtension {
                         PropertyDependencyList = [],
                         IsDisposable = false,
                         IsAsyncDisposable = false,
-                        Dependencies = [],
+                        Dependencies = []
                     });
             }
         }
@@ -316,8 +318,10 @@ file static class RegisterServiceProviderAttributeExtension {
             serviceProvider.TransientList.Add(new Service() {
                 Lifetime = ServiceLifetime.Transient,
                 ServiceType = serviceType,
-                IsRefable = false,
                 ImplementationType = serviceType,
+                IsGeneric = false,
+                IsValueType = false,
+                IsRefable = false,
                 Name = component.Name,
                 CreationTime = CreationTiming.Lazy,
                 CreationTimeTransitive = CreationTiming.Lazy,

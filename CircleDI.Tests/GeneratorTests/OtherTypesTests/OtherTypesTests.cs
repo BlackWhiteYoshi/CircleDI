@@ -204,6 +204,159 @@ public static class OtherTypesTests {
     }
 
     [Fact]
+    public static Task StructLazy() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>(CreationTime = CreationTiming.Lazy)]
+            public sealed partial class TestProvider;
+
+            public struct TestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task StructwithInterfaceLazy() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<ITestService, TestService>(CreationTime = CreationTiming.Lazy)]
+            public sealed partial class TestProvider;
+
+            public interface ITestService;
+            public struct TestService : ITestService;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task StructLazyIDisposable() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>(CreationTime = CreationTiming.Lazy)]
+            public sealed partial class TestProvider;
+
+            public struct TestService : IDisposable;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task StructLazyIAsyncDisposable() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>(CreationTime = CreationTiming.Lazy)]
+            public sealed partial class TestProvider;
+
+            public struct TestService : System.IAsyncDisposable;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task StructLazyMultipleIAsyncDisposable() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>(CreationTime = CreationTiming.Lazy)]
+            [Singleton<AnotherService>]
+            public sealed partial class TestProvider;
+
+            public struct TestService : System.IAsyncDisposable;
+            public sealed class AnotherService : System.IAsyncDisposable;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
     public static Task RecordClass() {
         const string input = """
             using CircleDIAttributes;

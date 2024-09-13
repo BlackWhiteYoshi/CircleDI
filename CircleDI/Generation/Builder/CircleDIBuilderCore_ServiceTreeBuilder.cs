@@ -260,13 +260,19 @@ public partial struct CircleDIBuilderCore {
                 lockedOnThisLevel = true;
 
                 if (!isScopeProvider) {
-                    builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null)\n");
+                    if (!service.IsValueType)
+                        builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null)\n");
+                    else
+                        builder.AppendInterpolation($"{indent}if (!_{service.Name.AsFirstLower()}_hasValue)\n");
                     indent.IncreaseLevel(); // (+1)
                     builder.AppendInterpolation($"{indent}lock (this)\n");
                     indent.IncreaseLevel(); // (+2)
                 }
                 else {
-                    builder.AppendInterpolation($"{indent}if (_{serviceProvider.Identifier.Name.AsFirstLower()}._{service.Name.AsFirstLower()} is null)\n");
+                    if (!service.IsValueType)
+                        builder.AppendInterpolation($"{indent}if (_{serviceProvider.Identifier.Name.AsFirstLower()}._{service.Name.AsFirstLower()} is null)\n");
+                    else
+                        builder.AppendInterpolation($"{indent}if (!_{serviceProvider.Identifier.Name.AsFirstLower()}._{service.Name.AsFirstLower()}_hasValue)\n");
                     indent.IncreaseLevel(); // (+1)
                     builder.AppendInterpolation($"{indent}lock (_{serviceProvider.Identifier.Name.AsFirstLower()})\n");
                     indent.IncreaseLevel(); // (+2)
@@ -275,9 +281,15 @@ public partial struct CircleDIBuilderCore {
 
 
             if (!isScopeProvider)
-                builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null) {{\n");
+                if (!service.IsValueType)
+                    builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null) {{\n");
+                else
+                    builder.AppendInterpolation($"{indent}if (!_{service.Name.AsFirstLower()}_hasValue) {{\n");
             else
-                builder.AppendInterpolation($"{indent}if (_{serviceProvider.Identifier.Name.AsFirstLower()}._{service.Name.AsFirstLower()} is null) {{\n");
+                if (!service.IsValueType)
+                    builder.AppendInterpolation($"{indent}if (_{serviceProvider.Identifier.Name.AsFirstLower()}._{service.Name.AsFirstLower()} is null) {{\n");
+                else
+                    builder.AppendInterpolation($"{indent}if (!_{serviceProvider.Identifier.Name.AsFirstLower()}._{service.Name.AsFirstLower()}_hasValue) {{\n");
             indent.IncreaseLevel(); // +1
         }
         else if (service.Lifetime is ServiceLifetime.Scoped) {
@@ -285,14 +297,20 @@ public partial struct CircleDIBuilderCore {
                 isLockedScope = true;
                 lockedOnThisLevel = true;
 
-                builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null)\n");
+                if (!service.IsValueType)
+                    builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null)\n");
+                else
+                    builder.AppendInterpolation($"{indent}if (!_{service.Name.AsFirstLower()}_hasValue)\n");
                 indent.IncreaseLevel(); // (+1)
 
                 builder.AppendInterpolation($"{indent}lock (this)\n");
                 indent.IncreaseLevel(); // (+2)
             }
 
-            builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null) {{\n");
+            if (!service.IsValueType)
+                builder.AppendInterpolation($"{indent}if (_{service.Name.AsFirstLower()} is null) {{\n");
+            else
+                builder.AppendInterpolation($"{indent}if (!_{service.Name.AsFirstLower()}_hasValue) {{\n");
             indent.IncreaseLevel(); // +1
         }
 
@@ -550,6 +568,8 @@ public partial struct CircleDIBuilderCore {
 
 
         if (service.Lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped) {
+            if (service.IsValueType && service.CreationTimeTransitive is CreationTiming.Lazy)
+                builder.AppendInterpolation($"{indent}_{service.Name.AsFirstLower()}_hasValue = true;\n");
             return 0;
         }
         else {

@@ -55,7 +55,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         _testService1 = new global::MyCode.TestService1(_testService2);
                         Set_TestService2_TestService1(_testService2, _testService1);
                     }
-            return (global::MyCode.ITestService1)_testService1;
+            return _testService1;
         }
     }
     private global::MyCode.TestService1? _testService1;
@@ -78,7 +78,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                             Set_TestService2_TestService1(_testService2, _testService1);
                         }
                     }
-            return (global::MyCode.ITestService2)_testService2;
+            return _testService2;
         }
     }
     private global::MyCode.TestService2? _testService2;

@@ -122,7 +122,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_scoped is null) {
                             _scoped = new global::MyCode.Scoped();
                         }
-                return (global::MyCode.IScoped)_scoped;
+                return _scoped;
             }
         }
         private global::MyCode.Scoped? _scoped;
@@ -139,7 +139,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_scoped2 is null) {
                             _scoped2 = new global::MyCode.Scoped2();
                         }
-                return (global::MyCode.Scoped2)_scoped2;
+                return _scoped2;
             }
         }
         private global::MyCode.Scoped2? _scoped2;

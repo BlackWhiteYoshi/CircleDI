@@ -45,7 +45,7 @@ public partial struct CircleDIBuilderCore {
                     }
 
                     AppendLazyService(service);
-                    builder.AppendInterpolation($"{indent}return {refOrEmpty}(global::{service.ServiceType.AsClosedFullyQualified()})_{service.Name.AsFirstLower()};\n");
+                    builder.AppendInterpolation($"{indent}return {refOrEmpty}_{service.Name.AsFirstLower()};\n");
 
                     if (service.GetAccessor == GetAccess.Property) {
                         indent.DecreaseLevel(); // 2
@@ -55,8 +55,12 @@ public partial struct CircleDIBuilderCore {
                     indent.DecreaseLevel(); // 1
                     builder.AppendInterpolation($"{indent}}}\n");
 
-
-                    builder.AppendInterpolation($"{indent}private global::{service.ImplementationType.AsClosedFullyQualified()}? _{service.Name.AsFirstLower()};\n\n");
+                    if (!service.IsValueType)
+                        builder.AppendInterpolation($"{indent}private global::{service.ImplementationType.AsClosedFullyQualified()}? _{service.Name.AsFirstLower()};\n\n");
+                    else {
+                        builder.AppendInterpolation($"{indent}private global::{service.ImplementationType.AsClosedFullyQualified()} _{service.Name.AsFirstLower()};\n");
+                        builder.AppendInterpolation($"{indent}private global::System.Boolean _{service.Name.AsFirstLower()}_hasValue = false;\n\n");
+                    }
                 }
             }
 

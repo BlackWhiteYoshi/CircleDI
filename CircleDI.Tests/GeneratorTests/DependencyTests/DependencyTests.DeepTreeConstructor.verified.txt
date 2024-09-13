@@ -54,7 +54,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                             _asyncDisposeList.Add(t3);
                         }
                     }
-            return (global::MyCode.S2)_s2;
+            return _s2;
         }
     }
     private global::MyCode.S2? _s2;

@@ -576,18 +576,17 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             if (!hasServiceSelf)
                 SingletonList.Add(new Service() {
                     Lifetime = ServiceLifetime.Singleton,
+                    Name = "Self",
                     ServiceType = serviceType,
                     ImplementationType = implementationType,
                     Implementation = new ImplementationMember(MemberType.Field, "this", IsStatic: false, IsScoped: false),
+                    CreationTime = creationTimeMainProvider,
+                    CreationTimeTransitive = creationTimeMainProvider,
+                    GetAccessor = getAccessorMainProvider,
 
                     ConstructorDependencyList = [],
                     PropertyDependencyList = [],
-                    Dependencies = [],
-                    Name = "Self",
-                    CreationTime = creationTimeMainProvider,
-                    GetAccessor = getAccessorMainProvider,
-                    IsDisposable = false,
-                    IsAsyncDisposable = false
+                    Dependencies = []
                 });
 
             if (generateScope) {
@@ -595,18 +594,17 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 if (!hasServiceSelfScope)
                     ScopedList.Add(new Service() {
                         Lifetime = ServiceLifetime.Scoped,
+                        Name = "SelfScope",
                         ServiceType = serviceTypeScope,
                         ImplementationType = implementationTypeScope,
                         Implementation = new ImplementationMember(MemberType.Field, "this", IsStatic: false, IsScoped: true),
+                        CreationTime = creationTimeScopeProvider,
+                        CreationTimeTransitive = creationTimeScopeProvider,
+                        GetAccessor = getAccessorScopeProvider,
 
                         ConstructorDependencyList = [],
                         PropertyDependencyList = [],
-                        Dependencies = [],
-                        Name = "SelfScope",
-                        CreationTime = creationTimeScopeProvider,
-                        GetAccessor = getAccessorScopeProvider,
-                        IsDisposable = false,
-                        IsAsyncDisposable = false
+                        Dependencies = []
                     });
 
 
@@ -635,6 +633,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     ServiceType = serviceTypeScope,
                     ImplementationType = implementationTypeScope,
                     CreationTime = CreationTiming.Lazy,
+                    CreationTimeTransitive = CreationTiming.Lazy,
                     GetAccessor = GetAccess.Property,
                     ConstructorDependencyList = constructorDependencyList,
                     PropertyDependencyList = propertyDependencyList,
@@ -736,7 +735,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             Name = module.Name,
                             ServiceType = moduleTypeName,
                             ImplementationType = moduleTypeName,
+                            IsValueType = module.IsValueType,
+                            IsRefable = module.IsValueType,
                             CreationTime = CreationTiming.Constructor,
+                            CreationTimeTransitive = CreationTiming.Constructor,
                             GetAccessor = GetAccess.Property,
                             ConstructorDependencyList = constructorDependencyList,
                             PropertyDependencyList = propertyDependencyList,
@@ -768,7 +770,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             Name = $"{module.Name}Scope",
                             ServiceType = moduleTypeNameScope,
                             ImplementationType = moduleTypeNameScope,
+                            IsValueType = moduleScope.IsValueType,
+                            IsRefable = moduleScope.IsValueType,
                             CreationTime = CreationTiming.Constructor,
+                            CreationTimeTransitive = CreationTiming.Constructor,
                             GetAccessor = GetAccess.Property,
                             ConstructorDependencyList = constructorDependencyList,
                             PropertyDependencyList = propertyDependencyList,

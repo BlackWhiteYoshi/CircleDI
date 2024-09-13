@@ -169,7 +169,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_jSRuntime is null) {
                             _jSRuntime = GetJSRuntime();
                         }
-                return (global::Microsoft.JSInterop.IJSRuntime)_jSRuntime;
+                return _jSRuntime;
             }
         }
         private global::Microsoft.JSInterop.IJSRuntime? _jSRuntime;
@@ -186,7 +186,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_navigationManager is null) {
                             _navigationManager = GetNavigationManager();
                         }
-                return (global::Microsoft.AspNetCore.Components.NavigationManager)_navigationManager;
+                return _navigationManager;
             }
         }
         private global::Microsoft.AspNetCore.Components.NavigationManager? _navigationManager;
@@ -203,7 +203,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_navigationInterception is null) {
                             _navigationInterception = GetNavigationInterception();
                         }
-                return (global::Microsoft.AspNetCore.Components.Routing.INavigationInterception)_navigationInterception;
+                return _navigationInterception;
             }
         }
         private global::Microsoft.AspNetCore.Components.Routing.INavigationInterception? _navigationInterception;
@@ -220,7 +220,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_scrollToLocationHash is null) {
                             _scrollToLocationHash = GetScrollToLocationHash();
                         }
-                return (global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash)_scrollToLocationHash;
+                return _scrollToLocationHash;
             }
         }
         private global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash? _scrollToLocationHash;
@@ -237,7 +237,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_errorBoundaryLogger is null) {
                             _errorBoundaryLogger = GetErrorBoundaryLogger();
                         }
-                return (global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger)_errorBoundaryLogger;
+                return _errorBoundaryLogger;
             }
         }
         private global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger? _errorBoundaryLogger;

@@ -62,8 +62,15 @@ public partial struct CircleDIBuilderCore {
                     singeltonAsyncDisposablesCount++;
                     if (service.CreationTimeTransitive == CreationTiming.Constructor)
                         builder.AppendInterpolation($"{indent}_ = ((IAsyncDisposable){service.AsServiceField()}).DisposeAsync().Preserve();\n");
-                    else
-                        builder.AppendInterpolation($"{indent}_ = ({service.AsServiceField()} as IAsyncDisposable)?.DisposeAsync().Preserve();\n");
+                    else // CreationTiming.Lazy
+                        if (!service.IsValueType)
+                            builder.AppendInterpolation($"{indent}_ = ({service.AsServiceField()} as IAsyncDisposable)?.DisposeAsync().Preserve();\n");
+                        else {
+                            builder.AppendInterpolation($"{indent}if ({service.AsServiceField()}_hasValue)\n");
+                            indent.IncreaseLevel(); // 3
+                            builder.AppendInterpolation($"{indent}_ = ((IAsyncDisposable){service.AsServiceField()}).DisposeAsync().Preserve();\n");
+                            indent.DecreaseLevel(); // 2
+                        }
                 }
             if ((singeltonDisposablesCount | singeltonAsyncDisposablesCount) > 0)
                 builder.Append('\n');
@@ -131,7 +138,10 @@ public partial struct CircleDIBuilderCore {
                     if (asyncDisposableService.CreationTimeTransitive == CreationTiming.Constructor)
                         builder.AppendInterpolation($"{indent}return ((IAsyncDisposable){asyncDisposableService.AsServiceField()}).DisposeAsync();\n");
                     else
-                        builder.AppendInterpolation($"{indent}return ({asyncDisposableService.AsServiceField()} as IAsyncDisposable)?.DisposeAsync() ?? default;\n");
+                        if (!asyncDisposableService.IsValueType)
+                            builder.AppendInterpolation($"{indent}return ({asyncDisposableService.AsServiceField()} as IAsyncDisposable)?.DisposeAsync() ?? default;\n");
+                        else
+                            builder.AppendInterpolation($"{indent}return _tT_hasValue ? ((IAsyncDisposable){asyncDisposableService.AsServiceField()}).DisposeAsync() : default;\n");
                     break;
                 }
                 case (0, true): {
@@ -217,14 +227,24 @@ public partial struct CircleDIBuilderCore {
         if (service.CreationTimeTransitive == CreationTiming.Constructor)
             builder.AppendInterpolation($"{indent}((IDisposable){service.AsServiceField()}).Dispose();\n");
         else
-            builder.AppendInterpolation($"{indent}({service.AsServiceField()} as IDisposable)?.Dispose();\n");
+            if (!service.IsValueType)
+                builder.AppendInterpolation($"{indent}({service.AsServiceField()} as IDisposable)?.Dispose();\n");
+            else {
+                builder.AppendInterpolation($"{indent}if ({service.AsServiceField()}_hasValue)\n");
+                indent.IncreaseLevel(); // +1
+                builder.AppendInterpolation($"{indent}((IDisposable){service.AsServiceField()}).Dispose();\n");
+                indent.DecreaseLevel(); // +0
+            }
     }
 
     private void AppendDisposeAsyncArray(Service service, int index) {
         if (service.CreationTimeTransitive == CreationTiming.Constructor)
             builder.AppendInterpolation($"{indent}disposeTasks[{index}] = ((IAsyncDisposable){service.AsServiceField()}).DisposeAsync().AsTask();\n");
         else
-            builder.AppendInterpolation($"{indent}disposeTasks[{index}] = ({service.AsServiceField()} as IAsyncDisposable)?.DisposeAsync().AsTask() ?? Task.CompletedTask;\n");
+            if (!service.IsValueType)
+                builder.AppendInterpolation($"{indent}disposeTasks[{index}] = ({service.AsServiceField()} as IAsyncDisposable)?.DisposeAsync().AsTask() ?? Task.CompletedTask;\n");
+            else
+                builder.AppendInterpolation($"{indent}disposeTasks[{index}] = {service.AsServiceField()}_hasValue ? ((IAsyncDisposable){service.AsServiceField()}).DisposeAsync().AsTask() : Task.CompletedTask;\n");
     }
 
 

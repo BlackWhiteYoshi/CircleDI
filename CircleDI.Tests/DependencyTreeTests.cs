@@ -1666,6 +1666,7 @@ public static class DependencyTreeTests {
             ImplementationType = null!,
 
             CreationTime = CreationTiming.Constructor,
+            CreationTimeTransitive = CreationTiming.Constructor,
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
@@ -1688,6 +1689,7 @@ public static class DependencyTreeTests {
             ImplementationType = null!,
 
             CreationTime = CreationTiming.Constructor,
+            CreationTimeTransitive = CreationTiming.Constructor,
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -1763,6 +1765,7 @@ public static class DependencyTreeTests {
             ImplementationType = null!,
 
             CreationTime = CreationTiming.Lazy,
+            CreationTimeTransitive = CreationTiming.Lazy,
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
@@ -1785,6 +1788,7 @@ public static class DependencyTreeTests {
             ImplementationType = null!,
 
             CreationTime = CreationTiming.Constructor,
+            CreationTimeTransitive = CreationTiming.Constructor,
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
@@ -1810,6 +1814,7 @@ public static class DependencyTreeTests {
             ImplementationType = null!,
 
             CreationTime = CreationTiming.Lazy,
+            CreationTimeTransitive = CreationTiming.Lazy,
 
             ConstructorDependencyList = [
                 new ConstructorDependency() {
@@ -1832,6 +1837,7 @@ public static class DependencyTreeTests {
             ImplementationType = null!,
 
             CreationTime = CreationTiming.Lazy,
+            CreationTimeTransitive = CreationTiming.Lazy,
 
             ConstructorDependencyList = [],
             PropertyDependencyList = [],

@@ -54,7 +54,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                             _asyncDisposeList.Add(t3);
                         }
                     }
-            return (global::MyCode.S2)_s2;
+            return _s2;
         }
     }
     private global::MyCode.S2? _s2;
@@ -214,7 +214,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                                 _asyncDisposeList.Add(t3);
                             }
                         }
-                return (global::MyCode.IRoot)_root;
+                return _root;
             }
         }
         private global::MyCode.Root? _root;
@@ -251,7 +251,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                                 _asyncDisposeList.Add(t3);
                             }
                         }
-                return (global::MyCode.S1)_s1;
+                return _s1;
             }
         }
         private global::MyCode.S1? _s1;
@@ -268,7 +268,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_s3_1 is null) {
                             _s3_1 = new global::MyCode.S3_1();
                         }
-                return (global::MyCode.S3_1)_s3_1;
+                return _s3_1;
             }
         }
         private global::MyCode.S3_1? _s3_1;
@@ -285,7 +285,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_s3_2 is null) {
                             _s3_2 = new global::MyCode.S3_2();
                         }
-                return (global::MyCode.S3_2)_s3_2;
+                return _s3_2;
             }
         }
         private global::MyCode.S3_2? _s3_2;

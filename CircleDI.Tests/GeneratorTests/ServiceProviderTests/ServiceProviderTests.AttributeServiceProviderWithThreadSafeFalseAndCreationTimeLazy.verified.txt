@@ -47,7 +47,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             if (_singleton is null) {
                 _singleton = new global::MyCode.Singleton();
             }
-            return (global::MyCode.ISingleton)_singleton;
+            return _singleton;
         }
     }
     private global::MyCode.Singleton? _singleton;
@@ -152,7 +152,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                 if (_scoped is null) {
                     _scoped = new global::MyCode.Scoped();
                 }
-                return (global::MyCode.IScoped)_scoped;
+                return _scoped;
             }
         }
         private global::MyCode.Scoped? _scoped;

@@ -49,7 +49,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                     if (_singletonDependency is null) {
                         _singletonDependency = new global::MyCode.SingletonDependency();
                     }
-            return (global::MyCode.ISingletonDependency)_singletonDependency;
+            return _singletonDependency;
         }
     }
     private global::MyCode.SingletonDependency? _singletonDependency;

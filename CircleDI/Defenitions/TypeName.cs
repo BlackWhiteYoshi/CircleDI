@@ -21,6 +21,11 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
     public required string Name { get; init; }
 
     /// <summary>
+    /// Does have a '?' annotation
+    /// </summary>
+    public required bool Nullable { get; init; }
+
+    /// <summary>
     /// The type of this type: class, struct, record, interface
     /// </summary>
     public required TypeKeyword Keyword { get; init; }
@@ -62,6 +67,7 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
     [SetsRequiredMembers]
     public TypeName(string name) {
         Name = name;
+        Nullable = false;
         Keyword = TypeKeyword.Class;
         NameSpaceList = [];
         ContainingTypeList = [];
@@ -70,8 +76,9 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
     }
 
     [SetsRequiredMembers]
-    public TypeName(string name, TypeKeyword keyWord, List<string> nameSpaceList, List<TypeName> containingTypeList, List<string> typeParameterList, List<TypeName?> typeArgumentList) {
+    public TypeName(string name, TypeKeyword keyWord, List<string> nameSpaceList, List<TypeName> containingTypeList, List<string> typeParameterList, List<TypeName?> typeArgumentList, bool nullable = false) {
         Name = name;
+        Nullable = nullable;
         Keyword = keyWord;
         NameSpaceList = nameSpaceList;
         ContainingTypeList = containingTypeList;
@@ -82,6 +89,8 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
     [SetsRequiredMembers]
     public TypeName(INamedTypeSymbol typeSymbol) {
         Name = typeSymbol.Name;
+
+        Nullable = typeSymbol.NullableAnnotation is NullableAnnotation.Annotated;
 
         Keyword = (typeSymbol.IsRecord, typeSymbol.TypeKind) switch {
             (false, TypeKind.Class) => TypeKeyword.Class,
@@ -115,7 +124,7 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
                     TypeParameterList.Add(typeSymbol.TypeArguments[i].Name);
                     TypeArgumentList.Add(null);
                     break;
-                case IErrorTypeSymbol namedTypeArgument: // IErrorTypeSymbol : INamedTypeSymbol
+                case IErrorTypeSymbol: // IErrorTypeSymbol : INamedTypeSymbol
                     // unbound type parameter or invalid input
                     TypeParameterList.Add(typeSymbol.TypeParameters[i].Name);
                     TypeArgumentList.Add(null);
@@ -153,6 +162,9 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
         if (Name != other.Name)
             return false;
 
+        if (Nullable != other.Nullable)
+            return false;
+
         if (Keyword != other.Keyword)
             return false;
 
@@ -174,6 +186,7 @@ public sealed class TypeName : IEquatable<TypeName>, IComparable<TypeName> {
 
     public override int GetHashCode() {
         int hashCode = Name.GetHashCode();
+        hashCode = Combine(hashCode, Nullable.GetHashCode());
         hashCode = Combine(hashCode, Keyword.GetHashCode());
 
         hashCode = CombineList(hashCode, NameSpaceList);

@@ -44,15 +44,17 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
-            if (_testService is null)
+            if (!_testService_hasValue)
                 lock (this)
-                    if (_testService is null) {
+                    if (!_testService_hasValue) {
                         _testService = new global::MyCode.TestService();
+                        _testService_hasValue = true;
                     }
             return _testService;
         }
     }
-    private global::MyCode.TestService? _testService;
+    private global::MyCode.TestService _testService;
+    private global::System.Boolean _testService_hasValue = false;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />

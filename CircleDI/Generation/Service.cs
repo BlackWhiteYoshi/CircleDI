@@ -3,6 +3,7 @@ using CircleDI.Extensions;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -28,17 +29,6 @@ public sealed class Service : IEquatable<Service> {
     public required TypeName ServiceType { get; init; }
 
     /// <summary>
-    /// Is true, when service is singleton/scoped and service and implementation are the same and they are a struct, record struct or native/built-in type.<br />
-    /// Is false, when Class or record class.
-    /// </summary>
-    public bool IsRefable { get; init; } = false;
-
-    /// <summary>
-    /// Indicates wheather this service has open/unbound type paramters.
-    /// </summary>
-    public bool IsGeneric { get; init; } = false;
-
-    /// <summary>
     /// <para>The type of the actual object that will be instatiated.</para>
     /// <para>If only 1 TypeArgument in the register attribute is present, then ServiceType and ImplementationType is the same.</para>
     /// </summary>
@@ -48,6 +38,22 @@ public sealed class Service : IEquatable<Service> {
     /// <para>Information about a custom implementation for retrieving an object for the Service.</para>
     /// </summary>
     public ImplementationMember Implementation { get; init; }
+
+    /// <summary>
+    /// Indicates wheather this service has open/unbound type paramters.
+    /// </summary>
+    public bool IsGeneric { get; init; } = false;
+
+    /// <summary>
+    /// Is struct or class
+    /// </summary>
+    public bool IsValueType { get; init; } = false;
+
+    /// <summary>
+    /// Is true, when service is singleton/scoped and service and implementation are the same and they are a struct, record struct or native/built-in type.<br />
+    /// Is false otherwise.
+    /// </summary>
+    public bool IsRefable { get; init; } = false;
 
 
     /// <summary>
@@ -224,10 +230,10 @@ public sealed class Service : IEquatable<Service> {
         Lifetime = lifetime;
 
         ServiceType = new TypeName(serviceType);
-        IsRefable = lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped && serviceType.IsValueType == true && SymbolEqualityComparer.Default.Equals(serviceType, implementationType);
         ImplementationType = new TypeName(implementationType);
 
         // map unbound generic to open generic
+        IsGeneric = false;
         foreach (TypeName? argument in ServiceType.TypeArgumentList)
             if (argument is null) {
                 IsGeneric = true;
@@ -243,6 +249,9 @@ public sealed class Service : IEquatable<Service> {
 
                 break;
             }
+
+        IsValueType = implementationType.IsValueType;
+        IsRefable = lifetime is ServiceLifetime.Singleton or ServiceLifetime.Scoped && serviceType.IsValueType; // (TService is struct && TImplementation : TService) => serviceType == implementationType
 
         Name = implementationType.Name;
         CreationTime = creationTimeProvider;
@@ -409,12 +418,15 @@ public sealed class Service : IEquatable<Service> {
 
         ServiceType = new TypeName(serviceType);
         ImplementationType = ServiceType;
+
         IsGeneric = false;
         foreach (TypeName? argumant in ServiceType.TypeArgumentList)
             if (argumant is null) {
                 IsGeneric = true;
                 serviceType = serviceType.ConstructedFrom;
             }
+        IsValueType = false;
+        IsRefable = false;
 
         Name = attributeData.NamedArguments.GetArgument<string>("Name") ?? serviceType.Name.Replace(".", "");
         CreationTime = CreationTiming.Constructor;
@@ -521,9 +533,10 @@ public sealed class Service : IEquatable<Service> {
 
         return new Service() {
             Lifetime = genericService.Lifetime,
-            IsRefable = genericService.IsRefable,
-            IsGeneric = genericService.IsGeneric,
             Implementation = genericService.Implementation,
+            IsGeneric = genericService.IsGeneric,
+            IsValueType = genericService.IsValueType,
+            IsRefable = genericService.IsRefable,
             ImportMode = genericService.ImportMode,
             Module = genericService.Module,
             CreationTime = genericService.CreationTime,
@@ -693,13 +706,15 @@ public sealed class Service : IEquatable<Service> {
 
         if (ServiceType != other.ServiceType)
             return false;
-        if (IsRefable != other.IsRefable)
-            return false;
-        if (IsGeneric != other.IsGeneric)
-            return false;
         if (ImplementationType != other.ImplementationType)
             return false;
         if (Implementation != other.Implementation)
+            return false;
+        if (IsGeneric != other.IsGeneric)
+            return false;
+        if (IsValueType != other.IsValueType)
+            return false;
+        if (IsRefable != other.IsRefable)
             return false;
 
         if (ImportMode != other.ImportMode)
@@ -734,10 +749,11 @@ public sealed class Service : IEquatable<Service> {
         };
 
         hashCode = Combine(hashCode, ServiceType.GetHashCode());
-        hashCode = Combine(hashCode, IsRefable.GetHashCode());
-        hashCode = Combine(hashCode, IsGeneric.GetHashCode());
         hashCode = Combine(hashCode, ImplementationType.GetHashCode());
         hashCode = Combine(hashCode, Implementation.GetHashCode());
+        hashCode = Combine(hashCode, IsGeneric.GetHashCode());
+        hashCode = Combine(hashCode, IsValueType.GetHashCode());
+        hashCode = Combine(hashCode, IsRefable.GetHashCode());
 
         hashCode = Combine(hashCode, ImportMode.GetHashCode());
         hashCode = Combine(hashCode, Module?.GetHashCode() ?? 0);
