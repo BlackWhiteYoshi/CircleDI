@@ -9,7 +9,7 @@ namespace CircleDI.Tests;
 /// </summary>
 public static class GenericServicesTests {
     [Fact]
-    public static Task GenericWithoutDependency_NotGenerated() {
+    public static Task WithoutDependency_NotGenerated() {
         const string input = """
             using CircleDIAttributes;
 
@@ -52,7 +52,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static Task MultipleGenericServices() {
+    public static Task MultipleServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -74,7 +74,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static Task GenericServiceMultipleTypeParameters() {
+    public static Task ServiceMultipleTypeParameters() {
         const string input = """
             using CircleDIAttributes;
 
@@ -97,7 +97,7 @@ public static class GenericServicesTests {
 
 
     [Fact]
-    public static Task GenericServiceWithConstrucorDependency() {
+    public static Task ServiceWithConstrucorDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -123,7 +123,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static Task GenericServiceWithPropertyDependency() {
+    public static Task ServiceWithPropertyDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -149,7 +149,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static Task GenericServiceWithClosedGenericDependency() {
+    public static Task ServiceWithClosedGenericDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -175,7 +175,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static Task GenericServiceWithMultipleClosedGenericDependency() {
+    public static Task ServiceWithMultipleClosedGenericDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -199,7 +199,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static Task GenericServiceWithOpenGenericDependency() {
+    public static Task ServiceWithOpenGenericDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -225,7 +225,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static Task GenericServiceWithMultipleOpenGenericDependency() {
+    public static Task ServiceWithMultipleOpenGenericDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -249,7 +249,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static void GenericServiceWithOpenGenericMismatchCount() {
+    public static void ServiceWithOpenGenericMismatchCount() {
         const string input = """
             using CircleDIAttributes;
 
@@ -272,7 +272,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static void GenericServiceWithOpenGenericMismatchType() {
+    public static void ServiceWithOpenGenericMismatchType() {
         const string input = """
             using CircleDIAttributes;
 
@@ -296,7 +296,7 @@ public static class GenericServicesTests {
 
 
     [Fact]
-    public static Task GenericServiceWithImplementationBase() {
+    public static Task ServiceWithImplementationBase() {
         const string input = """
             using CircleDIAttributes;
 
@@ -322,7 +322,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static Task GenericServiceWithGenericImplementationBase() {
+    public static Task ServiceWithGenericImplementationBase() {
         const string input = """
             using CircleDIAttributes;
 
@@ -348,7 +348,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static Task GenericServiceWithMultipleGenericsImplementationBase() {
+    public static Task ServiceWithMultipleGenericsImplementationBase() {
         const string input = """
             using CircleDIAttributes;
 
@@ -375,7 +375,7 @@ public static class GenericServicesTests {
 
 
     [Fact]
-    public static Task GenericServiceWithImplementation() {
+    public static Task ServiceWithImplementation() {
         const string input = """
             using CircleDIAttributes;
 
@@ -399,7 +399,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static Task GenericServiceDelegate() {
+    public static Task ServiceDelegate() {
         const string input = """
             using CircleDIAttributes;
 
@@ -424,7 +424,7 @@ public static class GenericServicesTests {
 
 
     [Fact]
-    public static void GenericServiceImplementationField() {
+    public static void ServiceImplementationField() {
         const string input = """
             using CircleDIAttributes;
 
@@ -448,7 +448,7 @@ public static class GenericServicesTests {
     }
 
     [Fact]
-    public static void GenericServiceImplementationProperty() {
+    public static void ServiceImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
 
