@@ -340,7 +340,7 @@ public sealed class Service : IEquatable<Service> {
                             if (!SymbolEqualityComparer.Default.Equals((field.Type as INamedTypeSymbol)?.ConstructedFrom, implementationType))
                                 errorManager.AddWrongFieldImplementationTypeError(implementationName, field.Type.ToDisplayString(), ImplementationType);
 
-                        if (implementationType.Arity > 0)
+                        if (IsGeneric)
                             errorManager.AddImplementationGenericError(implementationName, ImplementationType, implementationType.Arity);
                         break;
                     case IPropertySymbol property:
@@ -348,7 +348,7 @@ public sealed class Service : IEquatable<Service> {
                             if (!SymbolEqualityComparer.Default.Equals((property.Type as INamedTypeSymbol)?.ConstructedFrom, implementationType))
                                 errorManager.AddWrongPropertyImplementationTypeError(implementationName, property.Type.ToDisplayString(), ImplementationType);
 
-                        if (implementationType.Arity > 0)
+                        if (IsGeneric)
                             errorManager.AddImplementationGenericError(implementationName, ImplementationType, implementationType.Arity);
                         break;
                     case IMethodSymbol method: {
@@ -356,8 +356,14 @@ public sealed class Service : IEquatable<Service> {
                             if (!SymbolEqualityComparer.Default.Equals((method.ReturnType as INamedTypeSymbol)?.ConstructedFrom, implementationType))
                                 errorManager.AddWrongMethodImplementationTypeError(implementationName, method.ReturnType.ToDisplayString(), ImplementationType);
 
-                        if (method.Arity != implementationType.Arity)
-                            errorManager.AddMethodImplementationTypeParameterMismatchError(implementationName, method.Arity, implementationType.Arity);
+                        if (!IsGeneric) {
+                            if (method.Arity != 0)
+                                errorManager.AddMethodImplementationTypeParameterMismatchError(implementationName, method.Arity, 0);
+                        }
+                        else {
+                            if (method.Arity != implementationType.Arity)
+                                errorManager.AddMethodImplementationTypeParameterMismatchError(implementationName, method.Arity, implementationType.Arity);
+                        }
                         break;
                     }
                 }
@@ -467,8 +473,14 @@ public sealed class Service : IEquatable<Service> {
                 if ((implementation.ReturnType as ITypeParameterSymbol)?.Name != serviceType.DelegateInvokeMethod.ReturnType.Name)
                     errorManager.AddDelegateWrongReturnTypeError(methodName, implementation.ReturnType.ToDisplayString(), serviceType.DelegateInvokeMethod!.ReturnType.ToDisplayString());
 
-        if (implementation.Arity != serviceType.Arity)
-            errorManager.AddDelegateTypeParameterMismatchError(methodName, implementation.Arity, serviceType.Arity);
+        if (!IsGeneric) {
+            if (implementation.Arity != 0)
+                errorManager.AddDelegateTypeParameterMismatchError(methodName, implementation.Arity, 0);
+        }
+        else {
+            if (implementation.Arity != serviceType.Arity)
+                errorManager.AddDelegateTypeParameterMismatchError(methodName, implementation.Arity, serviceType.Arity);
+        }
     }
 
 

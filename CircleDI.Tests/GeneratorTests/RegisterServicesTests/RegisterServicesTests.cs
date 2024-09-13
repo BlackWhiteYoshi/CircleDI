@@ -2675,6 +2675,7 @@ public static class RegisterServicesTests {
         Assert.Equal("ServiceImplementation 'MyCode.TestService' does not exist or has no accessible constructor", diagnostics[0].GetMessage());
     }
 
+
     [Fact]
     public static Task RegisterServiceThatDerivesFromBaseClass() {
         const string input = """
@@ -2698,6 +2699,100 @@ public static class RegisterServicesTests {
             public sealed class DerivedClass : BaseClass {
                 public required DerivedClass Derived { get; init; }
             }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task RegisterServiceClosedGeneric() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService<string>>]
+            public sealed partial class TestProvider;
+
+            public sealed class TestService<T>;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task RegisterServiceClosedGenericWithImplementation() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService<string>>(Implementation = nameof(GetTestProvider))]
+            public sealed partial class TestProvider {
+                private static TestService<string> GetTestProvider() => new();
+            }
+
+            public sealed class TestService<T>;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task RegisterDelegateClosedGeneric() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Delegate<TestFunction<string>>(nameof(MyFunction))]
+            public sealed partial class TestProvider {
+                private static void MyFunction() { }
+            }
+
+            public delegate void TestFunction<string>();
 
             """;
 

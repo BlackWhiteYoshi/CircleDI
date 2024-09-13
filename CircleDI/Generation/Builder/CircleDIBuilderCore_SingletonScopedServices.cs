@@ -29,7 +29,7 @@ public partial struct CircleDIBuilderCore {
                 else if (service.CreationTimeTransitive == CreationTiming.Constructor)
                     builder.AppendInterpolation($"""
                         {indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {refOrEmpty}_{service.Name.AsFirstLower()};
-                        {indent}private {readonlyStr}global::{service.ImplementationType.AsClosedFullyQualified()} _{service.Name.AsFirstLower()};
+                        {indent}private {(!service.IsRefable ? readonlyStr : "")}global::{service.ImplementationType.AsClosedFullyQualified()} _{service.Name.AsFirstLower()};
 
 
                         """);

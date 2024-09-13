@@ -48,7 +48,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Implementation type: <see cref="global::MyCode.TestStruct"/>
     /// </summary>
     public ref global::MyCode.TestStruct TestStruct => ref _testStruct;
-    private readonly global::MyCode.TestStruct _testStruct;
+    private global::MyCode.TestStruct _testStruct;
 
     /// <summary>
     /// Lifetime: <see cref="global::CircleDIAttributes.SingletonAttribute{TService}">Singleton</see><br />
