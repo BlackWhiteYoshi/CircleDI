@@ -306,10 +306,10 @@ public static class BlazorTests {
                 public sealed partial class TestProvider;
 
                 public sealed class MyComponent : Microsoft.AspNetCore.Components.ComponentBase;
-                public sealed class MyComponent2 : Microsoft.AspNetCore.Components.ComponentBase, IDisposable;
+                public sealed class MyComponent2 : Microsoft.AspNetCore.Components.ComponentBase, System.IDisposable;
 
                 public sealed class MyComponent3 : Microsoft.AspNetCore.Components.ComponentBase;
-                public sealed class MyComponent4 : Microsoft.AspNetCore.Components.ComponentBase, IDisposable;
+                public sealed class MyComponent4 : Microsoft.AspNetCore.Components.ComponentBase, System.IDisposable;
             }
 
             namespace Microsoft.AspNetCore.Components {

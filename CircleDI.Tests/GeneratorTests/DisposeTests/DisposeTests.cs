@@ -23,7 +23,7 @@ public static class DisposeTests {
             [Singleton<ITestService, TestService>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IDisposable;
+            public interface ITestService : System.IDisposable;
             public sealed class TestService : ITestService;
 
             """;
@@ -45,7 +45,7 @@ public static class DisposeTests {
             [Scoped<ITestService, TestService>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IDisposable;
+            public interface ITestService : System.IDisposable;
             public sealed class TestService : ITestService;
 
             """;
@@ -67,7 +67,7 @@ public static class DisposeTests {
             [Transient<ITestService, TestService>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IDisposable;
+            public interface ITestService : System.IDisposable;
             public sealed class TestService : ITestService;
 
             """;
@@ -90,7 +90,7 @@ public static class DisposeTests {
             [Singleton<ITestService, TestService>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IAsyncDisposable;
+            public interface ITestService : System.IAsyncDisposable;
             public sealed class TestService : ITestService;
 
             """;
@@ -112,7 +112,7 @@ public static class DisposeTests {
             [Scoped<ITestService, TestService>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IAsyncDisposable;
+            public interface ITestService : System.IAsyncDisposable;
             public sealed class TestService : ITestService;
 
             """;
@@ -134,7 +134,7 @@ public static class DisposeTests {
             [Transient<ITestService, TestService>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IAsyncDisposable;
+            public interface ITestService : System.IAsyncDisposable;
             public sealed class TestService : ITestService;
 
             """;
@@ -157,7 +157,7 @@ public static class DisposeTests {
             [Singleton<ITestService, TestService>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IDisposable, IAsyncDisposable;
+            public interface ITestService : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService : ITestService;
 
             """;
@@ -179,7 +179,7 @@ public static class DisposeTests {
             [Scoped<ITestService, TestService>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IDisposable, IAsyncDisposable;
+            public interface ITestService : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService : ITestService;
 
             """;
@@ -201,7 +201,7 @@ public static class DisposeTests {
             [Transient<ITestService, TestService>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IDisposable, IAsyncDisposable;
+            public interface ITestService : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService : ITestService;
 
             """;
@@ -366,10 +366,10 @@ public static class DisposeTests {
             [Singleton<ITestService2, TestService2>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IDisposable, IAsyncDisposable;
+            public interface ITestService : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService : ITestService;
 
-            public interface ITestService2 : IDisposable, IAsyncDisposable;
+            public interface ITestService2 : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService2 : ITestService2;
 
             """;
@@ -392,10 +392,10 @@ public static class DisposeTests {
             [Transient<ITestService2, TestService2>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IDisposable, IAsyncDisposable;
+            public interface ITestService : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService : ITestService;
 
-            public interface ITestService2 : IDisposable, IAsyncDisposable;
+            public interface ITestService2 : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService2 : ITestService2;
 
             """;
@@ -418,7 +418,7 @@ public static class DisposeTests {
             [Singleton<ITestService, TestService>(CreationTime = CreationTiming.Lazy)]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IAsyncDisposable;
+            public interface ITestService : System.IAsyncDisposable;
             public sealed class TestService : ITestService;
 
             """;
@@ -441,10 +441,10 @@ public static class DisposeTests {
             [Singleton<ITestService2, TestService2>(CreationTime = CreationTiming.Lazy)]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IAsyncDisposable;
+            public interface ITestService : System.IAsyncDisposable;
             public sealed class TestService : ITestService;
 
-            public interface ITestService2 : IAsyncDisposable;
+            public interface ITestService2 : System.IAsyncDisposable;
             public sealed class TestService2 : ITestService2;
 
             """;
@@ -468,12 +468,12 @@ public static class DisposeTests {
             [Transient<ITestService2, TestService2>]
             public sealed partial class TestProvider;
 
-            public interface ITestService1 : IDisposable;
+            public interface ITestService1 : System.IDisposable;
             public sealed class TestService1 : ITestService1 {
                 public required ITestService2 TestService2 { private get; init; }
             }
 
-            public interface ITestService2 : IDisposable;
+            public interface ITestService2 : System.IDisposable;
             public sealed class TestService2 : ITestService2;
 
             """;
@@ -496,12 +496,12 @@ public static class DisposeTests {
             [Transient<ITestService2, TestService2>]
             public sealed partial class TestProvider;
 
-            public interface ITestService1 : IDisposable;
+            public interface ITestService1 : System.IDisposable;
             public sealed class TestService1 : ITestService1 {
                 public required ITestService2 TestService2 { private get; init; }
             }
 
-            public interface ITestService2 : IDisposable;
+            public interface ITestService2 : System.IDisposable;
             public sealed class TestService2 : ITestService2;
 
             """;
@@ -525,10 +525,10 @@ public static class DisposeTests {
             [Transient<ITestService2, TestService2>]
             public sealed partial class TestProvider;
 
-            public interface ITestService : IDisposable;
+            public interface ITestService : System.IDisposable;
             public sealed class TestService : ITestService;
 
-            public interface ITestService2 : IAsyncDisposable;
+            public interface ITestService2 : System.IAsyncDisposable;
             public sealed class TestService2 : ITestService2;
 
             """;
@@ -552,7 +552,7 @@ public static class DisposeTests {
             public sealed partial class TestProvider;
 
             public interface ITestService;
-            public sealed class TestService(ITestService2 testService2) : ITestService, IDisposable;
+            public sealed class TestService(ITestService2 testService2) : ITestService, System.IDisposable;
 
             public interface ITestService2;
             public sealed class TestService2 : ITestService2;
@@ -591,41 +591,41 @@ public static class DisposeTests {
             public sealed partial class TestProvider;
 
 
-            public interface ITestService1 : IDisposable;
+            public interface ITestService1 : System.IDisposable;
             public sealed class TestService1 : ITestService1;
 
-            public interface ITestService2 : IDisposable;
+            public interface ITestService2 : System.IDisposable;
             public sealed class TestService2 : ITestService2;
 
-            public interface ITestService3 : IAsyncDisposable;
+            public interface ITestService3 : System.IAsyncDisposable;
             public sealed class TestService3 : ITestService3;
 
-            public interface ITestService4 : IAsyncDisposable;
+            public interface ITestService4 : System.IAsyncDisposable;
             public sealed class TestService4 : ITestService4;
 
-            public interface ITestService5 : IDisposable, IAsyncDisposable;
+            public interface ITestService5 : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService5 : ITestService5;
 
-            public interface ITestService6 : IDisposable, IAsyncDisposable;
+            public interface ITestService6 : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService6 : ITestService6;
 
 
-            public interface ITestService7 : IDisposable;
+            public interface ITestService7 : System.IDisposable;
             public sealed class TestService7 : ITestService7;
 
-            public interface ITestService8 : IDisposable;
+            public interface ITestService8 : System.IDisposable;
             public sealed class TestService8 : ITestService8;
 
-            public interface ITestService9 : IAsyncDisposable;
+            public interface ITestService9 : System.IAsyncDisposable;
             public sealed class TestService9 : ITestService9;
 
-            public interface ITestService10 : IAsyncDisposable;
+            public interface ITestService10 : System.IAsyncDisposable;
             public sealed class TestService10 : ITestService10;
 
-            public interface ITestService11 : IDisposable, IAsyncDisposable;
+            public interface ITestService11 : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService11 : ITestService11;
 
-            public interface ITestService12 : IDisposable, IAsyncDisposable;
+            public interface ITestService12 : System.IDisposable, System.IAsyncDisposable;
             public sealed class TestService12 : ITestService12;
 
             """;

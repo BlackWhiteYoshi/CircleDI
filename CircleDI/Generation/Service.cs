@@ -381,8 +381,34 @@ public sealed class Service : IEquatable<Service> {
             PropertyDependencyList = [];
         }
 
-        IsDisposable = !noDispose && implementationType.HasInterface("IDisposable");
-        IsAsyncDisposable = !noDispose && implementationType.HasInterface("IAsyncDisposable");
+        IsDisposable = false;
+        IsAsyncDisposable = false;
+        if (!noDispose) {
+            foreach (INamedTypeSymbol interfaceSymbol in implementationType.AllInterfaces)
+                if (interfaceSymbol is INamedTypeSymbol {
+                    ContainingNamespace.ContainingNamespace.Name: "",
+                    ContainingNamespace.Name: "System",
+                    Name: "IDisposable",
+                    TypeKind: TypeKind.Interface,
+                    ContainingType: null,
+                    TypeParameters: []
+                }) {
+                    IsDisposable = true;
+                    break;
+                }
+            foreach (INamedTypeSymbol interfaceSymbol in implementationType.AllInterfaces)
+                if (interfaceSymbol is INamedTypeSymbol {
+                    ContainingNamespace.ContainingNamespace.Name: "",
+                    ContainingNamespace.Name: "System",
+                    Name: "IAsyncDisposable",
+                    TypeKind: TypeKind.Interface,
+                    ContainingType: null,
+                    TypeParameters: []
+                }) {
+                    IsAsyncDisposable = true;
+                    break;
+                }
+        }
 
         Dependencies = DependenciesDefaultIterator;
     }

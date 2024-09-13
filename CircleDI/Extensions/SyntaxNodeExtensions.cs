@@ -42,20 +42,6 @@ public static class SyntaxNodeExtensions {
         return default;
     }
 
-    /// <summary>
-    /// Checks if this symbol implements the given interface.
-    /// </summary>
-    /// <param name="symbol"></param>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    public static bool HasInterface(this ITypeSymbol symbol, string name) {
-        foreach (INamedTypeSymbol interfaceSymbol in symbol.AllInterfaces)
-            if (interfaceSymbol.Name == name)
-                return true;
-
-        return false;
-    }
-
 
     /// <summary>
     /// Searches for the applicable constructor by analyzing the available constructors at the given class/implementation.<br />

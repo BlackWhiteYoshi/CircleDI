@@ -275,7 +275,7 @@ public static class OtherTypesTests {
             [Singleton<TestService>(CreationTime = CreationTiming.Lazy)]
             public sealed partial class TestProvider;
 
-            public struct TestService : IDisposable;
+            public struct TestService : System.IDisposable;
 
             """;
 

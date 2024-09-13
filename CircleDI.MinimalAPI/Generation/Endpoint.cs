@@ -117,8 +117,9 @@ public sealed class Endpoint : IEquatable<Endpoint> {
                         ContainingNamespace.ContainingNamespace.Name: "AspNetCore",
                         ContainingNamespace.Name: "Builder",
                         Name: "RouteHandlerBuilder",
+                        TypeKind: TypeKind.Class,
                         ContainingType: null,
-                        TypeParameters: [],
+                        TypeParameters: []
                     }
                 }
             ]) {

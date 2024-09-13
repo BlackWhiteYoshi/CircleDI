@@ -1615,10 +1615,10 @@ public static class ServiceProviderTests {
             public sealed partial class TestProvider;
 
             public interface IServiceDispose;
-            public sealed class ServiceDispose : IServiceDispose, IDisposable;
+            public sealed class ServiceDispose : IServiceDispose, System.IDisposable;
 
             public interface IServiceDisposeAsync;
-            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, IAsyncDisposable;
+            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, System.IAsyncDisposable;
 
             """;
 
@@ -1650,10 +1650,10 @@ public static class ServiceProviderTests {
             public sealed partial class TestProvider;
 
             public interface IServiceDispose;
-            public sealed class ServiceDispose : IServiceDispose, IDisposable;
+            public sealed class ServiceDispose : IServiceDispose, System.IDisposable;
 
             public interface IServiceDisposeAsync;
-            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, IAsyncDisposable;
+            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, System.IAsyncDisposable;
 
             """;
 
@@ -1685,10 +1685,10 @@ public static class ServiceProviderTests {
             public sealed partial class TestProvider;
 
             public interface IServiceDispose;
-            public sealed class ServiceDispose : IServiceDispose, IDisposable;
+            public sealed class ServiceDispose : IServiceDispose, System.IDisposable;
 
             public interface IServiceDisposeAsync;
-            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, IAsyncDisposable;
+            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, System.IAsyncDisposable;
 
             """;
 
@@ -1722,10 +1722,10 @@ public static class ServiceProviderTests {
             public sealed partial class TestProvider;
 
             public interface IServiceDispose;
-            public sealed class ServiceDispose : IServiceDispose, IDisposable;
+            public sealed class ServiceDispose : IServiceDispose, System.IDisposable;
 
             public interface IServiceDisposeAsync;
-            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, IAsyncDisposable;
+            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, System.IAsyncDisposable;
 
             """;
 
@@ -1758,10 +1758,10 @@ public static class ServiceProviderTests {
             public sealed partial class TestProvider;
 
             public interface IServiceDispose;
-            public sealed class ServiceDispose : IServiceDispose, IDisposable;
+            public sealed class ServiceDispose : IServiceDispose, System.IDisposable;
 
             public interface IServiceDisposeAsync;
-            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, IAsyncDisposable;
+            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, System.IAsyncDisposable;
 
             """;
 
@@ -1794,10 +1794,10 @@ public static class ServiceProviderTests {
             public sealed partial class TestProvider;
 
             public interface IServiceDispose;
-            public sealed class ServiceDispose : IServiceDispose, IDisposable;
+            public sealed class ServiceDispose : IServiceDispose, System.IDisposable;
 
             public interface IServiceDisposeAsync;
-            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, IAsyncDisposable;
+            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, System.IAsyncDisposable;
 
             """;
 
@@ -1830,10 +1830,10 @@ public static class ServiceProviderTests {
             public sealed partial class TestProvider;
 
             public interface IServiceDispose;
-            public sealed class ServiceDispose : IServiceDispose, IDisposable;
+            public sealed class ServiceDispose : IServiceDispose, System.IDisposable;
 
             public interface IServiceDisposeAsync;
-            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, IAsyncDisposable;
+            public sealed class ServiceDisposeAsync : IServiceDisposeAsync, System.IAsyncDisposable;
 
             """;
 
@@ -1945,29 +1945,29 @@ public static class ServiceProviderTests {
             public sealed class Singleton : ISingleton;
 
             public interface ISingletonDisposable;
-            public sealed class SingletonDisposable : ISingletonDisposable, IDisposable;
+            public sealed class SingletonDisposable : ISingletonDisposable, System.IDisposable;
 
-            public interface ISingletonAsyncDisposable : IAsyncDisposable;
+            public interface ISingletonAsyncDisposable : System.IAsyncDisposable;
             public sealed class SingletonAsyncDisposable : ISingletonAsyncDisposable;
 
 
             public interface IScoped;
             public sealed class Scoped : IScoped;
 
-            public interface IScopedDisposable : IDisposable;
+            public interface IScopedDisposable : System.IDisposable;
             public sealed class ScopedDisposable : IScopedDisposable;
 
-            public interface IScopedAsyncDisposable : IAsyncDisposable;
+            public interface IScopedAsyncDisposable : System.IAsyncDisposable;
             public sealed class ScopedAsyncDisposable : IScopedAsyncDisposable;
 
 
             public interface ITransient;
             public sealed class Transient : ITransient;
 
-            public interface ITransientDisposable : IDisposable;
+            public interface ITransientDisposable : System.IDisposable;
             public sealed class TransientDisposable : ITransientDisposable;
 
-            public interface ITransientAsyncDisposable : IAsyncDisposable;
+            public interface ITransientAsyncDisposable : System.IAsyncDisposable;
             public sealed class TransientAsyncDisposable : ITransientAsyncDisposable;
 
 
