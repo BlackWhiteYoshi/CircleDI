@@ -102,5 +102,7 @@ public partial struct CircleDIBuilderCore {
 
         indent.DecreaseLevel(); // 1
         builder.AppendInterpolation($"{indent}}}\n\n\n");
+
+        serviceEnumerator.Dispose();
     }
 }

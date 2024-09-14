@@ -265,7 +265,7 @@ public partial struct CircleDIBuilderCore {
                     else
                         builder.AppendInterpolation($"{indent}if (!_{service.Name.AsFirstLower()}_hasValue)\n");
                     indent.IncreaseLevel(); // (+1)
-                    builder.AppendInterpolation($"{indent}lock (this)\n");
+                    builder.AppendInterpolation($"{indent}lock (_lock)\n");
                     indent.IncreaseLevel(); // (+2)
                 }
                 else {
@@ -274,7 +274,7 @@ public partial struct CircleDIBuilderCore {
                     else
                         builder.AppendInterpolation($"{indent}if (!_{serviceProvider.Identifier.Name.AsFirstLower()}._{service.Name.AsFirstLower()}_hasValue)\n");
                     indent.IncreaseLevel(); // (+1)
-                    builder.AppendInterpolation($"{indent}lock (_{serviceProvider.Identifier.Name.AsFirstLower()})\n");
+                    builder.AppendInterpolation($"{indent}lock (_{serviceProvider.Identifier.Name.AsFirstLower()}._lock)\n");
                     indent.IncreaseLevel(); // (+2)
                 }
             }
@@ -303,7 +303,7 @@ public partial struct CircleDIBuilderCore {
                     builder.AppendInterpolation($"{indent}if (!_{service.Name.AsFirstLower()}_hasValue)\n");
                 indent.IncreaseLevel(); // (+1)
 
-                builder.AppendInterpolation($"{indent}lock (this)\n");
+                builder.AppendInterpolation($"{indent}lock (_lock)\n");
                 indent.IncreaseLevel(); // (+2)
             }
 
@@ -495,9 +495,9 @@ public partial struct CircleDIBuilderCore {
 
         if (threadSafe) {
             if (appendServiceProviderField)
-                builder.AppendInterpolation($"{indent}lock (_{serviceProvider.Identifier.Name.AsFirstLower()}.{disposeStackName}) {{\n");
+                builder.AppendInterpolation($"{indent}lock (_{serviceProvider.Identifier.Name.AsFirstLower()}.{disposeStackName}_lock) {{\n");
             else
-                builder.AppendInterpolation($"{indent}lock ({disposeStackName}) {{\n");
+                builder.AppendInterpolation($"{indent}lock ({disposeStackName}_lock) {{\n");
             indent.IncreaseLevel(); // +1
         }
 

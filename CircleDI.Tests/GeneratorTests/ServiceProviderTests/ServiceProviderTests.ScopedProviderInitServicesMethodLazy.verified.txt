@@ -98,6 +98,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
         private global::MyCode.TestProvider _testProvider;
 
+        private readonly global::System.Object _lock = new();
+
         /// <summary>
         /// Constructs non-lazy scoped services. Should be called inside the constructor at the end.
         /// </summary>
@@ -118,7 +120,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.IScoped Scoped {
             get {
                 if (_scoped is null)
-                    lock (this)
+                    lock (_lock)
                         if (_scoped is null) {
                             _scoped = new global::MyCode.Scoped();
                         }
@@ -135,7 +137,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.Scoped2 Scoped2 {
             get {
                 if (_scoped2 is null)
-                    lock (this)
+                    lock (_lock)
                         if (_scoped2 is null) {
                             _scoped2 = new global::MyCode.Scoped2();
                         }

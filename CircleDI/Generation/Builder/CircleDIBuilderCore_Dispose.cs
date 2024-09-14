@@ -19,12 +19,20 @@ public partial struct CircleDIBuilderCore {
 
 
         // disposeList
-        if (hasDisposeList)
-            builder.AppendInterpolation($"{indent}private {readonlyStr}global::System.Collections.Generic.List<IDisposable> {DISPOSE_LIST};\n\n");
+        if (hasDisposeList) {
+            builder.AppendInterpolation($"{indent}private {readonlyStr}global::System.Collections.Generic.List<IDisposable> {DISPOSE_LIST};\n");
+            if (threadSafe)
+                builder.AppendInterpolation($"{indent}private readonly global::System.Object {DISPOSE_LIST}_lock = new();\n");
+            builder.Append('\n');
+        }
 
         // asyncDisposeList
-        if (hasAsyncDisposeList)
-            builder.AppendInterpolation($"{indent}private {readonlyStr}global::System.Collections.Generic.List<IAsyncDisposable> {ASYNC_DISPOSE_LIST};\n\n");
+        if (hasAsyncDisposeList) {
+            builder.AppendInterpolation($"{indent}private {readonlyStr}global::System.Collections.Generic.List<IAsyncDisposable> {ASYNC_DISPOSE_LIST};\n");
+            if (threadSafe)
+                builder.AppendInterpolation($"{indent}private readonly global::System.Object {ASYNC_DISPOSE_LIST}_lock = new();\n");
+            builder.Append('\n');
+        }
 
 
         uint singeltonDisposablesCount = 0;
@@ -252,7 +260,7 @@ public partial struct CircleDIBuilderCore {
 
     private void AppendDisposingDisposeList() {
         if (threadSafe) {
-            builder.AppendInterpolation($"{indent}lock ({DISPOSE_LIST})\n");
+            builder.AppendInterpolation($"{indent}lock ({DISPOSE_LIST}_lock)\n");
             indent.IncreaseLevel(); // 3
         }
 
@@ -268,7 +276,7 @@ public partial struct CircleDIBuilderCore {
 
     private void AppendDisposingAsyncDisposeListDiscard() {
         if (threadSafe) {
-            builder.AppendInterpolation($"{indent}lock ({ASYNC_DISPOSE_LIST})\n");
+            builder.AppendInterpolation($"{indent}lock ({ASYNC_DISPOSE_LIST}_lock)\n");
             indent.IncreaseLevel(); // 3
         }
 
@@ -294,7 +302,7 @@ public partial struct CircleDIBuilderCore {
 
     private void AppendDisposingAsyncDisposeListArray() {
         if (threadSafe) {
-            builder.AppendInterpolation($"{indent}lock ({ASYNC_DISPOSE_LIST})\n");
+            builder.AppendInterpolation($"{indent}lock ({ASYNC_DISPOSE_LIST}_lock)\n");
             indent.IncreaseLevel(); // 3
         }
 

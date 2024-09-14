@@ -54,7 +54,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService TestService {
         get {
             global::MyCode.TestService testService = new global::MyCode.TestService();
-            lock (_asyncDisposeList) {
+            lock (_asyncDisposeList_lock) {
                 _asyncDisposeList.Add(testService);
             }
             return testService;
@@ -88,12 +88,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
     private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
+    private readonly global::System.Object _asyncDisposeList_lock = new();
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
     /// </summary>
     public void Dispose() {
-        lock (_asyncDisposeList)
+        lock (_asyncDisposeList_lock)
             foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 if (asyncDisposable is IDisposable disposable)
                     disposable.Dispose();
@@ -108,7 +109,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         Task[] disposeTasks = new Task[_asyncDisposeList.Count];
 
         int index = 0;
-        lock (_asyncDisposeList)
+        lock (_asyncDisposeList_lock)
             foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 
@@ -168,7 +169,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestService TestService {
             get {
                 global::MyCode.TestService testService = new global::MyCode.TestService();
-                lock (_asyncDisposeList) {
+                lock (_asyncDisposeList_lock) {
                     _asyncDisposeList.Add(testService);
                 }
                 return testService;
@@ -206,12 +207,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
         private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
+        private readonly global::System.Object _asyncDisposeList_lock = new();
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
         /// </summary>
         public void Dispose() {
-            lock (_asyncDisposeList)
+            lock (_asyncDisposeList_lock)
                 foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     if (asyncDisposable is IDisposable disposable)
                         disposable.Dispose();
@@ -226,7 +228,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             Task[] disposeTasks = new Task[_asyncDisposeList.Count];
 
             int index = 0;
-            lock (_asyncDisposeList)
+            lock (_asyncDisposeList_lock)
                 foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 

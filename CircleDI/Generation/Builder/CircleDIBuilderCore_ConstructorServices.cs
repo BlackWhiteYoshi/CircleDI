@@ -31,6 +31,10 @@ public partial struct CircleDIBuilderCore {
                 builder.Append('\n');
         }
 
+        // lock object
+        if (hasLock)
+            builder.AppendInterpolation($"{indent}private readonly global::System.Object _lock = new();\n\n");
+
         // <summary> + method name
         AppendConstructionSummary();
         indent.IncreaseLevel(); // 2

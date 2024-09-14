@@ -584,6 +584,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         private readonly List<INamedTypeSymbol> path = [];
 
+
         /// <summary>
         /// Adds all services from the module to the service provider.
         /// </summary>

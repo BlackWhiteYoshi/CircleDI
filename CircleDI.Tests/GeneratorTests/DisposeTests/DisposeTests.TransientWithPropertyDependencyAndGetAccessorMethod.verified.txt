@@ -56,7 +56,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         global::MyCode.TestService1 testService1_1 = new global::MyCode.TestService1() {
             TestService2 = testService2
         };
-        lock (_disposeList) {
+        lock (_disposeList_lock) {
             _disposeList.Add(testService2);
             _disposeList.Add(testService1_1);
         }
@@ -71,7 +71,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITestService2 TestService2 {
         get {
             global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
-            lock (_disposeList) {
+            lock (_disposeList_lock) {
                 _disposeList.Add(testService2);
             }
             return testService2;
@@ -109,12 +109,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
     private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
+    private readonly global::System.Object _disposeList_lock = new();
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
     /// </summary>
     public void Dispose() {
-        lock (_disposeList)
+        lock (_disposeList_lock)
             foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
     }
@@ -123,7 +124,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// Disposes all disposable services instantiated by this provider asynchronously.
     /// </summary>
     public ValueTask DisposeAsync() {
-        lock (_disposeList)
+        lock (_disposeList_lock)
             foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
@@ -185,7 +186,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             global::MyCode.TestService1 testService1_1 = new global::MyCode.TestService1() {
                 TestService2 = testService2
             };
-            lock (_disposeList) {
+            lock (_disposeList_lock) {
                 _disposeList.Add(testService2);
                 _disposeList.Add(testService1_1);
             }
@@ -200,7 +201,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITestService2 TestService2 {
             get {
                 global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
-                lock (_disposeList) {
+                lock (_disposeList_lock) {
                     _disposeList.Add(testService2);
                 }
                 return testService2;
@@ -242,12 +243,13 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
         private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
+        private readonly global::System.Object _disposeList_lock = new();
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
         /// </summary>
         public void Dispose() {
-            lock (_disposeList)
+            lock (_disposeList_lock)
                 foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
         }
@@ -256,7 +258,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// Disposes all disposable services instantiated by this provider asynchronously.
         /// </summary>
         public ValueTask DisposeAsync() {
-            lock (_disposeList)
+            lock (_disposeList_lock)
                 foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
 

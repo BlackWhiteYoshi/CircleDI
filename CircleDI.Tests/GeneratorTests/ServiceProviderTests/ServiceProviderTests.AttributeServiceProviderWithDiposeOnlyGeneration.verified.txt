@@ -54,7 +54,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.IServiceDispose ServiceDispose {
         get {
             global::MyCode.ServiceDispose serviceDispose = new global::MyCode.ServiceDispose();
-            lock (_disposeList) {
+            lock (_disposeList_lock) {
                 _disposeList.Add(serviceDispose);
             }
             return serviceDispose;
@@ -69,7 +69,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync {
         get {
             global::MyCode.ServiceDisposeAsync serviceDisposeAsync = new global::MyCode.ServiceDisposeAsync();
-            lock (_asyncDisposeList) {
+            lock (_asyncDisposeList_lock) {
                 _asyncDisposeList.Add(serviceDisposeAsync);
             }
             return serviceDisposeAsync;
@@ -107,18 +107,20 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
     private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
+    private readonly global::System.Object _disposeList_lock = new();
 
     private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
+    private readonly global::System.Object _asyncDisposeList_lock = new();
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
     /// </summary>
     public void Dispose() {
-        lock (_disposeList)
+        lock (_disposeList_lock)
             foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
-        lock (_asyncDisposeList)
+        lock (_asyncDisposeList_lock)
             foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 if (asyncDisposable is IDisposable disposable)
                     disposable.Dispose();
@@ -180,7 +182,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.IServiceDispose ServiceDispose {
             get {
                 global::MyCode.ServiceDispose serviceDispose = new global::MyCode.ServiceDispose();
-                lock (_disposeList) {
+                lock (_disposeList_lock) {
                     _disposeList.Add(serviceDispose);
                 }
                 return serviceDispose;
@@ -195,7 +197,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync {
             get {
                 global::MyCode.ServiceDisposeAsync serviceDisposeAsync = new global::MyCode.ServiceDisposeAsync();
-                lock (_asyncDisposeList) {
+                lock (_asyncDisposeList_lock) {
                     _asyncDisposeList.Add(serviceDisposeAsync);
                 }
                 return serviceDisposeAsync;
@@ -237,18 +239,20 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
         private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
+        private readonly global::System.Object _disposeList_lock = new();
 
         private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
+        private readonly global::System.Object _asyncDisposeList_lock = new();
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
         /// </summary>
         public void Dispose() {
-            lock (_disposeList)
+            lock (_disposeList_lock)
                 foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
 
-            lock (_asyncDisposeList)
+            lock (_asyncDisposeList_lock)
                 foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     if (asyncDisposable is IDisposable disposable)
                         disposable.Dispose();

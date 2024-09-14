@@ -23,6 +23,8 @@ namespace MyCode;
 /// </para>
 /// </summary>
 public sealed partial class TestProvider : global::MyCode.ITestProvider, IServiceProvider {
+    private readonly global::System.Object _lock = new();
+
     /// <summary>
     /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
@@ -44,7 +46,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ISingleton GetSingleton() {
         if (_singleton is null)
-            lock (this)
+            lock (_lock)
                 if (_singleton is null) {
                     _singleton = new global::MyCode.Singleton();
                 }
@@ -132,6 +134,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
         private readonly global::MyCode.TestProvider _testProvider;
 
+        private readonly global::System.Object _lock = new();
+
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
@@ -147,7 +151,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.IScoped GetScoped() {
             if (_scoped is null)
-                lock (this)
+                lock (_lock)
                     if (_scoped is null) {
                         _scoped = new global::MyCode.Scoped();
                     }

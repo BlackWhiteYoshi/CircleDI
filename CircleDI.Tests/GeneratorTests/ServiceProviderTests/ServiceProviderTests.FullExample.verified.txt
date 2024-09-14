@@ -117,7 +117,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITransientDisposable TransientDisposable {
         get {
             global::MyCode.TransientDisposable transientDisposable = new global::MyCode.TransientDisposable();
-            lock (_disposeList) {
+            lock (_disposeList_lock) {
                 _disposeList.Add(transientDisposable);
             }
             return transientDisposable;
@@ -132,7 +132,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ITransientAsyncDisposable TransientAsyncDisposable {
         get {
             global::MyCode.TransientAsyncDisposable transientAsyncDisposable = new global::MyCode.TransientAsyncDisposable();
-            lock (_asyncDisposeList) {
+            lock (_asyncDisposeList_lock) {
                 _asyncDisposeList.Add(transientAsyncDisposable);
             }
             return transientAsyncDisposable;
@@ -206,8 +206,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
     private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
+    private readonly global::System.Object _disposeList_lock = new();
 
     private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
+    private readonly global::System.Object _asyncDisposeList_lock = new();
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
@@ -216,11 +218,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         ((IDisposable)_singletonDisposable).Dispose();
         _ = ((IAsyncDisposable)_singletonAsyncDisposable).DisposeAsync().Preserve();
 
-        lock (_disposeList)
+        lock (_disposeList_lock)
             foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
-        lock (_asyncDisposeList)
+        lock (_asyncDisposeList_lock)
             foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 if (asyncDisposable is IDisposable disposable)
                     disposable.Dispose();
@@ -234,7 +236,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public ValueTask DisposeAsync() {
         ((IDisposable)_singletonDisposable).Dispose();
 
-        lock (_disposeList)
+        lock (_disposeList_lock)
             foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
@@ -243,7 +245,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         disposeTasks[0] = ((IAsyncDisposable)_singletonAsyncDisposable).DisposeAsync().AsTask();
 
         int index = 1;
-        lock (_asyncDisposeList)
+        lock (_asyncDisposeList_lock)
             foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 
@@ -401,7 +403,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITransientDisposable TransientDisposable {
             get {
                 global::MyCode.TransientDisposable transientDisposable = new global::MyCode.TransientDisposable();
-                lock (_disposeList) {
+                lock (_disposeList_lock) {
                     _disposeList.Add(transientDisposable);
                 }
                 return transientDisposable;
@@ -416,7 +418,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::MyCode.ITransientAsyncDisposable TransientAsyncDisposable {
             get {
                 global::MyCode.TransientAsyncDisposable transientAsyncDisposable = new global::MyCode.TransientAsyncDisposable();
-                lock (_asyncDisposeList) {
+                lock (_asyncDisposeList_lock) {
                     _asyncDisposeList.Add(transientAsyncDisposable);
                 }
                 return transientAsyncDisposable;
@@ -514,8 +516,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
         private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
+        private readonly global::System.Object _disposeList_lock = new();
 
         private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
+        private readonly global::System.Object _asyncDisposeList_lock = new();
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
@@ -524,11 +528,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             ((IDisposable)_scopedDisposable).Dispose();
             _ = ((IAsyncDisposable)_scopedAsyncDisposable).DisposeAsync().Preserve();
 
-            lock (_disposeList)
+            lock (_disposeList_lock)
                 foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
 
-            lock (_asyncDisposeList)
+            lock (_asyncDisposeList_lock)
                 foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     if (asyncDisposable is IDisposable disposable)
                         disposable.Dispose();
@@ -542,7 +546,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public ValueTask DisposeAsync() {
             ((IDisposable)_scopedDisposable).Dispose();
 
-            lock (_disposeList)
+            lock (_disposeList_lock)
                 foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
 
@@ -551,7 +555,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             disposeTasks[0] = ((IAsyncDisposable)_scopedAsyncDisposable).DisposeAsync().AsTask();
 
             int index = 1;
-            lock (_asyncDisposeList)
+            lock (_asyncDisposeList_lock)
                 foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 

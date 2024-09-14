@@ -23,6 +23,8 @@ namespace MyCode;
 /// </para>
 /// </summary>
 public sealed partial class TestProvider : global::MyCode.ITestProvider, IServiceProvider {
+    private readonly global::System.Object _lock = new();
+
     /// <summary>
     /// Constructs non-lazy singleton services. Should be called inside the constructor at the end.
     /// </summary>
@@ -45,7 +47,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.ISingleton Singleton {
         get {
             if (_singleton is null)
-                lock (this)
+                lock (_lock)
                     if (_singleton is null) {
                         _singleton = new global::MyCode.Singleton();
                     }
@@ -62,7 +64,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public global::MyCode.Singleton2 Singleton2 {
         get {
             if (_singleton2 is null)
-                lock (this)
+                lock (_lock)
                     if (_singleton2 is null) {
                         _singleton2 = new global::MyCode.Singleton2();
                     }

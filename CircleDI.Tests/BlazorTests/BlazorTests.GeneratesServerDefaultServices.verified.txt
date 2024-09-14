@@ -172,6 +172,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         private readonly global::MyCode.TestProvider _testProvider;
         private readonly global::System.IServiceProvider _builtinServiceProvider;
 
+        private readonly global::System.Object _lock = new();
+
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
         /// </summary>
@@ -196,7 +198,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::Microsoft.JSInterop.IJSRuntime JSRuntime {
             get {
                 if (_jSRuntime is null)
-                    lock (this)
+                    lock (_lock)
                         if (_jSRuntime is null) {
                             _jSRuntime = GetJSRuntime();
                         }
@@ -213,7 +215,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::Microsoft.AspNetCore.Components.NavigationManager NavigationManager {
             get {
                 if (_navigationManager is null)
-                    lock (this)
+                    lock (_lock)
                         if (_navigationManager is null) {
                             _navigationManager = GetNavigationManager();
                         }
@@ -230,7 +232,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::Microsoft.AspNetCore.Components.Routing.INavigationInterception NavigationInterception {
             get {
                 if (_navigationInterception is null)
-                    lock (this)
+                    lock (_lock)
                         if (_navigationInterception is null) {
                             _navigationInterception = GetNavigationInterception();
                         }
@@ -247,7 +249,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::Microsoft.AspNetCore.Components.Routing.IScrollToLocationHash ScrollToLocationHash {
             get {
                 if (_scrollToLocationHash is null)
-                    lock (this)
+                    lock (_lock)
                         if (_scrollToLocationHash is null) {
                             _scrollToLocationHash = GetScrollToLocationHash();
                         }
@@ -264,7 +266,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::Microsoft.AspNetCore.Components.Web.IErrorBoundaryLogger ErrorBoundaryLogger {
             get {
                 if (_errorBoundaryLogger is null)
-                    lock (this)
+                    lock (_lock)
                         if (_errorBoundaryLogger is null) {
                             _errorBoundaryLogger = GetErrorBoundaryLogger();
                         }
@@ -281,7 +283,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::Microsoft.AspNetCore.Components.Infrastructure.ComponentStatePersistenceManager ComponentStatePersistenceManager {
             get {
                 if (_componentStatePersistenceManager is null)
-                    lock (this)
+                    lock (_lock)
                         if (_componentStatePersistenceManager is null) {
                             _componentStatePersistenceManager = GetComponentStatePersistenceManager();
                         }
@@ -298,7 +300,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::Microsoft.AspNetCore.Components.PersistentComponentState PersistentComponentState {
             get {
                 if (_persistentComponentState is null)
-                    lock (this)
+                    lock (_lock)
                         if (_persistentComponentState is null) {
                             _persistentComponentState = GetPersistentComponentState();
                         }
@@ -315,7 +317,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         public global::Microsoft.AspNetCore.Components.Forms.AntiforgeryStateProvider AntiforgeryStateProvider {
             get {
                 if (_antiforgeryStateProvider is null)
-                    lock (this)
+                    lock (_lock)
                         if (_antiforgeryStateProvider is null) {
                             _antiforgeryStateProvider = GetAntiforgeryStateProvider();
                         }

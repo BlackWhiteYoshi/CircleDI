@@ -381,7 +381,7 @@ public static class DisposeTests {
     }
 
     [Fact]
-    public static Task SingletonAndTransinent() {
+    public static Task SingletonAndTransient() {
         const string input = """
             using CircleDIAttributes;
 

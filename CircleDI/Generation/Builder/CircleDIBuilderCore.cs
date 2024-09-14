@@ -1,5 +1,6 @@
 ﻿using CircleDI.Defenitions;
 using CircleDI.Extensions;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -27,8 +28,9 @@ public partial struct CircleDIBuilderCore {
     private bool threadSafe;
 
     private string readonlyStr;
-    private bool hasDisposeList;
-    private bool hasAsyncDisposeList;
+    private bool hasLock;
+    private bool hasDisposeList = false;
+    private bool hasAsyncDisposeList = false;
 
     private bool isScopeProvider = false;
     public Indent indent = new();
@@ -52,29 +54,7 @@ public partial struct CircleDIBuilderCore {
         hasDisposeAsyncMethod = serviceProvider.HasDisposeAsyncMethod;
         threadSafe = serviceProvider.ThreadSafe;
 
-        readonlyStr = hasConstructor switch {
-            true => "",
-            false => "readonly "
-        };
-
-        hasDisposeList = false;
-        hasAsyncDisposeList = false;
-        if (generateDisposeMethods != DisposeGeneration.NoDisposing)
-            foreach (Service service in serviceProvider.TransientList) {
-                if (service.Lifetime is ServiceLifetime.TransientScoped)
-                    continue;
-
-                if (service.IsAsyncDisposable) {
-                    hasAsyncDisposeList = true;
-                    if (hasDisposeList)
-                        break;
-                }
-                else if (service.IsDisposable) {
-                    hasDisposeList = true;
-                    if (hasAsyncDisposeList)
-                        break;
-                }
-            }
+        InitializeTransitiveFields(serviceProvider.TransientList.Where(service => service.Lifetime is not ServiceLifetime.TransientScoped));
     }
 
     /// <summary>
@@ -92,28 +72,73 @@ public partial struct CircleDIBuilderCore {
         hasDisposeAsyncMethod = serviceProvider.HasDisposeAsyncMethodScope;
         threadSafe = serviceProvider.ThreadSafeScope;
 
+        InitializeTransitiveFields(serviceProvider.TransientList);
+    }
+
+    /// <summary>
+    /// Initializes the field <see cref="readonlyStr"/>, <see cref="hasLock"/>, <see cref="hasDisposeList"/> and <see cref="hasAsyncDisposeList"/>
+    /// </summary>
+    /// <param name="transientServiceList">TransientList with or without ServiceLifetime.TransientScoped services.</param>
+    [MemberNotNull(nameof(readonlyStr), nameof(hasLock))]
+    private void InitializeTransitiveFields(IEnumerable<Service> transientServiceList) {
         readonlyStr = hasConstructor switch {
             true => "",
             false => "readonly "
         };
 
+        hasLock = false;
+        if (threadSafe)
+            foreach (Service service in serviceList)
+                if (service.CreationTimeTransitive is CreationTiming.Lazy && service.Implementation.Type is not MemberType.Field) {
+                    hasLock = true;
+                    break;
+                }
+
         if (generateDisposeMethods == DisposeGeneration.NoDisposing) {
             hasDisposeList = false;
             hasAsyncDisposeList = false;
         }
-        else
-            if (!hasDisposeList || !hasAsyncDisposeList)
-                foreach (Service service in serviceProvider.TransientList)
-                    if (service.IsAsyncDisposable) {
-                        hasAsyncDisposeList = true;
-                        if (hasDisposeList)
-                            break;
+        else {
+            IEnumerator<Service> enumerator = transientServiceList.GetEnumerator();
+            switch ((hasDisposeList, hasAsyncDisposeList)) {
+                case (false, false):
+                    while (enumerator.MoveNext()) {
+                        Service service = enumerator.Current;
+                        if (service.IsAsyncDisposable) {
+                            hasAsyncDisposeList = true;
+                            goto hasAsyncDispose;
+                        }
+                        else if (service.IsDisposable) {
+                            hasDisposeList = true;
+                            goto hasDispose;
+                        }
                     }
-                    else if (service.IsDisposable) {
-                        hasDisposeList = true;
-                        if (hasAsyncDisposeList)
-                            break;
+                    break;
+                case (true, false):
+                    hasDispose:
+                    while (enumerator.MoveNext()) {
+                        Service service = enumerator.Current;
+                        if (service.IsAsyncDisposable) {
+                            hasAsyncDisposeList = true;
+                            goto default;
+                        }
                     }
+                    break;
+                case (false, true):
+                    hasAsyncDispose:
+                    while (enumerator.MoveNext()) {
+                        Service service = enumerator.Current;
+                        if (!service.IsAsyncDisposable && service.IsDisposable) {
+                            hasDisposeList = true;
+                            goto default;
+                        }
+                    }
+                    break;
+                default:
+                    enumerator.Dispose();
+                    break;
+            }
+        }
     }
 
 
