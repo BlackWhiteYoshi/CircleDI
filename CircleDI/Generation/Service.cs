@@ -173,22 +173,12 @@ public sealed class Service : IEquatable<Service> {
     /// Creates a data-object based on a service attribute (SingletonAttribute&lt;&gt;, ScopedAttribute&lt;&gt;, TransientAttribute&lt;&gt;, DelegateAttribute&lt;&gt;).
     /// </summary>
     /// <param name="module"></param>
+    /// <param name="thisType"></param>
     /// <param name="attributeData"></param>
     /// <param name="lifetime"></param>
     /// <param name="creationTimeProvider"></param>
     /// <param name="getAccessorProvider"></param>
-    [SetsRequiredMembers]
-    public Service(INamedTypeSymbol module, AttributeData attributeData, ServiceLifetime lifetime, CreationTiming creationTimeProvider, GetAccess getAccessorProvider, ErrorManager errorManager)
-        : this(module, module, attributeData, lifetime, creationTimeProvider, getAccessorProvider, errorManager) { }
-
-    /// <summary>
-    /// Creates a data-object based on a service attribute (SingletonAttribute&lt;&gt;, ScopedAttribute&lt;&gt;, TransientAttribute&lt;&gt;, DelegateAttribute&lt;&gt;).
-    /// </summary>
-    /// <param name="module"></param>
-    /// <param name="attributeData"></param>
-    /// <param name="lifetime"></param>
-    /// <param name="creationTimeProvider"></param>
-    /// <param name="getAccessorProvider"></param>
+    /// <param name="errorManager"></param>
     [SetsRequiredMembers]
     public Service(INamedTypeSymbol module, INamedTypeSymbol thisType, AttributeData attributeData, ServiceLifetime lifetime, CreationTiming creationTimeProvider, GetAccess getAccessorProvider, ErrorManager errorManager) {
         Debug.Assert(attributeData.AttributeClass?.TypeKind != TypeKind.Error == true || attributeData.AttributeClass?.TypeArguments.All((ITypeSymbol typeSymbol) => typeSymbol.TypeKind != TypeKind.Error) == true);

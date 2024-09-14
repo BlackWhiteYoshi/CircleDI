@@ -57,11 +57,9 @@ public partial struct CircleDIBuilderCore {
             false => "readonly "
         };
 
-        if (generateDisposeMethods == DisposeGeneration.NoDisposing) {
-            hasDisposeList = false;
-            hasAsyncDisposeList = false;
-        }
-        else
+        hasDisposeList = false;
+        hasAsyncDisposeList = false;
+        if (generateDisposeMethods != DisposeGeneration.NoDisposing)
             foreach (Service service in serviceProvider.TransientList) {
                 if (service.Lifetime is ServiceLifetime.TransientScoped)
                     continue;
@@ -104,17 +102,18 @@ public partial struct CircleDIBuilderCore {
             hasAsyncDisposeList = false;
         }
         else
-            foreach (Service service in serviceProvider.TransientList)
-                if (service.IsAsyncDisposable) {
-                    hasAsyncDisposeList = true;
-                    if (hasDisposeList)
-                        break;
-                }
-                else if (service.IsDisposable) {
-                    hasDisposeList = true;
-                    if (hasAsyncDisposeList)
-                        break;
-                }
+            if (!hasDisposeList || !hasAsyncDisposeList)
+                foreach (Service service in serviceProvider.TransientList)
+                    if (service.IsAsyncDisposable) {
+                        hasAsyncDisposeList = true;
+                        if (hasDisposeList)
+                            break;
+                    }
+                    else if (service.IsDisposable) {
+                        hasDisposeList = true;
+                        if (hasAsyncDisposeList)
+                            break;
+                    }
     }
 
 

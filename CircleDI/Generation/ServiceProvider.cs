@@ -466,122 +466,41 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         // adding services and default services
         {
-            // Default service ServiceProvider itself
-            TypeName serviceTypeServiceProvider = HasInterface ? InterfaceIdentifier : Identifier;
-            TypeName implementationTypeServiceProvider = Identifier;
-            bool hasServiceSelf = false;
-
-            // Default Service ServiceProvider.Scope self
-            TypeName serviceTypeScopeProvider = HasInterface ? InterfaceIdentifierScope : IdentifierScope;
-            TypeName implementationTypeScopeProvider = IdentifierScope;
-            bool hasServiceSelfScope = false;
-
-            ModuleRegistration moduleRegistration = new(this, generateScope, creationTimeMainProvider, creationTimeScopeProvider, getAccessorMainProvider, getAccessorScopeProvider);
+            Registration registration = new(this, generateScope, creationTimeMainProvider, creationTimeScopeProvider, getAccessorMainProvider, getAccessorScopeProvider) {
+                // Default service ServiceProvider itself
+                serviceTypeServiceProvider = HasInterface ? InterfaceIdentifier : Identifier,
+                implementationTypeServiceProvider = Identifier,
+                hasServiceSelf = false,
+                // Default Service ServiceProvider.Scope self
+                serviceTypeScopeProvider = HasInterface ? InterfaceIdentifierScope : IdentifierScope,
+                implementationTypeScopeProvider = IdentifierScope,
+                hasServiceSelfScope = false
+            };
 
             // add ServiceProvider as service parameter to ConstructorParameterList, it is important that it is the first member in the list
             if (generateScope)
                 ConstructorParameterListScope.Add(new ConstructorDependency() {
                     Name = Identifier.Name,
                     ServiceName = string.Empty,
-                    ServiceType = serviceTypeServiceProvider,
+                    ServiceType = registration.serviceTypeServiceProvider,
                     HasAttribute = true,
                     ByRef = RefKind.None
                 });
 
-            // register services [Singleton<>, Scoped<>, Transient<>, Delegate<>, Import<> attributes]
+            // register services [Singleton<>, Scoped<>, Transient<>, Delegate<>, Import<>] attributes
             IEnumerable<AttributeData> listedAttributes = serviceProviderScope switch {
                 null => serviceProvider.GetAttributes(),
                 _ => serviceProvider.GetAttributes().Concat(serviceProviderScope.GetAttributes())
             };
-            foreach (AttributeData attributeData in listedAttributes) {
-                ErrorManager.CurrentAttribute = attributeData;
-
-                INamedTypeSymbol? attribute = attributeData.AttributeClass;
-                if (attribute is not { ContainingNamespace: { Name: "CircleDIAttributes", ContainingNamespace.Name: "" }, ContainingType: null })
-                    continue;
-
-                if (attribute.TypeKind is TypeKind.Error || attribute.TypeArguments.Any((ITypeSymbol typeSymbol) => typeSymbol.TypeKind is TypeKind.Error)) {
-                    ErrorManager.AddInvalidServiceRegistrationError(Identifier, InterfaceIdentifier);
-                    continue;
-                }
-
-                switch (attribute.Name) {
-                    case "SingletonAttribute": {
-                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, ErrorManager);
-                        if (service.Name == string.Empty) // invalid service
-                            break;
-
-                        if (!service.IsGeneric)
-                            SingletonList.Add(service);
-                        else
-                            GenericSingletonList.Add(service);
-
-                        hasServiceSelf |= service.ServiceType == serviceTypeServiceProvider;
-
-                        // check for recursive cunstructor call
-                        if (service.ImplementationType == implementationTypeServiceProvider && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
-                            ErrorManager.AddEndlessRecursiveConstructorCallError(service.Name);
-                        break;
-                    }
-                    case "ScopedAttribute": {
-                        if (!generateScope)
-                            break;
-
-                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, ErrorManager);
-                        if (service.Name == string.Empty) // invalid service
-                            break;
-
-                        if (!service.IsGeneric)
-                            ScopedList.Add(service);
-                        else
-                            GenericScopedList.Add(service);
-
-                        hasServiceSelfScope |= service.ServiceType == serviceTypeScopeProvider;
-
-                        // check for recursive cunstructor call
-                        if (service.ImplementationType == implementationTypeScopeProvider && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
-                            ErrorManager.AddEndlessRecursiveConstructorCallScopeError(service.Name);
-                        break;
-                    }
-                    case "TransientAttribute": {
-                        Service service = new(serviceProvider, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, ErrorManager);
-                        if (service.Name == string.Empty) // invalid service
-                            break;
-
-                        if (!service.IsGeneric)
-                            TransientList.Add(service);
-                        else
-                            GenericTransientList.Add(service);
-                        break;
-                    }
-                    case "DelegateAttribute": {
-                        if (attributeData.ConstructorArguments.Length == 0)
-                            break;
-
-                        Service service = new(serviceProvider, attributeData, getAccessorScopeProvider, ErrorManager);
-                        if (service.Name == string.Empty) // invalid service
-                            break;
-
-                        if (!service.IsGeneric)
-                            DelegateList.Add(service);
-                        else
-                            GenericDelegateList.Add(service);
-                        break;
-                    }
-                    case "ImportAttribute": {
-                        moduleRegistration.RegisterServices(attributeData, serviceProvider);
-                        break;
-                    }
-                }
-            }
+            registration.RegisterAttributes(listedAttributes, serviceProvider);
 
             // Default service ServiceProvider itself
-            if (!hasServiceSelf)
+            if (!registration.hasServiceSelf)
                 SingletonList.Add(new Service() {
                     Lifetime = ServiceLifetime.Singleton,
                     Name = "Self",
-                    ServiceType = serviceTypeServiceProvider,
-                    ImplementationType = implementationTypeServiceProvider,
+                    ServiceType = registration.serviceTypeServiceProvider,
+                    ImplementationType = registration.implementationTypeServiceProvider,
                     Implementation = new ImplementationMember(MemberType.Field, "this", IsStatic: false, IsScoped: false),
                     CreationTime = creationTimeMainProvider,
                     CreationTimeTransitive = creationTimeMainProvider,
@@ -594,12 +513,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
             if (generateScope) {
                 // Default Service ServiceProvider.Scope self
-                if (!hasServiceSelfScope)
+                if (!registration.hasServiceSelfScope)
                     ScopedList.Add(new Service() {
                         Lifetime = ServiceLifetime.Scoped,
                         Name = "SelfScope",
-                        ServiceType = serviceTypeScopeProvider,
-                        ImplementationType = implementationTypeScopeProvider,
+                        ServiceType = registration.serviceTypeScopeProvider,
+                        ImplementationType = registration.implementationTypeScopeProvider,
                         Implementation = new ImplementationMember(MemberType.Field, "this", IsStatic: false, IsScoped: true),
                         CreationTime = creationTimeScopeProvider,
                         CreationTimeTransitive = creationTimeScopeProvider,
@@ -633,8 +552,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 CreateScope = new Service() {
                     Lifetime = ServiceLifetime.TransientSingleton,
                     Name = "MethodCreateScope",
-                    ServiceType = serviceTypeScopeProvider,
-                    ImplementationType = implementationTypeScopeProvider,
+                    ServiceType = registration.serviceTypeScopeProvider,
+                    ImplementationType = registration.implementationTypeScopeProvider,
                     CreationTime = CreationTiming.Lazy,
                     CreationTimeTransitive = CreationTiming.Lazy,
                     GetAccessor = GetAccess.Property,
@@ -652,7 +571,17 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// <summary>
     /// This type can add all services in a module.
     /// </summary>
-    private readonly struct ModuleRegistration(ServiceProvider serviceProvider, bool generateScope, CreationTiming creationTimeMainProvider, CreationTiming creationTimeScopeProvider, GetAccess getAccessorMainProvider, GetAccess getAccessorScopeProvider) {
+    private struct Registration(ServiceProvider serviceProvider, bool generateScope, CreationTiming creationTimeMainProvider, CreationTiming creationTimeScopeProvider, GetAccess getAccessorMainProvider, GetAccess getAccessorScopeProvider) {
+        // Default service ServiceProvider itself
+        public TypeName serviceTypeServiceProvider;
+        public TypeName implementationTypeServiceProvider;
+        public bool hasServiceSelf;
+
+        // Default Service ServiceProvider.Scope self
+        public TypeName serviceTypeScopeProvider;
+        public TypeName implementationTypeScopeProvider;
+        public bool hasServiceSelfScope;
+
         private readonly List<INamedTypeSymbol> path = [];
 
         /// <summary>
@@ -660,7 +589,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         /// </summary>
         /// <param name="importAttribute"></param>
         /// <param name="thisType">the type where the "this" keyword refers to.</param>
-        public readonly void RegisterServices(AttributeData importAttribute, INamedTypeSymbol thisType) {
+        public void RegisterModuleServices(AttributeData importAttribute, INamedTypeSymbol thisType) {
             INamedTypeSymbol attributeType = importAttribute.AttributeClass!;
 
             INamedTypeSymbol? module = attributeType.TypeArguments.Length switch {
@@ -830,94 +759,147 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             path.Add(module);
 
             try {
+                // register services [Singleton<>, Scoped<>, Transient<>, Delegate<>, Import<>] attributes
                 IEnumerable<AttributeData> listedAttributes = moduleScope switch {
                     null => module.GetAttributes(),
                     _ => module.GetAttributes().Concat(moduleScope.GetAttributes())
                 };
-                foreach (AttributeData attributeData in listedAttributes) {
-                    serviceProvider.ErrorManager.CurrentAttribute = attributeData;
-
-                    INamedTypeSymbol? attribute = attributeData.AttributeClass;
-                    if (attribute is not { ContainingNamespace: { Name: "CircleDIAttributes", ContainingNamespace.Name: "" }, ContainingType: null })
-                        continue;
-
-                    if (attribute.TypeKind is TypeKind.Error || attribute.TypeArguments.Any((ITypeSymbol typeSymbol) => typeSymbol.TypeKind is TypeKind.Error)) {
-                        serviceProvider.ErrorManager.AddInvalidServiceRegistrationError(serviceProvider.Identifier, serviceProvider.InterfaceIdentifier);
-                        continue;
-                    }
-
-                    switch (attribute.Name) {
-                        case "SingletonAttribute": {
-                            Service service = new(module, thisType, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, serviceProvider.ErrorManager) {
-                                ImportMode = importMode,
-                                Module = moduleTypeName
-                            };
-                            if (service.Name == string.Empty) // invalid service
-                                break;
-
-                            if (!service.IsGeneric)
-                                serviceProvider.SingletonList.Add(service);
-                            else
-                                serviceProvider.GenericSingletonList.Add(service);
-                            break;
-                        }
-                        case "ScopedAttribute": {
-                            if (!generateScope)
-                                break;
-
-                            Service service = new(module, thisType, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, serviceProvider.ErrorManager) {
-                                ImportMode = importMode,
-                                Module = moduleTypeName
-                            };
-                            if (service.Name == string.Empty) // invalid service
-                                break;
-
-                            if (!service.IsGeneric)
-                                serviceProvider.ScopedList.Add(service);
-                            else
-                                serviceProvider.GenericScopedList.Add(service);
-                            break;
-                        }
-                        case "TransientAttribute": {
-                            Service service = new(module, thisType, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, serviceProvider.ErrorManager) {
-                                ImportMode = importMode,
-                                Module = moduleTypeName
-                            };
-                            if (service.Name == string.Empty) // invalid service
-                                break;
-
-                            if (!service.IsGeneric)
-                                serviceProvider.TransientList.Add(service);
-                            else
-                                serviceProvider.GenericTransientList.Add(service);
-                            break;
-                        }
-                        case "DelegateAttribute": {
-                            if (attributeData.ConstructorArguments.Length == 0)
-                                break;
-
-                            Service service = new(module, attributeData, getAccessorScopeProvider, serviceProvider.ErrorManager) {
-                                ImportMode = importMode,
-                                Module = moduleTypeName
-                            };
-                            if (service.Name == string.Empty) // invalid service
-                                break;
-
-                            if (!service.IsGeneric)
-                                serviceProvider.DelegateList.Add(service);
-                            else
-                                serviceProvider.GenericDelegateList.Add(service);
-                            break;
-                        }
-                        case "ImportAttribute": {
-                            RegisterServices(attributeData, thisType);
-                            break;
-                        }
-                    }
-                }
+                RegisterAttributes(listedAttributes, module, thisType, importMode, moduleTypeName);
             }
             finally {
                 path.RemoveAt(path.Count - 1);
+            }
+        }
+
+
+        /// <summary>
+        /// <para>
+        /// Registers the given list of attributes [Singleton&lt;&gt;, Scoped&lt;&gt;, Transient&lt;&gt;, Delegate&lt;&gt;, Import&lt;&gt;]
+        /// </para>
+        /// <para>
+        /// Each registration involves to create a <see cref="Service"/> object and adding it to the corresponding list:<br />
+        /// [Singleton] -&gt; <see cref="SingletonList"/> or <see cref="GenericSingletonList"/><br />
+        /// [Scoped] -&gt; <see cref="ScopedList"/> or <see cref="GenericScopedList"/><br />
+        /// [Transient] -&gt; <see cref="TransientList"/> or <see cref="GenericTransientList"/><br />
+        /// [Delegate] -&gt; <see cref="DelegateList"/> or <see cref="GenericDelegateList"/><br />
+        /// [Import] -&gt; registration of the list of attributes of the given module
+        /// </para>
+        /// </summary>
+        /// <param name="listedAttributes"></param>
+        /// <param name="module"></param>
+        public void RegisterAttributes(IEnumerable<AttributeData> listedAttributes, INamedTypeSymbol module) => RegisterAttributes(listedAttributes, module, module, ImportMode.Auto, null);
+
+        /// <summary>
+        /// <para>
+        /// Registers the given list of attributes [Singleton&lt;&gt;, Scoped&lt;&gt;, Transient&lt;&gt;, Delegate&lt;&gt;, Import&lt;&gt;]
+        /// </para>
+        /// <para>
+        /// Each registration involves to create a <see cref="Service"/> object and adding it to the corresponding list:<br />
+        /// [Singleton] -&gt; <see cref="SingletonList"/> or <see cref="GenericSingletonList"/><br />
+        /// [Scoped] -&gt; <see cref="ScopedList"/> or <see cref="GenericScopedList"/><br />
+        /// [Transient] -&gt; <see cref="TransientList"/> or <see cref="GenericTransientList"/><br />
+        /// [Delegate] -&gt; <see cref="DelegateList"/> or <see cref="GenericDelegateList"/><br />
+        /// [Import] -&gt; registration of the list of attributes of the given module
+        /// </para>
+        /// </summary>
+        /// <param name="listedAttributes"></param>
+        /// <param name="module"></param>
+        /// <param name="thisType"></param>
+        /// <param name="importMode"></param>
+        /// <param name="moduleTypeName"></param>
+        public void RegisterAttributes(IEnumerable<AttributeData> listedAttributes, INamedTypeSymbol module, INamedTypeSymbol thisType, ImportMode importMode, TypeName? moduleTypeName) {
+            foreach (AttributeData attributeData in listedAttributes) {
+                serviceProvider.ErrorManager.CurrentAttribute = attributeData;
+
+                INamedTypeSymbol? attribute = attributeData.AttributeClass;
+                if (attribute is not { ContainingNamespace: { Name: "CircleDIAttributes", ContainingNamespace.Name: "" }, ContainingType: null })
+                    continue;
+
+                if (attribute.TypeKind is TypeKind.Error || attribute.TypeArguments.Any((ITypeSymbol typeSymbol) => typeSymbol.TypeKind is TypeKind.Error)) {
+                    serviceProvider.ErrorManager.AddInvalidServiceRegistrationError(serviceProvider.Identifier, serviceProvider.InterfaceIdentifier);
+                    continue;
+                }
+
+                switch (attribute.Name) {
+                    case "SingletonAttribute": {
+                        Service service = new(module, thisType, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, serviceProvider.ErrorManager) {
+                            ImportMode = importMode,
+                            Module = moduleTypeName
+                        };
+                        if (service.Name == string.Empty) // invalid service
+                            break;
+
+                        if (!service.IsGeneric)
+                            serviceProvider.SingletonList.Add(service);
+                        else
+                            serviceProvider.GenericSingletonList.Add(service);
+
+                        hasServiceSelf |= service.ServiceType == serviceTypeServiceProvider;
+
+                        // check for recursive cunstructor call
+                        if (service.ImplementationType == implementationTypeServiceProvider && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
+                            serviceProvider.ErrorManager.AddEndlessRecursiveConstructorCallError(service.Name);
+                        break;
+                    }
+                    case "ScopedAttribute": {
+                        if (!generateScope)
+                            break;
+
+                        Service service = new(module, thisType, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, serviceProvider.ErrorManager) {
+                            ImportMode = importMode,
+                            Module = moduleTypeName
+                        };
+                        if (service.Name == string.Empty) // invalid service
+                            break;
+
+                        if (!service.IsGeneric)
+                            serviceProvider.ScopedList.Add(service);
+                        else
+                            serviceProvider.GenericScopedList.Add(service);
+
+                        hasServiceSelfScope |= service.ServiceType == serviceTypeScopeProvider;
+
+                        // check for recursive cunstructor call
+                        if (service.ImplementationType == implementationTypeScopeProvider && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
+                            serviceProvider.ErrorManager.AddEndlessRecursiveConstructorCallScopeError(service.Name);
+                        break;
+                    }
+                    case "TransientAttribute": {
+                        Service service = new(module, thisType, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, serviceProvider.ErrorManager) {
+                            ImportMode = importMode,
+                            Module = moduleTypeName
+                        };
+                        if (service.Name == string.Empty) // invalid service
+                            break;
+
+                        if (!service.IsGeneric)
+                            serviceProvider.TransientList.Add(service);
+                        else
+                            serviceProvider.GenericTransientList.Add(service);
+                        break;
+                    }
+                    case "DelegateAttribute": {
+                        if (attributeData.ConstructorArguments.Length == 0)
+                            break;
+
+                        Service service = new(module, attributeData, getAccessorScopeProvider, serviceProvider.ErrorManager) {
+                            ImportMode = importMode,
+                            Module = moduleTypeName
+                        };
+                        if (service.Name == string.Empty) // invalid service
+                            break;
+
+                        if (!service.IsGeneric)
+                            serviceProvider.DelegateList.Add(service);
+                        else
+                            serviceProvider.GenericDelegateList.Add(service);
+                        break;
+                    }
+                    case "ImportAttribute": {
+                        RegisterModuleServices(attributeData, thisType);
+                        break;
+                    }
+                }
             }
         }
     }

@@ -56,10 +56,12 @@ public partial struct CircleDIBuilderCore {
                         singeltonAsyncDisposablesCount++;
                     else
                         singeltonDisposablesCount++;
+
                     AppendDispose(service);
                 }
                 else if (service.IsAsyncDisposable) {
                     singeltonAsyncDisposablesCount++;
+
                     if (service.CreationTimeTransitive == CreationTiming.Constructor)
                         builder.AppendInterpolation($"{indent}_ = ((IAsyncDisposable){service.AsServiceField()}).DisposeAsync().Preserve();\n");
                     else // CreationTiming.Lazy

@@ -568,6 +568,76 @@ public static class ImportTests {
 
 
     [Fact]
+    public static Task OverwriteDefaultServiceSelf() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import<ITestModule>]
+            public sealed partial class TestProvider;
+
+            public partial interface ITestProvider;
+
+            [Singleton<ITestProvider, TestProvider>(Name = "Me", Implementation = "this")]
+            public interface ITestModule;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
+    public static Task OverwriteDefaultServiceSelfScope() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import<ITestModule>]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope;
+            }
+
+            public partial interface ITestProvider {
+                public partial interface IScope;
+            }
+
+            [Scoped<ITestProvider.IScope, TestProvider.Scope>(Name = "Me", Implementation = "this")]
+            public interface ITestModule;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        return Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Fact]
     public static Task Recursive() {
         const string input = """
             using CircleDIAttributes;
@@ -660,5 +730,59 @@ public static class ImportTests {
         Assert.Single(diagnostics);
         Assert.Equal("CDI036", diagnostics[0].Id);
         Assert.Equal("Module cycle in ServiceProvider 'MyCode.TestProvider': ['MyCode.MyModule' -> 'MyCode.MyModule2' -> 'MyCode.MyModule']", diagnostics[0].GetMessage());
+    }
+
+    [Fact]
+    public static void OverwriteDefaultServiceSelfAsConstuctorCallFails() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import<ITestModule>]
+            public sealed partial class TestProvider;
+
+            public partial interface ITestProvider;
+
+            [Singleton<ITestProvider, TestProvider>(Name = "Me")]
+            public interface ITestModule;
+
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI004", diagnostics[0].Id);
+        Assert.Equal("Endless recursive constructor call in ServiceProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?", diagnostics[0].GetMessage());
+    }
+
+    [Fact]
+    public static void OverwriteDefaultServiceSelfScopeAsConstuctorCallFails() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import<ITestModule>]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope;
+            }
+
+            public partial interface ITestProvider {
+                public partial interface IScope;
+            }
+
+            [Scoped<ITestProvider.IScope, TestProvider.Scope>(Name = "Me")]
+            public interface ITestModule;
+
+            """;
+
+        _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
+
+        Assert.Single(diagnostics);
+        Assert.Equal("CDI005", diagnostics[0].Id);
+        Assert.Equal("Endless recursive constructor call in ScopedProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?", diagnostics[0].GetMessage());
     }
 }
