@@ -467,21 +467,23 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         // adding services and default services
         {
             // Default service ServiceProvider itself
-            TypeName implementationType = Identifier;
-            TypeName serviceType = HasInterface ? InterfaceIdentifier : implementationType;
+            TypeName serviceTypeServiceProvider = HasInterface ? InterfaceIdentifier : Identifier;
+            TypeName implementationTypeServiceProvider = Identifier;
             bool hasServiceSelf = false;
 
             // Default Service ServiceProvider.Scope self
-            TypeName implementationTypeScope = IdentifierScope;
-            TypeName serviceTypeScope = HasInterface ? InterfaceIdentifierScope : implementationTypeScope;
+            TypeName serviceTypeScopeProvider = HasInterface ? InterfaceIdentifierScope : IdentifierScope;
+            TypeName implementationTypeScopeProvider = IdentifierScope;
             bool hasServiceSelfScope = false;
+
+            ModuleRegistration moduleRegistration = new(this, generateScope, creationTimeMainProvider, creationTimeScopeProvider, getAccessorMainProvider, getAccessorScopeProvider);
 
             // add ServiceProvider as service parameter to ConstructorParameterList, it is important that it is the first member in the list
             if (generateScope)
                 ConstructorParameterListScope.Add(new ConstructorDependency() {
                     Name = Identifier.Name,
                     ServiceName = string.Empty,
-                    ServiceType = serviceType,
+                    ServiceType = serviceTypeServiceProvider,
                     HasAttribute = true,
                     ByRef = RefKind.None
                 });
@@ -503,21 +505,21 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     continue;
                 }
 
-                ModuleRegistration moduleRegistration = new(this, generateScope, creationTimeMainProvider, creationTimeScopeProvider, getAccessorMainProvider, getAccessorScopeProvider);
                 switch (attribute.Name) {
                     case "SingletonAttribute": {
                         Service service = new(serviceProvider, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, ErrorManager);
                         if (service.Name == string.Empty) // invalid service
                             break;
 
-                        hasServiceSelf |= service.ServiceType == serviceType;
                         if (!service.IsGeneric)
                             SingletonList.Add(service);
                         else
                             GenericSingletonList.Add(service);
 
+                        hasServiceSelf |= service.ServiceType == serviceTypeServiceProvider;
+
                         // check for recursive cunstructor call
-                        if (service.ImplementationType == implementationType && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
+                        if (service.ImplementationType == implementationTypeServiceProvider && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
                             ErrorManager.AddEndlessRecursiveConstructorCallError(service.Name);
                         break;
                     }
@@ -529,14 +531,15 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         if (service.Name == string.Empty) // invalid service
                             break;
 
-                        hasServiceSelfScope |= service.ServiceType == serviceTypeScope;
                         if (!service.IsGeneric)
                             ScopedList.Add(service);
                         else
                             GenericScopedList.Add(service);
 
+                        hasServiceSelfScope |= service.ServiceType == serviceTypeScopeProvider;
+
                         // check for recursive cunstructor call
-                        if (service.ImplementationType == implementationTypeScope && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
+                        if (service.ImplementationType == implementationTypeScopeProvider && service.Implementation.Type == MemberType.None && service.CreationTime == CreationTiming.Constructor)
                             ErrorManager.AddEndlessRecursiveConstructorCallScopeError(service.Name);
                         break;
                     }
@@ -566,7 +569,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         break;
                     }
                     case "ImportAttribute": {
-                        moduleRegistration.RegisterServices(attributeData);
+                        moduleRegistration.RegisterServices(attributeData, serviceProvider);
                         break;
                     }
                 }
@@ -577,8 +580,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 SingletonList.Add(new Service() {
                     Lifetime = ServiceLifetime.Singleton,
                     Name = "Self",
-                    ServiceType = serviceType,
-                    ImplementationType = implementationType,
+                    ServiceType = serviceTypeServiceProvider,
+                    ImplementationType = implementationTypeServiceProvider,
                     Implementation = new ImplementationMember(MemberType.Field, "this", IsStatic: false, IsScoped: false),
                     CreationTime = creationTimeMainProvider,
                     CreationTimeTransitive = creationTimeMainProvider,
@@ -595,8 +598,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     ScopedList.Add(new Service() {
                         Lifetime = ServiceLifetime.Scoped,
                         Name = "SelfScope",
-                        ServiceType = serviceTypeScope,
-                        ImplementationType = implementationTypeScope,
+                        ServiceType = serviceTypeScopeProvider,
+                        ImplementationType = implementationTypeScopeProvider,
                         Implementation = new ImplementationMember(MemberType.Field, "this", IsStatic: false, IsScoped: true),
                         CreationTime = creationTimeScopeProvider,
                         CreationTimeTransitive = creationTimeScopeProvider,
@@ -630,8 +633,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 CreateScope = new Service() {
                     Lifetime = ServiceLifetime.TransientSingleton,
                     Name = "MethodCreateScope",
-                    ServiceType = serviceTypeScope,
-                    ImplementationType = implementationTypeScope,
+                    ServiceType = serviceTypeScopeProvider,
+                    ImplementationType = implementationTypeScopeProvider,
                     CreationTime = CreationTiming.Lazy,
                     CreationTimeTransitive = CreationTiming.Lazy,
                     GetAccessor = GetAccess.Property,
@@ -656,7 +659,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         /// Adds all services from the module to the service provider.
         /// </summary>
         /// <param name="importAttribute"></param>
-        public readonly void RegisterServices(AttributeData importAttribute) {
+        /// <param name="thisType">the type where the "this" keyword refers to.</param>
+        public readonly void RegisterServices(AttributeData importAttribute, INamedTypeSymbol thisType) {
             INamedTypeSymbol attributeType = importAttribute.AttributeClass!;
 
             INamedTypeSymbol? module = attributeType.TypeArguments.Length switch {
@@ -718,6 +722,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     break;
                 }
                 case ImportMode.Service: {
+                    thisType = module;
+
                     {
                         if (serivceConstructor is null) {
                             serivceConstructor = module.FindConstructor(serviceProvider.ErrorManager);
@@ -745,6 +751,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             Dependencies = constructorDependencyList.Concat<Dependency>(propertyDependencyList)
                         });
                     }
+
                     if (moduleScope is not null) {
                         TypeName moduleTypeNameScope = new(moduleScope);
                         foreach (TypeName? argument in moduleTypeNameScope.TypeArgumentList)
@@ -780,9 +787,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             Dependencies = constructorDependencyList.Concat<Dependency>(propertyDependencyList)
                         });
                     }
+
                     break;
                 }
                 case ImportMode.Parameter: {
+                    thisType = module;
+
                     serviceProvider.ConstructorParameterList.Add(new ConstructorDependency() {
                         Name = module.Name,
                         ServiceName = string.Empty,
@@ -790,6 +800,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         HasAttribute = false,
                         ByRef = RefKind.None
                     });
+
                     if (moduleScope is not null)
                         serviceProvider.ConstructorParameterListScope.Add(new ConstructorDependency() {
                             Name = $"{module.Name}Scope",
@@ -798,6 +809,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             HasAttribute = false,
                             ByRef = RefKind.None
                         });
+
                     break;
                 }
                 default:
@@ -822,7 +834,6 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     null => module.GetAttributes(),
                     _ => module.GetAttributes().Concat(moduleScope.GetAttributes())
                 };
-
                 foreach (AttributeData attributeData in listedAttributes) {
                     serviceProvider.ErrorManager.CurrentAttribute = attributeData;
 
@@ -837,7 +848,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                     switch (attribute.Name) {
                         case "SingletonAttribute": {
-                            Service service = new(module, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, serviceProvider.ErrorManager) {
+                            Service service = new(module, thisType, attributeData, ServiceLifetime.Singleton, creationTimeMainProvider, getAccessorMainProvider, serviceProvider.ErrorManager) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
@@ -854,7 +865,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             if (!generateScope)
                                 break;
 
-                            Service service = new(module, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, serviceProvider.ErrorManager) {
+                            Service service = new(module, thisType, attributeData, ServiceLifetime.Scoped, creationTimeScopeProvider, getAccessorScopeProvider, serviceProvider.ErrorManager) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
@@ -868,7 +879,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             break;
                         }
                         case "TransientAttribute": {
-                            Service service = new(module, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, serviceProvider.ErrorManager) {
+                            Service service = new(module, thisType, attributeData, ServiceLifetime.Transient, CreationTiming.Lazy, getAccessorMainProvider, serviceProvider.ErrorManager) {
                                 ImportMode = importMode,
                                 Module = moduleTypeName
                             };
@@ -899,7 +910,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             break;
                         }
                         case "ImportAttribute": {
-                            RegisterServices(attributeData);
+                            RegisterServices(attributeData, thisType);
                             break;
                         }
                     }
