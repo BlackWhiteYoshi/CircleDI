@@ -166,8 +166,7 @@ public static class CircleDIBuilder {
             builder.AppendInterpolation($"{core.indent}global::{serviceProvider.InterfaceIdentifierScope.AsOpenFullyQualified()} CreateScope{serviceProvider.IdentifierScope.AsOpenGenerics()}(");
             foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
                 if (!dependency.HasAttribute)
-                    // if no attribute => dependency.ServiceType has value
-                    builder.AppendInterpolation($"global::{dependency.ServiceType!.AsClosedFullyQualified()} {dependency.Name}, ");
+                    builder.AppendInterpolation($"global::{dependency.ServiceType.AsClosedFullyQualified()} {dependency.Name}, ");
             if (builder[^1] == ' ')
                 builder.Length -= 2;
             builder.Append(");\n\n");

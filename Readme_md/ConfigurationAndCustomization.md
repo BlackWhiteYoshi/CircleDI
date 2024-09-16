@@ -290,6 +290,10 @@ Consequently, the diamond problem also leads to a naming conflict.
 
 [ImportMode](TypeTables.md#importmode-enum) applies always to both ServiceProvider and ScopedProvider, different [ImportModes](TypeTables.md#importmode-enum) for ServiceProvider and ScopedProvider is not supported.
 
+If the module implements *IDisposable*/*IAsyncDisposable* it will only be disposed when it is imported as service.  
+When it is imported as parameter, the function/object that creates the module should also handle the disposing.  
+A static import creates no object, so nothing to dispose.
+
 
 <br></br>
 ## Specific Attributes in Depth

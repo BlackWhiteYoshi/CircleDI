@@ -487,12 +487,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                     ByRef = RefKind.None
                 });
 
+
             // register services [Singleton<>, Scoped<>, Transient<>, Delegate<>, Import<>] attributes
             IEnumerable<AttributeData> listedAttributes = serviceProviderScope switch {
                 null => serviceProvider.GetAttributes(),
                 _ => serviceProvider.GetAttributes().Concat(serviceProviderScope.GetAttributes())
             };
             registration.RegisterAttributes(listedAttributes, serviceProvider);
+
 
             // Default service ServiceProvider itself
             if (!registration.hasServiceSelf)
@@ -534,13 +536,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 List<ConstructorDependency> constructorDependencyList;
                 List<PropertyDependency> propertyDependencyList;
                 if (serviceProviderScope is not null) {
-                    if (HasConstructorScope) {
-                        constructorDependencyList = serviceProviderScope.CreateConstructorDependencyList(ErrorManager) ?? [];
-                    }
-                    else
-                        // default constructorDependency
-                        constructorDependencyList = ConstructorParameterListScope;
-
+                    constructorDependencyList = HasConstructorScope switch {
+                        true => serviceProviderScope.CreateConstructorDependencyList(ErrorManager) ?? [],
+                        false => ConstructorParameterListScope // default constructorDependency
+                    };
                     propertyDependencyList = serviceProviderScope.CreatePropertyDependencyList(ErrorManager) ?? [];
                 }
                 else {
@@ -676,6 +675,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             CreationTime = CreationTiming.Constructor,
                             CreationTimeTransitive = CreationTiming.Constructor,
                             GetAccessor = GetAccess.Property,
+                            IsDisposable = module.ImplementsIDisposable(),
+                            IsAsyncDisposable = module.ImplementsIAsyncDisposable(),
                             ConstructorDependencyList = constructorDependencyList,
                             PropertyDependencyList = propertyDependencyList,
                             Dependencies = constructorDependencyList.Concat<Dependency>(propertyDependencyList)
@@ -712,6 +713,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             CreationTime = CreationTiming.Constructor,
                             CreationTimeTransitive = CreationTiming.Constructor,
                             GetAccessor = GetAccess.Property,
+                            IsDisposable = moduleScope.ImplementsIDisposable(),
+                            IsAsyncDisposable = moduleScope.ImplementsIAsyncDisposable(),
                             ConstructorDependencyList = constructorDependencyList,
                             PropertyDependencyList = propertyDependencyList,
                             Dependencies = constructorDependencyList.Concat<Dependency>(propertyDependencyList)

@@ -42,8 +42,8 @@ public partial struct CircleDIBuilderCore {
         // constructor parameters
         builder.Append('(');
         if (constructorParameterList.Count > 0) {
-            foreach (Dependency dependency in constructorParameterList)
-                builder.AppendInterpolation($"global::{(dependency.ServiceType ?? dependency.Service!.ServiceType).AsClosedFullyQualified()} {dependency.Name.AsFirstLower()}, ");
+            foreach (Dependency parameter in constructorParameterList)
+                builder.AppendInterpolation($"global::{parameter.ServiceType!.AsClosedFullyQualified()} {parameter.Name.AsFirstLower()}, ");
             builder.Length -= 2;
         }
         builder.Append(") {\n");
@@ -144,8 +144,8 @@ public partial struct CircleDIBuilderCore {
                 builder.AppendInterpolation($"{indent}[System.Diagnostics.CodeAnalysis.MemberNotNull(");
                 int startLength = builder.Length;
 
-                foreach (ConstructorDependency dependency in constructorParameterList)
-                    builder.AppendInterpolation($"nameof(_{dependency.Name.AsFirstLower()}), ");
+                foreach (Dependency parameter in constructorParameterList)
+                    builder.AppendInterpolation($"nameof(_{parameter.Name.AsFirstLower()}), ");
 
                 foreach (Service service in serviceList)
                     if (service.CreationTimeTransitive == CreationTiming.Constructor && service.Implementation.Type != MemberType.Field)

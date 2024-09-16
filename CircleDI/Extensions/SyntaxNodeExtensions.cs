@@ -44,6 +44,47 @@ public static class SyntaxNodeExtensions {
 
 
     /// <summary>
+    /// Iterates through all implemented interfaces of the given symbol and checks if it countains "System:IDisposable"
+    /// </summary>
+    /// <returns></returns>
+    public static bool ImplementsIDisposable(this INamedTypeSymbol typeSymbol) {
+        foreach (INamedTypeSymbol interfaceSymbol in typeSymbol.AllInterfaces)
+            if (interfaceSymbol is INamedTypeSymbol {
+                ContainingNamespace.ContainingNamespace.Name: "",
+                ContainingNamespace.Name: "System",
+                Name: "IDisposable",
+                TypeKind: TypeKind.Interface,
+                ContainingType: null,
+                TypeParameters.Length: 0
+            })
+                return true;
+
+        return false;
+    }
+
+    /// <summary>
+    /// Iterates through all implemented interfaces of the given symbol and checks if it countains "System:IAsyncDisposable"
+    /// </summary>
+    /// <returns></returns>
+    public static bool ImplementsIAsyncDisposable(this INamedTypeSymbol typeSymbol) {
+        foreach (INamedTypeSymbol interfaceSymbol in typeSymbol.AllInterfaces)
+            if (interfaceSymbol is INamedTypeSymbol {
+                ContainingNamespace.ContainingNamespace.Name: "",
+                ContainingNamespace.Name: "System",
+                Name: "IAsyncDisposable",
+                TypeKind: TypeKind.Interface,
+                ContainingType: null,
+                TypeParameters.Length: 0
+            })
+                return true;
+
+        return false;
+    }
+
+
+
+
+    /// <summary>
     /// Searches for the applicable constructor by analyzing the available constructors at the given class/implementation.<br />
     /// When no or multiple constructors are found an error will be created and null is returned.
     /// </summary>

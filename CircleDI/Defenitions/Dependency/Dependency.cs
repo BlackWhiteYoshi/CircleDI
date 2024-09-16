@@ -1,4 +1,5 @@
 ﻿using CircleDI.Generation;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CircleDI.Defenitions;
 
@@ -37,8 +38,10 @@ public abstract class Dependency {
     public required TypeName? ServiceType { get; init; }
 
     /// <summary>
-    /// Indicates if a [Dependency]-attribute is present.
+    /// <para>Indicates if a [Dependency]-attribute is present.</para>
+    /// <para>If this is false, it has no attribute to name the service, so <see cref="ServiceType"/> must be set.</para>
     /// </summary>
+    [MemberNotNullWhen(false, nameof(ServiceType))]
     public required bool HasAttribute { get; init; } = false;
 
 

@@ -95,9 +95,12 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
     /// If no ServiceProvider has "EndpointProvider" and one parameter has [Dependency], an error is reported instead.
     /// </para>
     /// </summary>
-    /// <param name="stringBuilderPool"></param>
     /// <param name="context"></param>
-    /// <param name="value"></param>
+    /// <param name="serviceProvider"></param>
+    /// <param name="genericServiceProvider"></param>
+    /// <param name="endpointList"></param>
+    /// <param name="stringBuilderPool"></param>
+    /// <param name="endpointErrorList"></param>
     private static void GenerateEndpointMethod(
             SourceProductionContext context,
             ImmutableArray<ServiceProviderWithEndpointFlag> serviceProvider,
@@ -223,7 +226,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                         }
                         builder.Append(' ');
                     }
-                    builder.AppendInterpolation($"global::{parameter.ServiceType!.AsClosedFullyQualified()} {parameter.Name}, ");
+                    builder.AppendInterpolation($"global::{parameter.ServiceType.AsClosedFullyQualified()} {parameter.Name}, ");
                 }
 
                 if (hasDependencyParameter)
