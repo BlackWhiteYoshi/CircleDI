@@ -399,7 +399,7 @@ public static class OtherTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI017", diagnostics[0].Id);
+        Assert.Equal("CDI025", diagnostics[0].Id);
         Assert.Equal("ServiceImplementation 'MyCode.ITest' does not exist or has no accessible constructor", diagnostics[0].GetMessage());
     }
 }

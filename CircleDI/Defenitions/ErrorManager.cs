@@ -68,7 +68,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(InterfaceTypeAndName, ServiceProviderAttribute.ToLocation()));
 
     private static DiagnosticDescriptor InterfaceTypeAndName { get; } = new(
-        id: "CDI040",
+        id: "CDI004",
         title: "InterfaceType and InterfaceName are incompatible",
         messageFormat: "InterfaceType and InterfaceName are not compatible, at most one property must be set.",
         category: "CircleDI",
@@ -80,7 +80,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(InterfaceNameIServiceProvider, ServiceProviderAttribute.ToLocation()));
 
     private static DiagnosticDescriptor InterfaceNameIServiceProvider { get; } = new(
-        id: "CDI035",
+        id: "CDI005",
         title: "InterfaceName is IServiceProvider",
         messageFormat: "InterfaceName 'IServiceProvider' is not allowed, it collides with 'System.IServiceProvider'",
         category: "CircleDI",
@@ -92,7 +92,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(ModuleCircle, ServiceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), string.Join("' -> '", circleList)]));
 
     private static DiagnosticDescriptor ModuleCircle { get; } = new(
-        id: "CDI036",
+        id: "CDI006",
         title: "Module circle",
         messageFormat: "Module cycle in ServiceProvider '{0}': ['{1}']",
         category: "CircleDI",
@@ -109,7 +109,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(EndlessRecursiveConstructorCall, CurrentAttribute.ToLocation(), [serviceName]));
 
     private static DiagnosticDescriptor EndlessRecursiveConstructorCall { get; } = new(
-        id: "CDI004",
+        id: "CDI007",
         title: "Endless recursive constructor call",
         messageFormat: "Endless recursive constructor call in ServiceProvider: Service '{0}' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?",
         category: "CircleDI",
@@ -121,7 +121,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(EndlessRecursiveConstructorCallScope, CurrentAttribute.ToLocation(), [serviceName]));
 
     private static DiagnosticDescriptor EndlessRecursiveConstructorCallScope { get; } = new(
-        id: "CDI005",
+        id: "CDI008",
         title: "Endless recursive constructor call in scope",
         messageFormat: "Endless recursive constructor call in ScopedProvider: Service '{0}' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?",
         category: "CircleDI",
@@ -132,7 +132,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(InvalidServiceRegistration, CurrentAttribute.ToLocation(), [serviceProviderIdentifier.CreateFullyQualifiedName(), interfaceIdentifier.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor InvalidServiceRegistration { get; } = new(
-        id: "CDI037",
+        id: "CDI009",
         title: "Invalid service registration",
         messageFormat: "Invalid type at service registration. If you are using a generated type like '{0}.Scope', '{1}' or '{1}.IScope', declare that type again, so it is available before generation.",
         category: "CircleDI",
@@ -143,7 +143,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(ServiceRegistrationTypeParameterMismatch, CurrentAttribute.ToLocation(), [interfaceIdentifier.CreateFullyQualifiedName(), implementationIdentifier.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor ServiceRegistrationTypeParameterMismatch { get; } = new(
-        id: "CDI041",
+        id: "CDI010",
         title: "Service registration type parameter mismatch",
         messageFormat: "Service registration type parameter mismatch at service '{0}' with implementation '{1}'. The number of type parameters must match and the type parameters must be open/unbound.",
         category: "CircleDI",
@@ -155,7 +155,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(TransientImplementationField, CurrentAttribute.ToLocation()));
 
     private static DiagnosticDescriptor TransientImplementationField { get; } = new(
-        id: "CDI006",
+        id: "CDI011",
         title: "Transient + Implementation field member is not allowed",
         messageFormat: "Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation",
         category: "CircleDI",
@@ -167,7 +167,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(TransientImplementationThis, CurrentAttribute.ToLocation()));
 
     private static DiagnosticDescriptor TransientImplementationThis { get; } = new(
-        id: "CDI007",
+        id: "CDI012",
         title: "Transient + Implementation = 'this'",
         messageFormat: "Transient + Implementation = 'this' is not allowed. Use Singleton or Scoped instead",
         category: "CircleDI",
@@ -179,7 +179,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(MissingImplementationMember, CurrentAttribute.ToLocation(), [serviceProviderName, implementationName]));
 
     private static DiagnosticDescriptor MissingImplementationMember { get; } = new(
-        id: "CDI008",
+        id: "CDI013",
         title: "Missing Implementation member",
         messageFormat: "No field, property or method with the name '{1}' in class '{0}' could be found",
         category: "CircleDI",
@@ -191,7 +191,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(WrongFieldImplementationType, CurrentAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor WrongFieldImplementationType { get; } = new(
-        id: "CDI009",
+        id: "CDI014",
         title: "Wrong field Implementation type",
         messageFormat: "Wrong type of field '{0}': '{1}' <-> '{2}' expected",
         category: "CircleDI",
@@ -203,7 +203,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(WrongPropertyImplementationType, CurrentAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor WrongPropertyImplementationType { get; } = new(
-        id: "CDI010",
+        id: "CDI015",
         title: "Wrong property Implementation type",
         messageFormat: "Wrong type of property '{0}': '{1}' <-> '{2}' expected",
         category: "CircleDI",
@@ -215,7 +215,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(ImplementationGeneric, CurrentAttribute.ToLocation(), [implementationName, service.CreateFullyQualifiedName(), serviceArity, serviceArity != 1 ? "s" : ""]));
 
     private static DiagnosticDescriptor ImplementationGeneric { get; } = new(
-        id: "CDI044",
+        id: "CDI016",
         title: "Implementation must be generic method",
         messageFormat: "Implementation '{0}' for type '{1}' must be a generic method with '{2}' type parameter{3}.",
         category: "CircleDI",
@@ -227,7 +227,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(WrongMethodImplementationType, CurrentAttribute.ToLocation(), [implementationName, actualType, expectedType.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor WrongMethodImplementationType { get; } = new(
-        id: "CDI011",
+        id: "CDI017",
         title: "Wrong method Implementation type",
         messageFormat: "Wrong return type of method '{0}': '{1}' <-> '{2}' expected",
         category: "CircleDI",
@@ -239,7 +239,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(MethodImplementationTypeParameterMismatch, CurrentAttribute.ToLocation(), [implementationName, methodArity, serviceArity]));
 
     private static DiagnosticDescriptor MethodImplementationTypeParameterMismatch { get; } = new(
-        id: "CDI042",
+        id: "CDI018",
         title: "Method Implementation type parameter mismatch",
         messageFormat: "Implementation Method '{0}' has the wrong number of type parameters: '{1}' <-> '{2}' expected",
         category: "CircleDI",
@@ -251,7 +251,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DelegateServiceIsNotDelegate, CurrentAttribute.ToLocation(), [serviceType.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor DelegateServiceIsNotDelegate { get; } = new(
-        id: "CDI012",
+        id: "CDI019",
         title: "Delegate service is not Delegate",
         messageFormat: "Delegate service '{0}' is not a Delegate type",
         category: "CircleDI",
@@ -263,7 +263,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(MissingDelegateImplementation, CurrentAttribute.ToLocation(), [serviceProviderName, implementationName]));
 
     private static DiagnosticDescriptor MissingDelegateImplementation { get; } = new(
-        id: "CDI013",
+        id: "CDI020",
         title: "Missing delegate implementation",
         messageFormat: "No method with the name '{1}' in class '{0}' could be found",
         category: "CircleDI",
@@ -275,7 +275,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DelegateWrongNumberOfParameters, CurrentAttribute.ToLocation(), [methodName, methodParameterNumber, delegateParameterNumber]));
 
     private static DiagnosticDescriptor DelegateWrongNumberOfParameters { get; } = new(
-        id: "CDI014",
+        id: "CDI021",
         title: "Delegate has wrong number of parameters",
         messageFormat: "Method '{0}' has wrong number of parameters: '{1}' <-> '{2}' expected",
         category: "CircleDI",
@@ -287,7 +287,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DelegateWrongParameterType, CurrentAttribute.ToLocation(), [methodName, methodParameterType, delegateParameterType, position]));
 
     private static DiagnosticDescriptor DelegateWrongParameterType { get; } = new(
-        id: "CDI015",
+        id: "CDI022",
         title: "Delegate has wrong parameter type",
         messageFormat: "Method '{0}' has wrong parameter type at position '{3}': '{1}' <-> '{2}' expected",
         category: "CircleDI",
@@ -299,7 +299,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DelegateWrongReturnType, CurrentAttribute.ToLocation(), [methodName, methodParameterType, delegateParameterType]));
 
     private static DiagnosticDescriptor DelegateWrongReturnType { get; } = new(
-        id: "CDI016",
+        id: "CDI023",
         title: "Delegate has wrong return type",
         messageFormat: "Method '{0}' has wrong return type: '{1}' <-> '{2}' expected",
         category: "CircleDI",
@@ -311,7 +311,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DelegateTypeParameterMismatch, CurrentAttribute.ToLocation(), [methodName, methodArity, serviceArity]));
 
     private static DiagnosticDescriptor DelegateTypeParameterMismatch { get; } = new(
-        id: "CDI043",
+        id: "CDI024",
         title: "Delegate type parameter mismatch",
         messageFormat: "Method '{0}' has the wrong number of type parameters: '{1}' <-> '{2}' expected",
         category: "CircleDI",
@@ -323,7 +323,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(MissingClassOrConstructor, CurrentAttribute.ToLocation(), [implementationType]));
 
     private static DiagnosticDescriptor MissingClassOrConstructor { get; } = new(
-        id: "CDI017",
+        id: "CDI025",
         title: "Missing class or constructor",
         messageFormat: "ServiceImplementation '{0}' does not exist or has no accessible constructor",
         category: "CircleDI",
@@ -340,7 +340,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
     }
 
     private static DiagnosticDescriptor MissingConstructorAttributes { get; } = new(
-        id: "CDI018",
+        id: "CDI026",
         title: "Missing ConstructorAttributes",
         messageFormat: "No ConstructorAttribute at ServiceImplementation '{0}', but there are multiple constructors",
         category: "CircleDI",
@@ -368,7 +368,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
     }
 
     private static DiagnosticDescriptor MultipleConstructorAttributes { get; } = new(
-        id: "CDI019",
+        id: "CDI027",
         title: "Multiple ConstructorAttributes",
         messageFormat: "Multiple ConstructorAttributes at ServiceImplementation '{0}', there must be exactly one when there are multiple constructors",
         category: "CircleDI",
@@ -390,7 +390,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
     }
 
     private static DiagnosticDescriptor MissingSetAccessor { get; } = new(
-        id: "CDI020",
+        id: "CDI028",
         title: "Missing set accessor",
         messageFormat: "No set/init accessor at Property '{0}'",
         category: "CircleDI",
@@ -406,7 +406,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DependencyUnregistered, ServiceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor DependencyUnregistered { get; } = new(
-        id: "CDI021",
+        id: "CDI029",
         title: "Dependency unregistered",
         messageFormat: "Unregistered dependency at Service '{0}' with type '{1}'",
         category: "CircleDI",
@@ -418,7 +418,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DependencyInterfaceUndeclared, ServiceProviderAttribute.ToLocation(), [dependencyServiceIdentifier.CreateFullyQualifiedName(), namspace, interfaceType]));
 
     private static DiagnosticDescriptor DependencyInterfaceUndeclared { get; } = new(
-        id: "CDI022",
+        id: "CDI030",
         title: "Dependency Interface unregistered",
         messageFormat: "Unregistered dependency '{0}' has the same identifier as generated interface type '{1}.{0}', only missing the namespace. If you mean this generated type, you can correct the namespace by just declaring the interface type in namespace '{1}': \"public partial interface {2};\"",
         category: "CircleDI",
@@ -430,7 +430,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DependencyAmbiguous, ServiceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName(), string.Join("\", \"", servicesWithSameType), isParameter ? "parameter" : "property"]));
 
     private static DiagnosticDescriptor DependencyAmbiguous { get; } = new(
-        id: "CDI023",
+        id: "CDI031",
         title: "Dependency ambiguous",
         messageFormat: "Ambiguous dependency at Service '{0}' with type '{1}': There are multiple Services registered for this type: [\"{2}\"]. Use the '[Dependency(Name=\"...\")]'-attribute on the {3} to choose one specific service",
         category: "CircleDI",
@@ -442,7 +442,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DependencyNamedUnregistered, ServiceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier]));
 
     private static DiagnosticDescriptor DependencyNamedUnregistered { get; } = new(
-        id: "CDI024",
+        id: "CDI032",
         title: "Dependency named unregistered",
         messageFormat: "Unregistered named dependency at Service '{0}' with name \"{1}\"",
         category: "CircleDI",
@@ -454,7 +454,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DependencyCircle, ServiceProviderAttribute.ToLocation(), [string.Join("' -> '", circleList)]));
 
     private static DiagnosticDescriptor DependencyCircle { get; } = new(
-        id: "CDI025",
+        id: "CDI033",
         title: "Dependency circle",
         messageFormat: "Circular dependency unresolvable: ['{0}']. Only singleton and scoped dependencies injected as properties can be resolved circular",
         category: "CircleDI",
@@ -466,7 +466,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DependencyLifetimeScope, ServiceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor DependencyLifetimeScope { get; } = new(
-        id: "CDI026",
+        id: "CDI034",
         title: "Dependency Lifetime: Singleton on Scoped",
         messageFormat: "Lifetime Violation: Singleton Service '{0}' has Scoped dependency '{1}'",
         category: "CircleDI",
@@ -478,7 +478,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DependencyLifetimeTransient, ServiceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor DependencyLifetimeTransient { get; } = new(
-        id: "CDI027",
+        id: "CDI035",
         title: "Dependency Lifetime: Singleton on Transient-Scoped",
         messageFormat: "Lifetime Violation: Singleton Service '{0}' has Transient-Scoped dependency '{1}'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped",
         category: "CircleDI",
@@ -490,7 +490,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DependencyLifetimeDelegate, ServiceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor DependencyLifetimeDelegate { get; } = new(
-        id: "CDI038",
+        id: "CDI036",
         title: "Dependency Lifetime: Singleton on Delegate-Scoped",
         messageFormat: "Lifetime Violation: Singleton Service '{0}' has Delegate-Scoped dependency '{1}'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.",
         category: "CircleDI",
@@ -502,7 +502,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(DependencyLifetimeAllServices, ServiceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName(), string.Join("\", \"", servicesWithSameType)]));
 
     private static DiagnosticDescriptor DependencyLifetimeAllServices { get; } = new(
-        id: "CDI028",
+        id: "CDI037",
         title: "Dependency Lifetime: Multiple servcies, but all invalid",
         messageFormat: "Lifetime Violation: Singleton Service '{0}' has dependency with type '{1}' and there are multiple services of that type, but they are all invalid (Scoped or Transient-Scoped): [\"{2}\"]",
         category: "CircleDI",
@@ -514,7 +514,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(ScopedProviderUnregistered, ServiceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor ScopedProviderUnregistered { get; } = new(
-        id: "CDI030",
+        id: "CDI038",
         title: "ScopedProvider Dependency unregistered",
         messageFormat: "Unregistered dependency at '{0}.Scope' with type '{1}'",
         category: "CircleDI",
@@ -526,7 +526,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(ScopedProviderAmbiguous, ServiceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName(), string.Join("\", \"", servicesWithSameType), isParameter ? "parameter" : "property"]));
 
     private static DiagnosticDescriptor ScopedProviderAmbiguous { get; } = new(
-        id: "CDI031",
+        id: "CDI039",
         title: "Dependency ambiguous",
         messageFormat: "Ambiguous dependency at '{0}.Scope' with type '{1}': There are multiple Services registered for this type: [\"{2}\"]. Use the '[Dependency(Name=\"...\")]'-attribute on the {3} to choose one specific service",
         category: "CircleDI",
@@ -538,7 +538,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(ScopedProviderNamedUnregistered, ServiceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier]));
 
     private static DiagnosticDescriptor ScopedProviderNamedUnregistered { get; } = new(
-        id: "CDI032",
+        id: "CDI040",
         title: "Dependency named unregistered",
         messageFormat: "Unregistered named dependency at '{0}.Scope' with name \"{1}\"",
         category: "CircleDI",
@@ -550,7 +550,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(ScopedProviderLifetimeScope, ServiceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor ScopedProviderLifetimeScope { get; } = new(
-        id: "CDI033",
+        id: "CDI041",
         title: "Dependency Lifetime: ScopedProvider on Scoped",
         messageFormat: "Lifetime Violation: ScopedProvider '{0}.Scope' has Scoped dependency '{1}'",
         category: "CircleDI",
@@ -562,7 +562,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(ScopedProviderLifetimeTransient, ServiceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor ScopedProviderLifetimeTransient { get; } = new(
-        id: "CDI034",
+        id: "CDI042",
         title: "Dependency Lifetime: ScopedProvider on Transient-Scoped",
         messageFormat: "Lifetime Violation: ScopedProvider '{0}.Scope' has Transient-Scoped dependency '{1}'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped",
         category: "CircleDI",
@@ -574,7 +574,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         => ErrorList.Add(Diagnostic.Create(ScopedProviderLifetimeDelegate, ServiceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName()]));
 
     private static DiagnosticDescriptor ScopedProviderLifetimeDelegate { get; } = new(
-        id: "CDI039",
+        id: "CDI043",
         title: "Dependency Lifetime: ScopedProvider on Delegate-Scoped",
         messageFormat: "Lifetime Violation: ScopedProvider '{0}.Scope' has Delegate-Scoped dependency '{1}'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.",
         category: "CircleDI",

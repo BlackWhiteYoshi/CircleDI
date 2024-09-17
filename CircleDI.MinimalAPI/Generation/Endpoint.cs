@@ -61,16 +61,16 @@ public sealed class Endpoint : IEquatable<Endpoint> {
     public required ParameterAttribute[]?[] ParameterAttributesList { get; init; }
 
 
-    public EndpointDiagnosticErrorManager ErrorManager { get; private set; }
+    public EndpointErrorManager ErrorManager { get; private set; }
 
 
-    public Endpoint(AttributeData attribute) => ErrorManager = new EndpointDiagnosticErrorManager(attribute, []);
+    public Endpoint(AttributeData attribute) => ErrorManager = new EndpointErrorManager(attribute, []);
 
     [SetsRequiredMembers]
     public Endpoint(GeneratorAttributeSyntaxContext syntaxContext, List<Diagnostic> endpointErrorList) {
         Debug.Assert(syntaxContext.Attributes.Length > 0);
         AttributeData attribute = syntaxContext.Attributes[0];
-        ErrorManager = new EndpointDiagnosticErrorManager(attribute, endpointErrorList);
+        ErrorManager = new EndpointErrorManager(attribute, endpointErrorList);
         IMethodSymbol method = (IMethodSymbol)syntaxContext.TargetSymbol;
 
         MethodHandler = new MethodName(method);

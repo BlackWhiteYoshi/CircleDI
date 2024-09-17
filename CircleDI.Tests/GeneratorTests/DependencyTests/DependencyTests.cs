@@ -591,7 +591,7 @@ public static class DependencyTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI018", diagnostics[0].Id);
+        Assert.Equal("CDI026", diagnostics[0].Id);
         Assert.Equal("No ConstructorAttribute at ServiceImplementation 'MyCode.TestService', but there are multiple constructors", diagnostics[0].GetMessage());
     }
 
@@ -623,7 +623,7 @@ public static class DependencyTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI019", diagnostics[0].Id);
+        Assert.Equal("CDI027", diagnostics[0].Id);
         Assert.Equal("Multiple ConstructorAttributes at ServiceImplementation 'MyCode.TestService', there must be exactly one when there are multiple constructors", diagnostics[0].GetMessage());
     }
 
@@ -795,7 +795,7 @@ public static class DependencyTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI020", diagnostics[0].Id);
+        Assert.Equal("CDI028", diagnostics[0].Id);
         Assert.Equal("No set/init accessor at Property 'MyCode.TestService.Self'", diagnostics[0].GetMessage());
     }
 
@@ -1157,7 +1157,7 @@ public static class DependencyTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI025", diagnostics[0].Id);
+        Assert.Equal("CDI033", diagnostics[0].Id);
         Assert.Equal("Circular dependency unresolvable: ['Service1' -> 'Service3' -> 'Service1']. Only singleton and scoped dependencies injected as properties can be resolved circular", diagnostics[0].GetMessage());
     }
 }

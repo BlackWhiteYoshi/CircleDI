@@ -313,7 +313,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI008", diagnostics[0].Id);
+        Assert.Equal("CDI013", diagnostics[0].Id);
         Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
     }
 
@@ -373,7 +373,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI008", diagnostics[0].Id);
+        Assert.Equal("CDI013", diagnostics[0].Id);
         Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
     }
 
@@ -434,7 +434,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI008", diagnostics[0].Id);
+        Assert.Equal("CDI013", diagnostics[0].Id);
         Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
     }
 
@@ -494,7 +494,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI008", diagnostics[0].Id);
+        Assert.Equal("CDI013", diagnostics[0].Id);
         Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
     }
 
@@ -555,7 +555,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI008", diagnostics[0].Id);
+        Assert.Equal("CDI013", diagnostics[0].Id);
         Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
     }
 
@@ -615,7 +615,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI008", diagnostics[0].Id);
+        Assert.Equal("CDI013", diagnostics[0].Id);
         Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
     }
 
@@ -1554,7 +1554,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI007", diagnostics[0].Id);
+        Assert.Equal("CDI012", diagnostics[0].Id);
         Assert.Equal("Transient + Implementation = 'this' is not allowed. Use Singleton or Scoped instead", diagnostics[0].GetMessage());
     }
 
@@ -1579,7 +1579,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI006", diagnostics[0].Id);
+        Assert.Equal("CDI011", diagnostics[0].Id);
         Assert.Equal("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation", diagnostics[0].GetMessage());
     }
 
@@ -1606,7 +1606,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI006", diagnostics[0].Id);
+        Assert.Equal("CDI011", diagnostics[0].Id);
         Assert.Equal("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation", diagnostics[0].GetMessage());
     }
 
@@ -1631,7 +1631,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI006", diagnostics[0].Id);
+        Assert.Equal("CDI011", diagnostics[0].Id);
         Assert.Equal("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation", diagnostics[0].GetMessage());
     }
 
@@ -1658,7 +1658,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI006", diagnostics[0].Id);
+        Assert.Equal("CDI011", diagnostics[0].Id);
         Assert.Equal("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation", diagnostics[0].GetMessage());
     }
 
@@ -1991,7 +1991,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI037", diagnostics[0].Id);
+        Assert.Equal("CDI009", diagnostics[0].Id);
         Assert.Equal("Invalid type at service registration. If you are using a generated type like 'MyCode.TestProvider.Scope', 'MyCode.ITestProvider' or 'MyCode.ITestProvider.IScope', declare that type again, so it is available before generation.", diagnostics[0].GetMessage());
     }
 
@@ -2014,7 +2014,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI017", diagnostics[0].Id);
+        Assert.Equal("CDI025", diagnostics[0].Id);
         Assert.Equal("ServiceImplementation 'MyCode.TestService' does not exist or has no accessible constructor", diagnostics[0].GetMessage());
     }
 
@@ -2203,7 +2203,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI004", diagnostics[0].Id);
+        Assert.Equal("CDI007", diagnostics[0].Id);
         Assert.Equal("Endless recursive constructor call in ServiceProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?", diagnostics[0].GetMessage());
     }
 
@@ -2263,7 +2263,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI005", diagnostics[0].Id);
+        Assert.Equal("CDI008", diagnostics[0].Id);
         Assert.Equal("Endless recursive constructor call in ScopedProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?", diagnostics[0].GetMessage());
     }
 
@@ -2289,7 +2289,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI009", diagnostics[0].Id);
+        Assert.Equal("CDI014", diagnostics[0].Id);
         Assert.Equal("Wrong type of field '_singleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected", diagnostics[0].GetMessage());
     }
 
@@ -2314,7 +2314,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI010", diagnostics[0].Id);
+        Assert.Equal("CDI015", diagnostics[0].Id);
         Assert.Equal("Wrong type of property 'Singleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected", diagnostics[0].GetMessage());
     }
 
@@ -2339,7 +2339,7 @@ public static class RegisterServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI011", diagnostics[0].Id);
+        Assert.Equal("CDI017", diagnostics[0].Id);
         Assert.Equal("Wrong return type of method 'CreateSingleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected", diagnostics[0].GetMessage());
     }
 }

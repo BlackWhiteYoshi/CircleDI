@@ -119,7 +119,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                     endpointServiceProvider = listedProvider;
                 else {
                     // many ServiceProviders
-                    context.ReportDiagnostic(EndpointDiagnosticErrorManager.CreateMultipleEndpointServiceProviderError(endpointServiceProvider.ErrorManager.ServiceProviderAttribute, listedProvider.ErrorManager.ServiceProviderAttribute));
+                    context.ReportDiagnostic(EndpointErrorManager.CreateMultipleEndpointServiceProviderError(endpointServiceProvider.ErrorManager.ServiceProviderAttribute, listedProvider.ErrorManager.ServiceProviderAttribute));
                     return;
                 }
 

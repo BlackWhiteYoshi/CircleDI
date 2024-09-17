@@ -7,7 +7,7 @@ namespace CircleDI.MinimalAPI;
 /// <summary>
 /// Collection of global <see cref="DiagnosticDescriptor"/> objects and methods to create <see cref="Diagnostic"/> objects from them.
 /// </summary>
-public sealed class EndpointDiagnosticErrorManager(AttributeData endpointAttribute, List<Diagnostic> errorList) {
+public sealed class EndpointErrorManager(AttributeData endpointAttribute, List<Diagnostic> errorList) {
     public AttributeData EndpointAttribute { get; } = endpointAttribute;
 
     /// <summary>

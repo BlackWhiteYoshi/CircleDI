@@ -76,7 +76,7 @@ public static class DependencyTreeTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI023", diagnostics[0].Id);
+        Assert.Equal("CDI031", diagnostics[0].Id);
         Assert.Equal("Ambiguous dependency at Service 'TestService1' with type 'MyCode.TestService2': There are multiple Services registered for this type: [\"TestService2_1\", \"TestService2_2\"]. Use the '[Dependency(Name=\"...\")]'-attribute on the parameter to choose one specific service", diagnostics[0].GetMessage());
     }
 
@@ -608,7 +608,7 @@ public static class DependencyTreeTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI021", diagnostics[0].Id);
+        Assert.Equal("CDI029", diagnostics[0].Id);
         Assert.Equal("Unregistered dependency at Service 'TestService1' with type 'MyCode.TestService2'", diagnostics[0].GetMessage());
     }
 
@@ -633,8 +633,8 @@ public static class DependencyTreeTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Equal(2, diagnostics.Length);
-        Assert.Equal("CDI030", diagnostics[0].Id);
-        Assert.Equal("CDI022", diagnostics[1].Id);
+        Assert.Equal("CDI038", diagnostics[0].Id);
+        Assert.Equal("CDI030", diagnostics[1].Id);
         Assert.Equal("Unregistered dependency 'ITestProvider' has the same identifier as generated interface type 'MyCode.ITestProvider', only missing the namespace. If you mean this generated type, you can correct the namespace by just declaring the interface type in namespace 'MyCode': \"public partial interface ITestProvider;\"", diagnostics[1].GetMessage());
     }
 
@@ -656,7 +656,7 @@ public static class DependencyTreeTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI024", diagnostics[0].Id);
+        Assert.Equal("CDI032", diagnostics[0].Id);
         Assert.Equal("Unregistered named dependency at Service 'TestService1' with name \"Asdf\"", diagnostics[0].GetMessage());
     }
 
@@ -1143,7 +1143,7 @@ public static class DependencyTreeTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI025", diagnostics[0].Id);
+        Assert.Equal("CDI033", diagnostics[0].Id);
         Assert.Equal("Circular dependency unresolvable: ['TestService1' -> 'TestService1']. Only singleton and scoped dependencies injected as properties can be resolved circular", diagnostics[0].GetMessage());
     }
 
@@ -1172,7 +1172,7 @@ public static class DependencyTreeTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI026", diagnostics[0].Id);
+        Assert.Equal("CDI034", diagnostics[0].Id);
         Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Scoped dependency 'MyCode.TestService2'", diagnostics[0].GetMessage());
     }
 
@@ -1242,7 +1242,7 @@ public static class DependencyTreeTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI027", diagnostics[0].Id);
+        Assert.Equal("CDI035", diagnostics[0].Id);
         Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Transient-Scoped dependency 'MyCode.TestService2'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped", diagnostics[0].GetMessage());
     }
 
@@ -1313,7 +1313,7 @@ public static class DependencyTreeTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI038", diagnostics[0].Id);
+        Assert.Equal("CDI036", diagnostics[0].Id);
         Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Delegate-Scoped dependency 'System.Action'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.", diagnostics[0].GetMessage());
     }
 
@@ -1341,7 +1341,7 @@ public static class DependencyTreeTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI028", diagnostics[0].Id);
+        Assert.Equal("CDI037", diagnostics[0].Id);
         Assert.Equal("Lifetime Violation: Singleton Service 'TestService' has dependency with type 'MyCode.ITestDependency' and there are multiple services of that type, but they are all invalid (Scoped or Transient-Scoped): [\"TestDependency1\", \"TestDependency2\"]", diagnostics[0].GetMessage());
     }
 

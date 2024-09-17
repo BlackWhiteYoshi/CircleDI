@@ -114,7 +114,7 @@ public static class ServiceProviderTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI035", diagnostics[0].Id);
+        Assert.Equal("CDI005", diagnostics[0].Id);
         Assert.Equal("InterfaceName 'IServiceProvider' is not allowed, it collides with 'System.IServiceProvider'", diagnostics[0].GetMessage());
     }
 
@@ -795,7 +795,7 @@ public static class ServiceProviderTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI030", diagnostics[0].Id);
+        Assert.Equal("CDI038", diagnostics[0].Id);
         Assert.Equal("Unregistered dependency at 'MyCode.TestProvider.Scope' with type 'MyCode.ITestService'", diagnostics[0].GetMessage());
     }
 
@@ -825,7 +825,7 @@ public static class ServiceProviderTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI031", diagnostics[0].Id);
+        Assert.Equal("CDI039", diagnostics[0].Id);
         Assert.Equal("Ambiguous dependency at 'MyCode.TestProvider.Scope' with type 'MyCode.ITestService': There are multiple Services registered for this type: [\"Single\", \"TestService\"]. Use the '[Dependency(Name=\"...\")]'-attribute on the parameter to choose one specific service", diagnostics[0].GetMessage());
     }
 
@@ -854,7 +854,7 @@ public static class ServiceProviderTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI032", diagnostics[0].Id);
+        Assert.Equal("CDI040", diagnostics[0].Id);
         Assert.Equal("Unregistered named dependency at 'MyCode.TestProvider.Scope' with name \"Single\"", diagnostics[0].GetMessage());
     }
 
@@ -883,7 +883,7 @@ public static class ServiceProviderTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI033", diagnostics[0].Id);
+        Assert.Equal("CDI041", diagnostics[0].Id);
         Assert.Equal("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Scoped dependency 'MyCode.ITestService'", diagnostics[0].GetMessage());
     }
 
@@ -914,7 +914,7 @@ public static class ServiceProviderTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI034", diagnostics[0].Id);
+        Assert.Equal("CDI042", diagnostics[0].Id);
         Assert.Equal("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Transient-Scoped dependency 'MyCode.ITestService1'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped", diagnostics[0].GetMessage());
     }
 
@@ -940,7 +940,7 @@ public static class ServiceProviderTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI039", diagnostics[0].Id);
+        Assert.Equal("CDI043", diagnostics[0].Id);
         Assert.Equal("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Delegate-Scoped dependency 'System.Action'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.", diagnostics[0].GetMessage());
     }
 
@@ -1091,7 +1091,7 @@ public static class ServiceProviderTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI040", diagnostics[0].Id);
+        Assert.Equal("CDI004", diagnostics[0].Id);
         Assert.Equal("InterfaceType and InterfaceName are not compatible, at most one property must be set.", diagnostics[0].GetMessage());
     }
 

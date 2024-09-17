@@ -267,7 +267,7 @@ public static class GenericServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI041", diagnostics[0].Id);
+        Assert.Equal("CDI010", diagnostics[0].Id);
         Assert.Equal("Service registration type parameter mismatch at service 'MyCode.ITestService<T, U>' with implementation 'MyCode.TestService<T, U, V>'. The number of type parameters must match and the type parameters must be open/unbound.", diagnostics[0].GetMessage());
     }
 
@@ -290,7 +290,7 @@ public static class GenericServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI041", diagnostics[0].Id);
+        Assert.Equal("CDI010", diagnostics[0].Id);
         Assert.Equal("Service registration type parameter mismatch at service 'MyCode.ITestService<global::System.Int32, global::System.String, V>' with implementation 'MyCode.TestService<global::System.Int32, global::System.Single, V>'. The number of type parameters must match and the type parameters must be open/unbound.", diagnostics[0].GetMessage());
     }
 
@@ -443,7 +443,7 @@ public static class GenericServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI044", diagnostics[0].Id);
+        Assert.Equal("CDI016", diagnostics[0].Id);
         Assert.Equal("Implementation 'testService' for type 'MyCode.TestService<T>' must be a generic method with '1' type parameter.", diagnostics[0].GetMessage());
     }
 
@@ -467,7 +467,7 @@ public static class GenericServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI044", diagnostics[0].Id);
+        Assert.Equal("CDI016", diagnostics[0].Id);
         Assert.Equal("Implementation 'TestService' for type 'MyCode.TestService<T, U>' must be a generic method with '2' type parameters.", diagnostics[0].GetMessage());
     }
 
@@ -491,7 +491,7 @@ public static class GenericServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI042", diagnostics[0].Id);
+        Assert.Equal("CDI018", diagnostics[0].Id);
         Assert.Equal("Implementation Method 'CreateTestService' has the wrong number of type parameters: '0' <-> '1' expected", diagnostics[0].GetMessage());
     }
 
@@ -515,7 +515,7 @@ public static class GenericServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI042", diagnostics[0].Id);
+        Assert.Equal("CDI018", diagnostics[0].Id);
         Assert.Equal("Implementation Method 'CreateTestService' has the wrong number of type parameters: '1' <-> '0' expected", diagnostics[0].GetMessage());
     }
 
@@ -539,7 +539,7 @@ public static class GenericServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI043", diagnostics[0].Id);
+        Assert.Equal("CDI024", diagnostics[0].Id);
         Assert.Equal("Method 'CreateTestService' has the wrong number of type parameters: '0' <-> '1' expected", diagnostics[0].GetMessage());
     }
 
@@ -563,7 +563,7 @@ public static class GenericServicesTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI043", diagnostics[0].Id);
+        Assert.Equal("CDI024", diagnostics[0].Id);
         Assert.Equal("Method 'CreateTestService' has the wrong number of type parameters: '1' <-> '0' expected", diagnostics[0].GetMessage());
     }
 }

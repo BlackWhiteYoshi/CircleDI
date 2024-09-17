@@ -331,7 +331,7 @@ public static class DelegateTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI012", diagnostics[0].Id);
+        Assert.Equal("CDI019", diagnostics[0].Id);
         Assert.Equal("Delegate service 'MyCode.TestService' is not a Delegate type", diagnostics[0].GetMessage());
     }
 
@@ -353,7 +353,7 @@ public static class DelegateTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI013", diagnostics[0].Id);
+        Assert.Equal("CDI020", diagnostics[0].Id);
         Assert.Equal("No method with the name 'DelegateImpl' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
     }
 
@@ -377,7 +377,7 @@ public static class DelegateTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI014", diagnostics[0].Id);
+        Assert.Equal("CDI021", diagnostics[0].Id);
         Assert.Equal("Method 'DelegateImpl' has wrong number of parameters: '2' <-> '1' expected", diagnostics[0].GetMessage());
     }
 
@@ -401,7 +401,7 @@ public static class DelegateTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI015", diagnostics[0].Id);
+        Assert.Equal("CDI022", diagnostics[0].Id);
         Assert.Equal("Method 'DelegateImpl' has wrong parameter type at position '1': 'string' <-> 'int' expected", diagnostics[0].GetMessage());
     }
 
@@ -425,9 +425,9 @@ public static class DelegateTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Equal(2, diagnostics.Length);
-        Assert.Equal("CDI015", diagnostics[0].Id);
+        Assert.Equal("CDI022", diagnostics[0].Id);
         Assert.Equal("Method 'DelegateImpl' has wrong parameter type at position '1': 'string' <-> 'int' expected", diagnostics[0].GetMessage());
-        Assert.Equal("CDI015", diagnostics[1].Id);
+        Assert.Equal("CDI022", diagnostics[1].Id);
         Assert.Equal("Method 'DelegateImpl' has wrong parameter type at position '2': 'float' <-> 'double' expected", diagnostics[1].GetMessage());
     }
 
@@ -451,7 +451,7 @@ public static class DelegateTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI016", diagnostics[0].Id);
+        Assert.Equal("CDI023", diagnostics[0].Id);
         Assert.Equal("Method 'DelegateImpl' has wrong return type: 'int' <-> 'string' expected", diagnostics[0].GetMessage());
     }
 
@@ -475,11 +475,11 @@ public static class DelegateTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Equal(3, diagnostics.Length);
-        Assert.Equal("CDI015", diagnostics[0].Id);
+        Assert.Equal("CDI022", diagnostics[0].Id);
         Assert.Equal("Method 'DelegateImpl' has wrong parameter type at position '1': 'string' <-> 'int' expected", diagnostics[0].GetMessage());
-        Assert.Equal("CDI015", diagnostics[1].Id);
+        Assert.Equal("CDI022", diagnostics[1].Id);
         Assert.Equal("Method 'DelegateImpl' has wrong parameter type at position '2': 'string' <-> 'int' expected", diagnostics[1].GetMessage());
-        Assert.Equal("CDI016", diagnostics[2].Id);
+        Assert.Equal("CDI023", diagnostics[2].Id);
         Assert.Equal("Method 'DelegateImpl' has wrong return type: 'int' <-> 'string' expected", diagnostics[2].GetMessage());
     }
 }

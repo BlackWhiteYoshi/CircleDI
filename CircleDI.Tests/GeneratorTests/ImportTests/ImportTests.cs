@@ -728,7 +728,7 @@ public static class ImportTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI036", diagnostics[0].Id);
+        Assert.Equal("CDI006", diagnostics[0].Id);
         Assert.Equal("Module cycle in ServiceProvider 'MyCode.TestProvider': ['MyCode.MyModule' -> 'MyCode.MyModule2' -> 'MyCode.MyModule']", diagnostics[0].GetMessage());
     }
 
@@ -753,7 +753,7 @@ public static class ImportTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI004", diagnostics[0].Id);
+        Assert.Equal("CDI007", diagnostics[0].Id);
         Assert.Equal("Endless recursive constructor call in ServiceProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?", diagnostics[0].GetMessage());
     }
 
@@ -782,7 +782,7 @@ public static class ImportTests {
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
         Assert.Single(diagnostics);
-        Assert.Equal("CDI005", diagnostics[0].Id);
+        Assert.Equal("CDI008", diagnostics[0].Id);
         Assert.Equal("Endless recursive constructor call in ScopedProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?", diagnostics[0].GetMessage());
     }
 }
