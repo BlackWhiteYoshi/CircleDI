@@ -1,7 +1,7 @@
 ﻿namespace CircleDI.Defenitions;
 
 /// <summary>
-/// An Item in <see cref="Service.PropertyDependencyList"/>,
+/// An Item in <see cref="Generation.Service.PropertyDependencyList"/>,
 /// </summary>
 public sealed class PropertyDependency : Dependency, IEquatable<PropertyDependency> {
     /// <summary>

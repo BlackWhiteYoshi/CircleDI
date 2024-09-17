@@ -18,7 +18,7 @@ public static class StringBuilderExtensions {
     public static StringBuilder AppendIndent(this StringBuilder builder, Indent indent) => builder.Append(Indent.CHAR, indent.Level);
 
     /// <summary>
-    /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.FirstLower)"/> to <see cref="AppendFirstLower"/>.
+    /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.IFirstLower)"/> to <see cref="AppendFirstLower"/>.
     /// </summary>
     /// <param name="str"></param>
     /// <returns></returns>
@@ -39,7 +39,8 @@ public static class StringBuilderExtensions {
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.StringJoin)"/> to <see cref="AppendStringJoin"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="list"></param>
+    /// <param name="join"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.StringJoin AsStringJoin(this IEnumerable<string> list, string join) => new(list, join);
     /// <summary>
@@ -64,7 +65,7 @@ public static class StringBuilderExtensions {
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.IServiceField AsServiceField(this Service service) => Unsafe.As<StringBuilderInterpolationHandler.IServiceField>(service);
     /// <summary>
-    /// <para>If implementation is field, it appends <i><see cref="Service.Implementation.Name"/></i>.</para>
+    /// <para>If implementation is field, it appends <see cref="AppendImplementationName"/>.</para>
     /// <para>Otherwise it appends <i><see cref="Service.Name"/></i>.</para>
     /// </summary>
     /// <param name="builder"></param>
@@ -129,7 +130,7 @@ public static class StringBuilderExtensions {
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.INamespace)"/> to <see cref="AppendNamespace"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="namespaceList"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.INamespace AsNamespace(this List<string> namespaceList) => Unsafe.As<StringBuilderInterpolationHandler.INamespace>(namespaceList);
     /// <summary>
@@ -162,6 +163,7 @@ public static class StringBuilderExtensions {
     /// Creates the fully qualified name, but '&lt;', '&gt;' and ':' are replaced with '{', '}' and ':' and the given extension is appended.
     /// </summary>
     /// <param name="builder">buffer to create the string, the content is cleared.</param>
+    /// <param name="typeName">the class/struct</param>
     /// <param name="extension">ending of the hintName, typically it is ".g.cs"</param>
     /// <returns></returns>
     public static string CreateHintName(this StringBuilder builder, TypeName typeName, string extension) {
@@ -179,13 +181,14 @@ public static class StringBuilderExtensions {
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.IClosedFullyQualifiedXMLSummary)"/> to <see cref="AppendClosedFullyQualifiedXMLSummary"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.IClosedFullyQualifiedXMLSummary AsClosedFullyQualifiedXMLSummary(this TypeName typeName) => Unsafe.As<StringBuilderInterpolationHandler.IClosedFullyQualifiedXMLSummary>(typeName);
     /// <summary>
     /// Creates the fully qualified name, but '&lt;' and '&gt;' are replaced with '{' and '}'.
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilder AppendClosedFullyQualifiedXMLSummary(this StringBuilder builder, TypeName typeName) {
         int startIndex = builder.Length;
@@ -198,7 +201,7 @@ public static class StringBuilderExtensions {
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.IClosedFullyQualified)"/> to <see cref="AppendClosedFullyQualified"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.IClosedFullyQualified AsClosedFullyQualified(this TypeName typeName) => Unsafe.As<StringBuilderInterpolationHandler.IClosedFullyQualified>(typeName);
     /// <summary>
@@ -206,13 +209,14 @@ public static class StringBuilderExtensions {
     /// "{namespace1}.{namespaceN}.{containingType1}.{containingTypeN}.{name}&lt;{T1}.{TN}&gt;"
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="typeName"></param>
     public static StringBuilder AppendClosedFullyQualified(this StringBuilder builder, TypeName typeName)
         => builder.AppendInterpolation($"{typeName.AsNamespaceList()}{typeName.AsClosedContainingTypeList()}{typeName.AsClosedName()}");
 
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.IOpenFullyQualified)"/> to <see cref="AppendOpenFullyQualified"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.IOpenFullyQualified AsOpenFullyQualified(this TypeName typeName) => Unsafe.As<StringBuilderInterpolationHandler.IOpenFullyQualified>(typeName);
     /// <summary>
@@ -220,6 +224,7 @@ public static class StringBuilderExtensions {
     /// "{namespace1}.{namespaceN}.{containingType1}.{containingTypeN}.{name}&lt;{T1}.{TN}&gt;"
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="typeName"></param>
     public static StringBuilder AppendOpenFullyQualified(this StringBuilder builder, TypeName typeName)
         => builder.AppendInterpolation($"{typeName.AsNamespaceList()}{typeName.AsOpenContainingTypeList()}{typeName.AsOpenName()}");
 
@@ -227,13 +232,14 @@ public static class StringBuilderExtensions {
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.INamespaceList)"/> to <see cref="AppendNamespaceList"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.INamespaceList AsNamespaceList(this TypeName typeName) => Unsafe.As<StringBuilderInterpolationHandler.INamespaceList>(typeName);
     /// <summary>
     /// Appends namespace with trailing dot
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="typeName"></param>
     public static StringBuilder AppendNamespaceList(this StringBuilder builder, TypeName typeName) {
         for (int i = typeName.NameSpaceList.Count - 1; i >= 0; i--)
             builder.AppendInterpolation($"{typeName.NameSpaceList[i]}.");
@@ -245,13 +251,14 @@ public static class StringBuilderExtensions {
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.IClosedContainingTypeList)"/> to <see cref="AppendClosedContainingTypeList"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.IClosedContainingTypeList AsClosedContainingTypeList(this TypeName typeName) => Unsafe.As<StringBuilderInterpolationHandler.IClosedContainingTypeList>(typeName);
     /// <summary>
     /// Appends containing types with trailing dot
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="typeName"></param>
     public static StringBuilder AppendClosedContainingTypeList(this StringBuilder builder, TypeName typeName) {
         for (int i = typeName.ContainingTypeList.Count - 1; i >= 0; i--)
             builder.AppendInterpolation($"{typeName.ContainingTypeList[i].AsClosedName()}.");
@@ -262,13 +269,14 @@ public static class StringBuilderExtensions {
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.IOpenContainingTypeList)"/> to <see cref="AppendOpenContainingTypeList"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.IOpenContainingTypeList AsOpenContainingTypeList(this TypeName typeName) => Unsafe.As<StringBuilderInterpolationHandler.IOpenContainingTypeList>(typeName);
     /// <summary>
     /// Appends containing types with trailing dot
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="typeName"></param>
     public static StringBuilder AppendOpenContainingTypeList(this StringBuilder builder, TypeName typeName) {
         for (int i = typeName.ContainingTypeList.Count - 1; i >= 0; i--)
             builder.AppendInterpolation($"{typeName.ContainingTypeList[i].AsOpenName()}.");
@@ -280,26 +288,28 @@ public static class StringBuilderExtensions {
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.IClosedName)"/> to <see cref="AppendClosedName"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.IClosedName AsClosedName(this TypeName typeName) => Unsafe.As<StringBuilderInterpolationHandler.IClosedName>(typeName);
     /// <summary>
-    /// Appends "{Name}<{T1}, {T2}, {TN}>"
+    /// Appends "{Name}&lt;{T1}, {T2}, {TN}&gt;"
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="typeName"></param>
     public static StringBuilder AppendClosedName(this StringBuilder builder, TypeName typeName)
         => builder.AppendInterpolation($"{typeName.Name}{(typeName.Nullable ? "?" : "")}{typeName.AsClosedGenerics()}");
 
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.IOpenName)"/> to <see cref="AppendOpenName"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.IOpenName AsOpenName(this TypeName typeName) => Unsafe.As<StringBuilderInterpolationHandler.IOpenName>(typeName);
     /// <summary>
-    /// Appends "{Name}<{T1}, {T2}, {TN}>"
+    /// Appends "{Name}&lt;{T1}, {T2}, {TN}&gt;"
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="typeName"></param>
     public static StringBuilder AppendOpenName(this StringBuilder builder, TypeName typeName)
         => builder.AppendInterpolation($"{typeName.Name}{(typeName.Nullable ? "?" : "")}{typeName.AsOpenGenerics()}");
 
@@ -307,14 +317,15 @@ public static class StringBuilderExtensions {
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.IClosedGenerics)"/> to <see cref="AppendClosedGenerics"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.IClosedGenerics AsClosedGenerics(this TypeName typeName) => Unsafe.As<StringBuilderInterpolationHandler.IClosedGenerics>(typeName);
     /// <summary>
     /// Appends: "&lt;{T1}, {T2}, {TN}&gt;"<br />
-    /// If <see cref="TypeArgumentList"/> empty, nothing is appended.
+    /// If <see cref="TypeName.TypeArgumentList"/> empty, nothing is appended.
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="typeName"></param>
     public static StringBuilder AppendClosedGenerics(this StringBuilder builder, TypeName typeName) {
         if (typeName.TypeArgumentList.Count == 0)
             return builder;
@@ -336,14 +347,15 @@ public static class StringBuilderExtensions {
     /// <summary>
     /// Creates a type to map method <see cref="StringBuilderInterpolationHandler.AppendFormatted(StringBuilderInterpolationHandler.IOpenGenerics)"/> to <see cref="AppendOpenGenerics"/>.
     /// </summary>
-    /// <param name="service"></param>
+    /// <param name="typeName"></param>
     /// <returns></returns>
     public static StringBuilderInterpolationHandler.IOpenGenerics AsOpenGenerics(this TypeName typeName) => Unsafe.As<StringBuilderInterpolationHandler.IOpenGenerics>(typeName);
     /// <summary>
     /// Appends: "&lt;{T1}, {T2}, {TN}&gt;"<br />
-    /// If <see cref="TypeArgumentList"/> empty, nothing is appended.
+    /// If <see cref="TypeName.TypeArgumentList"/> empty, nothing is appended.
     /// </summary>
     /// <param name="builder"></param>
+    /// <param name="typeName"></param>
     public static StringBuilder AppendOpenGenerics(this StringBuilder builder, TypeName typeName) {
         if (typeName.TypeParameterList.Count == 0)
             return builder;

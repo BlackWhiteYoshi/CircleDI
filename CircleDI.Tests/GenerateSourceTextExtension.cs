@@ -18,7 +18,7 @@ public static class GenerateSourceTextExtension {
         => GenerateSourceText<Generation.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
 
     /// <summary>
-    /// <para>Takes source code as input and outputs the generated source code based on the given input with <see cref="Blazor.CircleDIGenerator"/>.</para>
+    /// <para>Takes source code as input and outputs the generated source code based on the given input with <see cref="Blazor.Generation.CircleDIGenerator"/>.</para>
     /// <para>The generated source code contains post-initialization-output code as well as source output code.</para>
     /// </summary>
     /// <param name="input"></param>
@@ -29,7 +29,7 @@ public static class GenerateSourceTextExtension {
         => GenerateSourceText<Blazor.Generation.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
 
     /// <summary>
-    /// <para>Takes source code as input and outputs the generated source code based on the given input with <see cref="MinimalAPI.CircleDIGenerator"/>.</para>
+    /// <para>Takes source code as input and outputs the generated source code based on the given input with <see cref="MinimalAPI.Generation.CircleDIGenerator"/>.</para>
     /// <para>The generated source code contains post-initialization-output code as well as source output code.</para>
     /// </summary>
     /// <param name="input"></param>

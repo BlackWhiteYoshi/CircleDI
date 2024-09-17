@@ -11,7 +11,7 @@ namespace CircleDI.Generation;
 /// </summary>
 public static class CircleDIBuilder {
     /// <summary>
-    /// Gives a preconfigured <see cref="ObjectPool<StringBuilder>"/> for building class or interface.
+    /// Gives a preconfigured <see cref="ObjectPool{StringBuilder}"/> for building class or interface.
     /// </summary>
     /// <returns></returns>
     public static ObjectPool<StringBuilder> CreateStringBuilderPool() => new DefaultObjectPoolProvider().CreateStringBuilderPool(initialCapacity: 8192, maximumRetainedCapacity: 1024 * 1024);

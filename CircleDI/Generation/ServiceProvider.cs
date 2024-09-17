@@ -55,7 +55,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     public required TypeName InterfaceIdentifier { get; init; }
 
     /// <summary>
-    /// Is true when <see cref="InterfaceName"/> is not empty.<br />
+    /// Is true when <see cref="InterfaceIdentifier">InterfaceIdentifier.Name</see> is not empty.<br />
     /// If empty, no interface will be generated.
     /// </summary>
     public bool HasInterface => InterfaceIdentifier.Name != string.Empty;
@@ -1276,6 +1276,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
         /// Binary search the sorted <see cref="SortedServiceList"/>.
         /// </summary>
         /// <param name="serviceType"></param>
+        /// <param name="serviceList"></param>
         /// <returns>The index of the first occurrence and the number of matched services.</returns>
         private static (int index, int count) FindService(TypeName serviceType, List<Service> serviceList) {
             int lowerBound = 0;

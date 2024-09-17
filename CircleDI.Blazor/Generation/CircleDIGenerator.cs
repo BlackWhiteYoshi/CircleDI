@@ -97,8 +97,8 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
     /// </summary>
     /// <param name="context"></param>
     /// <param name="stringBuilderPool"></param>
-    /// <param name="serviceProvider"></param>
-    /// <param name="addRazorComponents"></param>
+    /// <param name="componentModule"></param>
+    /// <param name="componentList"></param>
     private static void GenerateComponentAttributes(SourceProductionContext context, ObjectPool<StringBuilder> stringBuilderPool, INamedTypeSymbol componentModule, ImmutableArray<INamedTypeSymbol?> componentList) {
         StringBuilder builder = stringBuilderPool.Get();
         Indent indent = new();

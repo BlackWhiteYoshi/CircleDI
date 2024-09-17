@@ -98,7 +98,7 @@ public sealed class Service : IEquatable<Service> {
     public CreationTiming CreationTimeTransitive { get; set; } = CreationTiming.Constructor;
 
     /// <summary>
-    /// <para>>Decides whether this service accessor will be a property or method.</para
+    /// <para>>Decides whether this service accessor will be a property or method.</para>
     /// <para>Default is <see cref="GetAccess.Property"/>.</para>
     /// </summary>
     public GetAccess GetAccessor { get; init; } = GetAccess.Property;
@@ -401,6 +401,7 @@ public sealed class Service : IEquatable<Service> {
     /// <param name="module"></param>
     /// <param name="attributeData"></param>
     /// <param name="getAccessorProvider"></param>
+    /// <param name="errorManager"></param>
     [SetsRequiredMembers]
     public Service(INamedTypeSymbol module, AttributeData attributeData, GetAccess getAccessorProvider, ErrorManager errorManager) {
         Debug.Assert(attributeData.AttributeClass?.TypeArguments.All((ITypeSymbol typeSymbol) => typeSymbol.TypeKind != TypeKind.Error) == true);

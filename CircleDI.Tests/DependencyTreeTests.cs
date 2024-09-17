@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 namespace CircleDI.Tests;
 
 /// <summary>
-/// Tests the function <see cref="DependencyTreeExtension.CreateDependencyTree(ServiceProvider)"/>.
+/// Tests the function <see cref="ServiceProvider.CreateDependencyTree()"/>.
 /// </summary>
 public static class DependencyTreeTests {
     private static ServiceProvider CreateProvider(List<Service> serviceList) {

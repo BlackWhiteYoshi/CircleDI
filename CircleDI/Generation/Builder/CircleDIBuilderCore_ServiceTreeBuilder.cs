@@ -234,6 +234,8 @@ public partial struct CircleDIBuilderCore {
     /// </summary>
     /// <param name="service"></param>
     /// <param name="circularStackIndex"></param>
+    /// <param name="disposeStackIndex"></param>
+    /// <param name="asyncDisposeStackIndex"></param>
     /// <returns></returns>
     private int AppendLazyServiceTreeRecursion(Service service, int circularStackIndex, int disposeStackIndex, int asyncDisposeStackIndex) {
         if (service.TreeState.visited.HasFlag(serviceProvider.DependencyTreeFlag))
@@ -487,6 +489,7 @@ public partial struct CircleDIBuilderCore {
     /// <para>The list is cleared afterwards.</para>
     /// </summary>
     /// <param name="disposeStack"></param>
+    /// <param name="disposeStackIndex"></param>
     /// <param name="disposeStackName"></param>
     /// <param name="appendServiceProviderField"></param>
     private void AppendDisposeStackLazy(List<(Service service, int number)> disposeStack, int disposeStackIndex, string disposeStackName, bool appendServiceProviderField) {

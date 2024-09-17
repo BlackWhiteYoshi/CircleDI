@@ -145,8 +145,8 @@ public static class SyntaxNodeExtensions {
     /// <para>Creates an array by mapping <see cref="IMethodSymbol.Parameters"/> to <see cref="ConstructorDependency"/>.</para>
     /// <para>
     /// Checks for attribute "DependencyAttribute" with argument "Name" -> [Dependency(Name = "...")]<br />
-    /// If present, <see cref="IsNamed"/> is set to true and <see cref="ServiceIdentifier"/> is set to it's value.<br />
-    /// Otherwise <see cref="IsNamed"/> is set to false, and <see cref="ServiceIdentifier"/> is set to parameter type.
+    /// If present, <see cref="Dependency.ServiceName"/> is set and <see cref="Dependency.ServiceType"/> is null.<br />
+    /// Otherwise <see cref="Dependency.ServiceName"/> is set to "", and <see cref="Dependency.ServiceType"/> is set.
     /// </para>
     /// </summary>
     /// <param name="constructor"></param>
@@ -192,7 +192,7 @@ public static class SyntaxNodeExtensions {
     }
 
     /// <summary>
-    /// <para>First <see cref="FindConstructor(INamedTypeSymbol, AttributeData)">finds the constructor</see> and if found, <see cref="Extensions.SyntaxNodeExtensions.CreateConstructorDependencyList(IMethodSymbol)">creates the constructor dependency list.</see></para>
+    /// <para>First <see cref="FindConstructor">finds the constructor</see> and if found, <see cref="CreateConstructorDependencyList(IMethodSymbol)">creates the constructor dependency list.</see></para>
     /// <para>If no constructor found or an invalid constructor dependency was found, an error is created and the null is returned.</para>
     /// </summary>
     /// <param name="implementation"></param>

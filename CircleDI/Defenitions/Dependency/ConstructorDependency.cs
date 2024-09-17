@@ -3,7 +3,7 @@
 namespace CircleDI.Defenitions;
 
 /// <summary>
-/// An Item in <see cref="Service.ConstructorDependencyList"/>,
+/// An Item in <see cref="Generation.Service.ConstructorDependencyList"/>,
 /// </summary>
 public sealed class ConstructorDependency : Dependency, IEquatable<ConstructorDependency> {
     /// <summary>
