@@ -190,6 +190,7 @@ public class MyService : IMyService {
 - [Workarounds for not supported Features](Readme_md/ConfigurationAndCustomization.md#workarounds-for-not-supported-features)
   - [Async Constructor](Readme_md/ConfigurationAndCustomization.md#async-constructor)
   - [Decoration](Readme_md/ConfigurationAndCustomization.md#decoration)
+  - [Nullable Service](Readme_md/ConfigurationAndCustomization.md#nullable-service)
 - [Remarks](Readme_md/ConfigurationAndCustomization.md#remarks)
   - [IServiceProvider Interface](Readme_md/ConfigurationAndCustomization.md#iserviceprovider-interface)
   - [Error Handling](Readme_md/ConfigurationAndCustomization.md#error-handling)

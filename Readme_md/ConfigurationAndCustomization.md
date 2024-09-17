@@ -19,6 +19,7 @@
 - [Workarounds for not supported Features](#workarounds-for-not-supported-features)
   - [Async Constructor](#async-constructor)
   - [Decoration](#decoration)
+  - [Nullable Service](#nullable-service)
 - [Remarks](#remarks)
   - [IServiceProvider Interface](#iserviceprovider-interface)
   - [Error Handling](#error-handling)
@@ -790,6 +791,30 @@ public sealed partial class MyProvider {
 public class ServiceBase;
 public class Service1(ServiceBase serviceBase);
 public class Service2(ServiceBase serviceBase);
+```
+
+
+<br></br>
+### Nullable Service
+
+If you need a service that can be null and you want to decide at runtime if that service is available or not, you have to write that functionality by yourself.
+The easiest way to achieve this is by using the [Nullable&lt;T&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1) type.
+However, there are some issues with this approach. 
+ - It only works for value types, if you have a reference type service, you have to wrap it in a struct.
+ - You need to supply an Implementation, because [Nullable&lt;T&gt;](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1) has multiple constructors and since you do not own the type, you cannot add a [\[Constructor\]](#constructorattribute)-attribute.
+ - The default name will be "Nullable", so you probably want to set it explicitly.
+ - If the service implements *IDisposable*/*IAsyncDisposable*, it will not be disposed. If the service needs to be disposed, you have to write your own Nullable type that forwards the disposing.
+
+```csharp
+[ServiceProvider]
+// MyServiceWrapper? is a shorthand for Nullable<MyServiceWrapper>
+[Singleton<MyServiceWrapper?>(Name = "MyValueService", Implementation = nameof(CreateMyService))]
+public sealed partial class MyProvider {
+    private static MyServiceWrapper? CreateMyService() => SomeRuntimeDecision() ? new() : null;
+}
+
+public class MyService;
+public record struct MyServiceWrapper(MyService MyService);
 ```
 
 
