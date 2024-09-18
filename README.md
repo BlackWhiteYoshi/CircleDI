@@ -368,3 +368,8 @@ And code conventions, structure, and quality is important to me. So there is a g
 - 0.9.0  
   Support for registering services with *typeof()*.  
   Registering open/unbound generic services.
+- 0.9.1  
+  Small breaking change: The error-id of most error messages got changed.  
+  Small breaking change: Modules implementing IDisposable/IAsyncDisposable imported as Service get disposed.  
+  Dedicated lock-objects instead of locking provider or lists itself.  
+  Some fixes for specific cases.
