@@ -727,11 +727,12 @@ public partial struct CircleDIBuilderCore {
     /// <param name="transientNumber"></param>
     private void AppendDependencyIdentifier(Dependency dependency, int transientNumber)
         => _ = dependency.Service!.Lifetime switch {
-            ServiceLifetime.Singleton when isScopeProvider && dependency.Service.Implementation.Name == "this" => builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}"),
-            ServiceLifetime.Singleton when isScopeProvider                                                     => builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}.{dependency.Service.AsServiceField()}"),
-            ServiceLifetime.Singleton or ServiceLifetime.Scoped                                                => builder.AppendServiceField(dependency.Service),
-            _ when dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient) && transientNumber > 0       => builder.AppendInterpolation($"{dependency.Service.Name.AsFirstLower()}_{transientNumber}"),
-            _ when dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient)                              => builder.AppendFirstLower(dependency.Service.Name),
-            _ /* when dependency.Service!.Lifetime.HasFlag(ServiceLifetime.Delegate) */                        => builder.AppendServiceGetter(dependency.Service)
+            ServiceLifetime.Singleton when isScopeProvider && dependency.Service.Implementation.Name == "this"                                                                                  => builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}"),
+            ServiceLifetime.Singleton when isScopeProvider                                                                                                                                      => builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}.{dependency.Service.AsServiceField()}"),
+            ServiceLifetime.Scoped when dependency.Service.Implementation.Type != MemberType.None && !dependency.Service.Implementation.IsScoped && !dependency.Service.Implementation.IsStatic => builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}.{dependency.Service.AsServiceField()}"),
+            ServiceLifetime.Singleton or ServiceLifetime.Scoped                                                                                                                                 => builder.AppendServiceField(dependency.Service),
+            _ when dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient) && transientNumber > 0                                                                                        => builder.AppendInterpolation($"{dependency.Service.Name.AsFirstLower()}_{transientNumber}"),
+            _ when dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient)                                                                                                               => builder.AppendFirstLower(dependency.Service.Name),
+            _ /* when dependency.Service!.Lifetime.HasFlag(ServiceLifetime.Delegate) */                                                                                                         => builder.AppendServiceGetter(dependency.Service)
         };
 }

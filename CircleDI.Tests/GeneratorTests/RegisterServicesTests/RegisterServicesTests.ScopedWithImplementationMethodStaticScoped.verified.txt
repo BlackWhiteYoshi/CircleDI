@@ -10,9 +10,9 @@ namespace MyCode;
 
 /// <summary>
 /// <para>
-/// Number of services registered: 3<br />
+/// Number of services registered: 4<br />
 /// - Singleton: 1<br />
-/// - Scoped: 2<br />
+/// - Scoped: 3<br />
 /// - Transient: 0<br />
 /// - Delegate: 0
 /// </para>
@@ -83,9 +83,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
     /// <summary>
     /// <para>
-    /// Number of services registered: 3<br />
+    /// Number of services registered: 4<br />
     /// - Singleton: 1<br />
-    /// - Scoped: 2<br />
+    /// - Scoped: 3<br />
     /// - Transient: 0<br />
     /// - Delegate: 0
     /// </para>
@@ -106,6 +106,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             _testProvider = (global::MyCode.TestProvider)testProvider;
 
             _testService = TestMethod();
+            _consumer = new global::MyCode.Consumer(_testService);
         }
 
         /// <summary>
@@ -115,6 +116,14 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService => _testService;
         private readonly global::MyCode.TestService _testService;
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
+        /// Service type: <see cref="global::MyCode.Consumer"/><br />
+        /// Implementation type: <see cref="global::MyCode.Consumer"/>
+        /// </summary>
+        public global::MyCode.Consumer Consumer => _consumer;
+        private readonly global::MyCode.Consumer _consumer;
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
@@ -146,6 +155,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                 case "IScope":
                     if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                         return SelfScope;
+                    return null;
+                case "Consumer":
+                    if (serviceType == typeof(global::MyCode.Consumer))
+                        return Consumer;
                     return null;
                 case "ITestService":
                     if (serviceType == typeof(global::MyCode.ITestService))
@@ -192,9 +205,9 @@ namespace MyCode;
 
 /// <summary>
 /// <para>
-/// Number of services registered: 3<br />
+/// Number of services registered: 4<br />
 /// - Singleton: 1<br />
-/// - Scoped: 2<br />
+/// - Scoped: 3<br />
 /// - Transient: 0<br />
 /// - Delegate: 0
 /// </para>
@@ -220,9 +233,9 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
 
     /// <summary>
     /// <para>
-    /// Number of services registered: 3<br />
+    /// Number of services registered: 4<br />
     /// - Singleton: 1<br />
-    /// - Scoped: 2<br />
+    /// - Scoped: 3<br />
     /// - Transient: 0<br />
     /// - Delegate: 0
     /// </para>
@@ -239,6 +252,13 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
         /// Implementation type: <see cref="global::MyCode.TestProvider.Scope"/>
         /// </summary>
         global::MyCode.ITestProvider.IScope SelfScope { get; }
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />
+        /// Service type: <see cref="global::MyCode.Consumer"/><br />
+        /// Implementation type: <see cref="global::MyCode.Consumer"/>
+        /// </summary>
+        global::MyCode.Consumer Consumer { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.ScopedAttribute{TService}">Scoped</see><br />

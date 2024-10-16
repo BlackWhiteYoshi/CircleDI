@@ -238,7 +238,10 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Singleton<TestProvider>(Implementation = "this")]
+            [Singleton<Consumer>]
             public sealed partial class TestProvider;
+
+            public sealed class Consumer(TestProvider testProvider);
 
             """;
 
@@ -257,6 +260,7 @@ public static class RegisterServicesTests {
             """);
     }
 
+
     [Fact]
     public static Task SingletonWithImplementationField() {
         const string input = """
@@ -266,12 +270,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>(Implementation = nameof(testField))]
+            [Singleton<Consumer>]
             public sealed partial class TestProvider {
                 private TestService testField;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -326,12 +333,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>(Implementation = nameof(testField))]
+            [Singleton<Consumer>]
             public sealed partial class TestProvider {
                 private static TestService testField;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -387,12 +397,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>(Implementation = nameof(TestProperty))]
+            [Singleton<Consumer>]
             public sealed partial class TestProvider {
                 private TestService TestProperty => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -447,12 +460,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>(Implementation = nameof(TestProperty))]
+            [Singleton<Consumer>]
             public sealed partial class TestProvider {
                 private static TestService TestProperty => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -508,12 +524,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>(Implementation = nameof(TestMethod))]
+            [Singleton<Consumer>]
             public sealed partial class TestProvider {
                 private TestService TestMethod() => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -568,12 +587,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Singleton<ITestService, TestService>(Implementation = nameof(TestMethod))]
+            [Singleton<Consumer>]
             public sealed partial class TestProvider {
                 private static TestService TestMethod() => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -631,6 +653,7 @@ public static class RegisterServicesTests {
             [Singleton<ITestService, TestService>]
             [Singleton<ITestService, TestService>(Name = "TestService2")]
             [Singleton<ITestServiceM, TestServiceM>]
+            [Singleton<Consumer>]
             public sealed partial class TestProvider;
 
             public interface ITestService;
@@ -638,6 +661,8 @@ public static class RegisterServicesTests {
 
             public interface ITestServiceM;
             public sealed class TestServiceM : ITestServiceM;
+            
+            public sealed class Consumer([Dependency(Name = "TestService")] ITestService testService, [Dependency(Name = "TestService2")] ITestService testService2, ITestServiceM testServiceM);
 
             """;
 
@@ -883,9 +908,12 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<TestProvider.Scope>(Implementation = "this")]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope;
             }
+
+            public sealed class Consumer(TestProvider.Scope testProviderScope);
 
             """;
 
@@ -904,6 +932,7 @@ public static class RegisterServicesTests {
             """);
     }
 
+
     [Fact]
     public static Task ScopedWithImplementationField() {
         const string input = """
@@ -913,12 +942,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(testField))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 private TestService testField;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -946,6 +978,7 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(testField))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
                     private TestService testField;
@@ -954,6 +987,8 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -981,12 +1016,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(testField))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 private static TestService testField;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1014,6 +1052,7 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(testField))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
                     private static TestService testField;
@@ -1022,6 +1061,8 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1050,12 +1091,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(TestProperty))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 private TestService TestProperty => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1083,6 +1127,7 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(TestProperty))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
                     private TestService TestProperty => default!;
@@ -1091,6 +1136,8 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1118,12 +1165,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(TestProperty))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 private static TestService TestProperty => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1151,6 +1201,7 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(TestProperty))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
                     private static TestService TestProperty => default!;
@@ -1159,6 +1210,8 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1187,12 +1240,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(TestMethod))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 private TestService TestMethod() => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1220,6 +1276,7 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(TestMethod))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
                     private TestService TestMethod() => default!;
@@ -1228,6 +1285,8 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1255,12 +1314,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(TestMethod))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 private static TestService TestMethod() => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1288,6 +1350,7 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Scoped<ITestService, TestService>(Implementation = nameof(TestMethod))]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
                     private static TestService TestMethod() => default!;
@@ -1296,6 +1359,8 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1326,6 +1391,7 @@ public static class RegisterServicesTests {
             [Scoped<ITestService, TestService>]
             [Scoped<ITestService, TestService>(Name = "TestService2")]
             [Scoped<ITestServiceM, TestServiceM>]
+            [Scoped<Consumer>]
             public sealed partial class TestProvider;
 
             public interface ITestService;
@@ -1333,6 +1399,8 @@ public static class RegisterServicesTests {
 
             public interface ITestServiceM;
             public sealed class TestServiceM : ITestServiceM;
+            
+            public sealed class Consumer([Dependency(Name = "TestService")] ITestService testService, [Dependency(Name = "TestService2")] ITestService testService2, ITestServiceM testServiceM);
 
             """;
 
@@ -1558,6 +1626,7 @@ public static class RegisterServicesTests {
         Assert.Equal("Transient + Implementation = 'this' is not allowed. Use Singleton or Scoped instead", diagnostics[0].GetMessage());
     }
 
+
     [Fact]
     public static void TransientWithImplementationField() {
         const string input = """
@@ -1672,12 +1741,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Transient<ITestService, TestService>(Implementation = nameof(TestProperty))]
+            [Transient<Consumer>]
             public sealed partial class TestProvider {
                 private TestService TestProperty => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1705,6 +1777,7 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Transient<ITestService, TestService>(Implementation = nameof(TestProperty))]
+            [Transient<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
                     private TestService TestProperty => default!;
@@ -1713,6 +1786,8 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1740,12 +1815,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Transient<ITestService, TestService>(Implementation = nameof(TestProperty))]
+            [Transient<Consumer>]
             public sealed partial class TestProvider {
                 private static TestService TestProperty => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1773,6 +1851,7 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Transient<ITestService, TestService>(Implementation = nameof(TestProperty))]
+            [Transient<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
                     private static TestService TestProperty => default!;
@@ -1781,6 +1860,8 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1809,12 +1890,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Transient<ITestService, TestService>(Implementation = nameof(TestMethod))]
+            [Transient<Consumer>]
             public sealed partial class TestProvider {
                 private TestService TestMethod() => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1842,6 +1926,7 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Transient<ITestService, TestService>(Implementation = nameof(TestMethod))]
+            [Transient<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
                     private TestService TestMethod() => default!;
@@ -1850,6 +1935,8 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1877,12 +1964,15 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Transient<ITestService, TestService>(Implementation = nameof(TestMethod))]
+            [Transient<Consumer>]
             public sealed partial class TestProvider {
                 private static TestService TestMethod() => default!;
             }
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1910,6 +2000,7 @@ public static class RegisterServicesTests {
 
             [ServiceProvider]
             [Transient<ITestService, TestService>(Implementation = nameof(TestMethod))]
+            [Transient<Consumer>]
             public sealed partial class TestProvider {
                 public sealed partial class Scope {
                     private static TestService TestMethod() => default!;
@@ -1918,6 +2009,8 @@ public static class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
+            
+            public sealed class Consumer(ITestService testService);
 
             """;
 
@@ -1948,6 +2041,7 @@ public static class RegisterServicesTests {
             [Transient<ITestService, TestService>]
             [Transient<ITestService, TestService>(Name = "TestService2")]
             [Transient<ITestServiceM, TestServiceM>]
+            [Transient<Consumer>]
             public sealed partial class TestProvider;
 
             public interface ITestService;
@@ -1955,6 +2049,8 @@ public static class RegisterServicesTests {
 
             public interface ITestServiceM;
             public sealed class TestServiceM : ITestServiceM;
+            
+            public sealed class Consumer([Dependency(Name = "TestService")] ITestService testService, [Dependency(Name = "TestService2")] ITestService testService2, ITestServiceM testServiceM);
 
             """;
 

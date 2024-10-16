@@ -10,10 +10,10 @@ namespace MyCode;
 
 /// <summary>
 /// <para>
-/// Number of services registered: 3<br />
+/// Number of services registered: 4<br />
 /// - Singleton: 1<br />
 /// - Scoped: 1<br />
-/// - Transient: 1<br />
+/// - Transient: 2<br />
 /// - Delegate: 0
 /// </para>
 /// <para>
@@ -83,10 +83,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
     /// <summary>
     /// <para>
-    /// Number of services registered: 3<br />
+    /// Number of services registered: 4<br />
     /// - Singleton: 1<br />
     /// - Scoped: 1<br />
-    /// - Transient: 1<br />
+    /// - Transient: 2<br />
     /// - Delegate: 0
     /// </para>
     /// <para>
@@ -134,6 +134,19 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             }
         }
 
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
+        /// Service type: <see cref="global::MyCode.Consumer"/><br />
+        /// Implementation type: <see cref="global::MyCode.Consumer"/>
+        /// </summary>
+        public global::MyCode.Consumer Consumer {
+            get {
+                global::MyCode.TestService testService = TestProperty;
+                global::MyCode.Consumer consumer_1 = new global::MyCode.Consumer(testService);
+                return consumer_1;
+            }
+        }
+
 
         /// <summary>
         /// <para>Finds all registered services of the given type.</para>
@@ -149,6 +162,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                 case "IScope":
                     if (serviceType == typeof(global::MyCode.ITestProvider.IScope))
                         return SelfScope;
+                    return null;
+                case "Consumer":
+                    if (serviceType == typeof(global::MyCode.Consumer))
+                        return Consumer;
                     return null;
                 case "ITestService":
                     if (serviceType == typeof(global::MyCode.ITestService))
@@ -195,10 +212,10 @@ namespace MyCode;
 
 /// <summary>
 /// <para>
-/// Number of services registered: 3<br />
+/// Number of services registered: 4<br />
 /// - Singleton: 1<br />
 /// - Scoped: 1<br />
-/// - Transient: 1<br />
+/// - Transient: 2<br />
 /// - Delegate: 0
 /// </para>
 /// <para>
@@ -223,10 +240,10 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
 
     /// <summary>
     /// <para>
-    /// Number of services registered: 3<br />
+    /// Number of services registered: 4<br />
     /// - Singleton: 1<br />
     /// - Scoped: 1<br />
-    /// - Transient: 1<br />
+    /// - Transient: 2<br />
     /// - Delegate: 0
     /// </para>
     /// <para>
@@ -242,6 +259,13 @@ public partial interface ITestProvider : IDisposable, IAsyncDisposable {
         /// Implementation type: <see cref="global::MyCode.TestProvider.Scope"/>
         /// </summary>
         global::MyCode.ITestProvider.IScope SelfScope { get; }
+
+        /// <summary>
+        /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
+        /// Service type: <see cref="global::MyCode.Consumer"/><br />
+        /// Implementation type: <see cref="global::MyCode.Consumer"/>
+        /// </summary>
+        global::MyCode.Consumer Consumer { get; }
 
         /// <summary>
         /// Lifetime: <see cref="global::CircleDIAttributes.TransientAttribute{TService}">Transient</see><br />
