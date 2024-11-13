@@ -27,8 +27,21 @@ public static partial class Attributes {
         /// <typeparam name="TScopeProvider">Type of the service provider which is used to retrieve components. The object will be dependency injected from the built-in service provider. The object must implement <see href="https://learn.microsoft.com/en-us/dotnet/api/system.iserviceprovider">System.IServiceProvider</see>, otherwise an error will be thrown.</typeparam>
         /// <param name="scopeProvider">An ServiceProvider instance</param>
         [GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
-        internal sealed class CircleDIComponentActivator<TScopeProvider>(TScopeProvider scopeProvider) : IComponentActivator {
-            private readonly IServiceProvider _serviceProvider = scopeProvider as IServiceProvider ?? throw new ArgumentException($"The instance of registered type {typeof(TScopeProvider)} is of type {scopeProvider.GetType()}, which must implement System.IServiceProvider", nameof(TScopeProvider));
+        internal sealed class CircleDIComponentActivator<TScopeProvider> : IComponentActivator {
+            private readonly IServiceProvider _serviceProvider;
+            private readonly IComponentActivator _defaultComponentActivator;
+
+            public CircleDIComponentActivator(TScopeProvider scopeProvider) {
+                _serviceProvider = scopeProvider as IServiceProvider ?? throw new ArgumentException($"The instance of registered type {typeof(TScopeProvider)} is of type {scopeProvider?.GetType()}, which must implement System.IServiceProvider", nameof(scopeProvider));
+
+                Type defaultComponentActivatorClass = typeof(Microsoft.AspNetCore.Components.RenderTree.Renderer).Assembly.GetType("Microsoft.AspNetCore.Components.DefaultComponentActivator") ?? throw new Exception("Microsoft.AspNetCore.Components.DefaultComponentActivator got renamed or does not exists anymore.");
+        #if NET9_0_OR_GREATER
+                _defaultComponentActivator = (IComponentActivator)Activator.CreateInstance(defaultComponentActivatorClass, [_serviceProvider])!;
+        #else
+                _defaultComponentActivator = (IComponentActivator)Activator.CreateInstance(defaultComponentActivatorClass)!;
+        #endif
+            }
+
 
             /// <summary>
             /// It will retrieve the component from the specified service provider if registered.<br />
@@ -42,7 +55,7 @@ public static partial class Attributes {
                 object? component = _serviceProvider.GetService(componentType);
 
                 if (component is null)
-                    return (IComponent)Activator.CreateInstance(componentType)!;
+                    return _defaultComponentActivator.CreateInstance(componentType);
 
                 if (component is Array components)
                     throw new ArgumentException($"Component of type '{componentType}' has multiple ({components.Length}) registrations", nameof(componentType));
