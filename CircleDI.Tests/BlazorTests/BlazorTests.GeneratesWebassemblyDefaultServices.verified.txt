@@ -186,7 +186,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         private readonly global::MyCode.TestProvider _testProvider;
         private readonly global::System.IServiceProvider _builtinServiceProvider;
 
+#if NET9_0_OR_GREATER
+        private readonly global::System.Threading.Lock _lock = new();
+#else
         private readonly global::System.Object _lock = new();
+#endif
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.

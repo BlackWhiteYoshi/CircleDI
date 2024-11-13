@@ -88,7 +88,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
     private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
+#if NET9_0_OR_GREATER
+    private readonly global::System.Threading.Lock _disposeList_lock = new();
+#else
     private readonly global::System.Object _disposeList_lock = new();
+#endif
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
@@ -201,7 +205,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
         private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
+#if NET9_0_OR_GREATER
+        private readonly global::System.Threading.Lock _disposeList_lock = new();
+#else
         private readonly global::System.Object _disposeList_lock = new();
+#endif
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.

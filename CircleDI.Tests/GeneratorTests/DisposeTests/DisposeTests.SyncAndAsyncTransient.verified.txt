@@ -88,7 +88,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
     private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
+#if NET9_0_OR_GREATER
+    private readonly global::System.Threading.Lock _asyncDisposeList_lock = new();
+#else
     private readonly global::System.Object _asyncDisposeList_lock = new();
+#endif
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
@@ -207,7 +211,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
         private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
+#if NET9_0_OR_GREATER
+        private readonly global::System.Threading.Lock _asyncDisposeList_lock = new();
+#else
         private readonly global::System.Object _asyncDisposeList_lock = new();
+#endif
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
