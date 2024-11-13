@@ -572,14 +572,14 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
     /// </summary>
     private struct Registration(ServiceProvider serviceProvider, bool generateScope, CreationTiming creationTimeMainProvider, CreationTiming creationTimeScopeProvider, GetAccess getAccessorMainProvider, GetAccess getAccessorScopeProvider) {
         // Default service ServiceProvider itself
-        public TypeName serviceTypeServiceProvider;
-        public TypeName implementationTypeServiceProvider;
-        public bool hasServiceSelf;
+        public required TypeName serviceTypeServiceProvider;
+        public required TypeName implementationTypeServiceProvider;
+        public required bool hasServiceSelf;
 
         // Default Service ServiceProvider.Scope self
-        public TypeName serviceTypeScopeProvider;
-        public TypeName implementationTypeScopeProvider;
-        public bool hasServiceSelfScope;
+        public required TypeName serviceTypeScopeProvider;
+        public required TypeName implementationTypeScopeProvider;
+        public required bool hasServiceSelfScope;
 
         private readonly List<INamedTypeSymbol> path = [];
 
