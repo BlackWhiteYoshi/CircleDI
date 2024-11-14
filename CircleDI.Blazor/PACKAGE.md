@@ -20,7 +20,7 @@ Extra Blazor features are
 - Automatic component registration as transient services.
 - Default services of *Microsoft.Extensions.DependencyInjection* provider get added.
 
-This package is not compatible with [CircleDI](https://www.nuget.org/packages/CircleDI).
+This package is not compatible with [CircleDI](https://www.nuget.org/packages/CircleDI) (this package already includes it).
 
 
 ## Requirements

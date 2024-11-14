@@ -18,7 +18,7 @@ Extra MinimalAPI features are
 
 - EndpointAttribute to register methods as minimal API endpoint.
 
-This package is not compatible with [CircleDI](https://www.nuget.org/packages/CircleDI).
+This package is not compatible with [CircleDI](https://www.nuget.org/packages/CircleDI) (this package already includes it).
 
 
 ## Requirements

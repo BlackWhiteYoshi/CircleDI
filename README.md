@@ -323,19 +323,6 @@ By defining this constant in your referencing project, you prevent one generatio
 
 
 <br></br>
-## Preview
-
-This package is in preview and breaking changes may occur.
-There are more features coming.
-
-If you find any bugs, have suggestions or just some ideas, feel free to create an issue.
-I will try to answer every request and explain my thought process as best I can.
-
-Pull Request are welcome, but it is always better to discuss things first. You do not want to do the hard work first only to see everything falling apart in a discussion.  
-And code conventions, structure, and quality is important to me. So there is a good possibility, I will make some adjustments to your PR to fit better to the codebase.
-
-
-<br></br>
 ## Versions
 
 ### CircleDI
@@ -373,3 +360,6 @@ And code conventions, structure, and quality is important to me. So there is a g
   Small breaking change: Modules implementing IDisposable/IAsyncDisposable imported as Service get disposed.  
   Dedicated lock-objects instead of locking provider or lists itself.  
   Some fixes for specific cases.
+- 1.0.0  
+  Changed Blazor ComponentActivator to support the default constructor dependency injection.  
+  Changed lock type to System.Threading.Lock when available.
