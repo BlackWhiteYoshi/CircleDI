@@ -328,38 +328,39 @@ By defining this constant in your referencing project, you prevent one generatio
 ### CircleDI
 
 - 0.1.0  
-  First version. Includes all basic functionalities for generating a Service Provider.
+  - first version, includes all basic functionalities for generating a Service Provider
 - 0.2.0  
-  Breaking Change: *CreateScope()* lists dependencies without [Dependency]-attribute as parameters and dependencies with [Dependency]-attribute are supplied by the ServiceProvider.  
-  Native/Built-in types are supported.
+  - breaking change: *CreateScope()* lists dependencies without [Dependency]-attribute as parameters and dependencies with [Dependency]-attribute are supplied by the ServiceProvider  
+  - native/built-in types are supported
 - 0.3.0  
-  Added support for passing value type services by reference.  
-  ServiceProvider can now also be struct, record or record struct.
+  - added support for passing value type services by reference  
+  - ServiceProvider can now also be struct, record or record struct
 - 0.4.0  
-  Added "NoDispose"-property to disable disposing for each distinct service.  
-  Added functionality for omitting interface generation when *InterfaceName* is empty.  
-  Added Attribute *ServiceProvider&lt;TInterface&gt;* to generate the interface into an existing one.
+  - added "NoDispose"-property to disable disposing for each distinct service  
+  - added functionality for omitting interface generation when *InterfaceName* is empty  
+  - added Attribute *ServiceProvider&lt;TInterface&gt;* to generate the interface into an existing one
 - 0.5.0  
-  Added CicleDI.Blazor.  
-  Removed Error *CDI029* "Dependency CreationTiming: Constructor on Lazy" and instead the lazy instantiated service will become constructor instantiated.
+  - added CicleDI.Blazor  
+  - removed Error *CDI029* "Dependency CreationTiming: Constructor on Lazy" and instead the lazy instantiated service will become constructor instantiated
 - 0.6.0  
-  Added Minimal.API.  
-  Added support for ServiceProvider being generic.  
-  Improved IServiceProvder.GetService(Type) method.
+  - added Minimal.API  
+  - added support for ServiceProvider being generic  
+  - improved IServiceProvder.GetService(Type) method
 - 0.7.0  
-  Added ImportAttribute.
+  - added ImportAttribute
 - 0.8.0  
-  Added ComponentModuleAttribute for cross project razor components importing.  
-  Breaking Change: ServiceProvider does not longer generate TransientAttributes, add ComponentModuleAttribute to the ServiceProvider to get the same behavior as before.  
-  Improved service tree generation.
+  - added ComponentModuleAttribute for cross project razor components importing  
+  - breaking change: ServiceProvider does not longer generate TransientAttributes, add ComponentModuleAttribute to the ServiceProvider to get the same behavior as before  
+  - improved service tree generation
 - 0.9.0  
-  Support for registering services with *typeof()*.  
-  Registering open/unbound generic services.
+  - support for registering services with *typeof()*  
+  - registering open/unbound generic services
 - 0.9.1  
-  Small breaking change: The error-id of most error messages got changed.  
-  Small breaking change: Modules implementing IDisposable/IAsyncDisposable imported as Service get disposed.  
-  Dedicated lock-objects instead of locking provider or lists itself.  
-  Some fixes for specific cases.
+  - small breaking change: The error-id of most error messages got changed  
+  - small breaking change: Modules implementing IDisposable/IAsyncDisposable imported as Service get disposed  
+  - dedicated lock-objects instead of locking provider or lists itself  
+  - some fixes for specific cases
+<br></br>
 - 1.0.0  
-  Changed Blazor ComponentActivator to support the default constructor dependency injection.  
-  Changed lock type to System.Threading.Lock when available.
+  - changed Blazor ComponentActivator to support the default constructor dependency injection  
+  - changed lock type to System.Threading.Lock when available
