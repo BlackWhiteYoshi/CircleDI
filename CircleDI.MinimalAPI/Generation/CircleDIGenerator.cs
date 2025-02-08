@@ -34,6 +34,9 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             context.AddSource("DisposeGeneration.g.cs", CircleDI.Defenitions.Attributes.DisposeGenerationEnum);
             context.AddSource("ImportMode.g.cs", CircleDI.Defenitions.Attributes.ImportModeEnum);
             context.AddSource("Http.g.cs", CircleDI.MinimalAPI.Defenitions.Attributes.HttpEnum);
+
+            // polyfill
+            context.AddSource("Lock.g.cs", CircleDI.Defenitions.Attributes.LockPolyfill);
         });
 
 

@@ -23,11 +23,7 @@ namespace MyCode;
 /// </para>
 /// </summary>
 public sealed partial class TestProvider : global::MyCode.ITestProvider, IServiceProvider {
-#if NET9_0_OR_GREATER
     private readonly global::System.Threading.Lock _lock = new();
-#else
-    private readonly global::System.Object _lock = new();
-#endif
 
     /// <summary>
     /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
@@ -119,11 +115,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
     private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
-#if NET9_0_OR_GREATER
     private readonly global::System.Threading.Lock _asyncDisposeList_lock = new();
-#else
-    private readonly global::System.Object _asyncDisposeList_lock = new();
-#endif
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
@@ -170,11 +162,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     public sealed partial class Scope : global::MyCode.ITestProvider.IScope, IServiceProvider {
         private readonly global::MyCode.TestProvider _testProvider;
 
-#if NET9_0_OR_GREATER
         private readonly global::System.Threading.Lock _lock = new();
-#else
-        private readonly global::System.Object _lock = new();
-#endif
 
         /// <summary>
         /// Creates an instance of a ScopeProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> scoped services.
@@ -559,11 +547,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
 
 
         private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
-#if NET9_0_OR_GREATER
         private readonly global::System.Threading.Lock _asyncDisposeList_lock = new();
-#else
-        private readonly global::System.Object _asyncDisposeList_lock = new();
-#endif
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.

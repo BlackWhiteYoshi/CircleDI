@@ -26,6 +26,9 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             context.AddSource("GetAccess.g.cs", Attributes.GetAccessEnum);
             context.AddSource("DisposeGeneration.g.cs", Attributes.DisposeGenerationEnum);
             context.AddSource("ImportMode.g.cs", Attributes.ImportModeEnum);
+
+            // polyfill
+            context.AddSource("Lock.g.cs", Attributes.LockPolyfill);
         });
 
         ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();

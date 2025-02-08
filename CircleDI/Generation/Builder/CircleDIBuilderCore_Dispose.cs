@@ -23,14 +23,7 @@ public partial struct CircleDIBuilderCore {
             builder.AppendInterpolation($"{indent}private {readonlyStr}global::System.Collections.Generic.List<IDisposable> {DISPOSE_LIST};\n");
             if (threadSafe)
                 // TODO just use Lock in both cases when there is support by PolySharp (https://github.com/Sergio0694/PolySharp)
-                builder.AppendInterpolation($"""
-                    #if NET9_0_OR_GREATER
-                    {indent}private readonly global::System.Threading.Lock {DISPOSE_LIST}_lock = new();
-                    #else
-                    {indent}private readonly global::System.Object {DISPOSE_LIST}_lock = new();
-                    #endif
-
-                    """);
+                builder.AppendInterpolation($"{indent}private readonly global::System.Threading.Lock {DISPOSE_LIST}_lock = new();\n");
             builder.Append('\n');
         }
 
@@ -38,15 +31,7 @@ public partial struct CircleDIBuilderCore {
         if (hasAsyncDisposeList) {
             builder.AppendInterpolation($"{indent}private {readonlyStr}global::System.Collections.Generic.List<IAsyncDisposable> {ASYNC_DISPOSE_LIST};\n");
             if (threadSafe)
-                // TODO just use Lock in both cases when there is support by PolySharp (https://github.com/Sergio0694/PolySharp)
-                builder.AppendInterpolation($"""
-                    #if NET9_0_OR_GREATER
-                    {indent}private readonly global::System.Threading.Lock {ASYNC_DISPOSE_LIST}_lock = new();
-                    #else
-                    {indent}private readonly global::System.Object {ASYNC_DISPOSE_LIST}_lock = new();
-                    #endif
-
-                    """);
+                builder.AppendInterpolation($"{indent}private readonly global::System.Threading.Lock {ASYNC_DISPOSE_LIST}_lock = new();\n");
             builder.Append('\n');
         }
 

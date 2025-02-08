@@ -1,5 +1,6 @@
 ﻿using CircleDI.Tests.GenerateSourceText;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 
 namespace CircleDI.Tests;
@@ -27,7 +28,7 @@ public static class ServiceProviderTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
 
-        foreach (string sourceText in sourceTexts)
+        foreach (string sourceText in sourceTexts.Where((string sourceText) => !sourceText.Contains("namespace System.Threading;\n")))
             Assert.Contains("namespace CircleDIAttributes;\n", sourceText);
     }
 

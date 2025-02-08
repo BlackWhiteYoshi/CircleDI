@@ -35,6 +35,9 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             context.AddSource("ImportMode.g.cs", CircleDI.Defenitions.Attributes.ImportModeEnum);
             context.AddSource("BlazorServiceGeneration.g.cs", CircleDI.Blazor.Defenitions.Attributes.BlazorServiceGenerationEnum);
 
+            // polyfill
+            context.AddSource("Lock.g.cs", CircleDI.Defenitions.Attributes.LockPolyfill);
+
             // class
             context.AddSource("CircleDIComponentActivator.g.cs", CircleDI.Blazor.Defenitions.Attributes.CircleDIComponentActivator);
         });
