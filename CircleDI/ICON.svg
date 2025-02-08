@@ -1,17 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -8 16 16" transform="rotate(45) scale(-1 1)">
     <defs>
-        <g id="peak">
-            <path d="M3.534 -1h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41" />
-        </g>
-
-        <g id="line">
-            <path d="M0 -5c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 5.917 -1H4.9A5 5 0 0 0 0 -5" />
-        </g>
+        <path id="peak" d="M3.534 -1h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41" />
+        <path id="line" d="M0 -5c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 5.917 -1H4.9A5 5 0 0 0 0 -5" />
     </defs>
 
-    <use href="#peak" fill="rgb(78, 201, 176)" />
-    <use href="#line" fill="rgb(78, 201, 176)" />
+    <use href="#peak" fill="#4EC9B0" />
+    <use href="#line" fill="#4EC9B0" />
 
-    <use href="#peak" fill="rgb(184, 215, 163)" transform="rotate(180)" />
-    <use href="#line" fill="rgb(184, 215, 163)" transform="rotate(180)" />
+    <use href="#peak" fill="#B8D7A3" transform="rotate(180)" />
+    <use href="#line" fill="#B8D7A3" transform="rotate(180)" />
 </svg>
