@@ -364,3 +364,5 @@ By defining this constant in your referencing project, you prevent one generatio
 - 1.0.0  
   - changed Blazor ComponentActivator to support the default constructor dependency injection  
   - changed lock type to System.Threading.Lock when available
+- 1.1.0  
+  - added polyfill for System.Threading.Lock for .NET8 backwards compatibility
