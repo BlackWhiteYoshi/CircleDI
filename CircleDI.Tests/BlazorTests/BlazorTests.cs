@@ -333,5 +333,31 @@ public static class BlazorTests {
             """);
     }
 
+    [Fact]
+    public static Task ComponentModuleOverride() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode {                
+                [Transient<MyComponent>(Name = "Overridden")]
+                [ComponentModule]
+                public readonly partial struct Module;
+
+                public sealed class MyComponent : Microsoft.AspNetCore.Components.ComponentBase;
+                public sealed class MyComponent2 : Microsoft.AspNetCore.Components.ComponentBase, IDisposable;
+            }
+
+            namespace Microsoft.AspNetCore.Components {
+                public abstract class ComponentBase;
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out _);
+        string sourceTextComponentModule = sourceTexts[^1];
+
+        return Verify(sourceTextComponentModule);
+    }
+
     #endregion
 }

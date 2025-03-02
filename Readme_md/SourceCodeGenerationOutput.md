@@ -2172,7 +2172,7 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     public global::IMyService3 MyService3 {
         get {
             global::MyService3 myService3 = new global::MyService3();
-            lock (_disposeList) {
+            lock (_disposeList_lock) {
                 _disposeList.Add(myService3);
             }
             return myService3;
@@ -2187,7 +2187,7 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     public global::IMyService4 MyService4 {
         get {
             global::MyService4 myService4 = new global::MyService4();
-            lock (_asyncDisposeList) {
+            lock (_asyncDisposeList_lock) {
                 _asyncDisposeList.Add(myService4);
             }
             return myService4;
@@ -2233,8 +2233,10 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
 
 
     private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
+    private readonly global::System.Threading.Lock _disposeList_lock = new();
 
     private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
+    private readonly global::System.Threading.Lock _asyncDisposeList_lock = new();
 
     /// <summary>
     /// Disposes all disposable services instantiated by this provider.
@@ -2243,11 +2245,11 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         ((IDisposable)_myService1).Dispose();
         _ = ((IAsyncDisposable)_myService2).DisposeAsync().Preserve();
 
-        lock (_disposeList)
+        lock (_disposeList_lock)
             foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
-        lock (_asyncDisposeList)
+        lock (_asyncDisposeList_lock)
             foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 if (asyncDisposable is IDisposable disposable)
                     disposable.Dispose();
@@ -2261,7 +2263,7 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     public ValueTask DisposeAsync() {
         ((IDisposable)_myService1).Dispose();
 
-        lock (_disposeList)
+        lock (_disposeList_lock)
             foreach (IDisposable disposable in _disposeList)
                 disposable.Dispose();
 
@@ -2270,7 +2272,7 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         disposeTasks[0] = ((IAsyncDisposable)_myService2).DisposeAsync().AsTask();
 
         int index = 1;
-        lock (_asyncDisposeList)
+        lock (_asyncDisposeList_lock)
             foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                 disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 
@@ -2345,7 +2347,7 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         public global::IMyService3 MyService3 {
             get {
                 global::MyService3 myService3 = new global::MyService3();
-                lock (_disposeList) {
+                lock (_disposeList_lock) {
                     _disposeList.Add(myService3);
                 }
                 return myService3;
@@ -2360,7 +2362,7 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         public global::IMyService4 MyService4 {
             get {
                 global::MyService4 myService4 = new global::MyService4();
-                lock (_asyncDisposeList) {
+                lock (_asyncDisposeList_lock) {
                     _asyncDisposeList.Add(myService4);
                 }
                 return myService4;
@@ -2410,18 +2412,20 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
 
 
         private readonly global::System.Collections.Generic.List<IDisposable> _disposeList;
+        private readonly global::System.Threading.Lock _disposeList_lock = new();
 
         private readonly global::System.Collections.Generic.List<IAsyncDisposable> _asyncDisposeList;
+        private readonly global::System.Threading.Lock _asyncDisposeList_lock = new();
 
         /// <summary>
         /// Disposes all disposable services instantiated by this provider.
         /// </summary>
         public void Dispose() {
-            lock (_disposeList)
+            lock (_disposeList_lock)
                 foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
 
-            lock (_asyncDisposeList)
+            lock (_asyncDisposeList_lock)
                 foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     if (asyncDisposable is IDisposable disposable)
                         disposable.Dispose();
@@ -2433,14 +2437,14 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         /// Disposes all disposable services instantiated by this provider asynchronously.
         /// </summary>
         public ValueTask DisposeAsync() {
-            lock (_disposeList)
+            lock (_disposeList_lock)
                 foreach (IDisposable disposable in _disposeList)
                     disposable.Dispose();
 
             Task[] disposeTasks = new Task[_asyncDisposeList.Count];
 
             int index = 0;
-            lock (_asyncDisposeList)
+            lock (_asyncDisposeList_lock)
                 foreach (IAsyncDisposable asyncDisposable in _asyncDisposeList)
                     disposeTasks[index++] = asyncDisposable.DisposeAsync().AsTask();
 
@@ -2491,6 +2495,8 @@ using System.Threading.Tasks;
 /// </para>
 /// </summary>
 public partial class LazyProvider : global::ILazyProvider, IServiceProvider {
+    private readonly global::System.Threading.Lock _lock = new();
+
     /// <summary>
     /// Creates an instance of a ServiceProvider together with all <see cref="global::CircleDIAttributes.CreationTiming.Constructor">non-lazy</see> singleton services.
     /// </summary>
@@ -2513,11 +2519,11 @@ public partial class LazyProvider : global::ILazyProvider, IServiceProvider {
     public global::IMyService MyService {
         get {
             if (_myService is null)
-                lock (this)
+                lock (_lock)
                     if (_myService is null) {
                         _myService = new global::MyService();
                     }
-            return (global::IMyService)_myService;
+            return _myService;
         }
     }
     private global::MyService? _myService;
@@ -3031,7 +3037,7 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
             if (_myService is null) {
                 _myService = new global::MyService();
             }
-            return (global::IMyService)_myService;
+            return _myService;
         }
     }
     private global::MyService? _myService;

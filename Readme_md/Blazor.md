@@ -119,7 +119,8 @@ Furthermore, the automatic detection of components is limited to the same projec
 This attribute is for cross project razor components importing.
 
 A module or ServiceProvider decorated with this attribute gets an [TransientAttribute&lt;TService&gt;](TypeTables.md#transientattribute) for each razor component (class that inherits from [ComponentBase](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.componentbase)).
-Each attribute has also the *NoDispose*-property set to true, because they get disposed by the framework.  
+Each attribute has also the *NoDispose*-property set to true, because they get disposed by the framework.
+When a component is registered manually, the component will not be added again.  
 Another project referencing this project can have a ServiceProvider or module with an [ImportAttribute](TypeTables.md#importattribute) importing the module or ServiceProvider with the generated [TransientAttribute&lt;TService&gt;](TypeTables.md#transientattribute).
 
 For example, if you have a server project *Blazor* and a client project *Blazor.Client* with server project reference on client project
@@ -175,8 +176,9 @@ There is no guarantee that all default services are present, especially not in t
 
 This package does not disable the built-in service provider or it's injection mechanism,
 so the normal *[Inject]*/*[Parameter]*/*[CascadingParameter]* works as expected.
-When using [Parameter]/[CascadingParameter] you must not use the *required* keyword,
+When using [Parameter]/[CascadingParameter] you should not use the *required* keyword,
 otherwise CircleDI is forced to dependency inject that parameter only to get overridden by the framework afterwards.
+If a *required* keyword is present, you can register some dummy dependency to fulfill the requirement e.g. for the type *string* an *empty string*.
 To avoid nullable warnings, just assign a "*null!*" to the property.
 
 <br></br>

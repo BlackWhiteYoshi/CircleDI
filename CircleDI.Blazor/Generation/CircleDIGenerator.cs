@@ -103,6 +103,34 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
     /// <param name="componentModule"></param>
     /// <param name="componentList"></param>
     private static void GenerateComponentAttributes(SourceProductionContext context, ObjectPool<StringBuilder> stringBuilderPool, INamedTypeSymbol componentModule, ImmutableArray<INamedTypeSymbol?> componentList) {
+        // find all the services listed on the [ComponentModule]-class
+        
+        ImmutableArray<AttributeData> attributes = componentModule.GetAttributes();
+        List<string> moduleServiceList = new(attributes.Length - 1); // [ComponentAttribute] gets not added
+
+        foreach (AttributeData attribute in attributes) {
+            INamedTypeSymbol? attributeType = attribute.AttributeClass;
+            switch (attributeType?.TypeArguments.Length) {
+                case 1: // Service<TService>
+                case 2: { // Service<TService, TImplementation>
+                    if (attributeType.TypeArguments[0] is INamedTypeSymbol namedType)
+                        moduleServiceList.Add(namedType.Name);
+                    break;
+                }
+                case 0: // Service(typeof(service)) || Service(typeof(service), typeof(implementation))
+                    switch (attribute.ConstructorArguments.Length) {
+                        case 1: // Service(typeof(service))
+                        case 2: { // Service(typeof(service), typeof(implementation))
+                            if (attribute.ConstructorArguments[0].Value is INamedTypeSymbol namedType)
+                                moduleServiceList.Add(namedType.Name);
+                            break;
+                        }
+                    }
+                    break;
+            }
+        }
+
+
         StringBuilder builder = stringBuilderPool.Get();
         Indent indent = new();
 
@@ -127,7 +155,8 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         // components
         foreach (INamedTypeSymbol? component in componentList)
             if (component is not null)
-                builder.AppendInterpolation($"{indent}[global::CircleDIAttributes.TransientAttribute<{new TypeName(component).AsOpenFullyQualified()}>(NoDispose = true)]\n");
+                if (!moduleServiceList.Contains(component.Name))
+                    builder.AppendInterpolation($"{indent}[global::CircleDIAttributes.TransientAttribute<{new TypeName(component).AsOpenFullyQualified()}>(NoDispose = true)]\n");
 
         // class head
         builder.AppendInterpolation($"{indent}partial {moduleName.Keyword.AsString()} {moduleName.Name}{moduleName.AsOpenGenerics()};\n");
