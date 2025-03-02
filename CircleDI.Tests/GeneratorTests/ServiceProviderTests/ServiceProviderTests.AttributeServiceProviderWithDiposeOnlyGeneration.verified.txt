@@ -53,11 +53,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.IServiceDispose ServiceDispose {
         get {
-            global::MyCode.ServiceDispose serviceDispose = new global::MyCode.ServiceDispose();
+            global::MyCode.ServiceDispose serviceDispose_0 = new global::MyCode.ServiceDispose();
             lock (_disposeList_lock) {
-                _disposeList.Add(serviceDispose);
+                _disposeList.Add(serviceDispose_0);
             }
-            return serviceDispose;
+            return serviceDispose_0;
         }
     }
 
@@ -68,11 +68,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync {
         get {
-            global::MyCode.ServiceDisposeAsync serviceDisposeAsync = new global::MyCode.ServiceDisposeAsync();
+            global::MyCode.ServiceDisposeAsync serviceDisposeAsync_0 = new global::MyCode.ServiceDisposeAsync();
             lock (_asyncDisposeList_lock) {
-                _asyncDisposeList.Add(serviceDisposeAsync);
+                _asyncDisposeList.Add(serviceDisposeAsync_0);
             }
-            return serviceDisposeAsync;
+            return serviceDisposeAsync_0;
         }
     }
 
@@ -181,11 +181,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.IServiceDispose ServiceDispose {
             get {
-                global::MyCode.ServiceDispose serviceDispose = new global::MyCode.ServiceDispose();
+                global::MyCode.ServiceDispose serviceDispose_0 = new global::MyCode.ServiceDispose();
                 lock (_disposeList_lock) {
-                    _disposeList.Add(serviceDispose);
+                    _disposeList.Add(serviceDispose_0);
                 }
-                return serviceDispose;
+                return serviceDispose_0;
             }
         }
 
@@ -196,11 +196,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync {
             get {
-                global::MyCode.ServiceDisposeAsync serviceDisposeAsync = new global::MyCode.ServiceDisposeAsync();
+                global::MyCode.ServiceDisposeAsync serviceDisposeAsync_0 = new global::MyCode.ServiceDisposeAsync();
                 lock (_asyncDisposeList_lock) {
-                    _asyncDisposeList.Add(serviceDisposeAsync);
+                    _asyncDisposeList.Add(serviceDisposeAsync_0);
                 }
-                return serviceDisposeAsync;
+                return serviceDisposeAsync_0;
             }
         }
 

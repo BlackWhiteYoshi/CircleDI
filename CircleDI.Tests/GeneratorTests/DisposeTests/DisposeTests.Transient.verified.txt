@@ -53,11 +53,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
-            global::MyCode.TestService testService = new global::MyCode.TestService();
+            global::MyCode.TestService testService_0 = new global::MyCode.TestService();
             lock (_disposeList_lock) {
-                _disposeList.Add(testService);
+                _disposeList.Add(testService_0);
             }
-            return testService;
+            return testService_0;
         }
     }
 
@@ -162,11 +162,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestService testService = new global::MyCode.TestService();
+                global::MyCode.TestService testService_0 = new global::MyCode.TestService();
                 lock (_disposeList_lock) {
-                    _disposeList.Add(testService);
+                    _disposeList.Add(testService_0);
                 }
-                return testService;
+                return testService_0;
             }
         }
 

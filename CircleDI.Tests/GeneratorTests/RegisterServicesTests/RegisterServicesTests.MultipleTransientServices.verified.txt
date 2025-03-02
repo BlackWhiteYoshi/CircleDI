@@ -52,8 +52,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
-            global::MyCode.TestService testService = new global::MyCode.TestService();
-            return testService;
+            global::MyCode.TestService testService_0 = new global::MyCode.TestService();
+            return testService_0;
         }
     }
 
@@ -64,8 +64,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService2 {
         get {
-            global::MyCode.TestService testService2 = new global::MyCode.TestService();
-            return testService2;
+            global::MyCode.TestService testService2_0 = new global::MyCode.TestService();
+            return testService2_0;
         }
     }
 
@@ -76,8 +76,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestServiceM TestServiceM {
         get {
-            global::MyCode.TestServiceM testServiceM = new global::MyCode.TestServiceM();
-            return testServiceM;
+            global::MyCode.TestServiceM testServiceM_0 = new global::MyCode.TestServiceM();
+            return testServiceM_0;
         }
     }
 
@@ -88,10 +88,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.Consumer Consumer {
         get {
-            global::MyCode.TestService testService = new global::MyCode.TestService();
+            global::MyCode.TestService testService_0 = new global::MyCode.TestService();
             global::MyCode.TestService testService2_1 = new global::MyCode.TestService();
             global::MyCode.TestServiceM testServiceM_2 = new global::MyCode.TestServiceM();
-            global::MyCode.Consumer consumer_3 = new global::MyCode.Consumer(testService, testService2_1, testServiceM_2);
+            global::MyCode.Consumer consumer_3 = new global::MyCode.Consumer(testService_0, testService2_1, testServiceM_2);
             return consumer_3;
         }
     }
@@ -193,8 +193,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestService testService = new global::MyCode.TestService();
-                return testService;
+                global::MyCode.TestService testService_0 = new global::MyCode.TestService();
+                return testService_0;
             }
         }
 
@@ -205,8 +205,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService2 {
             get {
-                global::MyCode.TestService testService2 = new global::MyCode.TestService();
-                return testService2;
+                global::MyCode.TestService testService2_0 = new global::MyCode.TestService();
+                return testService2_0;
             }
         }
 
@@ -217,8 +217,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestServiceM TestServiceM {
             get {
-                global::MyCode.TestServiceM testServiceM = new global::MyCode.TestServiceM();
-                return testServiceM;
+                global::MyCode.TestServiceM testServiceM_0 = new global::MyCode.TestServiceM();
+                return testServiceM_0;
             }
         }
 
@@ -229,10 +229,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.Consumer Consumer {
             get {
-                global::MyCode.TestService testService = new global::MyCode.TestService();
+                global::MyCode.TestService testService_0 = new global::MyCode.TestService();
                 global::MyCode.TestService testService2_1 = new global::MyCode.TestService();
                 global::MyCode.TestServiceM testServiceM_2 = new global::MyCode.TestServiceM();
-                global::MyCode.Consumer consumer_3 = new global::MyCode.Consumer(testService, testService2_1, testServiceM_2);
+                global::MyCode.Consumer consumer_3 = new global::MyCode.Consumer(testService_0, testService2_1, testServiceM_2);
                 return consumer_3;
             }
         }

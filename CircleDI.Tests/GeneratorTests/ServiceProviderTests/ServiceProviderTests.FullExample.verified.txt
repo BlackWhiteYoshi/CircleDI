@@ -104,8 +104,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITransient Transient {
         get {
-            global::MyCode.Transient transient = new global::MyCode.Transient();
-            return transient;
+            global::MyCode.Transient transient_0 = new global::MyCode.Transient();
+            return transient_0;
         }
     }
 
@@ -116,11 +116,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITransientDisposable TransientDisposable {
         get {
-            global::MyCode.TransientDisposable transientDisposable = new global::MyCode.TransientDisposable();
+            global::MyCode.TransientDisposable transientDisposable_0 = new global::MyCode.TransientDisposable();
             lock (_disposeList_lock) {
-                _disposeList.Add(transientDisposable);
+                _disposeList.Add(transientDisposable_0);
             }
-            return transientDisposable;
+            return transientDisposable_0;
         }
     }
 
@@ -131,11 +131,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITransientAsyncDisposable TransientAsyncDisposable {
         get {
-            global::MyCode.TransientAsyncDisposable transientAsyncDisposable = new global::MyCode.TransientAsyncDisposable();
+            global::MyCode.TransientAsyncDisposable transientAsyncDisposable_0 = new global::MyCode.TransientAsyncDisposable();
             lock (_asyncDisposeList_lock) {
-                _asyncDisposeList.Add(transientAsyncDisposable);
+                _asyncDisposeList.Add(transientAsyncDisposable_0);
             }
-            return transientAsyncDisposable;
+            return transientAsyncDisposable_0;
         }
     }
 
@@ -390,8 +390,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITransient Transient {
             get {
-                global::MyCode.Transient transient = new global::MyCode.Transient();
-                return transient;
+                global::MyCode.Transient transient_0 = new global::MyCode.Transient();
+                return transient_0;
             }
         }
 
@@ -402,11 +402,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITransientDisposable TransientDisposable {
             get {
-                global::MyCode.TransientDisposable transientDisposable = new global::MyCode.TransientDisposable();
+                global::MyCode.TransientDisposable transientDisposable_0 = new global::MyCode.TransientDisposable();
                 lock (_disposeList_lock) {
-                    _disposeList.Add(transientDisposable);
+                    _disposeList.Add(transientDisposable_0);
                 }
-                return transientDisposable;
+                return transientDisposable_0;
             }
         }
 
@@ -417,11 +417,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITransientAsyncDisposable TransientAsyncDisposable {
             get {
-                global::MyCode.TransientAsyncDisposable transientAsyncDisposable = new global::MyCode.TransientAsyncDisposable();
+                global::MyCode.TransientAsyncDisposable transientAsyncDisposable_0 = new global::MyCode.TransientAsyncDisposable();
                 lock (_asyncDisposeList_lock) {
-                    _asyncDisposeList.Add(transientAsyncDisposable);
+                    _asyncDisposeList.Add(transientAsyncDisposable_0);
                 }
-                return transientAsyncDisposable;
+                return transientAsyncDisposable_0;
             }
         }
 

@@ -129,8 +129,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestService testService = global::MyCode.ITestModule.Scope.TestService;
-                return testService;
+                global::MyCode.TestService testService_0 = global::MyCode.ITestModule.Scope.TestService;
+                return testService_0;
             }
         }
 

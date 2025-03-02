@@ -50,10 +50,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
             if (_s2 is null)
                 lock (_lock)
                     if (_s2 is null) {
-                        global::MyCode.T3 t3 = new global::MyCode.T3();
-                        _s2 = new global::MyCode.S2(t3);
+                        global::MyCode.T3 t3_0 = new global::MyCode.T3();
+                        _s2 = new global::MyCode.S2(t3_0);
                         lock (_asyncDisposeList_lock) {
-                            _asyncDisposeList.Add(t3);
+                            _asyncDisposeList.Add(t3_0);
                         }
                     }
             return _s2;
@@ -76,11 +76,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.T3 T3 {
         get {
-            global::MyCode.T3 t3 = new global::MyCode.T3();
+            global::MyCode.T3 t3_0 = new global::MyCode.T3();
             lock (_asyncDisposeList_lock) {
-                _asyncDisposeList.Add(t3);
+                _asyncDisposeList.Add(t3_0);
             }
-            return t3;
+            return t3_0;
         }
     }
 
@@ -190,8 +190,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                             if (_s3_2 is null) {
                                 _s3_2 = new global::MyCode.S3_2();
                             }
-                            global::MyCode.T3 t3 = new global::MyCode.T3();
-                            global::MyCode.T2 t2_1 = new global::MyCode.T2(_s3_1, _s3_2, t3);
+                            global::MyCode.T3 t3_0 = new global::MyCode.T3();
+                            global::MyCode.T2 t2_1 = new global::MyCode.T2(_s3_1, _s3_2, t3_0);
                             global::MyCode.T15 t15_2 = new global::MyCode.T15(t2_1) {
                                 Root = _root
                             };
@@ -216,7 +216,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                             _root = new global::MyCode.Root(t1_3, _s1);
                             Set_T15_Root(t15_2, _root);
                             lock (_asyncDisposeList_lock) {
-                                _asyncDisposeList.Add(t3);
+                                _asyncDisposeList.Add(t3_0);
                             }
                         }
                 return _root;
@@ -240,8 +240,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                             if (_s3_2 is null) {
                                 _s3_2 = new global::MyCode.S3_2();
                             }
-                            global::MyCode.T3 t3 = new global::MyCode.T3();
-                            global::MyCode.T2 t2_1 = new global::MyCode.T2(_s3_1, _s3_2, t3);
+                            global::MyCode.T3 t3_0 = new global::MyCode.T3();
+                            global::MyCode.T2 t2_1 = new global::MyCode.T2(_s3_1, _s3_2, t3_0);
                             if (_testProvider._s2 is null)
                                 lock (_testProvider._lock)
                                     if (_testProvider._s2 is null) {
@@ -253,7 +253,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                                     }
                             _s1 = new global::MyCode.S1(t2_1, _testProvider._s2);
                             lock (_asyncDisposeList_lock) {
-                                _asyncDisposeList.Add(t3);
+                                _asyncDisposeList.Add(t3_0);
                             }
                         }
                 return _s1;
@@ -335,8 +335,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_s3_2 is null) {
                             _s3_2 = new global::MyCode.S3_2();
                         }
-                global::MyCode.T3 t3 = new global::MyCode.T3();
-                global::MyCode.T2 t2_1 = new global::MyCode.T2(_s3_1, _s3_2, t3);
+                global::MyCode.T3 t3_0 = new global::MyCode.T3();
+                global::MyCode.T2 t2_1 = new global::MyCode.T2(_s3_1, _s3_2, t3_0);
                 global::MyCode.T15 t15_2 = new global::MyCode.T15(t2_1) {
                     Root = _root
                 };
@@ -375,7 +375,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         }
                 global::MyCode.T1 t1_10 = new global::MyCode.T1(t15_2);
                 lock (_asyncDisposeList_lock) {
-                    _asyncDisposeList.Add(t3);
+                    _asyncDisposeList.Add(t3_0);
                 }
                 return t1_10;
             }
@@ -398,8 +398,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_s3_2 is null) {
                             _s3_2 = new global::MyCode.S3_2();
                         }
-                global::MyCode.T3 t3 = new global::MyCode.T3();
-                global::MyCode.T2 t2_1 = new global::MyCode.T2(_s3_1, _s3_2, t3);
+                global::MyCode.T3 t3_0 = new global::MyCode.T3();
+                global::MyCode.T2 t2_1 = new global::MyCode.T2(_s3_1, _s3_2, t3_0);
                 global::MyCode.T15 t15_2 = new global::MyCode.T15(t2_1) {
                     Root = _root
                 };
@@ -437,7 +437,7 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                             }
                         }
                 lock (_asyncDisposeList_lock) {
-                    _asyncDisposeList.Add(t3);
+                    _asyncDisposeList.Add(t3_0);
                 }
                 return t15_2;
             }
@@ -460,10 +460,10 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
                         if (_s3_2 is null) {
                             _s3_2 = new global::MyCode.S3_2();
                         }
-                global::MyCode.T3 t3 = new global::MyCode.T3();
-                global::MyCode.T2 t2_1 = new global::MyCode.T2(_s3_1, _s3_2, t3);
+                global::MyCode.T3 t3_0 = new global::MyCode.T3();
+                global::MyCode.T2 t2_1 = new global::MyCode.T2(_s3_1, _s3_2, t3_0);
                 lock (_asyncDisposeList_lock) {
-                    _asyncDisposeList.Add(t3);
+                    _asyncDisposeList.Add(t3_0);
                 }
                 return t2_1;
             }
@@ -476,11 +476,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.T3 T3 {
             get {
-                global::MyCode.T3 t3 = new global::MyCode.T3();
+                global::MyCode.T3 t3_0 = new global::MyCode.T3();
                 lock (_asyncDisposeList_lock) {
-                    _asyncDisposeList.Add(t3);
+                    _asyncDisposeList.Add(t3_0);
                 }
-                return t3;
+                return t3_0;
             }
         }
 

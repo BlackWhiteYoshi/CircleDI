@@ -74,8 +74,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.MyComponent3 MyComponent3 {
         get {
-            global::MyCode.MyComponent3 myComponent3 = new global::MyCode.MyComponent3();
-            return myComponent3;
+            global::MyCode.MyComponent3 myComponent3_0 = new global::MyCode.MyComponent3();
+            return myComponent3_0;
         }
     }
 
@@ -86,8 +86,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.MyComponent4 MyComponent4 {
         get {
-            global::MyCode.MyComponent4 myComponent4 = new global::MyCode.MyComponent4();
-            return myComponent4;
+            global::MyCode.MyComponent4 myComponent4_0 = new global::MyCode.MyComponent4();
+            return myComponent4_0;
         }
     }
 
@@ -365,8 +365,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.MyComponent3 MyComponent3 {
             get {
-                global::MyCode.MyComponent3 myComponent3 = new global::MyCode.MyComponent3();
-                return myComponent3;
+                global::MyCode.MyComponent3 myComponent3_0 = new global::MyCode.MyComponent3();
+                return myComponent3_0;
             }
         }
 
@@ -377,8 +377,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.MyComponent4 MyComponent4 {
             get {
-                global::MyCode.MyComponent4 myComponent4 = new global::MyCode.MyComponent4();
-                return myComponent4;
+                global::MyCode.MyComponent4 myComponent4_0 = new global::MyCode.MyComponent4();
+                return myComponent4_0;
             }
         }
 

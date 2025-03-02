@@ -61,8 +61,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITransient Transient {
         get {
-            global::MyCode.Transient transient = new global::MyCode.Transient();
-            return transient;
+            global::MyCode.Transient transient_0 = new global::MyCode.Transient();
+            return transient_0;
         }
     }
 
@@ -183,8 +183,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITransient Transient {
             get {
-                global::MyCode.Transient transient = new global::MyCode.Transient();
-                return transient;
+                global::MyCode.Transient transient_0 = new global::MyCode.Transient();
+                return transient_0;
             }
         }
 

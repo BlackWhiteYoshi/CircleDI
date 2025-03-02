@@ -51,8 +51,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.IServiceDispose ServiceDispose {
         get {
-            global::MyCode.ServiceDispose serviceDispose = new global::MyCode.ServiceDispose();
-            return serviceDispose;
+            global::MyCode.ServiceDispose serviceDispose_0 = new global::MyCode.ServiceDispose();
+            return serviceDispose_0;
         }
     }
 
@@ -63,8 +63,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync {
         get {
-            global::MyCode.ServiceDisposeAsync serviceDisposeAsync = new global::MyCode.ServiceDisposeAsync();
-            return serviceDisposeAsync;
+            global::MyCode.ServiceDisposeAsync serviceDisposeAsync_0 = new global::MyCode.ServiceDisposeAsync();
+            return serviceDisposeAsync_0;
         }
     }
 
@@ -147,8 +147,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.IServiceDispose ServiceDispose {
             get {
-                global::MyCode.ServiceDispose serviceDispose = new global::MyCode.ServiceDispose();
-                return serviceDispose;
+                global::MyCode.ServiceDispose serviceDispose_0 = new global::MyCode.ServiceDispose();
+                return serviceDispose_0;
             }
         }
 
@@ -159,8 +159,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.IServiceDisposeAsync ServiceDisposeAsync {
             get {
-                global::MyCode.ServiceDisposeAsync serviceDisposeAsync = new global::MyCode.ServiceDisposeAsync();
-                return serviceDisposeAsync;
+                global::MyCode.ServiceDisposeAsync serviceDisposeAsync_0 = new global::MyCode.ServiceDisposeAsync();
+                return serviceDisposeAsync_0;
             }
         }
 

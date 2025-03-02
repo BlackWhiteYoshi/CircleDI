@@ -52,9 +52,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
-            global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
+            global::MyCode.TestDependency testDependency_0 = new global::MyCode.TestDependency();
             global::MyCode.TestService testService_1 = new global::MyCode.TestService() {
-                TestDependency = testDependency
+                TestDependency = testDependency_0
             };
             return testService_1;
         }
@@ -67,8 +67,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestDependency TestDependency {
         get {
-            global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
-            return testDependency;
+            global::MyCode.TestDependency testDependency_0 = new global::MyCode.TestDependency();
+            return testDependency_0;
         }
     }
 
@@ -165,9 +165,9 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
+                global::MyCode.TestDependency testDependency_0 = new global::MyCode.TestDependency();
                 global::MyCode.TestService testService_1 = new global::MyCode.TestService() {
-                    TestDependency = testDependency
+                    TestDependency = testDependency_0
                 };
                 return testService_1;
             }
@@ -180,8 +180,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestDependency TestDependency {
             get {
-                global::MyCode.TestDependency testDependency = new global::MyCode.TestDependency();
-                return testDependency;
+                global::MyCode.TestDependency testDependency_0 = new global::MyCode.TestDependency();
+                return testDependency_0;
             }
         }
 

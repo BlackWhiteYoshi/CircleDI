@@ -52,8 +52,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
-            global::MyCode.TestService testService = TestMethod();
-            return testService;
+            global::MyCode.TestService testService_0 = TestMethod();
+            return testService_0;
         }
     }
 
@@ -64,8 +64,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.Consumer Consumer {
         get {
-            global::MyCode.TestService testService = TestMethod();
-            global::MyCode.Consumer consumer_1 = new global::MyCode.Consumer(testService);
+            global::MyCode.TestService testService_0 = TestMethod();
+            global::MyCode.Consumer consumer_1 = new global::MyCode.Consumer(testService_0);
             return consumer_1;
         }
     }
@@ -163,8 +163,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestService testService = _testProvider.TestMethod();
-                return testService;
+                global::MyCode.TestService testService_0 = _testProvider.TestMethod();
+                return testService_0;
             }
         }
 
@@ -175,8 +175,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.Consumer Consumer {
             get {
-                global::MyCode.TestService testService = _testProvider.TestMethod();
-                global::MyCode.Consumer consumer_1 = new global::MyCode.Consumer(testService);
+                global::MyCode.TestService testService_0 = _testProvider.TestMethod();
+                global::MyCode.Consumer consumer_1 = new global::MyCode.Consumer(testService_0);
                 return consumer_1;
             }
         }

@@ -53,12 +53,12 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService1 TestService1 {
         get {
-            global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
+            global::MyCode.TestService2 testService2_0 = new global::MyCode.TestService2();
             global::MyCode.TestService1 testService1_1 = new global::MyCode.TestService1() {
-                TestService2 = testService2
+                TestService2 = testService2_0
             };
             lock (_disposeList_lock) {
-                _disposeList.Add(testService2);
+                _disposeList.Add(testService2_0);
                 _disposeList.Add(testService1_1);
             }
             return testService1_1;
@@ -72,11 +72,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService2 TestService2 {
         get {
-            global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
+            global::MyCode.TestService2 testService2_0 = new global::MyCode.TestService2();
             lock (_disposeList_lock) {
-                _disposeList.Add(testService2);
+                _disposeList.Add(testService2_0);
             }
-            return testService2;
+            return testService2_0;
         }
     }
 
@@ -185,12 +185,12 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService1 TestService1 {
             get {
-                global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
+                global::MyCode.TestService2 testService2_0 = new global::MyCode.TestService2();
                 global::MyCode.TestService1 testService1_1 = new global::MyCode.TestService1() {
-                    TestService2 = testService2
+                    TestService2 = testService2_0
                 };
                 lock (_disposeList_lock) {
-                    _disposeList.Add(testService2);
+                    _disposeList.Add(testService2_0);
                     _disposeList.Add(testService1_1);
                 }
                 return testService1_1;
@@ -204,11 +204,11 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService2 TestService2 {
             get {
-                global::MyCode.TestService2 testService2 = new global::MyCode.TestService2();
+                global::MyCode.TestService2 testService2_0 = new global::MyCode.TestService2();
                 lock (_disposeList_lock) {
-                    _disposeList.Add(testService2);
+                    _disposeList.Add(testService2_0);
                 }
-                return testService2;
+                return testService2_0;
             }
         }
 

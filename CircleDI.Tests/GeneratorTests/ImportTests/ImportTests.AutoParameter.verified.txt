@@ -55,8 +55,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
-            global::MyCode.TestService testService = _testModule.TestService;
-            return testService;
+            global::MyCode.TestService testService_0 = _testModule.TestService;
+            return testService_0;
         }
     }
 
@@ -67,8 +67,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService2 TestService2 {
         get {
-            global::MyCode.TestService2 testService2 = global::MyCode.TestModule.TestService2;
-            return testService2;
+            global::MyCode.TestService2 testService2_0 = global::MyCode.TestModule.TestService2;
+            return testService2_0;
         }
     }
 
@@ -165,8 +165,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestService testService = _testProvider._testModule.TestService;
-                return testService;
+                global::MyCode.TestService testService_0 = _testProvider._testModule.TestService;
+                return testService_0;
             }
         }
 
@@ -177,8 +177,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService2 TestService2 {
             get {
-                global::MyCode.TestService2 testService2 = global::MyCode.TestModule.TestService2;
-                return testService2;
+                global::MyCode.TestService2 testService2_0 = global::MyCode.TestModule.TestService2;
+                return testService2_0;
             }
         }
 

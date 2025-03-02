@@ -54,8 +54,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.IScoped Scoped {
         get {
-            global::MyCode.Scoped scoped = new global::MyCode.Scoped();
-            return scoped;
+            global::MyCode.Scoped scoped_0 = new global::MyCode.Scoped();
+            return scoped_0;
         }
     }
 
@@ -148,8 +148,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.IScoped Scoped {
             get {
-                global::MyCode.Scoped scoped = new global::MyCode.Scoped();
-                return scoped;
+                global::MyCode.Scoped scoped_0 = new global::MyCode.Scoped();
+                return scoped_0;
             }
         }
 

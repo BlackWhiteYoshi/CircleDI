@@ -182,8 +182,8 @@ public sealed partial class MyProvider : global::IMyProvider, IServiceProvider {
         /// </summary>
         public global::Service1 Service1 {
             get {
-                global::Service1 service1 = new global::Service1(_service2, _myProvider._service3);
-                return service1;
+                global::Service1 service1_0 = new global::Service1(_service2, _myProvider._service3);
+                return service1_0;
             }
         }
 
@@ -1261,8 +1261,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
     /// </summary>
     public global::MyCode.ITestService TestService {
         get {
-            global::MyCode.TestService testService = global::MyCode.ITestModule.CreateService;
-            return testService;
+            global::MyCode.TestService testService_0 = global::MyCode.ITestModule.CreateService;
+            return testService_0;
         }
     }
 
@@ -1355,8 +1355,8 @@ public sealed partial class TestProvider : global::MyCode.ITestProvider, IServic
         /// </summary>
         public global::MyCode.ITestService TestService {
             get {
-                global::MyCode.TestService testService = global::MyCode.ITestModule.CreateService;
-                return testService;
+                global::MyCode.TestService testService_0 = global::MyCode.ITestModule.CreateService;
+                return testService_0;
             }
         }
 
@@ -2171,11 +2171,11 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     /// </summary>
     public global::IMyService3 MyService3 {
         get {
-            global::MyService3 myService3 = new global::MyService3();
+            global::MyService3 myService3_0 = new global::MyService3();
             lock (_disposeList_lock) {
-                _disposeList.Add(myService3);
+                _disposeList.Add(myService3_0);
             }
-            return myService3;
+            return myService3_0;
         }
     }
 
@@ -2186,11 +2186,11 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
     /// </summary>
     public global::IMyService4 MyService4 {
         get {
-            global::MyService4 myService4 = new global::MyService4();
+            global::MyService4 myService4_0 = new global::MyService4();
             lock (_asyncDisposeList_lock) {
-                _asyncDisposeList.Add(myService4);
+                _asyncDisposeList.Add(myService4_0);
             }
-            return myService4;
+            return myService4_0;
         }
     }
 
@@ -2346,11 +2346,11 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         /// </summary>
         public global::IMyService3 MyService3 {
             get {
-                global::MyService3 myService3 = new global::MyService3();
+                global::MyService3 myService3_0 = new global::MyService3();
                 lock (_disposeList_lock) {
-                    _disposeList.Add(myService3);
+                    _disposeList.Add(myService3_0);
                 }
-                return myService3;
+                return myService3_0;
             }
         }
 
@@ -2361,11 +2361,11 @@ public partial class DisposingProvider : global::IDisposingProvider, IServicePro
         /// </summary>
         public global::IMyService4 MyService4 {
             get {
-                global::MyService4 myService4 = new global::MyService4();
+                global::MyService4 myService4_0 = new global::MyService4();
                 lock (_asyncDisposeList_lock) {
-                    _asyncDisposeList.Add(myService4);
+                    _asyncDisposeList.Add(myService4_0);
                 }
-                return myService4;
+                return myService4_0;
             }
         }
 
@@ -3057,9 +3057,9 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
     /// </summary>
     public global::IDisposableService DisposableService {
         get {
-            global::DisposableService disposableService = new global::DisposableService();
-            _disposeList.Add(disposableService);
-            return disposableService;
+            global::DisposableService disposableService_0 = new global::DisposableService();
+            _disposeList.Add(disposableService_0);
+            return disposableService_0;
         }
     }
 
@@ -3172,9 +3172,9 @@ public partial class FastProvider : global::IFastProvider, IServiceProvider {
         /// </summary>
         public global::IDisposableService DisposableService {
             get {
-                global::DisposableService disposableService = new global::DisposableService();
-                _disposeList.Add(disposableService);
-                return disposableService;
+                global::DisposableService disposableService_0 = new global::DisposableService();
+                _disposeList.Add(disposableService_0);
+                return disposableService_0;
             }
         }
 

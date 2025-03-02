@@ -32,10 +32,7 @@ public partial struct CircleDIBuilderCore {
             }
 
             int transientNumber = AppendTransientService(service);
-            if (transientNumber > 0)
-                builder.AppendInterpolation($"{indent}return {service.Name.AsFirstLower()}_{transientNumber};\n");
-            else
-                builder.AppendInterpolation($"{indent}return {service.Name.AsFirstLower()};\n");
+            builder.AppendInterpolation($"{indent}return {service.Name.AsFirstLower()}_{transientNumber};\n");
 
             if (service.GetAccessor == GetAccess.Property) {
                 indent.DecreaseLevel(); //  2
