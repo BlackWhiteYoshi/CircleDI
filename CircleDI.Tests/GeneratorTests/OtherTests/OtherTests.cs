@@ -13,9 +13,9 @@ namespace CircleDI.Tests;
 /// - ref
 /// </para>
 /// </summary>
-public static class OtherTests {
-    [Fact]
-    public static Task ServiceProviderStruct() {
+public sealed class OtherTests {
+    [Test]
+    public async ValueTask ServiceProviderStruct() {
         const string input = """
             using CircleDIAttributes;
 
@@ -32,7 +32,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -43,8 +43,8 @@ public static class OtherTests {
             """);
     }
 
-    [Fact]
-    public static Task ServiceProviderRecord() {
+    [Test]
+    public async ValueTask ServiceProviderRecord() {
         const string input = """
             using CircleDIAttributes;
 
@@ -61,7 +61,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -72,8 +72,8 @@ public static class OtherTests {
             """);
     }
 
-    [Fact]
-    public static Task ServiceProviderRecordClass() {
+    [Test]
+    public async ValueTask ServiceProviderRecordClass() {
         const string input = """
             using CircleDIAttributes;
 
@@ -90,7 +90,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -101,8 +101,8 @@ public static class OtherTests {
             """);
     }
 
-    [Fact]
-    public static Task ServiceProviderRecordStruct() {
+    [Test]
+    public async ValueTask ServiceProviderRecordStruct() {
         const string input = """
             using CircleDIAttributes;
 
@@ -119,7 +119,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -131,8 +131,8 @@ public static class OtherTests {
     }
 
 
-    [Fact]
-    public static Task Generic() {
+    [Test]
+    public async ValueTask Generic() {
         const string input = """
             using CircleDIAttributes;
             using System;
@@ -156,7 +156,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -168,8 +168,8 @@ public static class OtherTests {
     }
 
 
-    [Fact]
-    public static Task RecordClass() {
+    [Test]
+    public async ValueTask RecordClass() {
         const string input = """
             using CircleDIAttributes;
 
@@ -192,7 +192,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -203,8 +203,8 @@ public static class OtherTests {
             """);
     }
 
-    [Fact]
-    public static Task RecordStruct() {
+    [Test]
+    public async ValueTask RecordStruct() {
         const string input = """
             using CircleDIAttributes;
 
@@ -228,7 +228,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -239,8 +239,8 @@ public static class OtherTests {
             """);
     }
 
-    [Fact]
-    public static Task NativeType() {
+    [Test]
+    public async ValueTask NativeType() {
         const string input = """
             using CircleDIAttributes;
 
@@ -265,7 +265,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -277,8 +277,8 @@ public static class OtherTests {
     }
 
 
-    [Fact]
-    public static Task RefInClassProviderAndNoRefInStructProvider() {
+    [Test]
+    public async ValueTask RefInClassProviderAndNoRefInStructProvider() {
         const string input = """
             using CircleDIAttributes;
 
@@ -297,7 +297,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -308,8 +308,8 @@ public static class OtherTests {
             """);
     }
 
-    [Fact]
-    public static Task RefInOutInjection() {
+    [Test]
+    public async ValueTask RefInOutInjection() {
         const string input = """
             using CircleDIAttributes;
 
@@ -336,7 +336,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -348,8 +348,8 @@ public static class OtherTests {
     }
 
 
-    [Fact]
-    public static Task GenericClass() {
+    [Test]
+    public async ValueTask GenericClass() {
         const string input = """
             using CircleDIAttributes;
 
@@ -369,7 +369,7 @@ public static class OtherTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -381,8 +381,8 @@ public static class OtherTests {
     }
 
 
-    [Fact]
-    public static void InterfaceFails() {
+    [Test]
+    public async ValueTask InterfaceFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -398,8 +398,8 @@ public static class OtherTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI025", diagnostics[0].Id);
-        Assert.Equal("ServiceImplementation 'MyCode.ITest' does not exist or has no accessible constructor", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI025");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("ServiceImplementation 'MyCode.ITest' does not exist or has no accessible constructor");
     }
 }

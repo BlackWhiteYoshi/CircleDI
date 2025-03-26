@@ -7,9 +7,9 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests for dependency injection and corresponding attributes (DependencyAttribute, Constructorttribute).
 /// </summary>
-public static class DependencyTests {
-    [Fact]
-    public static Task SingleSingleton() {
+public sealed class DependencyTests {
+    [Test]
+    public async ValueTask SingleSingleton() {
         const string input = """
             using CircleDIAttributes;
 
@@ -31,11 +31,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task SingleScoped() {
+    [Test]
+    public async ValueTask SingleScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -57,11 +57,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task SingleTransient() {
+    [Test]
+    public async ValueTask SingleTransient() {
         const string input = """
             using CircleDIAttributes;
 
@@ -83,11 +83,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task SingleTransientScoped() {
+    [Test]
+    public async ValueTask SingleTransientScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -113,11 +113,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ScopedServiceOnLazySingleton() {
+    [Test]
+    public async ValueTask ScopedServiceOnLazySingleton() {
         const string input = """
             using CircleDIAttributes;
 
@@ -139,12 +139,12 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task MultipleSingleton() {
+    [Test]
+    public async ValueTask MultipleSingleton() {
         const string input = """
             using CircleDIAttributes;
 
@@ -174,11 +174,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task MultipleScoped() {
+    [Test]
+    public async ValueTask MultipleScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -208,11 +208,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task MultipleTransient() {
+    [Test]
+    public async ValueTask MultipleTransient() {
         const string input = """
             using CircleDIAttributes;
 
@@ -242,11 +242,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task NamedDependency() {
+    [Test]
+    public async ValueTask NamedDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -268,11 +268,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task SingleProperty() {
+    [Test]
+    public async ValueTask SingleProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -296,11 +296,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task TransientProperty() {
+    [Test]
+    public async ValueTask TransientProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -324,11 +324,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task MultipleProperties() {
+    [Test]
+    public async ValueTask MultipleProperties() {
         const string input = """
             using CircleDIAttributes;
 
@@ -362,11 +362,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task PropertyWithAttribute() {
+    [Test]
+    public async ValueTask PropertyWithAttribute() {
         const string input = """
             using CircleDIAttributes;
 
@@ -391,11 +391,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task PropertyAsNamedDependency() {
+    [Test]
+    public async ValueTask PropertyAsNamedDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -420,11 +420,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task NormalPropertyIsIgnored() {
+    [Test]
+    public async ValueTask NormalPropertyIsIgnored() {
         const string input = """
             using CircleDIAttributes;
 
@@ -448,12 +448,12 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task ServiceProviderDependency() {
+    [Test]
+    public async ValueTask ServiceProviderDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -474,11 +474,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ScopeProviderDependency() {
+    [Test]
+    public async ValueTask ScopeProviderDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -500,12 +500,12 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task MultipleConstructorWithConstructorAttribute() {
+    [Test]
+    public async ValueTask MultipleConstructorWithConstructorAttribute() {
         const string input = """
             using CircleDIAttributes;
 
@@ -532,11 +532,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task MultipleConstructorWithConstructorAttributeOnPrimary() {
+    [Test]
+    public async ValueTask MultipleConstructorWithConstructorAttributeOnPrimary() {
         const string input = """
             using CircleDIAttributes;
 
@@ -562,11 +562,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static void MultipleConstructorWithoutAttributeFails() {
+    [Test]
+    public async ValueTask MultipleConstructorWithoutAttributeFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -590,13 +590,13 @@ public static class DependencyTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI026", diagnostics[0].Id);
-        Assert.Equal("No ConstructorAttribute at ServiceImplementation 'MyCode.TestService', but there are multiple constructors", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI026");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("No ConstructorAttribute at ServiceImplementation 'MyCode.TestService', but there are multiple constructors");
     }
 
-    [Fact]
-    public static void MultipleConstructorWithMultipleAttributesFails() {
+    [Test]
+    public async ValueTask MultipleConstructorWithMultipleAttributesFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -622,14 +622,14 @@ public static class DependencyTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI027", diagnostics[0].Id);
-        Assert.Equal("Multiple ConstructorAttributes at ServiceImplementation 'MyCode.TestService', there must be exactly one when there are multiple constructors", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI027");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Multiple ConstructorAttributes at ServiceImplementation 'MyCode.TestService', there must be exactly one when there are multiple constructors");
     }
 
 
-    [Fact]
-    public static Task DeepTreeConstructor() {
+    [Test]
+    public async ValueTask DeepTreeConstructor() {
         const string input = """
             using CircleDIAttributes;
 
@@ -673,11 +673,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task DeepTreeLazy() {
+    [Test]
+    public async ValueTask DeepTreeLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -721,12 +721,12 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task CircularSelfSetAccessor() {
+    [Test]
+    public async ValueTask CircularSelfSetAccessor() {
         const string input = """
             using CircleDIAttributes;
 
@@ -746,11 +746,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task CircularSelfInitAccessor() {
+    [Test]
+    public async ValueTask CircularSelfInitAccessor() {
         const string input = """
             using CircleDIAttributes;
 
@@ -770,11 +770,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static void CircularSelfNoAccessorFails() {
+    [Test]
+    public async ValueTask CircularSelfNoAccessorFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -794,13 +794,13 @@ public static class DependencyTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI028", diagnostics[0].Id);
-        Assert.Equal("No set/init accessor at Property 'MyCode.TestService.Self'", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI028");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("No set/init accessor at Property 'MyCode.TestService.Self'");
     }
 
-    [Fact]
-    public static Task CircularServices() {
+    [Test]
+    public async ValueTask CircularServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -826,11 +826,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task CircularTransient() {
+    [Test]
+    public async ValueTask CircularTransient() {
         const string input = """
             using CircleDIAttributes;
 
@@ -854,11 +854,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task CircularManyServices() {
+    [Test]
+    public async ValueTask CircularManyServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -894,11 +894,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task CircularLazyServices() {
+    [Test]
+    public async ValueTask CircularLazyServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -922,12 +922,12 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task FullTangle3() {
+    [Test]
+    public async ValueTask FullTangle3() {
         const string input = """
             using CircleDIAttributes;
 
@@ -960,11 +960,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task FullTangle4() {
+    [Test]
+    public async ValueTask FullTangle4() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1007,11 +1007,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task FullTangle5() {
+    [Test]
+    public async ValueTask FullTangle5() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1066,12 +1066,12 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task CircularDependencyShortCircuit2() {
+    [Test]
+    public async ValueTask CircularDependencyShortCircuit2() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1095,11 +1095,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task CircularDependencyShortCircuit3() {
+    [Test]
+    public async ValueTask CircularDependencyShortCircuit3() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1126,11 +1126,11 @@ public static class DependencyTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static void CircularDependencyShortCircuitError() {
+    [Test]
+    public async ValueTask CircularDependencyShortCircuitError() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1156,8 +1156,8 @@ public static class DependencyTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI033", diagnostics[0].Id);
-        Assert.Equal("Circular dependency unresolvable: ['Service1' -> 'Service3' -> 'Service1']. Only singleton and scoped dependencies injected as properties can be resolved circular", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI033");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Circular dependency unresolvable: ['Service1' -> 'Service3' -> 'Service1']. Only singleton and scoped dependencies injected as properties can be resolved circular");
     }
 }

@@ -1,6 +1,5 @@
 ﻿using CircleDI.Tests.GenerateSourceText;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 
 namespace CircleDI.Tests;
@@ -8,9 +7,9 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests the ServiceProviderAttribute and ScopedProviderAttribute.
 /// </summary>
-public static class ServiceProviderTests {
-    [Fact]
-    public static void NoServiceProviderAttributeGeneratesNoProvider() {
+public sealed class ServiceProviderTests {
+    [Test]
+    public async ValueTask NoServiceProviderAttributeGeneratesNoProvider() {
         const string input = """
             using CircleDIAttributes;
 
@@ -29,11 +28,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
 
         foreach (string sourceText in sourceTexts.Where((string sourceText) => !sourceText.Contains("namespace System.Threading;\n")))
-            Assert.Contains("namespace CircleDIAttributes;\n", sourceText);
+            await Assert.That(sourceText).Contains("namespace CircleDIAttributes;\n");
     }
 
-    [Fact]
-    public static Task EmptyServiceProviderAttributeGeneratesDefaultProvider() {
+    [Test]
+    public async ValueTask EmptyServiceProviderAttributeGeneratesDefaultProvider() {
         const string input = """
             using CircleDIAttributes;
 
@@ -48,7 +47,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -60,8 +59,8 @@ public static class ServiceProviderTests {
     }
 
 
-    [Fact]
-    public static void MissingPartialOnServiceProviderReportsError() {
+    [Test]
+    public async ValueTask MissingPartialOnServiceProviderReportsError() {
         const string input = """
             using CircleDIAttributes;
 
@@ -74,13 +73,13 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI001", diagnostics[0].Id);
-        Assert.Equal("Missing partial keyword", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI001");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Missing partial keyword");
     }
 
-    [Fact]
-    public static void MissingPartialOnScopeProviderReportsError() {
+    [Test]
+    public async ValueTask MissingPartialOnScopeProviderReportsError() {
         const string input = """
             using CircleDIAttributes;
 
@@ -95,13 +94,13 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI002", diagnostics[0].Id);
-        Assert.Equal("Missing partial keyword", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI002");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Missing partial keyword");
     }
 
-    [Fact]
-    public static void InterfaceNameIServiceProviderError() {
+    [Test]
+    public async ValueTask InterfaceNameIServiceProviderError() {
         const string input = """
             using CircleDIAttributes;
 
@@ -114,13 +113,13 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI005", diagnostics[0].Id);
-        Assert.Equal("InterfaceName 'IServiceProvider' is not allowed, it collides with 'System.IServiceProvider'", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI005");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("InterfaceName 'IServiceProvider' is not allowed, it collides with 'System.IServiceProvider'");
     }
 
-    [Fact]
-    public static void NameServiceProviderHasInterfaceNameIServiceprovider() {
+    [Test]
+    public async ValueTask NameServiceProviderHasInterfaceNameIServiceprovider() {
         const string input = """
             using CircleDIAttributes;
 
@@ -134,12 +133,12 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextInterface = sourceTexts[^1];
 
-        Assert.Contains("public partial interface IServiceprovider", sourceTextInterface);
+        await Assert.That(sourceTextInterface).Contains("public partial interface IServiceprovider");
     }
 
 
-    [Fact]
-    public static void ServiceProviderGlobalNamespace() {
+    [Test]
+    public async ValueTask ServiceProviderGlobalNamespace() {
         const string input = """
             using CircleDIAttributes;
 
@@ -152,14 +151,14 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        Assert.Contains("public sealed partial class TestProvider", sourceTextClass);
-        Assert.DoesNotContain("namespace", sourceTextClass);
-        Assert.Contains("public partial interface ITestProvider", sourceTextInterface);
-        Assert.DoesNotContain("namespace", sourceTextInterface);
+        await Assert.That(sourceTextClass).Contains("public sealed partial class TestProvider");
+        await Assert.That(sourceTextClass).DoesNotContain("namespace");
+        await Assert.That(sourceTextInterface).Contains("public partial interface ITestProvider");
+        await Assert.That(sourceTextInterface).DoesNotContain("namespace");
     }
 
-    [Fact]
-    public static void ServiceProviderNestedNamespace() {
+    [Test]
+    public async ValueTask ServiceProviderNestedNamespace() {
         const string input = """
             using CircleDIAttributes;
 
@@ -176,13 +175,13 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        Assert.Contains("namespace MyCode.Nested;", sourceTextClass);
-        Assert.Contains("namespace MyCode.Nested;", sourceTextInterface);
+        await Assert.That(sourceTextClass).Contains("namespace MyCode.Nested;");
+        await Assert.That(sourceTextInterface).Contains("namespace MyCode.Nested;");
     }
 
 
-    [Fact]
-    public static Task ServiceProviderNestedType() {
+    [Test]
+    public async ValueTask ServiceProviderNestedType() {
         const string input = """
             using CircleDIAttributes;
 
@@ -199,7 +198,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -210,8 +209,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task ServiceProviderManyNestedTypes() {
+    [Test]
+    public async ValueTask ServiceProviderManyNestedTypes() {
         const string input = """
             using CircleDIAttributes;
 
@@ -232,7 +231,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -244,8 +243,8 @@ public static class ServiceProviderTests {
     }
 
 
-    [Fact]
-    public static Task ServiceProviderGeneric() {
+    [Test]
+    public async ValueTask ServiceProviderGeneric() {
         const string input = """
             using CircleDIAttributes;
 
@@ -259,7 +258,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -270,8 +269,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopeProviderGeneric() {
+    [Test]
+    public async ValueTask ScopeProviderGeneric() {
         const string input = """
             using CircleDIAttributes;
 
@@ -287,7 +286,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -298,8 +297,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task InterfaceGeneric() {
+    [Test]
+    public async ValueTask InterfaceGeneric() {
         const string input = """
             using CircleDIAttributes;
 
@@ -315,7 +314,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -326,8 +325,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task InterfaceScopeGeneric() {
+    [Test]
+    public async ValueTask InterfaceScopeGeneric() {
         const string input = """
             using CircleDIAttributes;
 
@@ -347,7 +346,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -358,8 +357,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task AllGeneric() {
+    [Test]
+    public async ValueTask AllGeneric() {
         const string input = """
             using CircleDIAttributes;
 
@@ -379,7 +378,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -391,8 +390,8 @@ public static class ServiceProviderTests {
     }
 
 
-    [Fact]
-    public static Task ServiceProviderInitServicesMethod() {
+    [Test]
+    public async ValueTask ServiceProviderInitServicesMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -417,11 +416,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ServiceProviderInitServicesMethodLazy() {
+    [Test]
+    public async ValueTask ServiceProviderInitServicesMethodLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -446,11 +445,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ScopedProviderInitServicesMethod() {
+    [Test]
+    public async ValueTask ScopedProviderInitServicesMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -478,11 +477,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ScopedProviderInitServicesMethodLazy() {
+    [Test]
+    public async ValueTask ScopedProviderInitServicesMethodLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -510,12 +509,12 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task ScopedProviderParameterDependency() {
+    [Test]
+    public async ValueTask ScopedProviderParameterDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -538,11 +537,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ScopedProviderParameterProviderDependency() {
+    [Test]
+    public async ValueTask ScopedProviderParameterProviderDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -565,11 +564,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ScopedProviderPropertyDependency() {
+    [Test]
+    public async ValueTask ScopedProviderPropertyDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -592,11 +591,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ScopedProviderPropertyProviderDependency() {
+    [Test]
+    public async ValueTask ScopedProviderPropertyProviderDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -620,11 +619,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ScopedProviderParameterPropertyAndProviderDependency() {
+    [Test]
+    public async ValueTask ScopedProviderParameterPropertyAndProviderDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -662,12 +661,12 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task ScopedProviderDependencyInjectionParameter() {
+    [Test]
+    public async ValueTask ScopedProviderDependencyInjectionParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -696,11 +695,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ScopedProviderDependencyInjectionProperty() {
+    [Test]
+    public async ValueTask ScopedProviderDependencyInjectionProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -732,11 +731,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ScopedProviderDependencyInjectionParameterProperty() {
+    [Test]
+    public async ValueTask ScopedProviderDependencyInjectionParameterProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -768,12 +767,12 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static void ScopedProviderDependencyInjectionNotRegisteredFails() {
+    [Test]
+    public async ValueTask ScopedProviderDependencyInjectionNotRegisteredFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -795,13 +794,13 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI038", diagnostics[0].Id);
-        Assert.Equal("Unregistered dependency at 'MyCode.TestProvider.Scope' with type 'MyCode.ITestService'", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI038");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Unregistered dependency at 'MyCode.TestProvider.Scope' with type 'MyCode.ITestService'");
     }
 
-    [Fact]
-    public static void ScopedProviderDependencyInjectionAmbiguousFails() {
+    [Test]
+    public async ValueTask ScopedProviderDependencyInjectionAmbiguousFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -825,13 +824,13 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI039", diagnostics[0].Id);
-        Assert.Equal("Ambiguous dependency at 'MyCode.TestProvider.Scope' with type 'MyCode.ITestService': There are multiple Services registered for this type: [\"Single\", \"TestService\"]. Use the '[Dependency(Name=\"...\")]'-attribute on the parameter to choose one specific service", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI039");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Ambiguous dependency at 'MyCode.TestProvider.Scope' with type 'MyCode.ITestService': There are multiple Services registered for this type: [\"Single\", \"TestService\"]. Use the '[Dependency(Name=\"...\")]'-attribute on the parameter to choose one specific service");
     }
 
-    [Fact]
-    public static void ScopedProviderDependencyInjectionNotNamedRegisteredFails() {
+    [Test]
+    public async ValueTask ScopedProviderDependencyInjectionNotNamedRegisteredFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -854,13 +853,13 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI040", diagnostics[0].Id);
-        Assert.Equal("Unregistered named dependency at 'MyCode.TestProvider.Scope' with name \"Single\"", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI040");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Unregistered named dependency at 'MyCode.TestProvider.Scope' with name \"Single\"");
     }
 
-    [Fact]
-    public static void ScopedProviderDependencyInjectionScopedFails() {
+    [Test]
+    public async ValueTask ScopedProviderDependencyInjectionScopedFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -883,13 +882,13 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI041", diagnostics[0].Id);
-        Assert.Equal("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Scoped dependency 'MyCode.ITestService'", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI041");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Scoped dependency 'MyCode.ITestService'");
     }
 
-    [Fact]
-    public static void ScopedProviderDependencyInjectionTransientScopedFails() {
+    [Test]
+    public async ValueTask ScopedProviderDependencyInjectionTransientScopedFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -914,13 +913,13 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI042", diagnostics[0].Id);
-        Assert.Equal("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Transient-Scoped dependency 'MyCode.ITestService1'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI042");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Transient-Scoped dependency 'MyCode.ITestService1'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped");
     }
 
-    [Fact]
-    public static void ScopedProviderDependencyInjectionDelegateScopedFails() {
+    [Test]
+    public async ValueTask ScopedProviderDependencyInjectionDelegateScopedFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -940,14 +939,14 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI043", diagnostics[0].Id);
-        Assert.Equal("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Delegate-Scoped dependency 'System.Action'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI043");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Lifetime Violation: ScopedProvider 'MyCode.TestProvider.Scope' has Delegate-Scoped dependency 'System.Action'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.");
     }
 
 
-    [Fact]
-    public static Task AttributeServiceProviderWithDifferentInterfaceName() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithDifferentInterfaceName() {
         const string input = """
             using CircleDIAttributes;
 
@@ -962,7 +961,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -973,8 +972,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithEmptyInterfaceName() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithEmptyInterfaceName() {
         const string input = """
             using CircleDIAttributes;
 
@@ -996,11 +995,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^1];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithInterfaceType() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithInterfaceType() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1023,7 +1022,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1034,8 +1033,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithInterfaceTypeParameter() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithInterfaceTypeParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1058,7 +1057,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1069,8 +1068,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static void AttributeServiceProviderWithInterfaceTypeAndInterfaceNameError() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithInterfaceTypeAndInterfaceNameError() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1091,14 +1090,14 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI004", diagnostics[0].Id);
-        Assert.Equal("InterfaceType and InterfaceName are not compatible, at most one property must be set.", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI004");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("InterfaceType and InterfaceName are not compatible, at most one property must be set.");
     }
 
 
-    [Fact]
-    public static Task AttributeServiceProviderWithCreationTimeLazy() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1124,11 +1123,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithGetAccessorMethod() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1154,11 +1153,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithGetAccessorMethodAndLazy() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithGetAccessorMethodAndLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1184,12 +1183,12 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task AttributeServiceProviderWithThreadSafeFalse() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithThreadSafeFalse() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1215,11 +1214,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithThreadSafeFalseAndCreationTimeLazy() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithThreadSafeFalseAndCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1245,11 +1244,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithThreadSafeFalseAndGetAccessorMethod() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithThreadSafeFalseAndGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1275,11 +1274,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithThreadSafeFalseAndGetAccessorMethodAndLazy() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithThreadSafeFalseAndGetAccessorMethodAndLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1305,12 +1304,12 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task AttributeScopeProviderNotGenerated() {
+    [Test]
+    public async ValueTask AttributeScopeProviderNotGenerated() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1338,7 +1337,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1349,8 +1348,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task AttributeScopeProviderWithCreationTimeLazy() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1377,11 +1376,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeScopeProviderWithGetAccessorMethod() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1408,11 +1407,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeScopeProviderWithGetAccessorMethodAndLazy() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithGetAccessorMethodAndLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1439,12 +1438,12 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task AttributeScopeProviderWithThreadSafeFalse() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithThreadSafeFalse() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1471,11 +1470,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeScopeProviderWithThreadSafeFalseAndCreationTimeLazy() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithThreadSafeFalseAndCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1502,11 +1501,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeScopeProviderWithThreadSafeFalseAndGetAccessorMethod() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithThreadSafeFalseAndGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1533,11 +1532,11 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AttributeScopeProviderWithThreadSafeFalseAndGetAccessorMethodAndLazy() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithThreadSafeFalseAndGetAccessorMethodAndLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1564,12 +1563,12 @@ public static class ServiceProviderTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task AttributeServiceProviderWithNoDiposeGeneration() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithNoDiposeGeneration() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1592,7 +1591,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1603,8 +1602,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithDiposeOnlyGeneration() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithDiposeOnlyGeneration() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1627,7 +1626,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1638,8 +1637,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithDiposeAsyncOnlyGeneration() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithDiposeAsyncOnlyGeneration() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1662,7 +1661,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1673,8 +1672,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task AttributeServiceProviderWithDiposeBothGeneration() {
+    [Test]
+    public async ValueTask AttributeServiceProviderWithDiposeBothGeneration() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1697,7 +1696,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1709,8 +1708,8 @@ public static class ServiceProviderTests {
     }
 
 
-    [Fact]
-    public static Task AttributeScopeProviderWithNoDiposeGeneration() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithNoDiposeGeneration() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1734,7 +1733,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1745,8 +1744,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task AttributeScopeProviderWithDiposeOnlyGeneration() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithDiposeOnlyGeneration() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1770,7 +1769,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1781,8 +1780,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task AttributeScopeProviderWithDiposeAsyncOnlyGeneration() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithDiposeAsyncOnlyGeneration() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1806,7 +1805,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1817,8 +1816,8 @@ public static class ServiceProviderTests {
             """);
     }
 
-    [Fact]
-    public static Task AttributeScopeProviderWithDiposeBothGeneration() {
+    [Test]
+    public async ValueTask AttributeScopeProviderWithDiposeBothGeneration() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1842,7 +1841,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1854,8 +1853,8 @@ public static class ServiceProviderTests {
     }
 
 
-    [Fact]
-    public static void AttributeScopeProviderAlsoWorkingOnScopeClass() {
+    [Test]
+    public async ValueTask AttributeScopeProviderAlsoWorkingOnScopeClass() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1878,17 +1877,17 @@ public static class ServiceProviderTests {
         string sourceTextInterface = sourceTexts[^1];
 
 
-        Assert.Contains("public sealed partial class TestProvider", sourceTextClass);
-        Assert.DoesNotContain("Scope ", sourceTextClass);
-        Assert.DoesNotContain("CreateScope", sourceTextClass);
+        await Assert.That(sourceTextClass).Contains("public sealed partial class TestProvider");
+        await Assert.That(sourceTextClass).DoesNotContain("Scope ");
+        await Assert.That(sourceTextClass).DoesNotContain("CreateScope");
 
-        Assert.Contains("public partial interface ITestProvider", sourceTextInterface);
-        Assert.DoesNotContain("IScope ", sourceTextInterface);
-        Assert.DoesNotContain("CreateScope", sourceTextInterface);
+        await Assert.That(sourceTextInterface).Contains("public partial interface ITestProvider");
+        await Assert.That(sourceTextInterface).DoesNotContain("IScope ");
+        await Assert.That(sourceTextInterface).DoesNotContain("CreateScope");
     }
 
-    [Fact]
-    public static void AttributeScopeProviderReportsErrorWhenUsedTwice() {
+    [Test]
+    public async ValueTask AttributeScopeProviderReportsErrorWhenUsedTwice() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1909,14 +1908,14 @@ public static class ServiceProviderTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI003", diagnostics[0].Id);
-        Assert.Equal("Double ScopedProviderAttribute is not allowed, put either one on the ServiceProvider or ScopedProvider, but not both", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI003");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Double ScopedProviderAttribute is not allowed, put either one on the ServiceProvider or ScopedProvider, but not both");
     }
 
 
-    [Fact]
-    public static Task FullExample() {
+    [Test]
+    public async ValueTask FullExample() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1998,7 +1997,7 @@ public static class ServiceProviderTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------

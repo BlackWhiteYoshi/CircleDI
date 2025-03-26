@@ -22,7 +22,6 @@ public partial struct CircleDIBuilderCore {
         if (hasDisposeList) {
             builder.AppendInterpolation($"{indent}private {readonlyStr}global::System.Collections.Generic.List<IDisposable> {DISPOSE_LIST};\n");
             if (threadSafe)
-                // TODO just use Lock in both cases when there is support by PolySharp (https://github.com/Sergio0694/PolySharp)
                 builder.AppendInterpolation($"{indent}private readonly global::System.Threading.Lock {DISPOSE_LIST}_lock = new();\n");
             builder.Append('\n');
         }

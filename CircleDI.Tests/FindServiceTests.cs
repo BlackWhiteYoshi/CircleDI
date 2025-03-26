@@ -6,9 +6,9 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests the function <i>FindService</i> in <i>ServiceProvider.DependencyTreeInitializer</i>.
 /// </summary>
-public static class FindServiceTests {
+public sealed class FindServiceTests {
     private static ServiceProvider CreateProvider(string[] serviceTypeList) {
-        List<Service> serviceList = serviceTypeList.Select((string serviceType) => new Service() {
+        List<Service> serviceList = [.. serviceTypeList.Select((string serviceType) => new Service() {
             ServiceType = new TypeName(serviceType),
             Name = serviceType,
             ImplementationType = new TypeName(serviceType),
@@ -16,7 +16,7 @@ public static class FindServiceTests {
             ConstructorDependencyList = [],
             PropertyDependencyList = [],
             Dependencies = []
-        }).ToList();
+        })];
         serviceList.Sort((Service x, Service y) => x.ServiceType.CompareTo(y.ServiceType));
 
         ServiceProvider serviceProvider = new(null!) {
@@ -32,169 +32,175 @@ public static class FindServiceTests {
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_SortedServiceList")]
     private extern static void SetSortedServiceList(ServiceProvider instance, List<Service> value);
 
-    private static (int index, int count) FindService(TypeName serviceType, List<Service> serviceList)
-        => (ValueTuple<int, int>)typeof(ServiceProvider).Assembly
+
+    [Before(Class)]
+    public static void InitFindServiceMethod() {
+        findServiceMethod = typeof(ServiceProvider).Assembly
             .GetType("CircleDI.Generation.ServiceProvider+DependencyTreeInitializer")!
-            .GetMethod("FindService", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
-            .Invoke(null, [serviceType, serviceList])!;
+            .GetMethod("FindService", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
+    }
+
+    private static System.Reflection.MethodInfo findServiceMethod = null!;
+
+    private static (int index, int count) FindService(TypeName serviceType, List<Service> serviceList) => (ValueTuple<int, int>)findServiceMethod.Invoke(null, [serviceType, serviceList])!;
 
 
 
-    [Fact]
-    public static void Empty() {
+    [Test]
+    public async ValueTask Empty() {
         ServiceProvider serviceProvider = CreateProvider([]);
 
         (int index, int count) = FindService(new TypeName("notPresent"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(0, index);
-        Assert.Equal(0, count);
+        await Assert.That(index).IsEqualTo(0);
+        await Assert.That(count).IsEqualTo(0);
     }
 
-    [Fact]
-    public static void NotFoundFirst() {
+    [Test]
+    public async ValueTask NotFoundFirst() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
         (int index, int count) = FindService(new TypeName("test0"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(0, index);
-        Assert.Equal(0, count);
+        await Assert.That(index).IsEqualTo(0);
+        await Assert.That(count).IsEqualTo(0);
     }
 
-    [Fact]
-    public static void NotFoundLast() {
+    [Test]
+    public async ValueTask NotFoundLast() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
         (int index, int count) = FindService(new TypeName("test4"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(3, index);
-        Assert.Equal(0, count);
+        await Assert.That(index).IsEqualTo(3);
+        await Assert.That(count).IsEqualTo(0);
     }
 
-    [Fact]
-    public static void NotFoundSecond() {
+    [Test]
+    public async ValueTask NotFoundSecond() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test3", "test4", "test5"]);
 
         (int index, int count) = FindService(new TypeName("test2"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(1, index);
-        Assert.Equal(0, count);
+        await Assert.That(index).IsEqualTo(1);
+        await Assert.That(count).IsEqualTo(0);
     }
 
-    [Fact]
-    public static void NotFoundSecondLast() {
+    [Test]
+    public async ValueTask NotFoundSecondLast() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3", "test5"]);
 
         (int index, int count) = FindService(new TypeName("test4"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(3, index);
-        Assert.Equal(0, count);
+        await Assert.That(index).IsEqualTo(3);
+        await Assert.That(count).IsEqualTo(0);
     }
 
-    [Fact]
-    public static void OneElement() {
+    [Test]
+    public async ValueTask OneElement() {
         ServiceProvider serviceProvider = CreateProvider(["test1"]);
 
         (int index, int count) = FindService(new TypeName("test1"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(0, index);
-        Assert.Equal(1, count);
+        await Assert.That(index).IsEqualTo(0);
+        await Assert.That(count).IsEqualTo(1);
     }
 
 
-    [Fact]
-    public static void TwoElements_FindFirst() {
+    [Test]
+    public async ValueTask TwoElements_FindFirst() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2"]);
 
         (int index, int count) = FindService(new TypeName("test1"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(0, index);
-        Assert.Equal(1, count);
+        await Assert.That(index).IsEqualTo(0);
+        await Assert.That(count).IsEqualTo(1);
     }
 
-    [Fact]
-    public static void TwoElements_FindSecond() {
+    [Test]
+    public async ValueTask TwoElements_FindSecond() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2"]);
 
         (int index, int count) = FindService(new TypeName("test2"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(1, index);
-        Assert.Equal(1, count);
+        await Assert.That(index).IsEqualTo(1);
+        await Assert.That(count).IsEqualTo(1);
     }
 
-    [Fact]
-    public static void TwoElements_BothEqual() {
+    [Test]
+    public async ValueTask TwoElements_BothEqual() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test1"]);
 
         (int index, int count) = FindService(new TypeName("test1"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(0, index);
-        Assert.Equal(2, count);
+        await Assert.That(index).IsEqualTo(0);
+        await Assert.That(count).IsEqualTo(2);
     }
 
 
-    [Fact]
-    public static void ThreeElements_FindFirst() {
+    [Test]
+    public async ValueTask ThreeElements_FindFirst() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
         (int index, int count) = FindService(new TypeName("test1"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(0, index);
-        Assert.Equal(1, count);
+        await Assert.That(index).IsEqualTo(0);
+        await Assert.That(count).IsEqualTo(1);
     }
 
-    [Fact]
-    public static void ThreeElements_FindSecond() {
+    [Test]
+    public async ValueTask ThreeElements_FindSecond() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
         (int index, int count) = FindService(new TypeName("test2"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(1, index);
-        Assert.Equal(1, count);
+        await Assert.That(index).IsEqualTo(1);
+        await Assert.That(count).IsEqualTo(1);
     }
 
-    [Fact]
-    public static void ThreeElements_FindThird() {
+    [Test]
+    public async ValueTask ThreeElements_FindThird() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test3"]);
 
         (int index, int count) = FindService(new TypeName("test3"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(2, index);
-        Assert.Equal(1, count);
+        await Assert.That(index).IsEqualTo(2);
+        await Assert.That(count).IsEqualTo(1);
     }
 
-    [Fact]
-    public static void ThreeElements_FindFirst2() {
+    [Test]
+    public async ValueTask ThreeElements_FindFirst2() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test1", "test3"]);
 
         (int index, int count) = FindService(new TypeName("test1"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(0, index);
-        Assert.Equal(2, count);
+        await Assert.That(index).IsEqualTo(0);
+        await Assert.That(count).IsEqualTo(2);
     }
 
-    [Fact]
-    public static void ThreeElements_FindLast2() {
+    [Test]
+    public async ValueTask ThreeElements_FindLast2() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test2", "test2"]);
 
         (int index, int count) = FindService(new TypeName("test2"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(1, index);
-        Assert.Equal(2, count);
+        await Assert.That(index).IsEqualTo(1);
+        await Assert.That(count).IsEqualTo(2);
     }
 
-    [Fact]
-    public static void ThreeElements_FindAll3() {
+    [Test]
+    public async ValueTask ThreeElements_FindAll3() {
         ServiceProvider serviceProvider = CreateProvider(["test1", "test1", "test1"]);
 
         (int index, int count) = FindService(new TypeName("test1"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(0, index);
-        Assert.Equal(3, count);
+        await Assert.That(index).IsEqualTo(0);
+        await Assert.That(count).IsEqualTo(3);
     }
 
 
-    [Fact]
-    public static void Twentylements_Find04To07() {
+    [Test]
+    public async ValueTask Twentylements_Find04To07() {
         ServiceProvider serviceProvider = CreateProvider([
             "test01",
             "test02",
@@ -220,7 +226,7 @@ public static class FindServiceTests {
 
         (int index, int count) = FindService(new TypeName("test07"), serviceProvider.SortedServiceList);
 
-        Assert.Equal(3, index);
-        Assert.Equal(4, count);
+        await Assert.That(index).IsEqualTo(3);
+        await Assert.That(count).IsEqualTo(4);
     }
 }

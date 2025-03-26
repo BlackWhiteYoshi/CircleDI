@@ -7,9 +7,9 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests for registering a [Delegate]
 /// </summary>
-public static class DelegateTests {
-    [Fact]
-    public static Task Delegate() {
+public sealed class DelegateTests {
+    [Test]
+    public async ValueTask Delegate() {
         const string input = """
             using CircleDIAttributes;
 
@@ -29,7 +29,7 @@ public static class DelegateTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -40,8 +40,8 @@ public static class DelegateTests {
             """);
     }
 
-    [Fact]
-    public static Task TypeAsParameter() {
+    [Test]
+    public async ValueTask TypeAsParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -61,7 +61,7 @@ public static class DelegateTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -72,8 +72,8 @@ public static class DelegateTests {
             """);
     }
 
-    [Fact]
-    public static Task Static() {
+    [Test]
+    public async ValueTask Static() {
         const string input = """
             using CircleDIAttributes;
 
@@ -93,7 +93,7 @@ public static class DelegateTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -104,8 +104,8 @@ public static class DelegateTests {
             """);
     }
 
-    [Fact]
-    public static Task Named() {
+    [Test]
+    public async ValueTask Named() {
         const string input = """
             using CircleDIAttributes;
 
@@ -125,7 +125,7 @@ public static class DelegateTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -136,8 +136,8 @@ public static class DelegateTests {
             """);
     }
 
-    [Fact]
-    public static Task WithGetAccessorMethod() {
+    [Test]
+    public async ValueTask WithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -157,7 +157,7 @@ public static class DelegateTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -168,8 +168,8 @@ public static class DelegateTests {
             """);
     }
 
-    [Fact]
-    public static Task Scoped() {
+    [Test]
+    public async ValueTask Scoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -191,7 +191,7 @@ public static class DelegateTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -202,8 +202,8 @@ public static class DelegateTests {
             """);
     }
 
-    [Fact]
-    public static Task StaticScoped() {
+    [Test]
+    public async ValueTask StaticScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -225,7 +225,7 @@ public static class DelegateTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -236,8 +236,8 @@ public static class DelegateTests {
             """);
     }
 
-    [Fact]
-    public static Task InjectionConstructor() {
+    [Test]
+    public async ValueTask InjectionConstructor() {
         const string input = """
             using CircleDIAttributes;
 
@@ -261,7 +261,7 @@ public static class DelegateTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -272,8 +272,8 @@ public static class DelegateTests {
             """);
     }
 
-    [Fact]
-    public static Task InjectionProperty() {
+    [Test]
+    public async ValueTask InjectionProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -299,7 +299,7 @@ public static class DelegateTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -311,8 +311,8 @@ public static class DelegateTests {
     }
 
 
-    [Fact]
-    public static void WrongTypeFails() {
+    [Test]
+    public async ValueTask WrongTypeFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -330,13 +330,13 @@ public static class DelegateTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI019", diagnostics[0].Id);
-        Assert.Equal("Delegate service 'MyCode.TestService' is not a Delegate type", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI019");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Delegate service 'MyCode.TestService' is not a Delegate type");
     }
 
-    [Fact]
-    public static void NoImplementationFails() {
+    [Test]
+    public async ValueTask NoImplementationFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -352,13 +352,13 @@ public static class DelegateTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI020", diagnostics[0].Id);
-        Assert.Equal("No method with the name 'DelegateImpl' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI020");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("No method with the name 'DelegateImpl' in class 'MyCode.TestProvider' could be found");
     }
 
-    [Fact]
-    public static void WrongNumberOfParametersFails() {
+    [Test]
+    public async ValueTask WrongNumberOfParametersFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -376,13 +376,13 @@ public static class DelegateTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI021", diagnostics[0].Id);
-        Assert.Equal("Method 'DelegateImpl' has wrong number of parameters: '2' <-> '1' expected", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI021");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Method 'DelegateImpl' has wrong number of parameters: '2' <-> '1' expected");
     }
 
-    [Fact]
-    public static void WrongParameterTypeFails() {
+    [Test]
+    public async ValueTask WrongParameterTypeFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -400,13 +400,13 @@ public static class DelegateTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI022", diagnostics[0].Id);
-        Assert.Equal("Method 'DelegateImpl' has wrong parameter type at position '1': 'string' <-> 'int' expected", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI022");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Method 'DelegateImpl' has wrong parameter type at position '1': 'string' <-> 'int' expected");
     }
 
-    [Fact]
-    public static void ManyWrongParameterTypesFailingWithMultipleErrors() {
+    [Test]
+    public async ValueTask ManyWrongParameterTypesFailingWithMultipleErrors() {
         const string input = """
             using CircleDIAttributes;
 
@@ -424,15 +424,15 @@ public static class DelegateTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Equal(2, diagnostics.Length);
-        Assert.Equal("CDI022", diagnostics[0].Id);
-        Assert.Equal("Method 'DelegateImpl' has wrong parameter type at position '1': 'string' <-> 'int' expected", diagnostics[0].GetMessage());
-        Assert.Equal("CDI022", diagnostics[1].Id);
-        Assert.Equal("Method 'DelegateImpl' has wrong parameter type at position '2': 'float' <-> 'double' expected", diagnostics[1].GetMessage());
+        await Assert.That(diagnostics.Length).IsEqualTo(2);
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI022");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Method 'DelegateImpl' has wrong parameter type at position '1': 'string' <-> 'int' expected");
+        await Assert.That(diagnostics[1].Id).IsEqualTo("CDI022");
+        await Assert.That(diagnostics[1].GetMessage()).IsEqualTo("Method 'DelegateImpl' has wrong parameter type at position '2': 'float' <-> 'double' expected");
     }
 
-    [Fact]
-    public static void WrongReturnTypeFails() {
+    [Test]
+    public async ValueTask WrongReturnTypeFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -450,13 +450,13 @@ public static class DelegateTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI023", diagnostics[0].Id);
-        Assert.Equal("Method 'DelegateImpl' has wrong return type: 'int' <-> 'string' expected", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI023");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Method 'DelegateImpl' has wrong return type: 'int' <-> 'string' expected");
     }
 
-    [Fact]
-    public static void AllTypesWrongFailingWithMultipleErrors() {
+    [Test]
+    public async ValueTask AllTypesWrongFailingWithMultipleErrors() {
         const string input = """
             using CircleDIAttributes;
 
@@ -474,12 +474,12 @@ public static class DelegateTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Equal(3, diagnostics.Length);
-        Assert.Equal("CDI022", diagnostics[0].Id);
-        Assert.Equal("Method 'DelegateImpl' has wrong parameter type at position '1': 'string' <-> 'int' expected", diagnostics[0].GetMessage());
-        Assert.Equal("CDI022", diagnostics[1].Id);
-        Assert.Equal("Method 'DelegateImpl' has wrong parameter type at position '2': 'string' <-> 'int' expected", diagnostics[1].GetMessage());
-        Assert.Equal("CDI023", diagnostics[2].Id);
-        Assert.Equal("Method 'DelegateImpl' has wrong return type: 'int' <-> 'string' expected", diagnostics[2].GetMessage());
+        await Assert.That(diagnostics.Length).IsEqualTo(3);
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI022");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Method 'DelegateImpl' has wrong parameter type at position '1': 'string' <-> 'int' expected");
+        await Assert.That(diagnostics[1].Id).IsEqualTo("CDI022");
+        await Assert.That(diagnostics[1].GetMessage()).IsEqualTo("Method 'DelegateImpl' has wrong parameter type at position '2': 'string' <-> 'int' expected");
+        await Assert.That(diagnostics[2].Id).IsEqualTo("CDI023");
+        await Assert.That(diagnostics[2].GetMessage()).IsEqualTo("Method 'DelegateImpl' has wrong return type: 'int' <-> 'string' expected");
     }
 }

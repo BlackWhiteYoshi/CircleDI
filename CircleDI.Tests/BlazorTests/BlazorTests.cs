@@ -2,9 +2,9 @@
 
 namespace CircleDI.Tests;
 
-public static class BlazorTests {
-    [Fact]
-    public static void GeneratesCircleDIComponentActivator() {
+public sealed class BlazorTests {
+    [Test]
+    public async ValueTask GeneratesCircleDIComponentActivator() {
         const string input = """
             using CircleDIAttributes;
 
@@ -17,14 +17,14 @@ public static class BlazorTests {
 
         string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out _);
 
-        _ = sourceTexts.Single((string sourceText) => sourceText.Contains("class CircleDIComponentActivator<TScopeProvider>"));
+        await Assert.That(sourceTexts.SingleOrDefault((string sourceText) => sourceText.Contains("class CircleDIComponentActivator<TScopeProvider>"))).IsNotNull();
     }
 
 
     #region ComponentModuleAttribute
 
-    [Fact]
-    public static Task ComponentsGetGenerated() {
+    [Test]
+    public async ValueTask ComponentsGetGenerated() {
         const string input = """
             using CircleDIAttributes;
 
@@ -45,11 +45,11 @@ public static class BlazorTests {
         string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out _);
         string componentModuleAttributes = sourceTexts.First((string sourceText) => sourceText.Contains("[global::CircleDIAttributes.TransientAttribute<"));
 
-        return Verify(componentModuleAttributes);
+        await Verify(componentModuleAttributes);
     }
 
-    [Fact]
-    public static Task ComponentModuleWithHardTypeName() {
+    [Test]
+    public async ValueTask ComponentModuleWithHardTypeName() {
         const string input = """
             using CircleDIAttributes;
 
@@ -74,7 +74,7 @@ public static class BlazorTests {
         string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out _);
         string componentModuleAttributes = sourceTexts.First((string sourceText) => sourceText.Contains("[global::CircleDIAttributes.TransientAttribute<"));
 
-        return Verify(componentModuleAttributes);
+        await Verify(componentModuleAttributes);
     }
 
     #endregion
@@ -82,8 +82,8 @@ public static class BlazorTests {
 
     #region DefaultServiceGeneration
 
-    [Fact]
-    public static Task GeneratesNoDefaultServices() {
+    [Test]
+    public async ValueTask GeneratesNoDefaultServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -98,8 +98,8 @@ public static class BlazorTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        Assert.DoesNotContain("private global::Microsoft.Extensions.Configuration.IConfiguration GetConfiguration()", sourceTexts);
-        return Verify($"""
+        await Assert.That(sourceTexts).DoesNotContain("private global::Microsoft.Extensions.Configuration.IConfiguration GetConfiguration()");
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -110,8 +110,8 @@ public static class BlazorTests {
             """);
     }
 
-    [Fact]
-    public static Task GeneratesServerDefaultServices() {
+    [Test]
+    public async ValueTask GeneratesServerDefaultServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -127,7 +127,7 @@ public static class BlazorTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {defaultServicesPartial}
 
             -----
@@ -144,8 +144,8 @@ public static class BlazorTests {
             """);
     }
 
-    [Fact]
-    public static Task GeneratesWebassemblyDefaultServices() {
+    [Test]
+    public async ValueTask GeneratesWebassemblyDefaultServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -161,7 +161,7 @@ public static class BlazorTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {defaultServicesPartial}
 
             -----
@@ -178,8 +178,8 @@ public static class BlazorTests {
             """);
     }
 
-    [Fact]
-    public static Task GeneratesHybridServices() {
+    [Test]
+    public async ValueTask GeneratesHybridServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -195,7 +195,7 @@ public static class BlazorTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {defaultServicesPartial}
 
             -----
@@ -212,8 +212,8 @@ public static class BlazorTests {
             """);
     }
 
-    [Fact]
-    public static Task GeneratesGenericServiceLogger() {
+    [Test]
+    public async ValueTask GeneratesGenericServiceLogger() {
         const string input = """
             using CircleDIAttributes;
 
@@ -236,7 +236,7 @@ public static class BlazorTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {defaultServicesPartial}
 
             -----
@@ -260,8 +260,8 @@ public static class BlazorTests {
 
     #region AddRazorComponents
 
-    [Fact]
-    public static Task NoComponentGetsIncluded() {
+    [Test]
+    public async ValueTask NoComponentGetsIncluded() {
         const string input = """
             using CircleDIAttributes;
 
@@ -283,7 +283,7 @@ public static class BlazorTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -294,8 +294,8 @@ public static class BlazorTests {
             """);
     }
 
-    [Fact]
-    public static Task ComponentsOverride() {
+    [Test]
+    public async ValueTask ComponentsOverride() {
         const string input = """
             using CircleDIAttributes;
 
@@ -322,7 +322,7 @@ public static class BlazorTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -333,8 +333,8 @@ public static class BlazorTests {
             """);
     }
 
-    [Fact]
-    public static Task ComponentModuleOverride() {
+    [Test]
+    public async ValueTask ComponentModuleOverride() {
         const string input = """
             using CircleDIAttributes;
 
@@ -356,7 +356,7 @@ public static class BlazorTests {
         string[] sourceTexts = input.GenerateSourceTextBlazor(out _, out _);
         string sourceTextComponentModule = sourceTexts[^1];
 
-        return Verify(sourceTextComponentModule);
+        await Verify(sourceTextComponentModule);
     }
 
     #endregion

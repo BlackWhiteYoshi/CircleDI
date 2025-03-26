@@ -7,9 +7,9 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests registering generic services (types that have at least 1 unbound type parameter).
 /// </summary>
-public static class GenericServicesTests {
-    [Fact]
-    public static Task WithoutDependency_NotGenerated() {
+public sealed class GenericServicesTests {
+    [Test]
+    public async ValueTask WithoutDependency_NotGenerated() {
         const string input = """
             using CircleDIAttributes;
 
@@ -25,12 +25,12 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task GenericService() {
+    [Test]
+    public async ValueTask GenericService() {
         const string input = """
             using CircleDIAttributes;
 
@@ -48,11 +48,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task MultipleServices() {
+    [Test]
+    public async ValueTask MultipleServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -70,11 +70,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ServiceMultipleTypeParameters() {
+    [Test]
+    public async ValueTask ServiceMultipleTypeParameters() {
         const string input = """
             using CircleDIAttributes;
 
@@ -92,12 +92,12 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task ServiceWithConstrucorDependency() {
+    [Test]
+    public async ValueTask ServiceWithConstrucorDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -119,11 +119,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ServiceWithPropertyDependency() {
+    [Test]
+    public async ValueTask ServiceWithPropertyDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -145,11 +145,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ServiceWithClosedGenericDependency() {
+    [Test]
+    public async ValueTask ServiceWithClosedGenericDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -171,11 +171,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ServiceWithMultipleClosedGenericDependency() {
+    [Test]
+    public async ValueTask ServiceWithMultipleClosedGenericDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -195,11 +195,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ServiceWithOpenGenericDependency() {
+    [Test]
+    public async ValueTask ServiceWithOpenGenericDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -221,11 +221,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ServiceWithMultipleOpenGenericDependency() {
+    [Test]
+    public async ValueTask ServiceWithMultipleOpenGenericDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -245,11 +245,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static void ServiceWithOpenGenericMismatchCount() {
+    [Test]
+    public async ValueTask ServiceWithOpenGenericMismatchCount() {
         const string input = """
             using CircleDIAttributes;
 
@@ -266,13 +266,13 @@ public static class GenericServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI010", diagnostics[0].Id);
-        Assert.Equal("Service registration type parameter mismatch at service 'MyCode.ITestService<T, U>' with implementation 'MyCode.TestService<T, U, V>'. The number of type parameters must match and the type parameters must be open/unbound.", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI010");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Service registration type parameter mismatch at service 'MyCode.ITestService<T, U>' with implementation 'MyCode.TestService<T, U, V>'. The number of type parameters must match and the type parameters must be open/unbound.");
     }
 
-    [Fact]
-    public static void ServiceWithOpenGenericMismatchType() {
+    [Test]
+    public async ValueTask ServiceWithOpenGenericMismatchType() {
         const string input = """
             using CircleDIAttributes;
 
@@ -289,14 +289,14 @@ public static class GenericServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI010", diagnostics[0].Id);
-        Assert.Equal("Service registration type parameter mismatch at service 'MyCode.ITestService<global::System.Int32, global::System.String, V>' with implementation 'MyCode.TestService<global::System.Int32, global::System.Single, V>'. The number of type parameters must match and the type parameters must be open/unbound.", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI010");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Service registration type parameter mismatch at service 'MyCode.ITestService<global::System.Int32, global::System.String, V>' with implementation 'MyCode.TestService<global::System.Int32, global::System.Single, V>'. The number of type parameters must match and the type parameters must be open/unbound.");
     }
 
 
-    [Fact]
-    public static Task ServiceWithImplementationBase() {
+    [Test]
+    public async ValueTask ServiceWithImplementationBase() {
         const string input = """
             using CircleDIAttributes;
 
@@ -318,11 +318,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ServiceWithGenericImplementationBase() {
+    [Test]
+    public async ValueTask ServiceWithGenericImplementationBase() {
         const string input = """
             using CircleDIAttributes;
 
@@ -344,11 +344,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ServiceWithMultipleGenericsImplementationBase() {
+    [Test]
+    public async ValueTask ServiceWithMultipleGenericsImplementationBase() {
         const string input = """
             using CircleDIAttributes;
 
@@ -370,12 +370,12 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task ServiceWithImplementation() {
+    [Test]
+    public async ValueTask ServiceWithImplementation() {
         const string input = """
             using CircleDIAttributes;
 
@@ -395,11 +395,11 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task ServiceDelegate() {
+    [Test]
+    public async ValueTask ServiceDelegate() {
         const string input = """
             using CircleDIAttributes;
 
@@ -419,12 +419,12 @@ public static class GenericServicesTests {
 
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static void ServiceImplementationField() {
+    [Test]
+    public async ValueTask ServiceImplementationField() {
         const string input = """
             using CircleDIAttributes;
 
@@ -442,13 +442,13 @@ public static class GenericServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI016", diagnostics[0].Id);
-        Assert.Equal("Implementation 'testService' for type 'MyCode.TestService<T>' must be a generic method with '1' type parameter.", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI016");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Implementation 'testService' for type 'MyCode.TestService<T>' must be a generic method with '1' type parameter.");
     }
 
-    [Fact]
-    public static void ServiceImplementationProperty() {
+    [Test]
+    public async ValueTask ServiceImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -466,13 +466,13 @@ public static class GenericServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI016", diagnostics[0].Id);
-        Assert.Equal("Implementation 'TestService' for type 'MyCode.TestService<T, U>' must be a generic method with '2' type parameters.", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI016");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Implementation 'TestService' for type 'MyCode.TestService<T, U>' must be a generic method with '2' type parameters.");
     }
 
-    [Fact]
-    public static void GenericServiceImplementationTypeParameterMismatch() {
+    [Test]
+    public async ValueTask GenericServiceImplementationTypeParameterMismatch() {
         const string input = """
             using CircleDIAttributes;
 
@@ -490,13 +490,13 @@ public static class GenericServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI018", diagnostics[0].Id);
-        Assert.Equal("Implementation Method 'CreateTestService' has the wrong number of type parameters: '0' <-> '1' expected", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI018");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Implementation Method 'CreateTestService' has the wrong number of type parameters: '0' <-> '1' expected");
     }
 
-    [Fact]
-    public static void GenericImplementationTypeParameterMismatch() {
+    [Test]
+    public async ValueTask GenericImplementationTypeParameterMismatch() {
         const string input = """
             using CircleDIAttributes;
 
@@ -514,13 +514,13 @@ public static class GenericServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI018", diagnostics[0].Id);
-        Assert.Equal("Implementation Method 'CreateTestService' has the wrong number of type parameters: '1' <-> '0' expected", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI018");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Implementation Method 'CreateTestService' has the wrong number of type parameters: '1' <-> '0' expected");
     }
 
-    [Fact]
-    public static void GenericDelegateServiceTypeParameterMismatch() {
+    [Test]
+    public async ValueTask GenericDelegateServiceTypeParameterMismatch() {
         const string input = """
             using CircleDIAttributes;
 
@@ -538,13 +538,13 @@ public static class GenericServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI024", diagnostics[0].Id);
-        Assert.Equal("Method 'CreateTestService' has the wrong number of type parameters: '0' <-> '1' expected", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI024");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Method 'CreateTestService' has the wrong number of type parameters: '0' <-> '1' expected");
     }
 
-    [Fact]
-    public static void GenericDelegateMethodTypeParameterMismatch() {
+    [Test]
+    public async ValueTask GenericDelegateMethodTypeParameterMismatch() {
         const string input = """
             using CircleDIAttributes;
 
@@ -562,8 +562,8 @@ public static class GenericServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI024", diagnostics[0].Id);
-        Assert.Equal("Method 'CreateTestService' has the wrong number of type parameters: '1' <-> '0' expected", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI024");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Method 'CreateTestService' has the wrong number of type parameters: '1' <-> '0' expected");
     }
 }

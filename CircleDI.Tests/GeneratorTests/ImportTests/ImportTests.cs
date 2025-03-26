@@ -7,9 +7,9 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests for the [Import] attribute
 /// </summary>
-public static class ImportTests {
-    [Fact]
-    public static Task Import() {
+public sealed class ImportTests {
+    [Test]
+    public async ValueTask Import() {
         const string input = """
             using CircleDIAttributes;
 
@@ -31,7 +31,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -42,8 +42,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task TypeAsParameter() {
+    [Test]
+    public async ValueTask TypeAsParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -65,7 +65,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -76,8 +76,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task ClosedGeneric() {
+    [Test]
+    public async ValueTask ClosedGeneric() {
         const string input = """
             using CircleDIAttributes;
 
@@ -104,7 +104,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -115,8 +115,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task UnboundGenericService() {
+    [Test]
+    public async ValueTask UnboundGenericService() {
         const string input = """
             using CircleDIAttributes;
 
@@ -143,7 +143,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -154,8 +154,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task TypeAsParameterAndImportMode() {
+    [Test]
+    public async ValueTask TypeAsParameterAndImportMode() {
         const string input = """
             using CircleDIAttributes;
 
@@ -179,7 +179,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -191,8 +191,8 @@ public static class ImportTests {
     }
 
 
-    [Fact]
-    public static Task Static() {
+    [Test]
+    public async ValueTask Static() {
         const string input = """
             using CircleDIAttributes;
 
@@ -216,7 +216,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -227,8 +227,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task AutoStatic() {
+    [Test]
+    public async ValueTask AutoStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -252,7 +252,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -264,8 +264,8 @@ public static class ImportTests {
     }
 
 
-    [Fact]
-    public static Task AsService() {
+    [Test]
+    public async ValueTask AsService() {
         const string input = """
             using CircleDIAttributes;
 
@@ -295,7 +295,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -306,8 +306,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task AutoAsService() {
+    [Test]
+    public async ValueTask AutoAsService() {
         const string input = """
             using CircleDIAttributes;
 
@@ -337,7 +337,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -349,8 +349,8 @@ public static class ImportTests {
     }
 
 
-    [Fact]
-    public static Task Parameter() {
+    [Test]
+    public async ValueTask Parameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -382,7 +382,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -393,8 +393,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task AutoParameter() {
+    [Test]
+    public async ValueTask AutoParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -426,7 +426,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -438,8 +438,8 @@ public static class ImportTests {
     }
 
 
-    [Fact]
-    public static Task StaticScope() {
+    [Test]
+    public async ValueTask StaticScope() {
         const string input = """
             using CircleDIAttributes;
 
@@ -465,7 +465,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -476,8 +476,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task AsServiceScope() {
+    [Test]
+    public async ValueTask AsServiceScope() {
         const string input = """
             using CircleDIAttributes;
 
@@ -509,7 +509,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -520,8 +520,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task ParameterScope() {
+    [Test]
+    public async ValueTask ParameterScope() {
         const string input = """
             using CircleDIAttributes;
 
@@ -555,7 +555,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -567,8 +567,8 @@ public static class ImportTests {
     }
 
 
-    [Fact]
-    public static Task OverwriteDefaultServiceSelf() {
+    [Test]
+    public async ValueTask OverwriteDefaultServiceSelf() {
         const string input = """
             using CircleDIAttributes;
 
@@ -589,7 +589,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -600,8 +600,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task OverwriteDefaultServiceSelfScope() {
+    [Test]
+    public async ValueTask OverwriteDefaultServiceSelfScope() {
         const string input = """
             using CircleDIAttributes;
 
@@ -626,7 +626,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -637,8 +637,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static Task Recursive() {
+    [Test]
+    public async ValueTask Recursive() {
         const string input = """
             using CircleDIAttributes;
 
@@ -695,7 +695,7 @@ public static class ImportTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -706,8 +706,8 @@ public static class ImportTests {
             """);
     }
 
-    [Fact]
-    public static void CycleError() {
+    [Test]
+    public async ValueTask CycleError() {
         const string input = """
             using CircleDIAttributes;
 
@@ -727,13 +727,13 @@ public static class ImportTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI006", diagnostics[0].Id);
-        Assert.Equal("Module cycle in ServiceProvider 'MyCode.TestProvider': ['MyCode.MyModule' -> 'MyCode.MyModule2' -> 'MyCode.MyModule']", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI006");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Module cycle in ServiceProvider 'MyCode.TestProvider': ['MyCode.MyModule' -> 'MyCode.MyModule2' -> 'MyCode.MyModule']");
     }
 
-    [Fact]
-    public static void OverwriteDefaultServiceSelfAsConstuctorCallFails() {
+    [Test]
+    public async ValueTask OverwriteDefaultServiceSelfAsConstuctorCallFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -752,13 +752,13 @@ public static class ImportTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI007", diagnostics[0].Id);
-        Assert.Equal("Endless recursive constructor call in ServiceProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI007");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Endless recursive constructor call in ServiceProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?");
     }
 
-    [Fact]
-    public static void OverwriteDefaultServiceSelfScopeAsConstuctorCallFails() {
+    [Test]
+    public async ValueTask OverwriteDefaultServiceSelfScopeAsConstuctorCallFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -781,8 +781,8 @@ public static class ImportTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI008", diagnostics[0].Id);
-        Assert.Equal("Endless recursive constructor call in ScopedProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI008");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Endless recursive constructor call in ScopedProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?");
     }
 }

@@ -12,9 +12,9 @@ namespace CircleDI.Tests;
 /// Transient
 /// </para>
 /// </summary>
-public static class RegisterServicesTests {
-    [Fact]
-    public static Task Singleton() {
+public sealed class RegisterServicesTests {
+    [Test]
+    public async ValueTask Singleton() {
         const string input = """
             using CircleDIAttributes;
 
@@ -33,7 +33,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -44,8 +44,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task SingletonWithImplementationTypeOnly() {
+    [Test]
+    public async ValueTask SingletonWithImplementationTypeOnly() {
         const string input = """
             using CircleDIAttributes;
 
@@ -63,7 +63,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -74,8 +74,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task SingletonWithTypesAsParameter() {
+    [Test]
+    public async ValueTask SingletonWithTypesAsParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -94,7 +94,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -105,8 +105,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task SingletonWithImplementationTypeOnlyAsParameter() {
+    [Test]
+    public async ValueTask SingletonWithImplementationTypeOnlyAsParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -124,7 +124,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -135,8 +135,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task SingletonWithName() {
+    [Test]
+    public async ValueTask SingletonWithName() {
         const string input = """
             using CircleDIAttributes;
 
@@ -155,7 +155,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -166,8 +166,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task SingletonWithCreationTimeLazy() {
+    [Test]
+    public async ValueTask SingletonWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -186,7 +186,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -197,8 +197,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task SingletonWithGetAccessorMethod() {
+    [Test]
+    public async ValueTask SingletonWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -217,7 +217,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -229,8 +229,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static Task SingletonWithImplementationThis() {
+    [Test]
+    public async ValueTask SingletonWithImplementationThis() {
         const string input = """
             using CircleDIAttributes;
 
@@ -249,7 +249,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -261,8 +261,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static Task SingletonWithImplementationField() {
+    [Test]
+    public async ValueTask SingletonWithImplementationField() {
         const string input = """
             using CircleDIAttributes;
 
@@ -286,7 +286,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -297,8 +297,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static void SingletonWithImplementationFieldScoped() {
+    [Test]
+    public async ValueTask SingletonWithImplementationFieldScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -319,13 +319,13 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI013", diagnostics[0].Id);
-        Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI013");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found");
     }
 
-    [Fact]
-    public static Task SingletonWithImplementationFieldStatic() {
+    [Test]
+    public async ValueTask SingletonWithImplementationFieldStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -349,7 +349,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -357,11 +357,12 @@ public static class RegisterServicesTests {
             ---------
 
             {sourceTextInterface}
-            """);
+            """
+        );
     }
 
-    [Fact]
-    public static void SingletonWithImplementationFieldStaticScoped() {
+    [Test]
+    public async ValueTask SingletonWithImplementationFieldStaticScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -382,14 +383,14 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI013", diagnostics[0].Id);
-        Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI013");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found");
     }
 
 
-    [Fact]
-    public static Task SingletonWithImplementationProperty() {
+    [Test]
+    public async ValueTask SingletonWithImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -413,7 +414,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -424,8 +425,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static void SingletonWithImplementationPropertyScoped() {
+    [Test]
+    public async ValueTask SingletonWithImplementationPropertyScoped() {
         const string input = """
             using CircleDIAttributes;
             F
@@ -446,13 +447,13 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI013", diagnostics[0].Id);
-        Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI013");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found");
     }
 
-    [Fact]
-    public static Task SingletonWithImplementationPropertyStatic() {
+    [Test]
+    public async ValueTask SingletonWithImplementationPropertyStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -476,7 +477,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -487,8 +488,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static void SingletonWithImplementationPropertyStaticScoped() {
+    [Test]
+    public async ValueTask SingletonWithImplementationPropertyStaticScoped() {
         const string input = """
             using CircleDIAttributes;
             F
@@ -509,14 +510,14 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI013", diagnostics[0].Id);
-        Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI013");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found");
     }
 
 
-    [Fact]
-    public static Task SingletonWithImplementationMethod() {
+    [Test]
+    public async ValueTask SingletonWithImplementationMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -540,7 +541,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -551,8 +552,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static void SingletonWithImplementationMethodScoped() {
+    [Test]
+    public async ValueTask SingletonWithImplementationMethodScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -573,13 +574,13 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI013", diagnostics[0].Id);
-        Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI013");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found");
     }
 
-    [Fact]
-    public static Task SingletonWithImplementationMethodStatic() {
+    [Test]
+    public async ValueTask SingletonWithImplementationMethodStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -603,7 +604,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -614,8 +615,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static void SingletonWithImplementationMethodStaticScoped() {
+    [Test]
+    public async ValueTask SingletonWithImplementationMethodStaticScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -636,14 +637,14 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI013", diagnostics[0].Id);
-        Assert.Equal("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI013");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("No field, property or method with the name 'testField' in class 'MyCode.TestProvider' could be found");
     }
 
 
-    [Fact]
-    public static Task MultipleSingletons() {
+    [Test]
+    public async ValueTask MultipleSingletons() {
         const string input = """
             using CircleDIAttributes;
 
@@ -670,7 +671,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -683,8 +684,8 @@ public static class RegisterServicesTests {
 
 
 
-    [Fact]
-    public static Task Scoped() {
+    [Test]
+    public async ValueTask Scoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -703,7 +704,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -714,8 +715,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationTypeOnly() {
+    [Test]
+    public async ValueTask ScopedWithImplementationTypeOnly() {
         const string input = """
             using CircleDIAttributes;
 
@@ -733,7 +734,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -744,8 +745,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithTypesAsParameter() {
+    [Test]
+    public async ValueTask ScopedWithTypesAsParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -764,7 +765,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -775,8 +776,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationTypeOnlyAsParameter() {
+    [Test]
+    public async ValueTask ScopedWithImplementationTypeOnlyAsParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -794,7 +795,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -805,8 +806,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithName() {
+    [Test]
+    public async ValueTask ScopedWithName() {
         const string input = """
             using CircleDIAttributes;
 
@@ -825,7 +826,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -836,8 +837,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithCreationTimeLazy() {
+    [Test]
+    public async ValueTask ScopedWithCreationTimeLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -856,7 +857,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -867,8 +868,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithGetAccessorMethod() {
+    [Test]
+    public async ValueTask ScopedWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -887,7 +888,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -899,8 +900,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static Task ScopedWithImplementationThis() {
+    [Test]
+    public async ValueTask ScopedWithImplementationThis() {
         const string input = """
             using CircleDIAttributes;
 
@@ -921,7 +922,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -933,8 +934,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static Task ScopedWithImplementationField() {
+    [Test]
+    public async ValueTask ScopedWithImplementationField() {
         const string input = """
             using CircleDIAttributes;
 
@@ -958,7 +959,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -969,8 +970,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationFieldScoped() {
+    [Test]
+    public async ValueTask ScopedWithImplementationFieldScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -996,7 +997,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1007,8 +1008,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationFieldStatic() {
+    [Test]
+    public async ValueTask ScopedWithImplementationFieldStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1032,7 +1033,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1043,8 +1044,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationFieldStaticScoped() {
+    [Test]
+    public async ValueTask ScopedWithImplementationFieldStaticScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1070,7 +1071,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1082,8 +1083,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static Task ScopedWithImplementationProperty() {
+    [Test]
+    public async ValueTask ScopedWithImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1107,7 +1108,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1118,8 +1119,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationPropertyScoped() {
+    [Test]
+    public async ValueTask ScopedWithImplementationPropertyScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1145,7 +1146,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1156,8 +1157,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationPropertyStatic() {
+    [Test]
+    public async ValueTask ScopedWithImplementationPropertyStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1181,7 +1182,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1192,8 +1193,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationPropertyStaticScoped() {
+    [Test]
+    public async ValueTask ScopedWithImplementationPropertyStaticScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1219,7 +1220,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1231,8 +1232,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static Task ScopedWithImplementationMethod() {
+    [Test]
+    public async ValueTask ScopedWithImplementationMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1256,7 +1257,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1267,8 +1268,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationMethodScoped() {
+    [Test]
+    public async ValueTask ScopedWithImplementationMethodScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1294,7 +1295,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1305,8 +1306,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationMethodStatic() {
+    [Test]
+    public async ValueTask ScopedWithImplementationMethodStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1330,7 +1331,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1341,8 +1342,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task ScopedWithImplementationMethodStaticScoped() {
+    [Test]
+    public async ValueTask ScopedWithImplementationMethodStaticScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1368,7 +1369,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1380,8 +1381,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static Task MultipleScopedServices() {
+    [Test]
+    public async ValueTask MultipleScopedServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1408,7 +1409,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1421,8 +1422,8 @@ public static class RegisterServicesTests {
 
 
 
-    [Fact]
-    public static Task Transient() {
+    [Test]
+    public async ValueTask Transient() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1441,7 +1442,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1452,8 +1453,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithImplementationTypeOnly() {
+    [Test]
+    public async ValueTask TransientWithImplementationTypeOnly() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1471,7 +1472,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1482,8 +1483,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithTypesAsParameter() {
+    [Test]
+    public async ValueTask TransientWithTypesAsParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1502,7 +1503,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1513,8 +1514,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithImplementationTypeOnlyAsParameter() {
+    [Test]
+    public async ValueTask TransientWithImplementationTypeOnlyAsParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1532,7 +1533,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1543,8 +1544,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithName() {
+    [Test]
+    public async ValueTask TransientWithName() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1563,7 +1564,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1574,8 +1575,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithGetAccessorMethod() {
+    [Test]
+    public async ValueTask TransientWithGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1594,7 +1595,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1606,8 +1607,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static void TransientWithImplementationThis() {
+    [Test]
+    public async ValueTask TransientWithImplementationThis() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1621,14 +1622,14 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI012", diagnostics[0].Id);
-        Assert.Equal("Transient + Implementation = 'this' is not allowed. Use Singleton or Scoped instead", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI012");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Transient + Implementation = 'this' is not allowed. Use Singleton or Scoped instead");
     }
 
 
-    [Fact]
-    public static void TransientWithImplementationField() {
+    [Test]
+    public async ValueTask TransientWithImplementationField() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1647,13 +1648,13 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI011", diagnostics[0].Id);
-        Assert.Equal("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI011");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation");
     }
 
-    [Fact]
-    public static void TransientWithImplementationFieldScoped() {
+    [Test]
+    public async ValueTask TransientWithImplementationFieldScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1674,13 +1675,13 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI011", diagnostics[0].Id);
-        Assert.Equal("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI011");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation");
     }
 
-    [Fact]
-    public static void TransientWithImplementationFieldStatic() {
+    [Test]
+    public async ValueTask TransientWithImplementationFieldStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1699,13 +1700,13 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI011", diagnostics[0].Id);
-        Assert.Equal("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI011");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation");
     }
 
-    [Fact]
-    public static void TransientWithImplementationFieldStaticScoped() {
+    [Test]
+    public async ValueTask TransientWithImplementationFieldStaticScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1726,14 +1727,14 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI011", diagnostics[0].Id);
-        Assert.Equal("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI011");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Transient + Implementation field member is not allowed. Use Singleton or Scoped instead or use a property/method as Implementation");
     }
 
 
-    [Fact]
-    public static Task TransientWithImplementationProperty() {
+    [Test]
+    public async ValueTask TransientWithImplementationProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1757,7 +1758,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1768,8 +1769,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithImplementationPropertyScoped() {
+    [Test]
+    public async ValueTask TransientWithImplementationPropertyScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1795,7 +1796,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1806,8 +1807,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithImplementationPropertyStatic() {
+    [Test]
+    public async ValueTask TransientWithImplementationPropertyStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1831,7 +1832,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1842,8 +1843,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithImplementationPropertyStaticScoped() {
+    [Test]
+    public async ValueTask TransientWithImplementationPropertyStaticScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1869,7 +1870,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1881,8 +1882,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static Task TransientWithImplementationMethod() {
+    [Test]
+    public async ValueTask TransientWithImplementationMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1906,7 +1907,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1917,8 +1918,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithImplementationMethodScoped() {
+    [Test]
+    public async ValueTask TransientWithImplementationMethodScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1944,7 +1945,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1955,8 +1956,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithImplementationMethodStatic() {
+    [Test]
+    public async ValueTask TransientWithImplementationMethodStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1980,7 +1981,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -1991,8 +1992,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task TransientWithImplementationMethodStaticScoped() {
+    [Test]
+    public async ValueTask TransientWithImplementationMethodStaticScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2018,7 +2019,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -2030,8 +2031,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static Task MultipleTransientServices() {
+    [Test]
+    public async ValueTask MultipleTransientServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2058,7 +2059,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -2071,8 +2072,8 @@ public static class RegisterServicesTests {
 
 
 
-    [Fact]
-    public static void InvalidServiceRegistration() {
+    [Test]
+    public async ValueTask InvalidServiceRegistration() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2086,13 +2087,13 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI009", diagnostics[0].Id);
-        Assert.Equal("Invalid type at service registration. If you are using a generated type like 'MyCode.TestProvider.Scope', 'MyCode.ITestProvider' or 'MyCode.ITestProvider.IScope', declare that type again, so it is available before generation.", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI009");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Invalid type at service registration. If you are using a generated type like 'MyCode.TestProvider.Scope', 'MyCode.ITestProvider' or 'MyCode.ITestProvider.IScope', declare that type again, so it is available before generation.");
     }
 
-    [Fact]
-    public static void RegisterServiceThatDoesNotExistsFails() {
+    [Test]
+    public async ValueTask RegisterServiceThatDoesNotExistsFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2109,14 +2110,14 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI025", diagnostics[0].Id);
-        Assert.Equal("ServiceImplementation 'MyCode.TestService' does not exist or has no accessible constructor", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI025");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("ServiceImplementation 'MyCode.TestService' does not exist or has no accessible constructor");
     }
 
 
-    [Fact]
-    public static Task RegisterServiceThatDerivesFromBaseClass() {
+    [Test]
+    public async ValueTask RegisterServiceThatDerivesFromBaseClass() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2145,7 +2146,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -2156,8 +2157,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task RegisterServiceClosedGeneric() {
+    [Test]
+    public async ValueTask RegisterServiceClosedGeneric() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2175,7 +2176,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -2186,8 +2187,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task RegisterServiceClosedGenericWithImplementation() {
+    [Test]
+    public async ValueTask RegisterServiceClosedGenericWithImplementation() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2207,7 +2208,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -2218,8 +2219,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static Task RegisterDelegateClosedGeneric() {
+    [Test]
+    public async ValueTask RegisterDelegateClosedGeneric() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2239,7 +2240,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -2251,8 +2252,8 @@ public static class RegisterServicesTests {
     }
 
 
-    [Fact]
-    public static Task OverwriteDefaultServiceSelf() {
+    [Test]
+    public async ValueTask OverwriteDefaultServiceSelf() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2270,7 +2271,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -2281,8 +2282,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static void OverwriteDefaultServiceSelfAsConstuctorCallFails() {
+    [Test]
+    public async ValueTask OverwriteDefaultServiceSelfAsConstuctorCallFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2298,13 +2299,13 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI007", diagnostics[0].Id);
-        Assert.Equal("Endless recursive constructor call in ServiceProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI007");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Endless recursive constructor call in ServiceProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?");
     }
 
-    [Fact]
-    public static Task OverwriteDefaultServiceSelfScope() {
+    [Test]
+    public async ValueTask OverwriteDefaultServiceSelfScope() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2326,7 +2327,7 @@ public static class RegisterServicesTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -2337,8 +2338,8 @@ public static class RegisterServicesTests {
             """);
     }
 
-    [Fact]
-    public static void OverwriteDefaultServiceSelfScopeAsConstuctorCallFails() {
+    [Test]
+    public async ValueTask OverwriteDefaultServiceSelfScopeAsConstuctorCallFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2358,14 +2359,14 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI008", diagnostics[0].Id);
-        Assert.Equal("Endless recursive constructor call in ScopedProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI008");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Endless recursive constructor call in ScopedProvider: Service 'Me' adds a constructor call to the constructor which results in an endless recursion. Did you mean to add 'Implementation = \"this\"'?");
     }
 
 
-    [Fact]
-    public static void RegisterServiceWithFieldImplementationOfWrongType() {
+    [Test]
+    public async ValueTask RegisterServiceWithFieldImplementationOfWrongType() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2384,13 +2385,13 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI014", diagnostics[0].Id);
-        Assert.Equal("Wrong type of field '_singleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI014");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Wrong type of field '_singleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected");
     }
 
-    [Fact]
-    public static void RegisterServiceWithPropertyImplementationOfWrongType() {
+    [Test]
+    public async ValueTask RegisterServiceWithPropertyImplementationOfWrongType() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2409,13 +2410,13 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI015", diagnostics[0].Id);
-        Assert.Equal("Wrong type of property 'Singleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI015");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Wrong type of property 'Singleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected");
     }
 
-    [Fact]
-    public static void RegisterServiceWithMethodImplementationOfWrongType() {
+    [Test]
+    public async ValueTask RegisterServiceWithMethodImplementationOfWrongType() {
         const string input = """
             using CircleDIAttributes;
 
@@ -2434,8 +2435,8 @@ public static class RegisterServicesTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI017", diagnostics[0].Id);
-        Assert.Equal("Wrong return type of method 'CreateSingleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI017");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Wrong return type of method 'CreateSingleton': 'MyCode.ITestService' <-> 'MyCode.TestService' expected");
     }
 }

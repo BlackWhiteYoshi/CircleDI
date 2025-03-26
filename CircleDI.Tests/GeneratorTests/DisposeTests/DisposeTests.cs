@@ -11,9 +11,9 @@ namespace CircleDI.Tests;
 /// - AsyncDispose function
 /// </para>
 /// </summary>
-public static class DisposeTests {
-    [Fact]
-    public static Task Singleton() {
+public sealed class DisposeTests {
+    [Test]
+    public async ValueTask Singleton() {
         const string input = """
             using CircleDIAttributes;
 
@@ -31,11 +31,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task Scope() {
+    [Test]
+    public async ValueTask Scope() {
         const string input = """
             using CircleDIAttributes;
 
@@ -53,11 +53,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task Transient() {
+    [Test]
+    public async ValueTask Transient() {
         const string input = """
             using CircleDIAttributes;
 
@@ -75,12 +75,12 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task AsyncSingleton() {
+    [Test]
+    public async ValueTask AsyncSingleton() {
         const string input = """
             using CircleDIAttributes;
 
@@ -98,11 +98,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AsyncScope() {
+    [Test]
+    public async ValueTask AsyncScope() {
         const string input = """
             using CircleDIAttributes;
 
@@ -120,11 +120,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task AsyncTransient() {
+    [Test]
+    public async ValueTask AsyncTransient() {
         const string input = """
             using CircleDIAttributes;
 
@@ -142,12 +142,12 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task SyncAndAsyncSingleton() {
+    [Test]
+    public async ValueTask SyncAndAsyncSingleton() {
         const string input = """
             using CircleDIAttributes;
 
@@ -165,11 +165,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task SyncAndAsyncScope() {
+    [Test]
+    public async ValueTask SyncAndAsyncScope() {
         const string input = """
             using CircleDIAttributes;
 
@@ -187,11 +187,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task SyncAndAsyncTransient() {
+    [Test]
+    public async ValueTask SyncAndAsyncTransient() {
         const string input = """
             using CircleDIAttributes;
 
@@ -209,12 +209,12 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task CustomDisposeMethod() {
+    [Test]
+    public async ValueTask CustomDisposeMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -232,11 +232,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task CustomDisposeAsyncMethod() {
+    [Test]
+    public async ValueTask CustomDisposeAsyncMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -254,11 +254,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task CustomDisposeMethodScope() {
+    [Test]
+    public async ValueTask CustomDisposeMethodScope() {
         const string input = """
             using CircleDIAttributes;
 
@@ -278,11 +278,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task CustomDisposeAsyncMethodScope() {
+    [Test]
+    public async ValueTask CustomDisposeAsyncMethodScope() {
         const string input = """
             using CircleDIAttributes;
 
@@ -302,12 +302,12 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task NoDisposableServices() {
+    [Test]
+    public async ValueTask NoDisposableServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -325,11 +325,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task NoDisposeProperty() {
+    [Test]
+    public async ValueTask NoDisposeProperty() {
         const string input = """
             using CircleDIAttributes;
 
@@ -351,11 +351,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task MultipleSingletons() {
+    [Test]
+    public async ValueTask MultipleSingletons() {
         const string input = """
             using CircleDIAttributes;
 
@@ -377,11 +377,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task SingletonAndTransient() {
+    [Test]
+    public async ValueTask SingletonAndTransient() {
         const string input = """
             using CircleDIAttributes;
 
@@ -403,12 +403,12 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task LazySingleton() {
+    [Test]
+    public async ValueTask LazySingleton() {
         const string input = """
             using CircleDIAttributes;
 
@@ -426,11 +426,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task LazyMultipleSingleton() {
+    [Test]
+    public async ValueTask LazyMultipleSingleton() {
         const string input = """
             using CircleDIAttributes;
 
@@ -452,12 +452,12 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task TransientWithPropertyDependency() {
+    [Test]
+    public async ValueTask TransientWithPropertyDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -481,11 +481,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task TransientWithPropertyDependencyAndGetAccessorMethod() {
+    [Test]
+    public async ValueTask TransientWithPropertyDependencyAndGetAccessorMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -509,12 +509,12 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task SyncAndAsyncNotThreadSafeHasList() {
+    [Test]
+    public async ValueTask SyncAndAsyncNotThreadSafeHasList() {
         const string input = """
             using CircleDIAttributes;
 
@@ -536,11 +536,11 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
-    [Fact]
-    public static Task TransientScopeGenerateListOnlyInScopedProvider() {
+    [Test]
+    public async ValueTask TransientScopeGenerateListOnlyInScopedProvider() {
         const string input = """
             using CircleDIAttributes;
 
@@ -562,12 +562,12 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 
 
-    [Fact]
-    public static Task ManyServices() {
+    [Test]
+    public async ValueTask ManyServices() {
         const string input = """
             using CircleDIAttributes;
 
@@ -633,6 +633,6 @@ public static class DisposeTests {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        return Verify(sourceTextClass);
+        await Verify(sourceTextClass);
     }
 }

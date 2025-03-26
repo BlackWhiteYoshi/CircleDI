@@ -7,11 +7,11 @@ using System.Text;
 
 namespace CircleDI.Tests;
 
-public static class MinimalAPITests {
+public sealed class MinimalAPITests {
     #region EndpointExtension
 
-    [Fact]
-    public static Task EndpointParameterless() {
+    [Test]
+    public async ValueTask EndpointParameterless() {
         const string input = """
             using CircleDIAttributes;
 
@@ -30,11 +30,11 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointOneParameter() {
+    [Test]
+    public async ValueTask EndpointOneParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -53,11 +53,11 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointMultipleParameter() {
+    [Test]
+    public async ValueTask EndpointMultipleParameter() {
         const string input = """
             using CircleDIAttributes;
 
@@ -76,11 +76,11 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointOneDependency() {
+    [Test]
+    public async ValueTask EndpointOneDependency() {
         const string input = """
             using CircleDIAttributes;
 
@@ -103,11 +103,11 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointMultipleDependencies() {
+    [Test]
+    public async ValueTask EndpointMultipleDependencies() {
         const string input = """
             using CircleDIAttributes;
 
@@ -133,11 +133,11 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointMultipleParameterAndDependencies() {
+    [Test]
+    public async ValueTask EndpointMultipleParameterAndDependencies() {
         const string input = """
             using CircleDIAttributes;
 
@@ -163,11 +163,11 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointMultiple() {
+    [Test]
+    public async ValueTask EndpointMultiple() {
         const string input = """
             using CircleDIAttributes;
 
@@ -192,11 +192,11 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointParameterWithOneAttribute() {
+    [Test]
+    public async ValueTask EndpointParameterWithOneAttribute() {
         const string input = """
             using CircleDIAttributes;
 
@@ -219,11 +219,11 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointParameterWithMultipleAttributes() {
+    [Test]
+    public async ValueTask EndpointParameterWithMultipleAttributes() {
         const string input = """
             using CircleDIAttributes;
 
@@ -255,12 +255,12 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
 
-    [Fact]
-    public static Task EndpointAttributePattern() {
+    [Test]
+    public async ValueTask EndpointAttributePattern() {
         const string input = """
             using CircleDIAttributes;
 
@@ -279,12 +279,12 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointAttributeHttpMethod() {
-        int httpCount = Enum.GetValues(typeof(Http)).Length;
+    [Test]
+    public async ValueTask EndpointAttributeHttpMethod() {
+        int httpCount = Enum.GetValues<Http>().Length;
 
         StringBuilder builder = new(1024);
         for (int i = 0; i <= httpCount; i++) {
@@ -317,11 +317,11 @@ public static class MinimalAPITests {
                 """);
         }
 
-        return Verify(builder.ToString());
+        await Verify(builder.ToString());
     }
 
-    [Fact]
-    public static Task EndpointAttributeRouteHandler() {
+    [Test]
+    public async ValueTask EndpointAttributeRouteHandler() {
         const string input = """
             using CircleDIAttributes;
 
@@ -346,12 +346,12 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
 
-    [Fact]
-    public static Task EndpointWithoutProvider() {
+    [Test]
+    public async ValueTask EndpointWithoutProvider() {
         const string input = """
             using CircleDIAttributes;
 
@@ -367,11 +367,11 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointScopeProviderGeneric() {
+    [Test]
+    public async ValueTask EndpointScopeProviderGeneric() {
         const string input = """
             using CircleDIAttributes;
 
@@ -394,11 +394,11 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
-    [Fact]
-    public static Task EndpointScopeProviderMultipleGenerics() {
+    [Test]
+    public async ValueTask EndpointScopeProviderMultipleGenerics() {
         const string input = """
             using CircleDIAttributes;
 
@@ -423,7 +423,7 @@ public static class MinimalAPITests {
         string[] sourceTexts = input.GenerateSourceTextMinimalAPI(out _, out _);
         string endpointExtensionSourceText = sourceTexts.First((string sourceText) => sourceText.Contains("partial class EndpointExtension"));
 
-        return Verify(endpointExtensionSourceText);
+        await Verify(endpointExtensionSourceText);
     }
 
     #endregion
@@ -431,8 +431,8 @@ public static class MinimalAPITests {
 
     #region Error
 
-    [Fact]
-    public static void ErrorNonStaticEEndpoint() {
+    [Test]
+    public async ValueTask ErrorNonStaticEEndpoint() {
         const string input = """
             using CircleDIAttributes;
 
@@ -450,13 +450,13 @@ public static class MinimalAPITests {
 
         _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDIM01", diagnostics[0].Id);
-        Assert.Equal("The endpoint method 'MyCode.Endpoints.MyHandler' must be static", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDIM01");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("The endpoint method 'MyCode.Endpoints.MyHandler' must be static");
     }
 
-    [Fact]
-    public static void ErrorGenericEEndpoint() {
+    [Test]
+    public async ValueTask ErrorGenericEEndpoint() {
         const string input = """
             using CircleDIAttributes;
 
@@ -474,13 +474,13 @@ public static class MinimalAPITests {
 
         _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDIM02", diagnostics[0].Id);
-        Assert.Equal("The endpoint method 'MyCode.Endpoints.MyHandler' must be non generic", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDIM02");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("The endpoint method 'MyCode.Endpoints.MyHandler' must be non generic");
     }
 
-    [Fact]
-    public static void ErrorMissingRouteBuilderMethod() {
+    [Test]
+    public async ValueTask ErrorMissingRouteBuilderMethod() {
         const string input = """
             using CircleDIAttributes;
 
@@ -498,13 +498,13 @@ public static class MinimalAPITests {
 
         _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDIM03", diagnostics[0].Id);
-        Assert.Equal("No method with the name 'MyHandlerBuilder' in class 'MyCode.Endpoints' could be found", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDIM03");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("No method with the name 'MyHandlerBuilder' in class 'MyCode.Endpoints' could be found");
     }
 
-    [Fact]
-    public static void ErrorRouteBuilderNonStatic() {
+    [Test]
+    public async ValueTask ErrorRouteBuilderNonStatic() {
         const string input = """
             using CircleDIAttributes;
 
@@ -528,13 +528,13 @@ public static class MinimalAPITests {
 
         _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDIM04", diagnostics[0].Id);
-        Assert.Equal("The RouteBuilder method 'MyHandlerBuilder' must be static", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDIM04");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("The RouteBuilder method 'MyHandlerBuilder' must be static");
     }
 
-    [Fact]
-    public static void ErrorRouteBuilderGeneric() {
+    [Test]
+    public async ValueTask ErrorRouteBuilderGeneric() {
         const string input = """
             using CircleDIAttributes;
 
@@ -558,17 +558,17 @@ public static class MinimalAPITests {
 
         _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDIM05", diagnostics[0].Id);
-        Assert.Equal("The RouteBuilder method 'MyHandlerBuilder' must non generic", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDIM05");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("The RouteBuilder method 'MyHandlerBuilder' must non generic");
     }
 
-    [Theory]
-    [InlineData("string str")]
-    [InlineData("RouteHandlerBuilder builder")]
-    [InlineData("RouteHandlerBuilder builder, string str")]
-    [InlineData("")]
-    public static void ErrorRouteBuilderParameterList(string parameter) {
+    [Test]
+    [Arguments("string str")]
+    [Arguments("RouteHandlerBuilder builder")]
+    [Arguments("RouteHandlerBuilder builder, string str")]
+    [Arguments("")]
+    public async ValueTask ErrorRouteBuilderParameterList(string parameter) {
         string input = $$"""
             using CircleDIAttributes;
 
@@ -592,13 +592,13 @@ public static class MinimalAPITests {
 
         _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDIM06", diagnostics[0].Id);
-        Assert.Equal("The RouteBuilder method 'MyHandlerBuilder' must have only one parameter of type 'Microsoft.AspNetCore.Builder.RouteHandlerBuilder'", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDIM06");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("The RouteBuilder method 'MyHandlerBuilder' must have only one parameter of type 'Microsoft.AspNetCore.Builder.RouteHandlerBuilder'");
     }
 
-    [Fact]
-    public static void ErrorMultipleSameEndpoint() {
+    [Test]
+    public async ValueTask ErrorMultipleSameEndpoint() {
         const string input = """
             using CircleDIAttributes;
 
@@ -619,13 +619,13 @@ public static class MinimalAPITests {
 
         _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDIM07", diagnostics[0].Id);
-        Assert.Equal("The endpoint \"Hello\" with HTTP method 'Get' has multiple registrations", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDIM07");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("The endpoint \"Hello\" with HTTP method 'Get' has multiple registrations");
     }
 
-    [Fact]
-    public static void ErrorMultipleEndpointServiceProvider() {
+    [Test]
+    public async ValueTask ErrorMultipleEndpointServiceProvider() {
         const string input = """
             using CircleDIAttributes;
 
@@ -641,13 +641,13 @@ public static class MinimalAPITests {
 
         _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDIM08", diagnostics[0].Id);
-        Assert.Equal("Multiple Endpoint ServiceProviders, at most one is allowed. Change the property \"EndpointProvider\" to false to change the ServiceProvider to a normal provider.", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDIM08");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Multiple Endpoint ServiceProviders, at most one is allowed. Change the property \"EndpointProvider\" to false to change the ServiceProvider to a normal provider.");
     }
 
-    [Fact]
-    public static void ErrorEndpointDependencyWithoutServiceProvider() {
+    [Test]
+    public async ValueTask ErrorEndpointDependencyWithoutServiceProvider() {
         const string input = """
             using CircleDIAttributes;
 
@@ -662,9 +662,9 @@ public static class MinimalAPITests {
 
         _ = input.GenerateSourceTextMinimalAPI(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDIM09", diagnostics[0].Id);
-        Assert.Equal("Endpoint has dependency without ServiceProvider. Either remove the [Dependency]-attribute or create a ServiceProvider with \"EndpointProvider\" set to default or true.", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDIM09");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Endpoint has dependency without ServiceProvider. Either remove the [Dependency]-attribute or create a ServiceProvider with \"EndpointProvider\" set to default or true.");
     }
 
     #endregion

@@ -9,7 +9,7 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests the function <see cref="ServiceProvider.CreateDependencyTree()"/>.
 /// </summary>
-public static class DependencyTreeTests {
+public sealed class DependencyTreeTests {
     private static ServiceProvider CreateProvider(List<Service> serviceList) {
         ServiceProvider serviceProvider = new(null!) {
             Identifier = new TypeName("TestProvider", TypeKeyword.Class, [], [], [], []),
@@ -44,19 +44,19 @@ public static class DependencyTreeTests {
 
 
 
-    [Fact]
-    public static void EmptyDoesNothing() {
+    [Test]
+    public async ValueTask EmptyDoesNothing() {
         ServiceProvider serviceProvider = CreateProvider([]);
 
         serviceProvider.CreateDependencyTree();
 
-        Assert.Equal([], serviceProvider.SingletonList);
-        Assert.Equal([], serviceProvider.ScopedList);
-        Assert.Equal([], serviceProvider.TransientList);
+        await Assert.That(serviceProvider.SingletonList).IsEmpty();
+        await Assert.That(serviceProvider.ScopedList).IsEmpty();
+        await Assert.That(serviceProvider.TransientList).IsEmpty();
     }
 
-    [Fact]
-    public static void MultipleServicesWithSameTypeWithoutNamingFails() {
+    [Test]
+    public async ValueTask MultipleServicesWithSameTypeWithoutNamingFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -75,16 +75,16 @@ public static class DependencyTreeTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI031", diagnostics[0].Id);
-        Assert.Equal("Ambiguous dependency at Service 'TestService1' with type 'MyCode.TestService2': There are multiple Services registered for this type: [\"TestService2_1\", \"TestService2_2\"]. Use the '[Dependency(Name=\"...\")]'-attribute on the parameter to choose one specific service", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI031");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Ambiguous dependency at Service 'TestService1' with type 'MyCode.TestService2': There are multiple Services registered for this type: [\"TestService2_1\", \"TestService2_2\"]. Use the '[Dependency(Name=\"...\")]'-attribute on the parameter to choose one specific service");
     }
 
 
     #region Tree
 
-    [Fact]
-    public static void Tree_SimplePath_Constructor() {
+    [Test]
+    public async ValueTask Tree_SimplePath_Constructor() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -143,12 +143,12 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Same(service2.ConstructorDependencyList[0].Service, service3);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service3).IsSameReferenceAs(service2.ConstructorDependencyList[0].Service);
     }
 
-    [Fact]
-    public static void Tree_SimplePath_Property() {
+    [Test]
+    public async ValueTask Tree_SimplePath_Property() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -211,14 +211,14 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.PropertyDependencyList[0].Service, service2);
-        Assert.Same(service2.PropertyDependencyList[0].Service, service3);
-        Assert.False(service1.PropertyDependencyList[0].IsCircular);
-        Assert.False(service2.PropertyDependencyList[0].IsCircular);
+        await Assert.That(service2).IsSameReferenceAs(service1.PropertyDependencyList[0].Service);
+        await Assert.That(service3).IsSameReferenceAs(service2.PropertyDependencyList[0].Service);
+        await Assert.That(service1.PropertyDependencyList[0].IsCircular).IsFalse();
+        await Assert.That(service2.PropertyDependencyList[0].IsCircular).IsFalse();
     }
 
-    [Fact]
-    public static void Tree_NormalTreePath() {
+    [Test]
+    public async ValueTask Tree_NormalTreePath() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -362,18 +362,18 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.PropertyDependencyList[0].Service, service2);
-        Assert.Same(service1.PropertyDependencyList[1].Service, service3);
+        await Assert.That(service2).IsSameReferenceAs(service1.PropertyDependencyList[0].Service);
+        await Assert.That(service3).IsSameReferenceAs(service1.PropertyDependencyList[1].Service);
 
-        Assert.Same(service2.ConstructorDependencyList[0].Service, service4);
-        Assert.Same(service2.ConstructorDependencyList[1].Service, service5);
+        await Assert.That(service4).IsSameReferenceAs(service2.ConstructorDependencyList[0].Service);
+        await Assert.That(service5).IsSameReferenceAs(service2.ConstructorDependencyList[1].Service);
 
-        Assert.Same(service3.PropertyDependencyList[0].Service, service6);
-        Assert.Same(service3.PropertyDependencyList[1].Service, service7);
+        await Assert.That(service6).IsSameReferenceAs(service3.PropertyDependencyList[0].Service);
+        await Assert.That(service7).IsSameReferenceAs(service3.PropertyDependencyList[1].Service);
     }
 
-    [Fact]
-    public static void Tree_DoublePath() {
+    [Test]
+    public async ValueTask Tree_DoublePath() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -419,12 +419,12 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Same(service1.ConstructorDependencyList[1].Service, service2);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[1].Service);
     }
 
-    [Fact]
-    public static void Tree_MergingPath() {
+    [Test]
+    public async ValueTask Tree_MergingPath() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -490,13 +490,13 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Same(service1.ConstructorDependencyList[1].Service, service3);
-        Assert.Same(service2.ConstructorDependencyList[0].Service, service3);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service3).IsSameReferenceAs(service1.ConstructorDependencyList[1].Service);
+        await Assert.That(service3).IsSameReferenceAs(service2.ConstructorDependencyList[0].Service);
     }
 
-    [Fact]
-    public static void Tree_DiamondMerging() {
+    [Test]
+    public async ValueTask Tree_DiamondMerging() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -582,14 +582,14 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Same(service1.ConstructorDependencyList[1].Service, service3);
-        Assert.Same(service2.ConstructorDependencyList[0].Service, service4);
-        Assert.Same(service3.ConstructorDependencyList[0].Service, service4);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service3).IsSameReferenceAs(service1.ConstructorDependencyList[1].Service);
+        await Assert.That(service4).IsSameReferenceAs(service2.ConstructorDependencyList[0].Service);
+        await Assert.That(service4).IsSameReferenceAs(service3.ConstructorDependencyList[0].Service);
     }
 
-    [Fact]
-    public static void Tree_MissingDependencyFails() {
+    [Test]
+    public async ValueTask Tree_MissingDependencyFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -607,13 +607,13 @@ public static class DependencyTreeTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI029", diagnostics[0].Id);
-        Assert.Equal("Unregistered dependency at Service 'TestService1' with type 'MyCode.TestService2'", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI029");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Unregistered dependency at Service 'TestService1' with type 'MyCode.TestService2'");
     }
 
-    [Fact]
-    public static void Tree_NotDeclaredInterfaceDependencyFails() {
+    [Test]
+    public async ValueTask Tree_NotDeclaredInterfaceDependencyFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -632,14 +632,14 @@ public static class DependencyTreeTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Equal(2, diagnostics.Length);
-        Assert.Equal("CDI038", diagnostics[0].Id);
-        Assert.Equal("CDI030", diagnostics[1].Id);
-        Assert.Equal("Unregistered dependency 'ITestProvider' has the same identifier as generated interface type 'MyCode.ITestProvider', only missing the namespace. If you mean this generated type, you can correct the namespace by just declaring the interface type in namespace 'MyCode': \"public partial interface ITestProvider;\"", diagnostics[1].GetMessage());
+        await Assert.That(diagnostics.Length).IsEqualTo(2);
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI038");
+        await Assert.That(diagnostics[1].Id).IsEqualTo("CDI030");
+        await Assert.That(diagnostics[1].GetMessage()).IsEqualTo("Unregistered dependency 'ITestProvider' has the same identifier as generated interface type 'MyCode.ITestProvider', only missing the namespace. If you mean this generated type, you can correct the namespace by just declaring the interface type in namespace 'MyCode': \"public partial interface ITestProvider;\"");
     }
 
-    [Fact]
-    public static void Tree_MissingNamedDependencyFails() {
+    [Test]
+    public async ValueTask Tree_MissingNamedDependencyFails() {
         const string input = """
             using CircleDIAttributes;
 
@@ -655,9 +655,9 @@ public static class DependencyTreeTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI032", diagnostics[0].Id);
-        Assert.Equal("Unregistered named dependency at Service 'TestService1' with name \"Asdf\"", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI032");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Unregistered named dependency at Service 'TestService1' with name \"Asdf\"");
     }
 
     #endregion
@@ -665,8 +665,8 @@ public static class DependencyTreeTests {
 
     #region MultipleRoots
 
-    [Fact]
-    public static void MultipleRoots_MergingRoots() {
+    [Test]
+    public async ValueTask MultipleRoots_MergingRoots() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -725,12 +725,12 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service3);
-        Assert.Same(service2.ConstructorDependencyList[0].Service, service3);
+        await Assert.That(service3).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service3).IsSameReferenceAs(service2.ConstructorDependencyList[0].Service);
     }
 
-    [Fact]
-    public static void MultipleRoots_MergingPath() {
+    [Test]
+    public async ValueTask MultipleRoots_MergingPath() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -809,9 +809,9 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service4);
-        Assert.Same(service2.ConstructorDependencyList[0].Service, service3);
-        Assert.Same(service3.ConstructorDependencyList[0].Service, service4);
+        await Assert.That(service4).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service3).IsSameReferenceAs(service2.ConstructorDependencyList[0].Service);
+        await Assert.That(service4).IsSameReferenceAs(service3.ConstructorDependencyList[0].Service);
     }
 
     #endregion
@@ -819,8 +819,8 @@ public static class DependencyTreeTests {
 
     #region MultipleTrees
 
-    [Fact]
-    public static void MultipleTrees_IndependServices() {
+    [Test]
+    public async ValueTask MultipleTrees_IndependServices() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -851,11 +851,11 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.NotSame(service1, service2);
+        await Assert.That(service2).IsNotSameReferenceAs(service1);
     }
 
-    [Fact]
-    public static void MultipleTrees_IndependentPath() {
+    [Test]
+    public async ValueTask MultipleTrees_IndependentPath() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -968,10 +968,10 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service4);
-        Assert.Same(service2.ConstructorDependencyList[0].Service, service3);
-        Assert.Same(service3.ConstructorDependencyList[0].Service, service4);
-        Assert.Same(service5.PropertyDependencyList[0].Service, service6);
+        await Assert.That(service4).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service3).IsSameReferenceAs(service2.ConstructorDependencyList[0].Service);
+        await Assert.That(service4).IsSameReferenceAs(service3.ConstructorDependencyList[0].Service);
+        await Assert.That(service6).IsSameReferenceAs(service5.PropertyDependencyList[0].Service);
     }
 
     #endregion
@@ -979,8 +979,8 @@ public static class DependencyTreeTests {
 
     #region Circles
 
-    [Fact]
-    public static void Circles_SimpleCircle() {
+    [Test]
+    public async ValueTask Circles_SimpleCircle() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1031,13 +1031,13 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.PropertyDependencyList[0].Service, service2);
-        Assert.Same(service2.PropertyDependencyList[0].Service, service1);
-        Assert.True(service1.PropertyDependencyList[0].IsCircular ^ service2.PropertyDependencyList[0].IsCircular);
+        await Assert.That(service2).IsSameReferenceAs(service1.PropertyDependencyList[0].Service);
+        await Assert.That(service1).IsSameReferenceAs(service2.PropertyDependencyList[0].Service);
+        await Assert.That(service1.PropertyDependencyList[0].IsCircular ^ service2.PropertyDependencyList[0].IsCircular).IsTrue();
     }
 
-    [Fact]
-    public static void Circles_SelfCircle() {
+    [Test]
+    public async ValueTask Circles_SelfCircle() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1066,12 +1066,12 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.PropertyDependencyList[0].Service, service1);
-        Assert.True(service1.PropertyDependencyList[0].IsCircular);
+        await Assert.That(service1).IsSameReferenceAs(service1.PropertyDependencyList[0].Service);
+        await Assert.That(service1.PropertyDependencyList[0].IsCircular).IsTrue();
     }
 
-    [Fact]
-    public static void Circles_ConstructorPropertyCircle() {
+    [Test]
+    public async ValueTask Circles_ConstructorPropertyCircle() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1120,13 +1120,13 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Same(service2.PropertyDependencyList[0].Service, service1);
-        Assert.True(service2.PropertyDependencyList[0].IsCircular);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service1).IsSameReferenceAs(service2.PropertyDependencyList[0].Service);
+        await Assert.That(service2.PropertyDependencyList[0].IsCircular).IsTrue();
     }
 
-    [Fact]
-    public static void Circles_InvalidCircle() {
+    [Test]
+    public async ValueTask Circles_InvalidCircle() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1142,9 +1142,9 @@ public static class DependencyTreeTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI033", diagnostics[0].Id);
-        Assert.Equal("Circular dependency unresolvable: ['TestService1' -> 'TestService1']. Only singleton and scoped dependencies injected as properties can be resolved circular", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI033");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Circular dependency unresolvable: ['TestService1' -> 'TestService1']. Only singleton and scoped dependencies injected as properties can be resolved circular");
     }
 
     #endregion
@@ -1152,8 +1152,8 @@ public static class DependencyTreeTests {
 
     #region Lifetime
 
-    [Fact]
-    public static void Lifetime_SingletonToScoped() {
+    [Test]
+    public async ValueTask Lifetime_SingletonToScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1171,13 +1171,13 @@ public static class DependencyTreeTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI034", diagnostics[0].Id);
-        Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Scoped dependency 'MyCode.TestService2'", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI034");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Lifetime Violation: Singleton Service 'TestService1' has Scoped dependency 'MyCode.TestService2'");
     }
 
-    [Fact]
-    public static void Lifetime_SingletonToTransient() {
+    [Test]
+    public async ValueTask Lifetime_SingletonToTransient() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1216,12 +1216,12 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Equal(ServiceLifetime.Transient, service2.Lifetime);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service2.Lifetime).IsEqualTo(ServiceLifetime.Transient);
     }
 
-    [Fact]
-    public static void Lifetime_SingletonToTransientScoped() {
+    [Test]
+    public async ValueTask Lifetime_SingletonToTransientScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1241,13 +1241,13 @@ public static class DependencyTreeTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI035", diagnostics[0].Id);
-        Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Transient-Scoped dependency 'MyCode.TestService2'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI035");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Lifetime Violation: Singleton Service 'TestService1' has Transient-Scoped dependency 'MyCode.TestService2'. \"Transient-Scoped\" means the service itself is transient, but it has at least one dependency or one dependency of the dependencies that is Scoped");
     }
 
-    [Fact]
-    public static void Lifetime_SingletonToDelegate() {
+    [Test]
+    public async ValueTask Lifetime_SingletonToDelegate() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1286,11 +1286,11 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
     }
 
-    [Fact]
-    public static void Lifetime_SingletonToDelegateScoped() {
+    [Test]
+    public async ValueTask Lifetime_SingletonToDelegateScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1312,13 +1312,13 @@ public static class DependencyTreeTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI036", diagnostics[0].Id);
-        Assert.Equal("Lifetime Violation: Singleton Service 'TestService1' has Delegate-Scoped dependency 'System.Action'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI036");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Lifetime Violation: Singleton Service 'TestService1' has Delegate-Scoped dependency 'System.Action'. \"Delegate-Scoped\" means the method is declared inside Scope and therefore only available for scoped services.");
     }
 
-    [Fact]
-    public static void Lifetime_SingletonToMutlipleScoped() {
+    [Test]
+    public async ValueTask Lifetime_SingletonToMutlipleScoped() {
         const string input = """
             using CircleDIAttributes;
 
@@ -1340,14 +1340,14 @@ public static class DependencyTreeTests {
 
         _ = input.GenerateSourceText(out _, out ImmutableArray<Diagnostic> diagnostics);
 
-        Assert.Single(diagnostics);
-        Assert.Equal("CDI037", diagnostics[0].Id);
-        Assert.Equal("Lifetime Violation: Singleton Service 'TestService' has dependency with type 'MyCode.ITestDependency' and there are multiple services of that type, but they are all invalid (Scoped or Transient-Scoped): [\"TestDependency1\", \"TestDependency2\"]", diagnostics[0].GetMessage());
+        await Assert.That(diagnostics).HasSingleItem();
+        await Assert.That(diagnostics[0].Id).IsEqualTo("CDI037");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Lifetime Violation: Singleton Service 'TestService' has dependency with type 'MyCode.ITestDependency' and there are multiple services of that type, but they are all invalid (Scoped or Transient-Scoped): [\"TestDependency1\", \"TestDependency2\"]");
     }
 
 
-    [Fact]
-    public static void Lifetime_ScopedToSingleton() {
+    [Test]
+    public async ValueTask Lifetime_ScopedToSingleton() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Scoped,
@@ -1386,11 +1386,11 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
     }
 
-    [Fact]
-    public static void Lifetime_ScopedToTransient() {
+    [Test]
+    public async ValueTask Lifetime_ScopedToTransient() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Scoped,
@@ -1429,12 +1429,12 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Equal(ServiceLifetime.Transient, service2.Lifetime);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service2.Lifetime).IsEqualTo(ServiceLifetime.Transient);
     }
 
-    [Fact]
-    public static void Lifetime_ScopedToDelegate() {
+    [Test]
+    public async ValueTask Lifetime_ScopedToDelegate() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Scoped,
@@ -1473,12 +1473,12 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
     }
 
 
-    [Fact]
-    public static void Lifetime_TransientToSingleton() {
+    [Test]
+    public async ValueTask Lifetime_TransientToSingleton() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Transient,
@@ -1517,12 +1517,12 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Equal(ServiceLifetime.Transient, service1.Lifetime);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service1.Lifetime).IsEqualTo(ServiceLifetime.Transient);
     }
 
-    [Fact]
-    public static void Lifetime_TransientToScoped() {
+    [Test]
+    public async ValueTask Lifetime_TransientToScoped() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Transient,
@@ -1561,12 +1561,12 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Equal(ServiceLifetime.TransientScoped, service1.Lifetime);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service1.Lifetime).IsEqualTo(ServiceLifetime.TransientScoped);
     }
 
-    [Fact]
-    public static void Lifetime_TransientToDelegate() {
+    [Test]
+    public async ValueTask Lifetime_TransientToDelegate() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Transient,
@@ -1605,11 +1605,11 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
     }
 
-    [Fact]
-    public static void Lifetime_TransientToDelegateScoped() {
+    [Test]
+    public async ValueTask Lifetime_TransientToDelegateScoped() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Transient,
@@ -1648,8 +1648,8 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Equal(ServiceLifetime.TransientScoped, service1.Lifetime);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service1.Lifetime).IsEqualTo(ServiceLifetime.TransientScoped);
     }
 
     #endregion
@@ -1657,8 +1657,8 @@ public static class DependencyTreeTests {
 
     #region CreationTiming
 
-    [Fact]
-    public static void CreationTiming_ConstructorToConstructor() {
+    [Test]
+    public async ValueTask CreationTiming_ConstructorToConstructor() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1703,11 +1703,11 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
     }
 
-    [Fact]
-    public static void CreationTiming_ConstructorToLazy() {
+    [Test]
+    public async ValueTask CreationTiming_ConstructorToLazy() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1752,12 +1752,12 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
-        Assert.Equal(CreationTiming.Constructor, service2.CreationTimeTransitive);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
+        await Assert.That(service2.CreationTimeTransitive).IsEqualTo(CreationTiming.Constructor);
     }
 
-    [Fact]
-    public static void CreationTiming_LazyToConstructor() {
+    [Test]
+    public async ValueTask CreationTiming_LazyToConstructor() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1802,11 +1802,11 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
     }
 
-    [Fact]
-    public static void CreationTiming_LazyToLazy() {
+    [Test]
+    public async ValueTask CreationTiming_LazyToLazy() {
         Service service1 = new() {
             Name = "service1",
             Lifetime = ServiceLifetime.Singleton,
@@ -1851,7 +1851,7 @@ public static class DependencyTreeTests {
         serviceProvider.CreateDependencyTree();
 
 
-        Assert.Same(service1.ConstructorDependencyList[0].Service, service2);
+        await Assert.That(service2).IsSameReferenceAs(service1.ConstructorDependencyList[0].Service);
     }
 
     #endregion

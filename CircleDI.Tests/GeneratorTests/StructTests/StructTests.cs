@@ -5,9 +5,9 @@ namespace CircleDI.Tests;
 /// <summary>
 /// Tests related to the struct type
 /// </summary>
-public static class StructTests {
-    [Fact]
-    public static Task Struct() {
+public sealed class StructTests {
+    [Test]
+    public async ValueTask Struct() {
         const string input = """
             using CircleDIAttributes;
 
@@ -31,7 +31,7 @@ public static class StructTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -42,8 +42,8 @@ public static class StructTests {
             """);
     }
 
-    [Fact]
-    public static Task Lazy() {
+    [Test]
+    public async ValueTask Lazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -61,7 +61,7 @@ public static class StructTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -72,8 +72,8 @@ public static class StructTests {
             """);
     }
 
-    [Fact]
-    public static Task withInterfaceLazy() {
+    [Test]
+    public async ValueTask WithInterfaceLazy() {
         const string input = """
             using CircleDIAttributes;
 
@@ -92,7 +92,7 @@ public static class StructTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -103,8 +103,8 @@ public static class StructTests {
             """);
     }
 
-    [Fact]
-    public static Task LazyIDisposable() {
+    [Test]
+    public async ValueTask LazyIDisposable() {
         const string input = """
             using CircleDIAttributes;
 
@@ -122,7 +122,7 @@ public static class StructTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -133,8 +133,8 @@ public static class StructTests {
             """);
     }
 
-    [Fact]
-    public static Task LazyIAsyncDisposable() {
+    [Test]
+    public async ValueTask LazyIAsyncDisposable() {
         const string input = """
             using CircleDIAttributes;
 
@@ -152,7 +152,7 @@ public static class StructTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------
@@ -163,8 +163,8 @@ public static class StructTests {
             """);
     }
 
-    [Fact]
-    public static Task LazyMultipleIAsyncDisposable() {
+    [Test]
+    public async ValueTask LazyMultipleIAsyncDisposable() {
         const string input = """
             using CircleDIAttributes;
 
@@ -184,7 +184,7 @@ public static class StructTests {
         string sourceTextClass = sourceTexts[^2];
         string sourceTextInterface = sourceTexts[^1];
 
-        return Verify($"""
+        await Verify($"""
             {sourceTextClass}
 
             ---------

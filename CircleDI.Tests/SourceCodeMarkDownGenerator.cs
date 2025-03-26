@@ -11,13 +11,13 @@ namespace CircleDI.Tests;
 /// It just happens that creating an entire console application project for this little functionality was not worth it.
 /// </para>
 /// </summary>
-public static class SourceCodeMarkDownGenerator {
-    private static void AppendSection(this StringBuilder builder, string title, string input) {
+public sealed class SourceCodeMarkDownGenerator {
+    private static async ValueTask AppendSection(StringBuilder builder, string title, string input) {
         string[] sourceTexts = input.GenerateSourceText(out _, out _);
         string sourceTextClass = sourceTexts[^2];
 
-        Assert.Equal('\n', input[^1]);
-        Assert.Equal('\n', sourceTextClass[^1]);
+        await Assert.That(input[^1]).IsEqualTo('\n');
+        await Assert.That(sourceTextClass[^1]).IsEqualTo('\n');
 
         builder.AppendInterpolation($"""
 
@@ -37,17 +37,17 @@ public static class SourceCodeMarkDownGenerator {
 
 
     /// <summary>
-    /// <para>Uncomment "[Fact]" and do "run test" on this function to generate the markdown file.</para>
-    /// <para>Do not forget to comment out "[Fact]" again.</para>
+    /// <para>Uncomment "[Test]" and do "run test" on this function to generate the markdown file.</para>
+    /// <para>Do not forget to comment out "[Test]" again.</para>
     /// </summary>
-    //[Fact]
-    public static void CreateMarkDownFile() {
+    [Test, Explicit]
+    public async ValueTask CreateMarkDownFile() {
         StringBuilder builder = new(100000);
 
         builder.Append("# Source Code Generation Output\n");
 
 
-        builder.AppendSection("Register Services", """
+        await AppendSection(builder, "Register Services", """
             using CircleDIAttributes;
 
             [ServiceProvider]
@@ -65,7 +65,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Register Circle Dependency (set-accessor)", """
+        await AppendSection(builder, "Register Circle Dependency (set-accessor)", """
             using CircleDIAttributes;
 
             [ServiceProvider]
@@ -84,7 +84,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Register Circle Dependency (init-accessor)", """
+        await AppendSection(builder, "Register Circle Dependency (init-accessor)", """
             using CircleDIAttributes;
 
             [ServiceProvider]
@@ -103,7 +103,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Register Delegate Service", """
+        await AppendSection(builder, "Register Delegate Service", """
             using CircleDIAttributes;
 
             [ServiceProvider]
@@ -117,7 +117,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Register Generic Service", """
+        await AppendSection(builder, "Register Generic Service", """
             using CircleDIAttributes;
 
             [ServiceProvider]
@@ -134,7 +134,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Import Services", """
+        await AppendSection(builder, "Import Services", """
             using CircleDIAttributes;
 
             namespace MyCode;
@@ -153,7 +153,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Implementation Field", """
+        await AppendSection(builder, "Implementation Field", """
             using CircleDIAttributes;
 
             [ServiceProvider]
@@ -173,7 +173,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Implementation Property", """
+        await AppendSection(builder, "Implementation Property", """
             using CircleDIAttributes;
 
             [ServiceProvider]
@@ -188,7 +188,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Implementation Method", """
+        await AppendSection(builder, "Implementation Method", """
             using CircleDIAttributes;
 
             [ServiceProvider]
@@ -207,7 +207,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Disposable Services", """
+        await AppendSection(builder, "Disposable Services", """
             using CircleDIAttributes;
             using System;
             using System.Threading.Tasks;
@@ -242,7 +242,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Lazy Service Instantiation", """
+        await AppendSection(builder, "Lazy Service Instantiation", """
             using CircleDIAttributes;
 
             [ServiceProvider(CreationTime = CreationTiming.Lazy)]
@@ -255,7 +255,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Get Method Accessor", """
+        await AppendSection(builder, "Get Method Accessor", """
             using CircleDIAttributes;
 
             [ServiceProvider(GetAccessor = GetAccess.Method)]
@@ -268,7 +268,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Disable Scope and disable Dispose Generation", """
+        await AppendSection(builder, "Disable Scope and disable Dispose Generation", """
             using CircleDIAttributes;
 
             [ServiceProvider(GenerateDisposeMethods = DisposeGeneration.NoDisposing)]
@@ -282,7 +282,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("ThreadSafe disabled", """
+        await AppendSection(builder, "ThreadSafe disabled", """
             using CircleDIAttributes;
             using System;
 
@@ -302,7 +302,7 @@ public static class SourceCodeMarkDownGenerator {
 
             """);
 
-        builder.AppendSection("Overwriting defaults", """
+        await AppendSection(builder, "Overwriting defaults", """
             using CircleDIAttributes;
             using System.Threading.Tasks;
 
@@ -344,6 +344,6 @@ public static class SourceCodeMarkDownGenerator {
             """);
 
 
-        File.WriteAllText("../../../SourceCodeGenerationOutput.md", builder.ToString());
+        File.WriteAllText("../../../../Readme_md/SourceCodeGenerationOutput.md", builder.ToString());
     }
 }
