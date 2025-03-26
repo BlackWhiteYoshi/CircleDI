@@ -2,7 +2,7 @@
 
 public static partial class Attributes {
     public const string NAME = "CircleDI";
-    public const string VERSION = "1.1.0";
+    public const string VERSION = "1.1.1";
 
     private const string CREATION_TIME_PROPERTY = """
         /// <summary>
