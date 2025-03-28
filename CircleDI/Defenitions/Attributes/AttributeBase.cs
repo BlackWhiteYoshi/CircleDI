@@ -1,8 +1,10 @@
-﻿namespace CircleDI.Defenitions;
+﻿using AssemblyVersionInfo;
+
+namespace CircleDI.Defenitions;
 
 public static partial class Attributes {
-    public const string NAME = "CircleDI";
-    public const string VERSION = "1.1.1";
+    public const string NAME = Assembly.NAME;
+    public const string VERSION = Assembly.VERSION_MAJOR_MINOR_BUILD;
 
     private const string CREATION_TIME_PROPERTY = """
         /// <summary>
