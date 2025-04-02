@@ -275,7 +275,7 @@ file static class RegisterServiceProviderAttributeExtension {
             serviceProviderAttributeName,
             static (SyntaxNode syntaxNode, CancellationToken _) => syntaxNode is ClassDeclarationSyntax or StructDeclarationSyntax or RecordDeclarationSyntax,
             CreateServiceProviderWithEndpointFlag
-        ).Select((ServiceProviderWithEndpointFlag providerAndFlag, CancellationToken _) => (providerAndFlag.serviceProvider.CreateDependencyTree(), providerAndFlag.endpointProvider)).WithComparer(NoComparison<ServiceProviderWithEndpointFlag>.Instance);
+        ).Select((ServiceProviderWithEndpointFlag providerAndFlag, CancellationToken _) => (providerAndFlag.serviceProvider.CreateDependencyTree(), providerAndFlag.endpointProvider));
 
         context.RegisterSourceOutput(serviceProviderWithEndpointFlag, (SourceProductionContext context, ServiceProviderWithEndpointFlag value) => stringBuilderPool.GenerateClass(context, value.serviceProvider));
         context.RegisterSourceOutput(serviceProviderWithEndpointFlag, (SourceProductionContext context, ServiceProviderWithEndpointFlag value) => stringBuilderPool.GenerateInterface(context, value.serviceProvider));
