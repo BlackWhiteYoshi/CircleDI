@@ -8,6 +8,8 @@ namespace CircleDI.Generation;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class CircleDIGenerator : IIncrementalGenerator {
+    private readonly ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
+
     public void Initialize(IncrementalGeneratorInitializationContext context) {
         context.RegisterPostInitializationOutput(static (IncrementalGeneratorPostInitializationContext context) => {
             // attributes
@@ -31,7 +33,6 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             context.AddSource("Lock.g.cs", Attributes.LockPolyfill);
         });
 
-        ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
         context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute", stringBuilderPool);
         context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute`1", stringBuilderPool);
     }

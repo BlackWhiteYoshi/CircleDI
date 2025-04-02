@@ -14,6 +14,8 @@ namespace CircleDI.Blazor.Generation;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class CircleDIGenerator : IIncrementalGenerator {
+    private readonly ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
+
     public void Initialize(IncrementalGeneratorInitializationContext context) {
         context.RegisterPostInitializationOutput(static (IncrementalGeneratorPostInitializationContext context) => {
             // attributes
@@ -56,8 +58,6 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             static (GeneratorAttributeSyntaxContext context, CancellationToken _) => (INamedTypeSymbol)context.TargetSymbol
         );
 
-
-        ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
 
         context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute", componentList, stringBuilderPool);
         context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute`1", componentList, stringBuilderPool);

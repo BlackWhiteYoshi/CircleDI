@@ -14,6 +14,9 @@ namespace CircleDI.MinimalAPI.Generation;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class CircleDIGenerator : IIncrementalGenerator {
+    private readonly ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
+    private readonly List<Diagnostic> endpointErrorList = [];
+
     public void Initialize(IncrementalGeneratorInitializationContext context) {
         context.RegisterPostInitializationOutput(static (IncrementalGeneratorPostInitializationContext context) => {
             // attributes
@@ -40,11 +43,9 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         });
 
 
-        ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
         IncrementalValuesProvider<ServiceProviderWithEndpointFlag> serviceProviderList = context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute", stringBuilderPool);
         IncrementalValuesProvider<ServiceProviderWithEndpointFlag> genericServiceProviderList = context.RegisterServiceProviderAttribute("CircleDIAttributes.ServiceProviderAttribute`1", stringBuilderPool);
-        List<Diagnostic> endpointErrorList = [];
-
+        
 
         // find all endpoints
         IncrementalValueProvider<ImmutableArray<Endpoint>> endpointList = context.SyntaxProvider.ForAttributeWithMetadataName(
