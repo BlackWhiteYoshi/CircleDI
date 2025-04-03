@@ -120,6 +120,11 @@ public sealed class MyServiceImplementation {
 }
 ```
 
+It is also used to mark dependency parameters in the [constructor of the ScopedProvider](#custom-constructor).
+
+When the [\[SetsRequiredMembers\]](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.codeanalysis.setsrequiredmembersattribute) attribute is present on the constructor,
+the *required* keyword on properties is ignored and only [\[Dependency\]](TypeTables.md#dependencyattribute) marked properties are registered.
+
 Another usage is for Named Services.
 When at the [DependencyAttribute](TypeTables.md#dependencyattribute) the *Name*-property is specified, the service will be injected by name instead by service type.
 For in depth explanation see [Named Services](#named-services).

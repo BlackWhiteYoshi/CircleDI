@@ -198,12 +198,16 @@ public static class SyntaxNodeExtensions {
     /// <param name="implementation"></param>
     /// <param name="errorManager"></param>
     /// <returns></returns>
-    public static List<ConstructorDependency>? CreateConstructorDependencyList(this INamedTypeSymbol implementation, ErrorManager errorManager) {
+    public static List<ConstructorDependency>? CreateConstructorDependencyList(this INamedTypeSymbol implementation, ErrorManager errorManager, out bool hasSetsRequiredMembers) {
         IMethodSymbol? constructor = FindConstructor(implementation, errorManager);
-        if (constructor is not null)
+        if (constructor is not null) {
+            hasSetsRequiredMembers = constructor.GetAttribute("SetsRequiredMembersAttribute") is not null;
             return CreateConstructorDependencyList(constructor);
-        else
+        }
+        else {
+            hasSetsRequiredMembers = false;
             return null;
+        }
     }
 
 
@@ -215,7 +219,7 @@ public static class SyntaxNodeExtensions {
     /// <param name="implementation"></param>
     /// <param name="errorManager"></param>
     /// <returns></returns>
-    public static List<PropertyDependency>? CreatePropertyDependencyList(this INamedTypeSymbol implementation, ErrorManager errorManager) {
+    public static List<PropertyDependency>? CreatePropertyDependencyList(this INamedTypeSymbol implementation, bool hasSetsRequiredMembers, ErrorManager errorManager) {
         List<PropertyDependency> propertyDependencyList = [];
 
         for (INamedTypeSymbol? baseType = implementation; baseType is not null; baseType = baseType.BaseType) {
@@ -250,7 +254,7 @@ public static class SyntaxNodeExtensions {
                         hasAttribute = true;
                     }
                 }
-                else if (property.IsRequired) {
+                else if (!hasSetsRequiredMembers && property.IsRequired) {
                     if (property.Type is not INamedTypeSymbol namedType)
                         continue;
                     foreach (ITypeSymbol argument in namedType.TypeArguments)

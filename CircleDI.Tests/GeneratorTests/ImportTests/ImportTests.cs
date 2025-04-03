@@ -568,6 +568,81 @@ public sealed class ImportTests {
 
 
     [Test]
+    public async ValueTask AsServiceSingletonWithSetsRequiredMembers() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import<TestModule>]
+            public sealed partial class TestProvider;
+
+            [Transient<TestService>]
+            [method: System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+            public sealed class TestModule() {
+                public required string Str { private get; init; }
+            }
+
+            public sealed class TestService():
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Test]
+    public async ValueTask AsServiceScopeWithSetsRequiredMembers() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Import<TestModule>]
+            public sealed partial class TestProvider;
+
+            [Transient<TestService>]
+            public class TestModule {
+                [method: System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+                public sealed class Scope() {
+                    public required string Str { private get; init; }
+                }
+            }
+
+            public sealed class TestService():
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+
+    [Test]
     public async ValueTask OverwriteDefaultServiceSelf() {
         const string input = """
             using CircleDIAttributes;

@@ -536,11 +536,12 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                 List<ConstructorDependency> constructorDependencyList;
                 List<PropertyDependency> propertyDependencyList;
                 if (serviceProviderScope is not null) {
+                    bool hasSetsRequiredMembers = false;
                     constructorDependencyList = HasConstructorScope switch {
-                        true => serviceProviderScope.CreateConstructorDependencyList(ErrorManager) ?? [],
+                        true => serviceProviderScope.CreateConstructorDependencyList(ErrorManager, out hasSetsRequiredMembers) ?? [],
                         false => ConstructorParameterListScope // default constructorDependency
                     };
-                    propertyDependencyList = serviceProviderScope.CreatePropertyDependencyList(ErrorManager) ?? [];
+                    propertyDependencyList = serviceProviderScope.CreatePropertyDependencyList(hasSetsRequiredMembers, ErrorManager) ?? [];
                 }
                 else {
                     // default constructorDependency and no propertyDependencyList
@@ -661,7 +662,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         }
                         List<ConstructorDependency> constructorDependencyList = serivceConstructor!.CreateConstructorDependencyList();
 
-                        List<PropertyDependency>? propertyDependencyList = module.CreatePropertyDependencyList(serviceProvider.ErrorManager);
+                        bool hasSetsRequiredMembers = serivceConstructor.GetAttribute("SetsRequiredMembersAttribute") is not null;
+                        List<PropertyDependency>? propertyDependencyList = module.CreatePropertyDependencyList(hasSetsRequiredMembers, serviceProvider.ErrorManager);
                         if (propertyDependencyList is null)
                             return;
 
@@ -699,7 +701,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         }
                         List<ConstructorDependency> constructorDependencyList = serivceConstructorScope!.CreateConstructorDependencyList();
 
-                        List<PropertyDependency>? propertyDependencyList = moduleScope.CreatePropertyDependencyList(serviceProvider.ErrorManager);
+                        bool hasSetsRequiredMembers = serivceConstructorScope.GetAttribute("SetsRequiredMembersAttribute") is not null;
+                        List<PropertyDependency>? propertyDependencyList = moduleScope.CreatePropertyDependencyList(hasSetsRequiredMembers, serviceProvider.ErrorManager);
                         if (propertyDependencyList is null)
                             return;
 

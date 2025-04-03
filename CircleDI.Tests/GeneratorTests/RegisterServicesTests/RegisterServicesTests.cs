@@ -2117,6 +2117,115 @@ public sealed class RegisterServicesTests {
 
 
     [Test]
+    public async ValueTask RegisterServiceWithSetsRequiredMembers() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<ITestService, TestService>]
+            public sealed partial class TestProvider;
+
+            public interface ITestService;
+            public sealed class TestService : ITestService {
+                public required string Str { private get; init; }
+                
+                [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+                public TestService() { }
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Test]
+    public async ValueTask RegisterServiceConstructorDependenciesWithSetsRequiredMembers() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<ITestService, TestService>]
+            [Singleton<int>(Implementation = nameof(_myInt))]
+            public sealed partial class TestProvider {
+                private readonly int _myInt = 5;
+            }
+
+            public interface ITestService;
+            [method: System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+            public sealed class TestService(int number) : ITestService {
+                public required string Str { private get; init; }
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Test]
+    public async ValueTask RegisterServicePropertyDependencyWithSetsRequiredMembers() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<ITestService, TestService>]
+            public sealed partial class TestProvider;
+
+            public interface ITestService;
+            [method: System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+            public sealed class TestService() : ITestService {
+                [Dependency]
+                public required ITestService Self { private get; init; }
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+
+    [Test]
     public async ValueTask RegisterServiceThatDerivesFromBaseClass() {
         const string input = """
             using CircleDIAttributes;

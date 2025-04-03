@@ -595,6 +595,36 @@ public sealed class ServiceProviderTests {
     }
 
     [Test]
+    public async ValueTask ScopedProviderPropertyWithSetsRequiredMembers() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Transient<IScoped, Scoped>]
+            public sealed partial class TestProvider {
+                public sealed partial class Scope {
+                    public required IScoped Scoped { private get; init; }
+
+                    [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+                    public Scope() { }
+                }
+            }
+            public partial interface ITestProvider;
+
+            public interface IScoped;
+            public sealed class Scoped : IScoped;
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+
+        await Verify(sourceTextClass);
+    }
+
+    [Test]
     public async ValueTask ScopedProviderPropertyProviderDependency() {
         const string input = """
             using CircleDIAttributes;

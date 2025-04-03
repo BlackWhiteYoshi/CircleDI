@@ -274,8 +274,8 @@ public sealed class Service : IEquatable<Service> {
         // Implementation, ConstructorDependencyList, PropertyDependencyList
         if (implementationName is null) {
             Implementation = default;
-            ConstructorDependencyList = implementationType.CreateConstructorDependencyList(errorManager) ?? [];
-            PropertyDependencyList = implementationType.CreatePropertyDependencyList(errorManager) ?? [];
+            ConstructorDependencyList = implementationType.CreateConstructorDependencyList(errorManager, out bool hasSetsRequiredMembers) ?? [];
+            PropertyDependencyList = implementationType.CreatePropertyDependencyList(hasSetsRequiredMembers, errorManager) ?? [];
         }
         else {
             if (implementationName == "this") {
