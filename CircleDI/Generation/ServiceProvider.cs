@@ -386,9 +386,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
 
         // parameters on ScopedProviderAttribute
-        AttributeData? scopedProviderAttribute = serviceProvider.GetAttribute("ScopedProviderAttribute");
+        AttributeData? scopedProviderAttribute = serviceProvider.GetAttribute("ScopedProviderAttribute", ["CircleDIAttributes"]);
         if (serviceProviderScope is not null) {
-            AttributeData? scopedProviderAttributeNested = serviceProviderScope.GetAttribute("ScopedProviderAttribute");
+            AttributeData? scopedProviderAttributeNested = serviceProviderScope.GetAttribute("ScopedProviderAttribute", ["CircleDIAttributes"]);
             if (scopedProviderAttributeNested is not null) {
                 if (scopedProviderAttribute is null)
                     scopedProviderAttribute = scopedProviderAttributeNested;
@@ -662,7 +662,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         }
                         List<ConstructorDependency> constructorDependencyList = serivceConstructor!.CreateConstructorDependencyList();
 
-                        bool hasSetsRequiredMembers = serivceConstructor.GetAttribute("SetsRequiredMembersAttribute") is not null;
+                        bool hasSetsRequiredMembers = serivceConstructor.GetAttribute("SetsRequiredMembersAttribute", ["CodeAnalysis", "Diagnostics", "System"]) is not null;
                         List<PropertyDependency>? propertyDependencyList = module.CreatePropertyDependencyList(hasSetsRequiredMembers, serviceProvider.ErrorManager);
                         if (propertyDependencyList is null)
                             return;
@@ -701,7 +701,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                         }
                         List<ConstructorDependency> constructorDependencyList = serivceConstructorScope!.CreateConstructorDependencyList();
 
-                        bool hasSetsRequiredMembers = serivceConstructorScope.GetAttribute("SetsRequiredMembersAttribute") is not null;
+                        bool hasSetsRequiredMembers = serivceConstructorScope.GetAttribute("SetsRequiredMembersAttribute", ["CodeAnalysis", "Diagnostics", "System"]) is not null;
                         List<PropertyDependency>? propertyDependencyList = moduleScope.CreatePropertyDependencyList(hasSetsRequiredMembers, serviceProvider.ErrorManager);
                         if (propertyDependencyList is null)
                             return;

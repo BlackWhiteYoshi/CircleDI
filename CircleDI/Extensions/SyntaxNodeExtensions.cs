@@ -15,11 +15,28 @@ public static class SyntaxNodeExtensions {
     /// </summary>
     /// <param name="symbol"></param>
     /// <param name="name"></param>
+    /// <param name="namspace">namespace-list from back to front: e.g. System.Diagnostics.CodeAnalysis -> ["CodeAnalysis", "Diagnostics", "System"]</param>
     /// <returns></returns>
-    public static AttributeData? GetAttribute(this ISymbol symbol, string name) {
-        foreach (AttributeData attributeData in symbol.GetAttributes())
-            if (attributeData.AttributeClass?.Name == name)
-                return attributeData;
+    public static AttributeData? GetAttribute(this ISymbol symbol, string name, string[] namspace) {
+        break_continue:
+        foreach (AttributeData attributeData in symbol.GetAttributes()) {
+            if (attributeData.AttributeClass is not INamedTypeSymbol attribute)
+                continue;
+
+            if (attribute.Name != name)
+                continue;
+
+            INamespaceSymbol namespaceSymbol = attribute.ContainingNamespace;
+            foreach (string namespacePart in namspace) {
+                if (namespacePart != namespaceSymbol.Name)
+                    goto break_continue;
+                namespaceSymbol = namespaceSymbol.ContainingNamespace;
+            }
+            if (namespaceSymbol.Name != string.Empty)
+                continue;
+
+            return attributeData;
+        }
 
         return null;
     }
@@ -113,12 +130,12 @@ public static class SyntaxNodeExtensions {
                     availableConstructors++;
                     lastAvailableConstructor = ctor;
 
-                    if (ctor.GetAttribute("ConstructorAttribute") is not null)
+                    if (ctor.GetAttribute("ConstructorAttribute", ["CircleDIAttributes"]) is not null)
                         if (attributeConstructor is null)
                             attributeConstructor = ctor;
                         else {
-                            AttributeData firstAttribute = attributeConstructor.GetAttribute("ConstructorAttribute")!;
-                            AttributeData secondAttribute = ctor.GetAttribute("ConstructorAttribute")!;
+                            AttributeData firstAttribute = attributeConstructor.GetAttribute("ConstructorAttribute", ["CircleDIAttributes"])!;
+                            AttributeData secondAttribute = ctor.GetAttribute("ConstructorAttribute", ["CircleDIAttributes"])!;
                             errorManager.AddMultipleConstructorAttributesError(firstAttribute, secondAttribute, implementation, implementation.ToDisplayString());
                             return null;
                         }
@@ -155,7 +172,7 @@ public static class SyntaxNodeExtensions {
         List<ConstructorDependency> result = new(constructor.Parameters.Length);
 
         foreach (IParameterSymbol parameter in constructor.Parameters) {
-            if (parameter.GetAttribute("DependencyAttribute") is AttributeData attributeData)
+            if (parameter.GetAttribute("DependencyAttribute", ["CircleDIAttributes"]) is AttributeData attributeData)
                 if (attributeData.NamedArguments.GetArgument<string>("Name") is string dependencyName)
                     // AddNamedDependency
                     result.Add(new ConstructorDependency() {
@@ -201,7 +218,7 @@ public static class SyntaxNodeExtensions {
     public static List<ConstructorDependency>? CreateConstructorDependencyList(this INamedTypeSymbol implementation, ErrorManager errorManager, out bool hasSetsRequiredMembers) {
         IMethodSymbol? constructor = FindConstructor(implementation, errorManager);
         if (constructor is not null) {
-            hasSetsRequiredMembers = constructor.GetAttribute("SetsRequiredMembersAttribute") is not null;
+            hasSetsRequiredMembers = constructor.GetAttribute("SetsRequiredMembersAttribute", ["CodeAnalysis", "Diagnostics", "System"]) is not null;
             return CreateConstructorDependencyList(constructor);
         }
         else {
@@ -231,7 +248,7 @@ public static class SyntaxNodeExtensions {
                 string serviceName;
                 TypeName? serviceType;
                 bool hasAttribute;
-                if (property.GetAttribute("DependencyAttribute") is AttributeData propertyAttribute) {
+                if (property.GetAttribute("DependencyAttribute", ["CircleDIAttributes"]) is AttributeData propertyAttribute) {
                     if (property.SetMethod is null) {
                         errorManager.AddMissingSetAccessorError(property, baseType, property.ToDisplayString());
                         return null;
