@@ -1,0 +1,6 @@
+﻿<Solution>
+  <Project Path="CircleDI/CircleDI.csproj" />
+  <Project Path="CircleDI.Blazor/CircleDI.Blazor.csproj" />
+  <Project Path="CircleDI.MinimalAPI/CircleDI.MinimalAPI.csproj" />
+  <Project Path="CircleDI.Tests/CircleDI.Tests.csproj" />
+</Solution>
