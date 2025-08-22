@@ -277,7 +277,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -340,7 +340,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -405,7 +405,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -468,7 +468,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -532,7 +532,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -595,7 +595,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -662,7 +662,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestServiceM;
             public sealed class TestServiceM : ITestServiceM;
-            
+
             public sealed class Consumer([Dependency(Name = "TestService")] ITestService testService, [Dependency(Name = "TestService2")] ITestService testService2, ITestServiceM testServiceM);
 
             """;
@@ -950,7 +950,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -988,7 +988,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1024,7 +1024,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1062,7 +1062,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1099,7 +1099,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1137,7 +1137,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1173,7 +1173,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1211,7 +1211,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1248,7 +1248,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1286,7 +1286,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1322,7 +1322,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1360,7 +1360,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1400,7 +1400,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestServiceM;
             public sealed class TestServiceM : ITestServiceM;
-            
+
             public sealed class Consumer([Dependency(Name = "TestService")] ITestService testService, [Dependency(Name = "TestService2")] ITestService testService2, ITestServiceM testServiceM);
 
             """;
@@ -1749,7 +1749,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1787,7 +1787,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1823,7 +1823,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1861,7 +1861,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1898,7 +1898,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1936,7 +1936,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -1972,7 +1972,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -2010,7 +2010,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestService;
             public sealed class TestService : ITestService;
-            
+
             public sealed class Consumer(ITestService testService);
 
             """;
@@ -2050,7 +2050,7 @@ public sealed class RegisterServicesTests {
 
             public interface ITestServiceM;
             public sealed class TestServiceM : ITestServiceM;
-            
+
             public sealed class Consumer([Dependency(Name = "TestService")] ITestService testService, [Dependency(Name = "TestService2")] ITestService testService2, ITestServiceM testServiceM);
 
             """;
@@ -2130,7 +2130,7 @@ public sealed class RegisterServicesTests {
             public interface ITestService;
             public sealed class TestService : ITestService {
                 public required string Str { private get; init; }
-                
+
                 [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
                 public TestService() { }
             }

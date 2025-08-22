@@ -338,7 +338,7 @@ public sealed class BlazorTests {
         const string input = """
             using CircleDIAttributes;
 
-            namespace MyCode {                
+            namespace MyCode {
                 [Transient<MyComponent>(Name = "Overridden")]
                 [ComponentModule]
                 public readonly partial struct Module;

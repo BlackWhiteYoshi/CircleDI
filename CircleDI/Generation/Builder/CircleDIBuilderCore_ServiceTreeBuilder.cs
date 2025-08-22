@@ -13,7 +13,7 @@ namespace CircleDI.Generation;
 public partial struct CircleDIBuilderCore {
     /** struct public - file private
      * Only these methods below should be called outside of this file,
-     * all other members (fields and methods) are private to this file. 
+     * all other members (fields and methods) are private to this file.
      **/
     #region public
 

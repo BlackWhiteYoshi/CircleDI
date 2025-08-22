@@ -104,7 +104,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
     /// <param name="componentList"></param>
     private static void GenerateComponentAttributes(SourceProductionContext context, ObjectPool<StringBuilder> stringBuilderPool, INamedTypeSymbol componentModule, ImmutableArray<INamedTypeSymbol?> componentList) {
         // find all the services listed on the [ComponentModule]-class
-        
+
         ImmutableArray<AttributeData> attributes = componentModule.GetAttributes();
         List<string> moduleServiceList = new(attributes.Length - 1); // [ComponentAttribute] gets not added
 
