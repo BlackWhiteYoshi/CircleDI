@@ -10,7 +10,7 @@ using System.Diagnostics;
 using System.Text;
 using ServiceProviderWithExtra = (CircleDI.Generation.ServiceProvider serviceProvider, CircleDI.Blazor.Defenitions.BlazorServiceGeneration defaultServiceGeneration, bool AddRazorComponents);
 
-namespace CircleDI.Blazor.Generation;
+namespace CircleDI.Blazor;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class CircleDIGenerator : IIncrementalGenerator {

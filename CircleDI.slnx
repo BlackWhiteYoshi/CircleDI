@@ -1,4 +1,11 @@
 ﻿<Solution>
+  <Folder Name="/_SolutionFiles/">
+    <File Path="Directory.Build.props" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Core/">
+    <Project Path="Core/CircleDI.Core/CircleDI.Core.csproj" />
+  </Folder>
   <Project Path="CircleDI/CircleDI.csproj" />
   <Project Path="CircleDI.Blazor/CircleDI.Blazor.csproj" />
   <Project Path="CircleDI.MinimalAPI/CircleDI.MinimalAPI.csproj" />

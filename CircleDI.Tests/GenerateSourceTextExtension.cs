@@ -15,7 +15,7 @@ public static class GenerateSourceTextExtension {
     /// <param name="diagnostics"></param>
     /// <returns></returns>
     public static string[] GenerateSourceText(this string input, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics)
-        => GenerateSourceText<Generation.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
+        => GenerateSourceText<CircleDI.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
 
     /// <summary>
     /// <para>Takes source code as input and outputs the generated source code based on the given input with <see cref="Blazor.Generation.CircleDIGenerator"/>.</para>
@@ -26,7 +26,7 @@ public static class GenerateSourceTextExtension {
     /// <param name="diagnostics"></param>
     /// <returns></returns>
     public static string[] GenerateSourceTextBlazor(this string input, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics)
-        => GenerateSourceText<Blazor.Generation.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
+        => GenerateSourceText<CircleDI.Blazor.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
 
     /// <summary>
     /// <para>Takes source code as input and outputs the generated source code based on the given input with <see cref="MinimalAPI.Generation.CircleDIGenerator"/>.</para>
@@ -37,7 +37,7 @@ public static class GenerateSourceTextExtension {
     /// <param name="diagnostics"></param>
     /// <returns></returns>
     public static string[] GenerateSourceTextMinimalAPI(this string input, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics)
-        => GenerateSourceText<MinimalAPI.Generation.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
+        => GenerateSourceText<CircleDI.MinimalAPI.CircleDIGenerator>(input, out outputCompilation, out diagnostics);
 
 
     /// <summary>

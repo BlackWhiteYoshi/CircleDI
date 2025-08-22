@@ -1,10 +1,11 @@
 ﻿using CircleDI.Defenitions;
+using CircleDI.Generation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.ObjectPool;
 using System.Text;
 
-namespace CircleDI.Generation;
+namespace CircleDI;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class CircleDIGenerator : IIncrementalGenerator {

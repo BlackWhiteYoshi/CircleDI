@@ -2,6 +2,7 @@
 using CircleDI.Extensions;
 using CircleDI.Generation;
 using CircleDI.MinimalAPI.Defenitions;
+using CircleDI.MinimalAPI.Generation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.ObjectPool;
@@ -10,7 +11,7 @@ using System.Diagnostics;
 using System.Text;
 using ServiceProviderWithEndpointFlag = (CircleDI.Generation.ServiceProvider serviceProvider, bool endpointProvider);
 
-namespace CircleDI.MinimalAPI.Generation;
+namespace CircleDI.MinimalAPI;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class CircleDIGenerator : IIncrementalGenerator {
