@@ -88,7 +88,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         isEnabledByDefault: true);
 
 
-    public void AddModuleCircleError(TypeName serviceProvider, IEnumerable<string> circleList)
+    public void AddModuleCircleError(TypeName serviceProvider, string[] circleList)
         => ErrorList.Add(Diagnostic.Create(ModuleCircle, ServiceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), string.Join("' -> '", circleList)]));
 
     private static DiagnosticDescriptor ModuleCircle { get; } = new(
@@ -426,7 +426,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         isEnabledByDefault: true);
 
 
-    public void AddDependencyAmbiguousError(string serviceName, TypeName dependencyServiceIdentifier, IEnumerable<string> servicesWithSameType, bool isParameter)
+    public void AddDependencyAmbiguousError(string serviceName, TypeName dependencyServiceIdentifier, string[] servicesWithSameType, bool isParameter)
         => ErrorList.Add(Diagnostic.Create(DependencyAmbiguous, ServiceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName(), string.Join("\", \"", servicesWithSameType), isParameter ? "parameter" : "property"]));
 
     private static DiagnosticDescriptor DependencyAmbiguous { get; } = new(
@@ -450,7 +450,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         isEnabledByDefault: true);
 
 
-    public void AddDependencyCircleError(IEnumerable<string> circleList)
+    public void AddDependencyCircleError(string[] circleList)
         => ErrorList.Add(Diagnostic.Create(DependencyCircle, ServiceProviderAttribute.ToLocation(), [string.Join("' -> '", circleList)]));
 
     private static DiagnosticDescriptor DependencyCircle { get; } = new(
@@ -498,7 +498,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         isEnabledByDefault: true);
 
 
-    public void AddDependencyLifetimeAllServicesError(string serviceName, TypeName dependencyServiceIdentifier, IEnumerable<string> servicesWithSameType)
+    public void AddDependencyLifetimeAllServicesError(string serviceName, TypeName dependencyServiceIdentifier, List<string> servicesWithSameType)
         => ErrorList.Add(Diagnostic.Create(DependencyLifetimeAllServices, ServiceProviderAttribute.ToLocation(), [serviceName, dependencyServiceIdentifier.CreateFullyQualifiedName(), string.Join("\", \"", servicesWithSameType)]));
 
     private static DiagnosticDescriptor DependencyLifetimeAllServices { get; } = new(
@@ -522,7 +522,7 @@ public sealed class ErrorManager(AttributeData serviceProviderAttribute) {
         isEnabledByDefault: true);
 
 
-    public void AddScopedProviderAmbiguousError(TypeName serviceProvider, TypeName dependencyServiceIdentifier, IEnumerable<string> servicesWithSameType, bool isParameter)
+    public void AddScopedProviderAmbiguousError(TypeName serviceProvider, TypeName dependencyServiceIdentifier, string[] servicesWithSameType, bool isParameter)
         => ErrorList.Add(Diagnostic.Create(ScopedProviderAmbiguous, ServiceProviderAttribute.ToLocation(), [serviceProvider.CreateFullyQualifiedName(), dependencyServiceIdentifier.CreateFullyQualifiedName(), string.Join("\", \"", servicesWithSameType), isParameter ? "parameter" : "property"]));
 
     private static DiagnosticDescriptor ScopedProviderAmbiguous { get; } = new(

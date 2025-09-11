@@ -756,9 +756,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
             // check circle
             for (int index = 0; index < path.Count; index++)
                 if (SymbolEqualityComparer.Default.Equals(path[index], module)) {
-                    IEnumerable<string> modulesInCircle = path.Skip(index).Select((INamedTypeSymbol typeSymbol) => typeSymbol.ToDisplayString());
+                    string[] modulesInCircle = new string[path.Count - index + 1];
+                    for (int i = 0; i < modulesInCircle.Length - 1; i++)
+                        modulesInCircle[i] = path[index + i].ToDisplayString();
                     // append first item again as last item to illustrate the circle
-                    modulesInCircle = modulesInCircle.Concat(modulesInCircle.Take(1));
+                    modulesInCircle[^1] = modulesInCircle[0];
 
                     serviceProvider.ErrorManager.AddModuleCircleError(serviceProvider.Identifier, modulesInCircle);
                     return;
@@ -1012,6 +1014,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
         private readonly List<Dependency> path = [new ConstructorDependency() { Name = null!, ServiceType = null!, ServiceName = null!, HasAttribute = false, ByRef = default }];
         private readonly List<Cycle> cycleList = [];
+        private readonly List<string> noLifetimeMatchList = []; // if multiple matches but all have no compatible lifetime
 
 
         public readonly void InitNode(Service service) {
@@ -1048,7 +1051,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                             dependencyServiceInitialized:;
                         }
                         else {
-                            IEnumerable<string> noLifetimeMatchList = []; // if multiple matches but all have no compatible lifetime
+                            noLifetimeMatchList.Clear();
                             int missingIndex = -1; // index of sorted list where the closed service should be located
                             List<Service> currentServiceList = serviceProvider.SortedServiceList;
                             // 2 iterations, first with *SortedServiceList*, second with *GenericSortedServiceList*
@@ -1059,7 +1062,7 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                         if (iteration == 0)
                                             break;
 
-                                        if (noLifetimeMatchList.Any()) {
+                                        if (noLifetimeMatchList.Count > 0) {
                                             serviceProvider.ErrorManager.AddDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, noLifetimeMatchList);
                                             return;
                                         }
@@ -1108,7 +1111,8 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                                             if (serviceIndex == -1) {
                                                 // no match
-                                                noLifetimeMatchList = noLifetimeMatchList.Concat(currentServiceList.Skip(index).Take(count).Select((Service service) => service.Name));
+                                                for (int i = 0; i < count; i++)
+                                                    noLifetimeMatchList.Add(currentServiceList[index + i].Name);
                                                 goto case 0;
                                             }
 
@@ -1118,7 +1122,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
 
                                         error:
                                         {
-                                            IEnumerable<string> servicesWithSameType = currentServiceList.Skip(index).Take(count).Select((Service service) => service.Name);
+                                            string[] servicesWithSameType = new string[count];
+                                            for (int i = 0; i < count; i++)
+                                                servicesWithSameType[i] = currentServiceList[index + i].Name;
                                             bool isParameter = dependency is ConstructorDependency;
 
                                             if (ReferenceEquals(service, serviceProvider.CreateScope))
@@ -1176,10 +1182,18 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                             }
                                         // else
                                         {
-                                            IEnumerable<string> servicesInCircle = path.Skip(cycleList[cycleIndex].cycleEnd - 1)
-                                                .Concat(cycleList[cycleIndex].shortcircuitList.Skip(shortcircuitIndex + 1)).Select((Dependency edge) => edge.Service!.Name);
+                                            int shortcircuitEnd = shortcircuitIndex + 1;
+                                            int cycleEnd = cycleList[cycleIndex].cycleEnd - 1;
+                                            int firstListCount = path.Count - cycleEnd;
+                                            int secondListCount = cycleList[cycleIndex].shortcircuitList.Length - shortcircuitEnd;
+
+                                            string[] servicesInCircle = new string[firstListCount + secondListCount + 1];
+                                            for (int i = 0; i < firstListCount; i++)
+                                                servicesInCircle[i] = path[cycleEnd + i].Service!.Name;
+                                            for (int i = 0; i < secondListCount; i++)
+                                                servicesInCircle[firstListCount + i] = cycleList[cycleIndex].shortcircuitList[shortcircuitEnd + i].Service!.Name;
                                             // append first item again as last item to illustrate the circle
-                                            servicesInCircle = servicesInCircle.Concat(servicesInCircle.Take(1));
+                                            servicesInCircle[^1] = servicesInCircle[0];
 
                                             serviceProvider.ErrorManager.AddDependencyCircleError(servicesInCircle);
                                             return;
@@ -1211,7 +1225,10 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                     }
                                 // else
                                 {
-                                    IEnumerable<string> servicesInCircle = path.Skip(index - 1).Select((Dependency edge) => edge.Service!.Name);
+                                    index--;
+                                    string[] servicesInCircle = new string[path.Count - index];
+                                    for (int i = 0; i < servicesInCircle.Length; i++)
+                                        servicesInCircle[i] = path[index + i].Service!.Name;
                                     serviceProvider.ErrorManager.AddDependencyCircleError(servicesInCircle);
                                     return;
                                 }

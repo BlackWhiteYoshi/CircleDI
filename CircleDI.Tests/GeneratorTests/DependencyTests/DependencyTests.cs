@@ -1140,6 +1140,7 @@ public sealed class DependencyTests {
             [Singleton<Service1>]
             [Singleton<Service2>]
             [Transient<Service3>]
+            [Transient<Service4>]
             public sealed partial class TestProvider;
 
 
@@ -1150,7 +1151,9 @@ public sealed class DependencyTests {
 
             public sealed class Service2(Service3 Service3);
 
-            public sealed class Service3(Service1 Service1);
+            public sealed class Service3(Service4 Service4);
+
+            public sealed class Service4(Service1 Service1);
 
             """;
 
@@ -1158,6 +1161,6 @@ public sealed class DependencyTests {
 
         await Assert.That(diagnostics).HasSingleItem();
         await Assert.That(diagnostics[0].Id).IsEqualTo("CDI033");
-        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Circular dependency unresolvable: ['Service1' -> 'Service3' -> 'Service1']. Only singleton and scoped dependencies injected as properties can be resolved circular");
+        await Assert.That(diagnostics[0].GetMessage()).IsEqualTo("Circular dependency unresolvable: ['Service1' -> 'Service3' -> 'Service4' -> 'Service1']. Only singleton and scoped dependencies injected as properties can be resolved circular");
     }
 }
