@@ -3,6 +3,14 @@
     <File Path="Directory.Build.props" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/_SolutionFiles/Readme_md/">
+    <File Path="Readme_md/Blazor.md" />
+    <File Path="Readme_md/ComparisonToServiceCollection.md" />
+    <File Path="Readme_md/ConfigurationAndCustomization.md" />
+    <File Path="Readme_md/MinimalAPI.md" />
+    <File Path="Readme_md/SourceCodeGenerationOutput.md" />
+    <File Path="Readme_md/TypeTables.md" />
+  </Folder>
   <Folder Name="/Core/">
     <Project Path="Core/CircleDI.Core/CircleDI.Core.csproj" />
   </Folder>
