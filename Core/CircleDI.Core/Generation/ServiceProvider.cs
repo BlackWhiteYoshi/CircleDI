@@ -1062,6 +1062,9 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                         if (iteration == 0)
                                             break;
 
+                                        if (dependency.DefaultValue != string.Empty)
+                                            goto _continue;
+
                                         if (noLifetimeMatchList.Count > 0) {
                                             serviceProvider.ErrorManager.AddDependencyLifetimeAllServicesError(service.Name, dependency.ServiceType, noLifetimeMatchList);
                                             return;
@@ -1276,10 +1279,11 @@ public sealed class ServiceProvider : IEquatable<ServiceProvider> {
                                     service.Lifetime = ServiceLifetime.TransientScoped;
                                 break;
                         }
+                        _continue:;
                     }
                     finally {
                         path.RemoveAt(path.Count - 1);
-                        Debug.Assert(serviceProvider.ErrorManager.ErrorList.Count > 0 || dependency.Service is not null);
+                        Debug.Assert(serviceProvider.ErrorManager.ErrorList.Count > 0 || dependency.DefaultValue != string.Empty || dependency.Service is not null);
                     }
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using CircleDI.Defenitions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
 namespace CircleDI.Extensions;
@@ -172,6 +173,14 @@ public static class SyntaxNodeExtensions {
         List<ConstructorDependency> result = new(constructor.Parameters.Length);
 
         foreach (IParameterSymbol parameter in constructor.Parameters) {
+            string defaultValue = string.Empty;
+            if (parameter.HasExplicitDefaultValue)
+                foreach (SyntaxReference syntaxReference in parameter.DeclaringSyntaxReferences)
+                    if (syntaxReference.GetSyntax() is ParameterSyntax { Default: EqualsValueClauseSyntax equalsSyntax }) {
+                        defaultValue = equalsSyntax.Value.ToFullString();
+                        break;
+                    }
+
             if (parameter.GetAttribute("DependencyAttribute", ["CircleDIAttributes"]) is AttributeData attributeData)
                 if (attributeData.NamedArguments.GetArgument<string>("Name") is string dependencyName)
                     // AddNamedDependency
@@ -180,16 +189,17 @@ public static class SyntaxNodeExtensions {
                         ServiceName = dependencyName,
                         ServiceType = null,
                         HasAttribute = true,
-                        ByRef = parameter.RefKind
+                        ByRef = parameter.RefKind,
+                        DefaultValue = defaultValue
                     });
                 else
-                    AddTypedDependency(hasAttribute: true, parameter, result);
+                    AddTypedDependency(parameter, defaultValue, hasAttribute: true, result);
             else
-                AddTypedDependency(hasAttribute: false, parameter, result);
+                AddTypedDependency(parameter, defaultValue, hasAttribute: false, result);
 
-            static void AddTypedDependency(bool hasAttribute, IParameterSymbol parameter, List<ConstructorDependency> result) {
+            static void AddTypedDependency(IParameterSymbol parameter, string defaultValue, bool hasAttribute, List< ConstructorDependency> result) {
                 if (parameter.Type is not INamedTypeSymbol namedType)
-                    return;
+                    return; // no error needed, already syntax error
 
                 foreach (ITypeSymbol argument in namedType.TypeArguments)
                     if (argument is IErrorTypeSymbol) // unbound is not allowed in this context -> invalid input
@@ -200,7 +210,8 @@ public static class SyntaxNodeExtensions {
                     ServiceName = string.Empty,
                     ServiceType = new TypeName(namedType),
                     HasAttribute = hasAttribute,
-                    ByRef = parameter.RefKind
+                    ByRef = parameter.RefKind,
+                    DefaultValue = defaultValue
                 });
             }
         }
@@ -244,6 +255,13 @@ public static class SyntaxNodeExtensions {
             foreach (ISymbol member in baseType.GetMembers()) {
                 if (member is not IPropertySymbol { Name.Length: > 0 } property)
                     continue;
+
+                string defaultValue = string.Empty;
+                foreach (SyntaxReference syntaxReference in property.DeclaringSyntaxReferences)
+                    if (syntaxReference.GetSyntax() is PropertyDeclarationSyntax { Initializer: EqualsValueClauseSyntax equalsSyntax }) {
+                        defaultValue = equalsSyntax.Value.ToFullString();
+                        break;
+                    }
 
                 string serviceName;
                 TypeName? serviceType;
@@ -297,6 +315,7 @@ public static class SyntaxNodeExtensions {
                     IsInit = property.SetMethod.IsInitOnly,
                     ImplementationBaseName = implementationBaseName,
                     IsRequired = property.IsRequired,
+                    DefaultValue = defaultValue
                 });
             }
         }

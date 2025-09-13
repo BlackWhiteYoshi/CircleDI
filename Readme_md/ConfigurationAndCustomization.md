@@ -16,6 +16,7 @@
   - [Custom Constructor](#custom-constructor)
   - [Custom Dispose](#custom-dispose)
   - [Struct Types and Native/Built-in Types](#struct-types-and-nativebuilt-in-types)
+  - [Default Values](#default-values)
 - [Workarounds for not supported Features](#workarounds-for-not-supported-features)
   - [Async Constructor](#async-constructor)
   - [Decoration](#decoration)
@@ -689,6 +690,29 @@ public interface IService;
 public sealed class Service(ref StructService structService) : IService;
 
 public struct StructService;
+```
+
+
+<br></br>
+### Default Values
+
+If no matching service is registered and a dependency has a default value specified, it will take that value.  
+An Exception are [named services](#named-services). If a dependency is requested with a specific service, that service must be available and the default value is not taken as fallback.
+
+The parameter default value can be any expression and is not evaluated.
+Instead, that expression is taken as is with no further checks.
+So, make sure when using any members (e.g. a method call) as default Value, that these members are accessible and fully qualified,
+so that the expression is also a valid expression in the dependency container.
+
+```csharp
+[ServiceProvider]
+[Singleton<IService, Service>]
+public sealed partial class MyProvider;
+
+public interface IService;
+public sealed class Service(string optionalKey = "") : IService {
+    public required int Number { private get; init; } = 0;
+}
 ```
 
 

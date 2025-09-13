@@ -187,6 +187,7 @@ public class MyService : IMyService {
   - [Custom Constructor](Readme_md/ConfigurationAndCustomization.md#custom-constructor)
   - [Custom Dispose](Readme_md/ConfigurationAndCustomization.md#custom-dispose)
   - [Struct Types and Native/Built-in Types](Readme_md/ConfigurationAndCustomization.md#struct-types-and-nativebuilt-in-types)
+  - [Default Values](Readme_md/ConfigurationAndCustomization.md#default-values)
 - [Workarounds for not supported Features](Readme_md/ConfigurationAndCustomization.md#workarounds-for-not-supported-features)
   - [Async Constructor](Readme_md/ConfigurationAndCustomization.md#async-constructor)
   - [Decoration](Readme_md/ConfigurationAndCustomization.md#decoration)

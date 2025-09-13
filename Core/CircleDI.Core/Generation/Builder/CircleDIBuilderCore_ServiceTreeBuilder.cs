@@ -38,7 +38,8 @@ public partial struct CircleDIBuilderCore {
 
                     // init all circularDependency services - must be a for loop -> while iterating items could be added
                     for (int i = 0; i < circularStack.Count; i++)
-                        AppendCounstructorServiceTreeRecursion(circularStack[i].dependency.Service!);
+                        if (circularStack[i].dependency.Service is Service dependencyService)
+                            AppendCounstructorServiceTreeRecursion(dependencyService);
                 }
 
             if (builder.Length > initialLength)
@@ -69,13 +70,13 @@ public partial struct CircleDIBuilderCore {
         Span<int> transientNumberProperty = transientNumberList[service.ConstructorDependencyList.Count..];
         for (int i = 0; i < service.ConstructorDependencyList.Count; i++) {
             ConstructorDependency dependency = service.ConstructorDependencyList[i];
-            if (dependency.HasAttribute)
-                transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service!, 0, 0, 0);
+            if (dependency.HasAttribute && dependency.Service is not null)
+                transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service, 0, 0, 0);
         }
         for (int i = 0; i < service.PropertyDependencyList.Count; i++) {
             PropertyDependency dependency = service.PropertyDependencyList[i];
-            if (dependency.HasAttribute)
-                transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service!, 0, 0, 0);
+            if (dependency.HasAttribute && dependency.Service is not null)
+                transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service, 0, 0, 0);
         }
 
         AppendDisposeStackLazy(transientDisposeStack, 0, DISPOSE_LIST, appendServiceProviderField: false);
@@ -205,24 +206,28 @@ public partial struct CircleDIBuilderCore {
         Span<int> transientNumberProperty = transientNumberList[service.ConstructorDependencyList.Count..];
         for (int i = 0; i < service.ConstructorDependencyList.Count; i++) {
             ConstructorDependency dependency = service.ConstructorDependencyList[i];
-            if (isScopeProvider && dependency.Service!.Lifetime is ServiceLifetime.Singleton) {
-                if (dependency.Service.CreationTimeTransitive is CreationTiming.Lazy)
-                    transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
-            }
-            else
-                transientNumberConstructor[i] = AppendCounstructorServiceTreeRecursion(dependency.Service!);
+
+            if (dependency.Service is not null)
+                if (isScopeProvider && dependency.Service.Lifetime is ServiceLifetime.Singleton) {
+                    if (dependency.Service.CreationTimeTransitive is CreationTiming.Lazy)
+                        transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
+                }
+                else
+                    transientNumberConstructor[i] = AppendCounstructorServiceTreeRecursion(dependency.Service);
         }
         for (int i = 0; i < service.PropertyDependencyList.Count; i++) {
             PropertyDependency dependency = service.PropertyDependencyList[i];
-            if (!dependency.IsCircular)
-                if (isScopeProvider && dependency.Service!.Lifetime is ServiceLifetime.Singleton) {
-                    if (dependency.Service.CreationTimeTransitive is CreationTiming.Lazy)
-                        transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
-                }
+
+            if (dependency.Service is not null)
+                if (!dependency.IsCircular)
+                    if (isScopeProvider && dependency.Service.Lifetime is ServiceLifetime.Singleton) {
+                        if (dependency.Service.CreationTimeTransitive is CreationTiming.Lazy)
+                            transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
+                    }
+                    else
+                        transientNumberProperty[i] = AppendCounstructorServiceTreeRecursion(dependency.Service);
                 else
-                    transientNumberProperty[i] = AppendCounstructorServiceTreeRecursion(dependency.Service!);
-            else
-                circularStack.Add((service, transientNumber, dependency));
+                    circularStack.Add((service, transientNumber, dependency));
         }
 
         service.TreeState.init = serviceProvider.DependencyTreeFlag;
@@ -322,19 +327,23 @@ public partial struct CircleDIBuilderCore {
         Span<int> transientNumberProperty = transientNumberList[service.ConstructorDependencyList.Count..];
         for (int i = 0; i < service.ConstructorDependencyList.Count; i++) {
             ConstructorDependency dependency = service.ConstructorDependencyList[i];
-            transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
+
+            if (dependency.Service is not null)
+                transientNumberConstructor[i] = AppendLazyServiceTreeRecursion(dependency.Service, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
         }
 
         int circularNotInitDependencyListIndex = circularNotInitList.Count;
         for (int i = 0; i < service.PropertyDependencyList.Count; i++) {
             PropertyDependency dependency = service.PropertyDependencyList[i];
-            if (!dependency.IsCircular)
-                transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service!, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
-            else
-                if (dependency.Service!.CreationTimeTransitive is CreationTiming.Constructor || dependency.Service.TreeState.init.HasFlag(serviceProvider.DependencyTreeFlag))
-                    circularStack.Add((service, transientNumber, dependency));
+
+            if (dependency.Service is not null)
+                if (!dependency.IsCircular)
+                    transientNumberProperty[i] = AppendLazyServiceTreeRecursion(dependency.Service, circularStack.Count, transientDisposeStack.Count, transientAsyncDisposeStack.Count);
                 else
-                    circularNotInitList.Add((service, transientNumber, dependency));
+                    if (dependency.Service.CreationTimeTransitive is CreationTiming.Constructor || dependency.Service.TreeState.init.HasFlag(serviceProvider.DependencyTreeFlag))
+                        circularStack.Add((service, transientNumber, dependency));
+                    else
+                        circularNotInitList.Add((service, transientNumber, dependency));
         }
 
         int currentTransientNumber = AppendServiceCreation(service, transientNumberConstructor, transientNumberProperty);
@@ -583,7 +592,7 @@ public partial struct CircleDIBuilderCore {
             for (int i = 0; i < service.ConstructorDependencyList.Count; i++) {
                 ConstructorDependency dependency = service.ConstructorDependencyList[i];
 
-                if (dependency.Service!.IsRefable && !keyword.HasFlag(TypeKeyword.Struct))
+                if (dependency.Service?.IsRefable is true && !keyword.HasFlag(TypeKeyword.Struct))
                     builder.Append(dependency.ByRef.AsString());
 
                 AppendDependencyIdentifier(dependency, numberList[i]);
@@ -613,7 +622,7 @@ public partial struct CircleDIBuilderCore {
                     builder.AppendFirstLower(dependency.Name);
                 }
                 else {
-                    if (dependency.Service!.IsRefable && !keyword.HasFlag(TypeKeyword.Struct))
+                    if (dependency.Service?.IsRefable is true && !keyword.HasFlag(TypeKeyword.Struct))
                         builder.Append(dependency.ByRef.AsString());
                     AppendDependencyIdentifier(dependency, numberList[i]);
                 }
@@ -709,12 +718,14 @@ public partial struct CircleDIBuilderCore {
     /// <param name="dependency"></param>
     /// <param name="transientNumber"></param>
     private void AppendDependencyIdentifier(Dependency dependency, int transientNumber)
-        => _ = dependency.Service!.Lifetime switch {
+        => _ = dependency.Service?.Lifetime switch {
+            null                                                                                                                                                                                => builder.Append(dependency.DefaultValue),
             ServiceLifetime.Singleton when isScopeProvider && dependency.Service.Implementation.Name == "this"                                                                                  => builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}"),
             ServiceLifetime.Singleton when isScopeProvider                                                                                                                                      => builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}.{dependency.Service.AsServiceField()}"),
             ServiceLifetime.Scoped when dependency.Service.Implementation.Type != MemberType.None && !dependency.Service.Implementation.IsScoped && !dependency.Service.Implementation.IsStatic => builder.AppendInterpolation($"_{serviceProvider.Identifier.Name.AsFirstLower()}.{dependency.Service.AsServiceField()}"),
             ServiceLifetime.Singleton or ServiceLifetime.Scoped                                                                                                                                 => builder.AppendServiceField(dependency.Service),
             _ when dependency.Service.Lifetime.HasFlag(ServiceLifetime.Transient)                                                                                                               => builder.AppendInterpolation($"{dependency.Service.Name.AsFirstLower()}_{transientNumber}"),
-            _ /* when dependency.Service!.Lifetime.HasFlag(ServiceLifetime.Delegate) */                                                                                                         => builder.AppendServiceGetter(dependency.Service)
+            _ when dependency.Service.Lifetime.HasFlag(ServiceLifetime.Delegate)                                                                                                                => builder.AppendServiceGetter(dependency.Service),
+            _ => throw new Exception("Not Reachable! The method AppendDependencyIdentifier(Dependency, int) in CircleDIBuilderCore_TreeBuilder has a flaw.")
         };
 }

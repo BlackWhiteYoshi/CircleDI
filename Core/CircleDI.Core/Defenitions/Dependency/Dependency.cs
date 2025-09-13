@@ -42,7 +42,16 @@ public abstract class Dependency {
     /// <para>If this is false, it has no attribute to name the service, so <see cref="ServiceType"/> must be set.</para>
     /// </summary>
     [MemberNotNullWhen(false, nameof(ServiceType))]
-    public required bool HasAttribute { get; init; } = false;
+    public required bool HasAttribute { get; init; }
+
+    /// <summary>
+    /// <para>
+    /// Contains the default value as written string.<br />
+    /// Basically the expression after the "=" symbol.
+    /// </para>
+    /// <para>An empty string means no defaultValue.</para>
+    /// </summary>
+    public string DefaultValue { get; init; } = string.Empty;
 
 
     #region Equals
@@ -56,6 +65,8 @@ public abstract class Dependency {
             return false;
         if (HasAttribute != other.HasAttribute)
             return false;
+        if (DefaultValue != other.DefaultValue)
+            return false;
 
         return true;
     }
@@ -65,6 +76,7 @@ public abstract class Dependency {
         hashCode = Combine(hashCode, ServiceName.GetHashCode());
         hashCode = Combine(hashCode, ServiceType?.GetHashCode() ?? 0);
         hashCode = Combine(hashCode, HasAttribute.GetHashCode());
+        hashCode = Combine(hashCode, DefaultValue.GetHashCode());
         return hashCode;
 
 

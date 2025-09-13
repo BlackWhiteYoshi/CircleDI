@@ -2226,6 +2226,197 @@ public sealed class RegisterServicesTests {
 
 
     [Test]
+    public async ValueTask RegisterServiceWithDependencyDefaultValue_Null() {
+        string input = $"""
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>]
+            public sealed partial class TestProvider;
+
+            public sealed class TestService(string? dependency = null);
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Test]
+    public async ValueTask RegisterServiceWithDependencyDefaultValue_Default() {
+        string input = $"""
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>]
+            public sealed partial class TestProvider;
+
+            public sealed class TestService(System.Guid dependency = default);
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Test]
+    public async ValueTask RegisterServiceWithDependencyDefaultValue_String() {
+        string input = $"""
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>]
+            public sealed partial class TestProvider;
+
+            public sealed class TestService(string dependency = "something\n");
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Test]
+    public async ValueTask RegisterServiceWithDependencyDefaultValue_Bool() {
+        string input = $"""
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>]
+            public sealed partial class TestProvider;
+
+            public sealed class TestService(bool dependency = true);
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Test]
+    public async ValueTask RegisterServiceWithDependencyDefaultValue_Number() {
+        string input = $"""
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>]
+            public sealed partial class TestProvider;
+
+            public sealed class TestService(ulong dependency = 1L);
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+    [Test]
+    public async ValueTask RegisterServiceWithPropertyDependencyDefaultValue() {
+        const string input = """
+            using CircleDIAttributes;
+
+            namespace MyCode;
+
+            [ServiceProvider]
+            [Singleton<TestService>]
+            public sealed partial class TestProvider;
+
+            public sealed class TestService {
+                public required bool Truly { private get; init; } = true;
+                public required bool Falsy { private get; init; } = false;
+                public required string? Nully { private get; init; } = null;
+                public required Guid Id { private get; init; } = default;
+                public required char Character { private get; init; } = 'A';
+                public required string Str { private get; init; } = "something";
+                public required ReadOnlySpan<byte> Utf8Str { private get; init; } = "something"u8;
+                public required int Number { private get; init; } = 5;
+                public required ulong BigNumber { private get; init; } = 8L;
+            }
+
+            """;
+
+        string[] sourceTexts = input.GenerateSourceText(out _, out _);
+        string sourceTextClass = sourceTexts[^2];
+        string sourceTextInterface = sourceTexts[^1];
+
+        await Verify($"""
+            {sourceTextClass}
+
+            ---------
+            Interface
+            ---------
+
+            {sourceTextInterface}
+            """);
+    }
+
+
+    [Test]
     public async ValueTask RegisterServiceThatDerivesFromBaseClass() {
         const string input = """
             using CircleDIAttributes;

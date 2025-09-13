@@ -248,7 +248,10 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             if (endpoint.AsService.ConstructorDependencyList.Count > 0) {
                 foreach (ConstructorDependency parameter in endpoint.AsService.ConstructorDependencyList)
                     if (parameter.HasAttribute)
-                        builder.AppendInterpolation($"{parameter.ByRef.AsString()}{endpointServiceProvider!.Identifier.Name.AsFirstLower()}.{parameter.Service!.AsServiceGetter()}, ");
+                        if (parameter.Service is not null)
+                            builder.AppendInterpolation($"{parameter.ByRef.AsString()}{endpointServiceProvider!.Identifier.Name.AsFirstLower()}.{parameter.Service.AsServiceGetter()}, ");
+                        else
+                            builder.Append(parameter.DefaultValue);
                     else
                         builder.AppendInterpolation($"{parameter.Name}, ");
                 builder.Length -= 2; // remove ", "
