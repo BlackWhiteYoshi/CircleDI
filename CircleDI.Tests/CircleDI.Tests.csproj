@@ -9,11 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="AcceptAllTests/AcceptAllTests.cs" />
+    <Content Include="AcceptAllTests/AcceptAllTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="TUnit" Version="0.57.65" />
     <PackageReference Include="Verify.TUnit" Version="30.11.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0" PrivateAssets="all" />
-
   </ItemGroup>
 
   <ItemGroup>
