@@ -1,4 +1,4 @@
-# CircleDI
+﻿# CircleDI
 
 The world only full-power circular Service Provider.
 
@@ -367,3 +367,5 @@ By defining this constant in your referencing project, you prevent one generatio
   - changed lock type to System.Threading.Lock when available
 - 1.1
   - added polyfill for System.Threading.Lock for .NET8 backwards compatibility
+- 1.2
+  - added Default Values as dependency fallback
