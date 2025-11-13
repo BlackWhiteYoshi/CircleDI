@@ -15,7 +15,7 @@ namespace CircleDI.MinimalAPI;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class CircleDIGenerator : IIncrementalGenerator {
-    private readonly ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
+    private readonly ObjectPool<StringBuilder> stringBuilderPool = ObjectPool<StringBuilder>.CreateDefault();
     private readonly List<Diagnostic> endpointErrorList = [];
 
     public void Initialize(IncrementalGeneratorInitializationContext context) {
@@ -213,7 +213,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
 
                     if (endpoint.ParameterAttributesList[i]!.Length > 0) {
                         foreach (ParameterAttribute attribute in endpoint.ParameterAttributesList[i]!) {
-                            builder.AppendInterpolation($"[global::{attribute.Name.AsClosedFullyQualified()}");
+                            builder.AppendInterpolation($"[global::{attribute.Name.AsClosedFullyQualified}");
 
                             if (attribute.ParameterList.Length + attribute.PropertyList.Length > 0) {
                                 builder.Append('(');
@@ -231,11 +231,11 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                         }
                         builder.Append(' ');
                     }
-                    builder.AppendInterpolation($"global::{parameter.ServiceType.AsClosedFullyQualified()} {parameter.Name}, ");
+                    builder.AppendInterpolation($"global::{parameter.ServiceType.AsClosedFullyQualified} {parameter.Name}, ");
                 }
 
                 if (hasDependencyParameter)
-                    builder.AppendInterpolation($"global::{serviceTypeScopeProvider!.AsOpenFullyQualified()} {endpointServiceProvider!.Identifier.Name.AsFirstLower()}");
+                    builder.AppendInterpolation($"global::{serviceTypeScopeProvider!.AsOpenFullyQualified} {endpointServiceProvider!.Identifier.Name.AsFirstLower}");
                 else
                     builder.Length -= 2; // remove ", "
             }
@@ -249,7 +249,7 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
                 foreach (ConstructorDependency parameter in endpoint.AsService.ConstructorDependencyList)
                     if (parameter.HasAttribute)
                         if (parameter.Service is not null)
-                            builder.AppendInterpolation($"{parameter.ByRef.AsString()}{endpointServiceProvider!.Identifier.Name.AsFirstLower()}.{parameter.Service.AsServiceGetter()}, ");
+                            builder.AppendInterpolation($"{parameter.ByRef.AsString}{endpointServiceProvider!.Identifier.Name.AsFirstLower}.{parameter.Service.AsServiceGetter}, ");
                         else
                             builder.Append(parameter.DefaultValue);
                     else

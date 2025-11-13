@@ -19,13 +19,13 @@ public partial struct CircleDIBuilderCore {
         {
             int i = 1;
             if (isScopeProvider)
-                builder.AppendInterpolation($"{indent}private {readonlyStr}global::{serviceProvider.Identifier.AsOpenFullyQualified()} _{serviceProvider.Identifier.Name.AsFirstLower()};\n");
+                builder.AppendInterpolation($"{indent}private {readonlyStr}global::{serviceProvider.Identifier.AsOpenFullyQualified} _{serviceProvider.Identifier.Name.AsFirstLower};\n");
             else
                 i = 0;
 
             for (; i < constructorParameterList.Count; i++)
                 // ConstructorParameterList items have always serviceType set
-                builder.AppendInterpolation($"{indent}private {readonlyStr}global::{constructorParameterList[i].ServiceType!.AsClosedFullyQualified()} _{constructorParameterList[i].Name.AsFirstLower()};\n");
+                builder.AppendInterpolation($"{indent}private {readonlyStr}global::{constructorParameterList[i].ServiceType!.AsClosedFullyQualified} _{constructorParameterList[i].Name.AsFirstLower};\n");
 
             if (i > 0)
                 builder.Append('\n');
@@ -47,7 +47,7 @@ public partial struct CircleDIBuilderCore {
         builder.Append('(');
         if (constructorParameterList.Count > 0) {
             foreach (Dependency parameter in constructorParameterList)
-                builder.AppendInterpolation($"global::{parameter.ServiceType!.AsClosedFullyQualified()} {parameter.Name.AsFirstLower()}, ");
+                builder.AppendInterpolation($"global::{parameter.ServiceType!.AsClosedFullyQualified} {parameter.Name.AsFirstLower}, ");
             builder.Length -= 2;
         }
         builder.Append(") {\n");
@@ -57,14 +57,14 @@ public partial struct CircleDIBuilderCore {
             int i = 1;
             if (isScopeProvider)
                 if (serviceProvider.HasInterface)
-                    builder.AppendInterpolation($"{indent}_{serviceProvider.Identifier.Name.AsFirstLower()} = (global::{serviceProvider.Identifier.AsOpenFullyQualified()}){serviceProvider.Identifier.Name.AsFirstLower()};\n");
+                    builder.AppendInterpolation($"{indent}_{serviceProvider.Identifier.Name.AsFirstLower} = (global::{serviceProvider.Identifier.AsOpenFullyQualified}){serviceProvider.Identifier.Name.AsFirstLower};\n");
                 else
-                    builder.AppendInterpolation($"{indent}_{serviceProvider.Identifier.Name.AsFirstLower()} = {serviceProvider.Identifier.Name.AsFirstLower()};\n");
+                    builder.AppendInterpolation($"{indent}_{serviceProvider.Identifier.Name.AsFirstLower} = {serviceProvider.Identifier.Name.AsFirstLower};\n");
             else
                 i = 0;
 
             for (; i < constructorParameterList.Count; i++)
-                builder.AppendInterpolation($"{indent}_{constructorParameterList[i].Name.AsFirstLower()} = {constructorParameterList[i].Name.AsFirstLower()};\n");
+                builder.AppendInterpolation($"{indent}_{constructorParameterList[i].Name.AsFirstLower} = {constructorParameterList[i].Name.AsFirstLower};\n");
 
             if (i > 0)
                 builder.Append('\n');
@@ -95,12 +95,12 @@ public partial struct CircleDIBuilderCore {
                 AppendCreateScopeSummary();
                 if (serviceProvider.HasInterface)
                     builder.AppendInterpolation($"""
-                        {indent}/// <param name="{serviceProvider.Identifier.Name.AsFirstLower()}">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="{serviceProvider.Identifier.Name}"/>.</param>
+                        {indent}/// <param name="{serviceProvider.Identifier.Name.AsFirstLower}">An instance of the service provider this provider is the scope of. It must be an instance of <see cref="{serviceProvider.Identifier.Name}"/>.</param>
                         {indent}public Scope
                         """);
                 else
                     builder.AppendInterpolation($"""
-                        {indent}/// <param name="{serviceProvider.Identifier.Name.AsFirstLower()}">An instance of the service provider this provider is the scope of.</param>
+                        {indent}/// <param name="{serviceProvider.Identifier.Name.AsFirstLower}">An instance of the service provider this provider is the scope of.</param>
                         {indent}public Scope
                         """);
             }
@@ -122,9 +122,9 @@ public partial struct CircleDIBuilderCore {
                         {{indent}}/// <summary>
                         {{indent}}/// Constructs non-lazy scoped services. Should be called inside the constructor at the end.
                         {{indent}}/// </summary>
-                        {{indent}}/// <param name="{{serviceProvider.Identifier.Name.AsFirstLower()}}">
+                        {{indent}}/// <param name="{{serviceProvider.Identifier.Name.AsFirstLower}}">
                         {{indent}}/// The ServiceProvider this ScopedProvider is created from. It must be an instance of <see cref="{{serviceProvider.Identifier.Name}}"/>. Usually it is the object you get injected to your constructor parameter:<br />
-                        {{indent}}/// public Scope([Dependency] {{(serviceProvider.HasInterface ? serviceProvider.InterfaceIdentifier.Name : serviceProvider.Identifier.Name)}} {{serviceProvider.Identifier.Name.AsFirstLower()}}) { ...
+                        {{indent}}/// public Scope([Dependency] {{(serviceProvider.HasInterface ? serviceProvider.InterfaceIdentifier.Name : serviceProvider.Identifier.Name)}} {{serviceProvider.Identifier.Name.AsFirstLower}}) { ...
                         {{indent}}/// </param>
 
                         """);
@@ -133,9 +133,9 @@ public partial struct CircleDIBuilderCore {
                         {{indent}}/// <summary>
                         {{indent}}/// Constructs non-lazy scoped services. Should be called inside the constructor at the end.
                         {{indent}}/// </summary>
-                        {{indent}}/// <param name="{{serviceProvider.Identifier.Name.AsFirstLower()}}">
+                        {{indent}}/// <param name="{{serviceProvider.Identifier.Name.AsFirstLower}}">
                         {{indent}}/// The ServiceProvider this ScopedProvider is created from. Usually it is the object you get injected to your constructor parameter:<br />
-                        {{indent}}/// public Scope([Dependency] {{(serviceProvider.HasInterface ? serviceProvider.InterfaceIdentifier.Name : serviceProvider.Identifier.Name)}} {{serviceProvider.Identifier.Name.AsFirstLower()}}) { ...
+                        {{indent}}/// public Scope([Dependency] {{(serviceProvider.HasInterface ? serviceProvider.InterfaceIdentifier.Name : serviceProvider.Identifier.Name)}} {{serviceProvider.Identifier.Name.AsFirstLower}}) { ...
                         {{indent}}/// </param>
 
                         """);
@@ -149,17 +149,17 @@ public partial struct CircleDIBuilderCore {
                 int startLength = builder.Length;
 
                 foreach (Dependency parameter in constructorParameterList)
-                    builder.AppendInterpolation($"nameof(_{parameter.Name.AsFirstLower()}), ");
+                    builder.AppendInterpolation($"nameof(_{parameter.Name.AsFirstLower}), ");
 
                 foreach (Service service in serviceList)
                     if (service.CreationTimeTransitive == CreationTiming.Constructor && service.Implementation.Type != MemberType.Field)
-                        builder.AppendInterpolation($"nameof(_{service.Name.AsFirstLower()}), ");
+                        builder.AppendInterpolation($"nameof(_{service.Name.AsFirstLower}), ");
 
                 if (hasDisposeList)
-                    builder.AppendInterpolation($"nameof({DISPOSE_LIST.AsFirstLower()}), ");
+                    builder.AppendInterpolation($"nameof({DISPOSE_LIST.AsFirstLower}), ");
 
                 if (hasAsyncDisposeList)
-                    builder.AppendInterpolation($"nameof({ASYNC_DISPOSE_LIST.AsFirstLower()}), ");
+                    builder.AppendInterpolation($"nameof({ASYNC_DISPOSE_LIST.AsFirstLower}), ");
 
                 if (builder.Length > startLength) {
                     builder.Length -= 2; // remove ", "

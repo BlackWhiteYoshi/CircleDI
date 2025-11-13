@@ -25,11 +25,11 @@ public partial struct CircleDIBuilderCore {
         // method head
         {
             TypeName identifier = serviceProvider.HasInterface ? serviceProvider.InterfaceIdentifierScope : serviceProvider.IdentifierScope;
-            builder.AppendInterpolation($"{indent}public global::{identifier.AsOpenFullyQualified()} CreateScope{serviceProvider.IdentifierScope.AsOpenGenerics()}(");
+            builder.AppendInterpolation($"{indent}public global::{identifier.AsOpenFullyQualified} CreateScope{serviceProvider.IdentifierScope.AsOpenGenerics}(");
 
             foreach (Dependency dependency in serviceProvider.CreateScope.ConstructorDependencyList.Concat<Dependency>(serviceProvider.CreateScope.PropertyDependencyList))
                 if (!dependency.HasAttribute)
-                    builder.AppendInterpolation($"global::{dependency.ServiceType.AsClosedFullyQualified()} {dependency.Name.AsFirstLower()}, ");
+                    builder.AppendInterpolation($"global::{dependency.ServiceType.AsClosedFullyQualified} {dependency.Name.AsFirstLower}, ");
             if (builder[^1] == ' ')
                 builder.Length -= 2;
 

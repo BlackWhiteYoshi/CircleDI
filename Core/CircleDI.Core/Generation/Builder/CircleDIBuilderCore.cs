@@ -209,9 +209,9 @@ public partial struct CircleDIBuilderCore {
     public StringBuilder AppendServiceSummary(Service service)
         => builder.AppendInterpolation($$"""
             {{indent}}/// <summary>
-            {{indent}}/// Lifetime: <see cref="global::CircleDIAttributes.{{service.Lifetime.AsString()}}Attribute{TService}">{{service.Lifetime.AsString()}}</see><br />
-            {{indent}}/// Service type: <see cref="global::{{service.ServiceType.AsClosedFullyQualifiedXMLSummary()}}"/><br />
-            {{indent}}/// Implementation type: <see cref="global::{{service.ImplementationType.AsClosedFullyQualifiedXMLSummary()}}"/>
+            {{indent}}/// Lifetime: <see cref="global::CircleDIAttributes.{{service.Lifetime.AsString}}Attribute{TService}">{{service.Lifetime.AsString}}</see><br />
+            {{indent}}/// Service type: <see cref="global::{{service.ServiceType.AsClosedFullyQualifiedXMLSummary}}"/><br />
+            {{indent}}/// Implementation type: <see cref="global::{{service.ImplementationType.AsClosedFullyQualifiedXMLSummary}}"/>
             {{indent}}/// </summary>
 
             """);

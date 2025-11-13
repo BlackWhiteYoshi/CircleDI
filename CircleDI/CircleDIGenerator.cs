@@ -9,7 +9,7 @@ namespace CircleDI;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class CircleDIGenerator : IIncrementalGenerator {
-    private readonly ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
+    private readonly ObjectPool<StringBuilder> stringBuilderPool = ObjectPool<StringBuilder>.CreateDefault();
 
     public void Initialize(IncrementalGeneratorInitializationContext context) {
         context.RegisterPostInitializationOutput(static (IncrementalGeneratorPostInitializationContext context) => {

@@ -14,7 +14,7 @@ namespace CircleDI.Blazor;
 
 [Generator(LanguageNames.CSharp)]
 public sealed class CircleDIGenerator : IIncrementalGenerator {
-    private readonly ObjectPool<StringBuilder> stringBuilderPool = CircleDIBuilder.CreateStringBuilderPool();
+    private readonly ObjectPool<StringBuilder> stringBuilderPool = ObjectPool<StringBuilder>.CreateDefault();
 
     public void Initialize(IncrementalGeneratorInitializationContext context) {
         context.RegisterPostInitializationOutput(static (IncrementalGeneratorPostInitializationContext context) => {
@@ -142,13 +142,13 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
             #nullable enable annotations
 
 
-            {moduleName.NameSpaceList.AsNamespace()}
+            {moduleName.NameSpaceList.AsNamespace}
             """
         );
 
         // containing types
         for (int i = moduleName.ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.AppendInterpolation($"{indent}partial {moduleName.ContainingTypeList[i].Keyword.AsString()} {moduleName.ContainingTypeList[i].AsOpenName()} {{\n");
+            builder.AppendInterpolation($"{indent}partial {moduleName.ContainingTypeList[i].Keyword.AsString} {moduleName.ContainingTypeList[i].AsOpenName} {{\n");
             indent.IncreaseLevel();
         }
 
@@ -156,10 +156,10 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         foreach (INamedTypeSymbol? component in componentList)
             if (component is not null)
                 if (!moduleServiceList.Contains(component.Name))
-                    builder.AppendInterpolation($"{indent}[global::CircleDIAttributes.TransientAttribute<{new TypeName(component).AsOpenFullyQualified()}>(NoDispose = true)]\n");
+                    builder.AppendInterpolation($"{indent}[global::CircleDIAttributes.TransientAttribute<{new TypeName(component).AsOpenFullyQualified}>(NoDispose = true)]\n");
 
         // class head
-        builder.AppendInterpolation($"{indent}partial {moduleName.Keyword.AsString()} {moduleName.Name}{moduleName.AsOpenGenerics()};\n");
+        builder.AppendInterpolation($"{indent}partial {moduleName.Keyword.AsString} {moduleName.Name}{moduleName.AsOpenGenerics};\n");
 
         // containing types closing
         for (int i = 0; i < moduleName.ContainingTypeList.Count; i++) {
@@ -392,18 +392,18 @@ file static class RegisterServiceProviderAttributeExtension {
             #nullable enable annotations
 
 
-            {serviceProvider.Identifier.NameSpaceList.AsNamespace()}
+            {serviceProvider.Identifier.NameSpaceList.AsNamespace}
             """
         );
 
         // containing types
         for (int i = serviceProvider.Identifier.ContainingTypeList.Count - 1; i >= 0; i--) {
-            builder.AppendInterpolation($"{indent}partial {serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString()} {serviceProvider.Identifier.ContainingTypeList[i].AsOpenName()} {{\n");
+            builder.AppendInterpolation($"{indent}partial {serviceProvider.InterfaceIdentifier.ContainingTypeList[i].Keyword.AsString} {serviceProvider.Identifier.ContainingTypeList[i].AsOpenName} {{\n");
             indent.IncreaseLevel();
         }
 
         // class head
-        builder.AppendInterpolation($"{indent}partial {serviceProvider.Keyword.AsString()} {serviceProvider.Identifier.Name} {{\n");
+        builder.AppendInterpolation($"{indent}partial {serviceProvider.Keyword.AsString} {serviceProvider.Identifier.Name} {{\n");
         indent.IncreaseLevel(); // 1
 
         // singletons getter
@@ -424,7 +424,7 @@ file static class RegisterServiceProviderAttributeExtension {
         builder.Append('\n');
 
         // scope head
-        builder.AppendInterpolation($"{indent}partial {serviceProvider.KeywordScope.AsString()} Scope {{\n");
+        builder.AppendInterpolation($"{indent}partial {serviceProvider.KeywordScope.AsString} Scope {{\n");
         indent.IncreaseLevel(); // 2
 
 

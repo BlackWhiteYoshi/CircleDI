@@ -22,21 +22,21 @@ public partial struct CircleDIBuilderCore {
 
                 if (service.Implementation.Type == MemberType.Field)
                     if (service.Lifetime == ServiceLifetime.Scoped && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
-                        builder.AppendInterpolation($"{indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {refOrEmpty}_{serviceProvider.Identifier.Name.AsFirstLower()}.{service.AsImplementationName()};\n\n");
+                        builder.AppendInterpolation($"{indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified} {service.AsServiceGetter} => {refOrEmpty}_{serviceProvider.Identifier.Name.AsFirstLower}.{service.AsImplementationName};\n\n");
                     else
-                        builder.AppendInterpolation($"{indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {refOrEmpty}{service.AsImplementationName()};\n\n");
+                        builder.AppendInterpolation($"{indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified} {service.AsServiceGetter} => {refOrEmpty}{service.AsImplementationName};\n\n");
 
                 else if (service.CreationTimeTransitive == CreationTiming.Constructor)
                     builder.AppendInterpolation($"""
-                        {indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {refOrEmpty}_{service.Name.AsFirstLower()};
-                        {indent}private {(!service.IsRefable ? readonlyStr : "")}global::{service.ImplementationType.AsClosedFullyQualified()} _{service.Name.AsFirstLower()};
+                        {indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified} {service.AsServiceGetter} => {refOrEmpty}_{service.Name.AsFirstLower};
+                        {indent}private {(!service.IsRefable ? readonlyStr : "")}global::{service.ImplementationType.AsClosedFullyQualified} _{service.Name.AsFirstLower};
 
 
                         """);
 
                 // CreationTiming.Lazy
                 else {
-                    builder.AppendInterpolation($"{indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} {{\n");
+                    builder.AppendInterpolation($"{indent}public {refOrEmpty}global::{service.ServiceType.AsClosedFullyQualified} {service.AsServiceGetter} {{\n");
                     indent.IncreaseLevel(); // 2
 
                     if (service.GetAccessor == GetAccess.Property) {
@@ -45,7 +45,7 @@ public partial struct CircleDIBuilderCore {
                     }
 
                     AppendLazyService(service);
-                    builder.AppendInterpolation($"{indent}return {refOrEmpty}_{service.Name.AsFirstLower()};\n");
+                    builder.AppendInterpolation($"{indent}return {refOrEmpty}_{service.Name.AsFirstLower};\n");
 
                     if (service.GetAccessor == GetAccess.Property) {
                         indent.DecreaseLevel(); // 2
@@ -56,10 +56,10 @@ public partial struct CircleDIBuilderCore {
                     builder.AppendInterpolation($"{indent}}}\n");
 
                     if (!service.IsValueType)
-                        builder.AppendInterpolation($"{indent}private global::{service.ImplementationType.AsClosedFullyQualified()}? _{service.Name.AsFirstLower()};\n\n");
+                        builder.AppendInterpolation($"{indent}private global::{service.ImplementationType.AsClosedFullyQualified}? _{service.Name.AsFirstLower};\n\n");
                     else {
-                        builder.AppendInterpolation($"{indent}private global::{service.ImplementationType.AsClosedFullyQualified()} _{service.Name.AsFirstLower()};\n");
-                        builder.AppendInterpolation($"{indent}private global::System.Boolean _{service.Name.AsFirstLower()}_hasValue = false;\n\n");
+                        builder.AppendInterpolation($"{indent}private global::{service.ImplementationType.AsClosedFullyQualified} _{service.Name.AsFirstLower};\n");
+                        builder.AppendInterpolation($"{indent}private global::System.Boolean _{service.Name.AsFirstLower}_hasValue = false;\n\n");
                     }
                 }
             }

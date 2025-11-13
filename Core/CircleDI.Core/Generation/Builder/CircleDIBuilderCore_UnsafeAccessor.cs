@@ -19,7 +19,7 @@ public partial struct CircleDIBuilderCore {
                 if (dependency.IsCircular && dependency.IsInit)
                     builder.AppendInterpolation($"""
                         {indent}[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_{dependency.Name}")]
-                        {indent}private extern static void Set_{service.Name}_{dependency.Name}(global::{dependency.ImplementationBaseName.AsClosedFullyQualified()} instance, global::{dependency.Service!.ServiceType.AsClosedFullyQualified()} value);
+                        {indent}private extern static void Set_{service.Name}_{dependency.Name}(global::{dependency.ImplementationBaseName.AsClosedFullyQualified} instance, global::{dependency.Service!.ServiceType.AsClosedFullyQualified} value);
 
 
                         """);

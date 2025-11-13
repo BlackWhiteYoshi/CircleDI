@@ -67,16 +67,16 @@ public partial struct CircleDIBuilderCore {
                     indent.IncreaseLevel(); // 4
                 }
 
-                builder.AppendInterpolation($"{indent}if (serviceType == typeof(global::{service.ServiceType.AsClosedFullyQualified()}))\n");
+                builder.AppendInterpolation($"{indent}if (serviceType == typeof(global::{service.ServiceType.AsClosedFullyQualified}))\n");
                 indent.IncreaseLevel(); // 5
 
                 Service? nextService = serviceEnumerator.MoveNext() ? serviceEnumerator.Current : null;
                 if (service.ServiceType != nextService?.ServiceType)
-                    builder.AppendInterpolation($"{indent}return {service.AsServiceGetter()};\n");
+                    builder.AppendInterpolation($"{indent}return {service.AsServiceGetter};\n");
                 else {
-                    builder.AppendInterpolation($"{indent}return (global::{service.ServiceType.AsClosedFullyQualified()}[])[{service.AsServiceGetter()}");
+                    builder.AppendInterpolation($"{indent}return (global::{service.ServiceType.AsClosedFullyQualified}[])[{service.AsServiceGetter}");
                     do {
-                        builder.AppendInterpolation($", {nextService!.AsServiceGetter()}");
+                        builder.AppendInterpolation($", {nextService!.AsServiceGetter}");
                         nextService = serviceEnumerator.MoveNext() ? serviceEnumerator.Current : null;
                     }
                     while (service.ServiceType == nextService?.ServiceType);

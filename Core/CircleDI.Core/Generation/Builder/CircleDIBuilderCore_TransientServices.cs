@@ -20,19 +20,19 @@ public partial struct CircleDIBuilderCore {
             AppendServiceSummary(service);
 
             if (service.GetAccessor == GetAccess.Property) {
-                builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} {service.Name} {{\n");
+                builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified} {service.Name} {{\n");
                 indent.IncreaseLevel(); // 2
 
                 builder.AppendInterpolation($"{indent}get {{\n");
                 indent.IncreaseLevel(); // 3
             }
             else {
-                builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} Get{service.Name}() {{\n");
+                builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified} Get{service.Name}() {{\n");
                 indent.IncreaseLevel(); // 2
             }
 
             int transientNumber = AppendTransientService(service);
-            builder.AppendInterpolation($"{indent}return {service.Name.AsFirstLower()}_{transientNumber};\n");
+            builder.AppendInterpolation($"{indent}return {service.Name.AsFirstLower}_{transientNumber};\n");
 
             if (service.GetAccessor == GetAccess.Property) {
                 indent.DecreaseLevel(); //  2

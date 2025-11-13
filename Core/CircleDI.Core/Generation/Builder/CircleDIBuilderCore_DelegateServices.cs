@@ -20,14 +20,14 @@ public partial struct CircleDIBuilderCore {
 
             if (isScopeProvider && !service.Implementation.IsScoped && !service.Implementation.IsStatic)
                 if (service.IsGeneric)
-                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => _{serviceProvider.Identifier.Name.AsFirstLower()}.{service.AsImplementationName()}{service.ImplementationType.AsClosedGenerics()};\n\n");
+                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified} {service.AsServiceGetter} => _{serviceProvider.Identifier.Name.AsFirstLower}.{service.AsImplementationName}{service.ImplementationType.AsClosedGenerics};\n\n");
                 else
-                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => _{serviceProvider.Identifier.Name.AsFirstLower()}.{service.AsImplementationName()};\n\n");
+                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified} {service.AsServiceGetter} => _{serviceProvider.Identifier.Name.AsFirstLower}.{service.AsImplementationName};\n\n");
             else
                 if (service.IsGeneric)
-                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {service.AsImplementationName()}{service.ImplementationType.AsClosedGenerics()};\n\n");
+                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified} {service.AsServiceGetter} => {service.AsImplementationName}{service.ImplementationType.AsClosedGenerics};\n\n");
                 else
-                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified()} {service.AsServiceGetter()} => {service.AsImplementationName()};\n\n");
+                    builder.AppendInterpolation($"{indent}public global::{service.ServiceType.AsClosedFullyQualified} {service.AsServiceGetter} => {service.AsImplementationName};\n\n");
         }
 
         if (builder.Length > currentPosition)
