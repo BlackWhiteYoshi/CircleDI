@@ -1,4 +1,4 @@
-﻿namespace CircleDI.MinimalAPI.Defenitions;
+namespace CircleDI.MinimalAPI.Defenitions;
 
 /// <summary>
 /// HTTP method of the endpoint.

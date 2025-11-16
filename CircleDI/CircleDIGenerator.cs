@@ -1,4 +1,4 @@
-﻿using CircleDI.Defenitions;
+using CircleDI.Defenitions;
 using CircleDI.Generation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

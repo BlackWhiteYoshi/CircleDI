@@ -1,4 +1,4 @@
-﻿namespace CircleDI.Defenitions;
+namespace CircleDI.Defenitions;
 
 public static partial class Attributes {
     public const string DelegateAttribute = $$"""

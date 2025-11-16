@@ -1,4 +1,4 @@
-﻿namespace CircleDI.Defenitions;
+namespace CircleDI.Defenitions;
 
 /// <summary>
 /// The type of the member to access the service.<br />

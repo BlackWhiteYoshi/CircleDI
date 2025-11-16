@@ -1,4 +1,4 @@
-﻿using CircleDI.Generation;
+using CircleDI.Generation;
 using System.Diagnostics.CodeAnalysis;
 
 namespace CircleDI.Defenitions;

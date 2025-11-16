@@ -1,4 +1,4 @@
-﻿using CircleDI.Extensions;
+using CircleDI.Extensions;
 
 namespace CircleDI.Generation;
 

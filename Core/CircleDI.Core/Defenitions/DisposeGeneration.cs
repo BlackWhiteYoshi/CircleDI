@@ -1,4 +1,4 @@
-﻿namespace CircleDI.Defenitions;
+namespace CircleDI.Defenitions;
 
 /// <summary>
 /// <para>Configuration for generating the Dispose methods:</para>

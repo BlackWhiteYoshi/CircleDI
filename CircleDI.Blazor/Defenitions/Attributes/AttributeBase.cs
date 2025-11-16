@@ -1,4 +1,4 @@
-﻿namespace CircleDI.Blazor.Defenitions;
+namespace CircleDI.Blazor.Defenitions;
 
 public static partial class Attributes {
     private const string NAME = CircleDI.Defenitions.Attributes.NAME;

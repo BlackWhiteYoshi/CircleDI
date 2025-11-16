@@ -1,4 +1,4 @@
-﻿# CircleDI.MinimalAPI
+# CircleDI.MinimalAPI
 
 The world only full-power circular Service Provider wired up with ASP.NET Core minimal API.
 

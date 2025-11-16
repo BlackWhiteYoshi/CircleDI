@@ -1,4 +1,4 @@
-﻿using CircleDI.Defenitions;
+using CircleDI.Defenitions;
 using CircleDI.Generation;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;

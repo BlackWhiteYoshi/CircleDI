@@ -1,4 +1,4 @@
-﻿using CircleDI.Blazor.Defenitions;
+using CircleDI.Blazor.Defenitions;
 using CircleDI.Defenitions;
 using CircleDI.Extensions;
 using CircleDI.Generation;

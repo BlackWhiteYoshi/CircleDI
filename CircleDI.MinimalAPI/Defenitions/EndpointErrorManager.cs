@@ -1,4 +1,4 @@
-﻿using CircleDI.MinimalAPI.Defenitions;
+using CircleDI.MinimalAPI.Defenitions;
 using Microsoft.CodeAnalysis;
 using System.Text;
 

@@ -1,4 +1,4 @@
-﻿using CircleDI.Extensions;
+using CircleDI.Extensions;
 using Microsoft.CodeAnalysis;
 using System.Text;
 

@@ -1,4 +1,4 @@
-﻿using CircleDI.Tests.GenerateSourceText;
+using CircleDI.Tests.GenerateSourceText;
 
 namespace CircleDI.Tests;
 

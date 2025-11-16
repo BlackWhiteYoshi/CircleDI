@@ -1,4 +1,4 @@
-﻿using CircleDI.Defenitions;
+using CircleDI.Defenitions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics.CodeAnalysis;

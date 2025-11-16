@@ -1,4 +1,4 @@
-﻿namespace CircleDI.MinimalAPI.Defenitions;
+namespace CircleDI.MinimalAPI.Defenitions;
 
 public static partial class Attributes {
     private const string NAME = CircleDI.Defenitions.Attributes.NAME;

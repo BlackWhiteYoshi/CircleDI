@@ -1,4 +1,4 @@
-﻿using CircleDI.Tests.GenerateSourceText;
+using CircleDI.Tests.GenerateSourceText;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 

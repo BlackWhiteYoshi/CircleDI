@@ -1,4 +1,4 @@
-﻿using CircleDI.Defenitions;
+using CircleDI.Defenitions;
 using Microsoft.CodeAnalysis;
 
 namespace CircleDI.Extensions;

@@ -1,4 +1,4 @@
-﻿# CircleDI.Blazor
+# CircleDI.Blazor
 
 The world only full-power circular Service Provider wired up with Blazor.
 

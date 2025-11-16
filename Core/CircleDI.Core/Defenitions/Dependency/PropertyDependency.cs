@@ -1,4 +1,4 @@
-﻿namespace CircleDI.Defenitions;
+namespace CircleDI.Defenitions;
 
 /// <summary>
 /// An Item in <see cref="Generation.Service.PropertyDependencyList"/>,

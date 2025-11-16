@@ -1,4 +1,4 @@
-﻿using CircleDI.Defenitions;
+using CircleDI.Defenitions;
 using CircleDI.Extensions;
 using CircleDI.Generation;
 using CircleDI.MinimalAPI.Defenitions;
