@@ -10,6 +10,8 @@ string currentDirectory = Directory.GetCurrentDirectory();
 AcceptFolder(Path.Join(currentDirectory, "..", "GeneratorTests"));
 AcceptFolder(Path.Join(currentDirectory, "..", "BlazorTests"));
 AcceptFolder(Path.Join(currentDirectory, "..", "MinimalAPITests"));
+Console.WriteLine("done");
+
 
 void AcceptFolder(string directory) {
     foreach (string fileName in Directory.GetFiles(directory, "*", SearchOption.AllDirectories))
