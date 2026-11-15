@@ -107,8 +107,8 @@ All components are registered with lifetime Transient and disposing ignored, the
 
 When a component is registered manually, the component will not be added again.
 
-Only classes that explicitly inherit from [ComponentBase](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.componentbase) (or derived of ComponentBase) will be detected, *.razor*-files are ignored.
-This is because at the point of generation the Blazor compiler has not generated the classes from the *.razor*-files yet.
+Before .NET11 only classes that explicitly inherit from [ComponentBase](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.componentbase) (or derived from ComponentBase) will be detected, *.razor*-files are ignored. This is because at the point of generation, the Blazor compiler has not generated the classes from the *.razor*-files yet.  
+With .NET11 the razor compiler uses the new [RegisterPreCompilationSourceOutput method](https://learn.microsoft.com/ka-ge/dotnet/api/microsoft.codeanalysis.incrementalgeneratorinitializationcontext.registerprecompilationsourceoutput), which adds the razor compiler content before the generation of CircleDI.
 
 Furthermore, the automatic detection of components is limited to the same project, for automatic cross project component importing use the [ComponentModuleAttribute](#componentmodule-attribute).
 
