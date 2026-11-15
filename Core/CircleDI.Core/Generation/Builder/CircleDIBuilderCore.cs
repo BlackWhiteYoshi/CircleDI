@@ -106,11 +106,11 @@ public partial struct CircleDIBuilderCore {
                         Service service = enumerator.Current;
                         if (service.IsAsyncDisposable) {
                             hasAsyncDisposeList = true;
-                            goto hasAsyncDispose;
+                            goto hasAsyncDispose; // goto case (false, true);
                         }
                         else if (service.IsDisposable) {
                             hasDisposeList = true;
-                            goto hasDispose;
+                            goto hasDispose; // goto case (true, false);
                         }
                     }
                     break;

@@ -89,47 +89,47 @@ public sealed class Endpoint : IEquatable<Endpoint> {
                 HttpMethod = (Http)httpMethod;
         }
 
-        if (attribute.NamedArguments.GetArgument<string>("RouteBuilder") is string routeBuilderName) {
-            if (method.ContainingType is not INamedTypeSymbol container)
-                // invalid source code, methods can't be top level
-                goto return_RouteBuilder;
+        switch (attribute.NamedArguments.GetArgument<string>("RouteBuilder")) {
+            case string routeBuilderName:
+                if (method.ContainingType is not INamedTypeSymbol container)
+                    // invalid source code, methods can't be top level
+                    break;
 
-            if (container.GetMembers(routeBuilderName) is not [IMethodSymbol routeBuilderMethod]) {
-                ErrorManager.AddMissingRouteBuilderMethodError(container, routeBuilderName);
-                goto return_RouteBuilder;
-            }
-
-            if (!routeBuilderMethod.IsStatic) {
-                ErrorManager.AddRouteBuilderNonStaticError(routeBuilderName);
-                goto return_RouteBuilder;
-            }
-
-            if (routeBuilderMethod.TypeParameters.Length > 0) {
-                ErrorManager.AddRouteBuilderGenericError(routeBuilderName);
-                goto return_RouteBuilder;
-            }
-
-            if (routeBuilderMethod.Parameters is not [
-                IParameterSymbol {
-                    Type: INamedTypeSymbol {
-                        ContainingNamespace.ContainingNamespace.ContainingNamespace.ContainingNamespace.Name: "",
-                        ContainingNamespace.ContainingNamespace.ContainingNamespace.Name: "Microsoft",
-                        ContainingNamespace.ContainingNamespace.Name: "AspNetCore",
-                        ContainingNamespace.Name: "Builder",
-                        Name: "RouteHandlerBuilder",
-                        TypeKind: TypeKind.Class,
-                        ContainingType: null,
-                        TypeParameters: []
-                    }
+                if (container.GetMembers(routeBuilderName) is not [IMethodSymbol routeBuilderMethod]) {
+                    ErrorManager.AddMissingRouteBuilderMethodError(container, routeBuilderName);
+                    break;
                 }
-            ]) {
-                ErrorManager.AddRouteBuilderParameterListError(routeBuilderName);
-                goto return_RouteBuilder;
-            }
 
-            MethodRouteBuilder = new MethodName(routeBuilderMethod);
+                if (!routeBuilderMethod.IsStatic) {
+                    ErrorManager.AddRouteBuilderNonStaticError(routeBuilderName);
+                    break;
+                }
 
-            return_RouteBuilder:;
+                if (routeBuilderMethod.TypeParameters.Length > 0) {
+                    ErrorManager.AddRouteBuilderGenericError(routeBuilderName);
+                    break;
+                }
+
+                if (routeBuilderMethod.Parameters is not [
+                    IParameterSymbol {
+                        Type: INamedTypeSymbol {
+                            ContainingNamespace.ContainingNamespace.ContainingNamespace.ContainingNamespace.Name: "",
+                            ContainingNamespace.ContainingNamespace.ContainingNamespace.Name: "Microsoft",
+                            ContainingNamespace.ContainingNamespace.Name: "AspNetCore",
+                            ContainingNamespace.Name: "Builder",
+                            Name: "RouteHandlerBuilder",
+                            TypeKind: TypeKind.Class,
+                            ContainingType: null,
+                            TypeParameters: []
+                        }
+                    }
+                ]) {
+                    ErrorManager.AddRouteBuilderParameterListError(routeBuilderName);
+                    break;
+                }
+
+                MethodRouteBuilder = new MethodName(routeBuilderMethod);
+                break;
         }
 
 

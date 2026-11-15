@@ -579,18 +579,17 @@ public sealed class Service : IEquatable<Service> {
 
                             do {
                                 if (parameterServiceType.TypeArgumentList[j] is null) {
-                                    string typeParameter = parameterServiceType.TypeParameterList[j];
-                                    for (int k = 0; k < implementationType.TypeParameterList.Count; k++)
-                                        if (implementationType.TypeParameterList[k] == typeParameter) {
-                                            parameterTypeArgumentList.Add(implementationType.TypeArgumentList[k]);
-                                            goto _break;
-                                        }
-                                    // else
-                                    {
+                                    section: do {
+                                        string typeParameter = parameterServiceType.TypeParameterList[j];
+                                        for (int k = 0; k < implementationType.TypeParameterList.Count; k++)
+                                            if (implementationType.TypeParameterList[k] == typeParameter) {
+                                                parameterTypeArgumentList.Add(implementationType.TypeArgumentList[k]);
+                                                break section;
+                                            }
+
                                         // not defined typeparameter => syntax error
                                         parameterTypeArgumentList.Add(null);
-                                    }
-                                    _break:;
+                                    } while (false);
                                 }
                             } while (++j < implementationType.TypeArgumentList.Count);
 
@@ -619,18 +618,17 @@ public sealed class Service : IEquatable<Service> {
 
                             do {
                                 if (baseArgumentList[j] is null) {
-                                    string typeParameter = baseImplementation.TypeParameterList[j];
-                                    for (int k = 0; k < implementationType.TypeParameterList.Count; k++)
-                                        if (implementationType.TypeParameterList[k] == typeParameter) {
-                                            filledArgumentList.Add(implementationType.TypeArgumentList[k]);
-                                            goto _break;
-                                        }
-                                    // else
-                                    {
+                                    section: do {
+                                        string typeParameter = baseImplementation.TypeParameterList[j];
+                                        for (int k = 0; k < implementationType.TypeParameterList.Count; k++)
+                                            if (implementationType.TypeParameterList[k] == typeParameter) {
+                                                filledArgumentList.Add(implementationType.TypeArgumentList[k]);
+                                                break section;
+                                            }
+
                                         // not defined typeparameter => syntax error
                                         filledArgumentList.Add(null);
-                                    }
-                                    _break:;
+                                    } while (false);
                                 }
                             } while (++j < baseImplementation.TypeArgumentList.Count);
 

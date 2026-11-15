@@ -19,7 +19,7 @@ public static class SyntaxNodeExtensions {
     /// <param name="namspace">namespace-list from back to front: e.g. System.Diagnostics.CodeAnalysis -> ["CodeAnalysis", "Diagnostics", "System"]</param>
     /// <returns></returns>
     public static AttributeData? GetAttribute(this ISymbol symbol, string name, string[] namspace) {
-        foreach (AttributeData attributeData in symbol.GetAttributes()) {
+        mainLoop: foreach (AttributeData attributeData in symbol.GetAttributes()) {
             if (attributeData.AttributeClass is not INamedTypeSymbol attribute)
                 continue;
 
@@ -29,14 +29,13 @@ public static class SyntaxNodeExtensions {
             INamespaceSymbol namespaceSymbol = attribute.ContainingNamespace;
             foreach (string namespacePart in namspace) {
                 if (namespacePart != namespaceSymbol.Name)
-                    goto break_continue;
+                    continue mainLoop;
                 namespaceSymbol = namespaceSymbol.ContainingNamespace;
             }
             if (namespaceSymbol.Name != string.Empty)
                 continue;
 
             return attributeData;
-            break_continue:;
         }
 
         return null;
