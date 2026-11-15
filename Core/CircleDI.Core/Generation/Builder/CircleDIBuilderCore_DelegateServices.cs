@@ -1,6 +1,6 @@
-using CircleDI.Extensions;
+using CircleDI.Core.Extensions;
 
-namespace CircleDI.Generation;
+namespace CircleDI.Core.Generation;
 
 /// <summary>
 /// Contains the method to build the Delegate Getter.

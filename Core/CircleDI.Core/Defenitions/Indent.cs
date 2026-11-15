@@ -1,4 +1,4 @@
-namespace CircleDI.Defenitions;
+namespace CircleDI.Core.Defenitions;
 
 /// <summary>
 /// An int wrapper to handle indentation.

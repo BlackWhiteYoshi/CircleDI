@@ -13,16 +13,16 @@ public static partial class Attributes {
 
         namespace CircleDIAttributes;
 
-        {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeSummary}}
+        {{CircleDI.Core.Defenitions.Attributes.ServiceProviderAttributeSummary}}
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ServiceProviderAttribute : Attribute {
-            {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithInterfaceTypeAndName}}
+            {{CircleDI.Core.Defenitions.Attributes.ServiceProviderAttributeContentWithInterfaceTypeAndName}}
 
             {{ServiceProviderAttributePropertyEndpointProvider}}
         }
 
-        {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeSummary}}
+        {{CircleDI.Core.Defenitions.Attributes.ServiceProviderAttributeSummary}}
         /// <typeparam name="TInterface">
         /// An explicit declared interface the generated interface will be based on: The name, access modifier, namespace and containing types will be inferred.<br />
         /// That interface must be partial.<br />
@@ -31,7 +31,7 @@ public static partial class Attributes {
         [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("{{NAME}}", "{{VERSION}}")]
         internal sealed class ServiceProviderAttribute<TInterface> : Attribute {
-            {{CircleDI.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
+            {{CircleDI.Core.Defenitions.Attributes.ServiceProviderAttributeContentWithoutInterfaceName}}
 
             {{ServiceProviderAttributePropertyEndpointProvider}}
         }

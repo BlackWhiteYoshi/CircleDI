@@ -1,10 +1,10 @@
-using CircleDI.Defenitions;
-using CircleDI.Generation;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Generation;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace CircleDI.Extensions;
+namespace CircleDI.Core.Extensions;
 
 /// <summary>
 /// Extension methods on <see cref="StringBuilder"/>.

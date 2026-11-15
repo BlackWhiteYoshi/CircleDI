@@ -1,5 +1,5 @@
-using CircleDI.Defenitions;
-using CircleDI.Generation;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Generation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.ObjectPool;

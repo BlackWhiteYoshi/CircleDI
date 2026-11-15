@@ -1,12 +1,12 @@
-using CircleDI.Defenitions;
-using CircleDI.Extensions;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Extensions;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace CircleDI.Generation;
+namespace CircleDI.Core.Generation;
 
 /// <summary>
 /// Contains all necessary information to source generate a service.<br />

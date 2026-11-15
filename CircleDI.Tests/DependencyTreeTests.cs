@@ -1,5 +1,5 @@
-using CircleDI.Defenitions;
-using CircleDI.Generation;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Generation;
 using CircleDI.Tests.GenerateSourceText;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;

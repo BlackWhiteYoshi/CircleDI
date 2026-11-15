@@ -1,4 +1,4 @@
-namespace CircleDI.Defenitions;
+namespace CircleDI.Core.Defenitions;
 
 /// <summary>
 /// Represents a member in a ServiceProvider that returns or holds a service-implementation.<br />

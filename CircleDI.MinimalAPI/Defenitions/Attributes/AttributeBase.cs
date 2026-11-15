@@ -1,6 +1,6 @@
 namespace CircleDI.MinimalAPI.Defenitions;
 
 public static partial class Attributes {
-    private const string NAME = CircleDI.Defenitions.Attributes.NAME;
-    private const string VERSION = CircleDI.Defenitions.Attributes.VERSION;
+    private const string NAME = CircleDI.Core.Defenitions.Attributes.NAME;
+    private const string VERSION = CircleDI.Core.Defenitions.Attributes.VERSION;
 }

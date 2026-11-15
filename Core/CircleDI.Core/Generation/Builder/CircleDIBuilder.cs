@@ -1,10 +1,10 @@
-using CircleDI.Defenitions;
-using CircleDI.Extensions;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.ObjectPool;
 using System.Text;
 
-namespace CircleDI.Generation;
+namespace CircleDI.Core.Generation;
 
 /// <summary>
 /// Contains the build functionality to build the ServiceProvider/ScopeProvider class and interface.

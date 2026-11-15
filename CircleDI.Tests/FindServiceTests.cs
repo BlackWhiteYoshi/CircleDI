@@ -1,5 +1,5 @@
-using CircleDI.Defenitions;
-using CircleDI.Generation;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Generation;
 
 namespace CircleDI.Tests;
 
@@ -36,7 +36,7 @@ public sealed class FindServiceTests {
     [Before(Class)]
     public static void InitFindServiceMethod() {
         findServiceMethod = typeof(ServiceProvider).Assembly
-            .GetType("CircleDI.Generation.ServiceProvider+DependencyTreeInitializer")!
+            .GetType("CircleDI.Core.Generation.ServiceProvider+DependencyTreeInitializer")!
             .GetMethod("FindService", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
     }
 

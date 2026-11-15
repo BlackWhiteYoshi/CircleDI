@@ -1,4 +1,4 @@
-namespace CircleDI.Defenitions;
+namespace CircleDI.Core.Defenitions;
 
 public static partial class Attributes {
     public const string ImportModeEnum = $$"""

@@ -1,7 +1,7 @@
-using CircleDI.Defenitions;
-using CircleDI.Extensions;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Extensions;
 
-namespace CircleDI.Generation;
+namespace CircleDI.Core.Generation;
 
 /// <summary>
 /// <para>Contains the method to build the CreateScope() method.</para>

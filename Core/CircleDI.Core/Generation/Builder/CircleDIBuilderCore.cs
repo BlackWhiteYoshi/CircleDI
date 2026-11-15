@@ -1,10 +1,10 @@
-using CircleDI.Defenitions;
-using CircleDI.Extensions;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Extensions;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace CircleDI.Generation;
+namespace CircleDI.Core.Generation;
 
 /// <summary>
 /// <para>

@@ -1,7 +1,7 @@
-using CircleDI.Generation;
+using CircleDI.Core.Generation;
 using System.Diagnostics.CodeAnalysis;
 
-namespace CircleDI.Defenitions;
+namespace CircleDI.Core.Defenitions;
 
 /// <summary>
 /// Base type for <see cref="ConstructorDependency"/> and <see cref="PropertyDependency"/>.

@@ -1,7 +1,7 @@
-using CircleDI.Defenitions;
-using CircleDI.Extensions;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Extensions;
 
-namespace CircleDI.Generation;
+namespace CircleDI.Core.Generation;
 
 /// <summary>
 /// Contains the method to build the the Dispose and DisposeAsync methods, inclusive the fields holding the transient dispose list.

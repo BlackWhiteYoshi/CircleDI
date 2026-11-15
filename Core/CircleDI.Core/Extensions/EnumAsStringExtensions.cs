@@ -1,7 +1,7 @@
-using CircleDI.Defenitions;
+using CircleDI.Core.Defenitions;
 using Microsoft.CodeAnalysis;
 
-namespace CircleDI.Extensions;
+namespace CircleDI.Core.Extensions;
 
 /// <summary>
 /// Extension methods for mapping enum types to string.

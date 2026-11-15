@@ -1,6 +1,6 @@
-using CircleDI.Defenitions;
-using CircleDI.Extensions;
-using CircleDI.Generation;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Extensions;
+using CircleDI.Core.Generation;
 using CircleDI.MinimalAPI.Defenitions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

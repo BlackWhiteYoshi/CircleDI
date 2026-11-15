@@ -1,8 +1,8 @@
-using CircleDI.Extensions;
+using CircleDI.Core.Extensions;
 using Microsoft.CodeAnalysis;
 using System.Text;
 
-namespace CircleDI.Defenitions;
+namespace CircleDI.Core.Defenitions;
 
 /// <summary>
 /// Collection of global <see cref="DiagnosticDescriptor"/> objects

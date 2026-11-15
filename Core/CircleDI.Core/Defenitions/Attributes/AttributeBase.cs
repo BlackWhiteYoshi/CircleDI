@@ -1,6 +1,6 @@
 using AssemblyVersionInfo;
 
-namespace CircleDI.Defenitions;
+namespace CircleDI.Core.Defenitions;
 
 public static partial class Attributes {
     public const string NAME = Assembly.NAME;

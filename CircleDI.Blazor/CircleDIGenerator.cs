@@ -1,14 +1,14 @@
 using CircleDI.Blazor.Defenitions;
-using CircleDI.Defenitions;
-using CircleDI.Extensions;
-using CircleDI.Generation;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Extensions;
+using CircleDI.Core.Generation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.ObjectPool;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
-using ServiceProviderWithExtra = (CircleDI.Generation.ServiceProvider serviceProvider, CircleDI.Blazor.Defenitions.BlazorServiceGeneration defaultServiceGeneration, bool AddRazorComponents);
+using ServiceProviderWithExtra = (CircleDI.Core.Generation.ServiceProvider serviceProvider, CircleDI.Blazor.Defenitions.BlazorServiceGeneration defaultServiceGeneration, bool AddRazorComponents);
 
 namespace CircleDI.Blazor;
 
@@ -20,25 +20,25 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         context.RegisterPostInitializationOutput(static (IncrementalGeneratorPostInitializationContext context) => {
             // attributes
             context.AddSource("ServiceProviderAttribute.g.cs", CircleDI.Blazor.Defenitions.Attributes.ServiceProviderAttribute);
-            context.AddSource("ScopedProviderAttribute.g.cs", CircleDI.Defenitions.Attributes.ScopedProviderAttribute);
-            context.AddSource("SingletonAttribute.g.cs", CircleDI.Defenitions.Attributes.SingletonAttribute);
-            context.AddSource("ScopedAttribute.g.cs", CircleDI.Defenitions.Attributes.ScopedAttribute);
-            context.AddSource("TransientAttribute.g.cs", CircleDI.Defenitions.Attributes.TransientAttribute);
-            context.AddSource("DelegateAttribute.g.cs", CircleDI.Defenitions.Attributes.DelegateAttribute);
-            context.AddSource("ImportAttribute.g.cs", CircleDI.Defenitions.Attributes.ImportAttribute);
-            context.AddSource("DependencyAttribute.g.cs", CircleDI.Defenitions.Attributes.DependencyAttribute);
-            context.AddSource("ConstructorAttribute.g.cs", CircleDI.Defenitions.Attributes.ConstructorAttribute);
+            context.AddSource("ScopedProviderAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.ScopedProviderAttribute);
+            context.AddSource("SingletonAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.SingletonAttribute);
+            context.AddSource("ScopedAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.ScopedAttribute);
+            context.AddSource("TransientAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.TransientAttribute);
+            context.AddSource("DelegateAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.DelegateAttribute);
+            context.AddSource("ImportAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.ImportAttribute);
+            context.AddSource("DependencyAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.DependencyAttribute);
+            context.AddSource("ConstructorAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.ConstructorAttribute);
             context.AddSource("ComponentModuleAttribute.g.cs", CircleDI.Blazor.Defenitions.Attributes.ComponentModuleAttribute);
 
             // enums
-            context.AddSource("CreationTiming.g.cs", CircleDI.Defenitions.Attributes.CreationTimingEnum);
-            context.AddSource("GetAccess.g.cs", CircleDI.Defenitions.Attributes.GetAccessEnum);
-            context.AddSource("DisposeGeneration.g.cs", CircleDI.Defenitions.Attributes.DisposeGenerationEnum);
-            context.AddSource("ImportMode.g.cs", CircleDI.Defenitions.Attributes.ImportModeEnum);
+            context.AddSource("CreationTiming.g.cs", CircleDI.Core.Defenitions.Attributes.CreationTimingEnum);
+            context.AddSource("GetAccess.g.cs", CircleDI.Core.Defenitions.Attributes.GetAccessEnum);
+            context.AddSource("DisposeGeneration.g.cs", CircleDI.Core.Defenitions.Attributes.DisposeGenerationEnum);
+            context.AddSource("ImportMode.g.cs", CircleDI.Core.Defenitions.Attributes.ImportModeEnum);
             context.AddSource("BlazorServiceGeneration.g.cs", CircleDI.Blazor.Defenitions.Attributes.BlazorServiceGenerationEnum);
 
             // polyfill
-            context.AddSource("Lock.g.cs", CircleDI.Defenitions.Attributes.LockPolyfill);
+            context.AddSource("Lock.g.cs", CircleDI.Core.Defenitions.Attributes.LockPolyfill);
 
             // class
             context.AddSource("CircleDIComponentActivator.g.cs", CircleDI.Blazor.Defenitions.Attributes.CircleDIComponentActivator);

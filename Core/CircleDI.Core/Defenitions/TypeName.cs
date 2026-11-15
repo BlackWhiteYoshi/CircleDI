@@ -1,7 +1,7 @@
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 
-namespace CircleDI.Defenitions;
+namespace CircleDI.Core.Defenitions;
 
 /// <summary>
 /// <para>Datastructure holding all necessary information to construct the fully qualified name of a type or type declaration:</para>

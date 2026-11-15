@@ -1,9 +1,9 @@
-using CircleDI.Defenitions;
+using CircleDI.Core.Defenitions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
-namespace CircleDI.Extensions;
+namespace CircleDI.Core.Extensions;
 
 /// <summary>
 /// Extension methods on source generator types (namespace 'Microsoft.CodeAnalysis').<br />

@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace CircleDI.Defenitions;
+namespace CircleDI.Core.Defenitions;
 
 /// <summary>
 /// An Item in <see cref="Generation.Service.ConstructorDependencyList"/>,

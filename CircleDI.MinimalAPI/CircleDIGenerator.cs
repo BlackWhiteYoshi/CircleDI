@@ -1,6 +1,6 @@
-using CircleDI.Defenitions;
-using CircleDI.Extensions;
-using CircleDI.Generation;
+using CircleDI.Core.Defenitions;
+using CircleDI.Core.Extensions;
+using CircleDI.Core.Generation;
 using CircleDI.MinimalAPI.Defenitions;
 using CircleDI.MinimalAPI.Generation;
 using Microsoft.CodeAnalysis;
@@ -9,7 +9,7 @@ using Microsoft.Extensions.ObjectPool;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
-using ServiceProviderWithEndpointFlag = (CircleDI.Generation.ServiceProvider serviceProvider, bool endpointProvider);
+using ServiceProviderWithEndpointFlag = (CircleDI.Core.Generation.ServiceProvider serviceProvider, bool endpointProvider);
 
 namespace CircleDI.MinimalAPI;
 
@@ -22,25 +22,25 @@ public sealed class CircleDIGenerator : IIncrementalGenerator {
         context.RegisterPostInitializationOutput(static (IncrementalGeneratorPostInitializationContext context) => {
             // attributes
             context.AddSource("ServiceProviderAttribute.g.cs", CircleDI.MinimalAPI.Defenitions.Attributes.ServiceProviderAttribute);
-            context.AddSource("ScopedProviderAttribute.g.cs", CircleDI.Defenitions.Attributes.ScopedProviderAttribute);
-            context.AddSource("SingletonAttribute.g.cs", CircleDI.Defenitions.Attributes.SingletonAttribute);
-            context.AddSource("ScopedAttribute.g.cs", CircleDI.Defenitions.Attributes.ScopedAttribute);
-            context.AddSource("TransientAttribute.g.cs", CircleDI.Defenitions.Attributes.TransientAttribute);
-            context.AddSource("DelegateAttribute.g.cs", CircleDI.Defenitions.Attributes.DelegateAttribute);
-            context.AddSource("ImportAttribute.g.cs", CircleDI.Defenitions.Attributes.ImportAttribute);
-            context.AddSource("DependencyAttribute.g.cs", CircleDI.Defenitions.Attributes.DependencyAttribute);
-            context.AddSource("ConstructorAttribute.g.cs", CircleDI.Defenitions.Attributes.ConstructorAttribute);
+            context.AddSource("ScopedProviderAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.ScopedProviderAttribute);
+            context.AddSource("SingletonAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.SingletonAttribute);
+            context.AddSource("ScopedAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.ScopedAttribute);
+            context.AddSource("TransientAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.TransientAttribute);
+            context.AddSource("DelegateAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.DelegateAttribute);
+            context.AddSource("ImportAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.ImportAttribute);
+            context.AddSource("DependencyAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.DependencyAttribute);
+            context.AddSource("ConstructorAttribute.g.cs", CircleDI.Core.Defenitions.Attributes.ConstructorAttribute);
             context.AddSource("EndpointrAttribute.g.cs", CircleDI.MinimalAPI.Defenitions.Attributes.EndpointAttribute);
 
             // enums
-            context.AddSource("CreationTiming.g.cs", CircleDI.Defenitions.Attributes.CreationTimingEnum);
-            context.AddSource("GetAccess.g.cs", CircleDI.Defenitions.Attributes.GetAccessEnum);
-            context.AddSource("DisposeGeneration.g.cs", CircleDI.Defenitions.Attributes.DisposeGenerationEnum);
-            context.AddSource("ImportMode.g.cs", CircleDI.Defenitions.Attributes.ImportModeEnum);
+            context.AddSource("CreationTiming.g.cs", CircleDI.Core.Defenitions.Attributes.CreationTimingEnum);
+            context.AddSource("GetAccess.g.cs", CircleDI.Core.Defenitions.Attributes.GetAccessEnum);
+            context.AddSource("DisposeGeneration.g.cs", CircleDI.Core.Defenitions.Attributes.DisposeGenerationEnum);
+            context.AddSource("ImportMode.g.cs", CircleDI.Core.Defenitions.Attributes.ImportModeEnum);
             context.AddSource("Http.g.cs", CircleDI.MinimalAPI.Defenitions.Attributes.HttpEnum);
 
             // polyfill
-            context.AddSource("Lock.g.cs", CircleDI.Defenitions.Attributes.LockPolyfill);
+            context.AddSource("Lock.g.cs", CircleDI.Core.Defenitions.Attributes.LockPolyfill);
         });
 
 

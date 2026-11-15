@@ -1,4 +1,4 @@
-using CircleDI.Extensions;
+using CircleDI.Core.Extensions;
 using CircleDI.Tests.GenerateSourceText;
 using System.Text;
 
